@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  userId Int @id @default(autoincrement())
+  email String @unique
+  password String
+  username String
+  designation String
+  phoneNumber String
+  profilePictureId Int? @unique
+  teamId Int?
+  projectId Int?
+  resetPasswordOTP String?
+  otpExpires String?
+  createdAt DateTime @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  profilePicture  ProfilePicture? @relation(fields: [profilePictureId], references: [id])
+}
+
+model ProfilePicture {
+  id       Int     @id @default(autoincrement()) 
+  base64   String  
+  user     User?   @relation 
+}
+
+model Customer {
+  id       Int     @id @default(autoincrement()) 
+  Cust_name   String  
+  Allowed_User_Count String 
+  Plan String
+}
+
