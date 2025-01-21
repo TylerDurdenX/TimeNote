@@ -1,12 +1,13 @@
 import React from 'react'
 
-type Props = {}
+type Props = {
+  id: number
+}
 
-const UserDetailsSection = (props: Props) => {
+const userDetailsSection = ({id}: Props) => {
   return (
-    <div className=''>                flex-shrink-0  w-[calc(100%)] bg-blue-200 p-4 h-full overflow-hiddenflex-shrink-0  w-[calc(100%)] bg-blue-200 p-4 h-full overflow-hidden
-    </div>
+    <div>userDetailsSection</div>
   )
 }
 
-export default UserDetailsSection
+export default userDetailsSection

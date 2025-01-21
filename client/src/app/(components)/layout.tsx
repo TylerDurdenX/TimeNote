@@ -48,13 +48,15 @@ export default function RootLayout({
       >
         <SidebarProvider>
           <AppSidebar/>
+          <SidebarTrigger children={children}/>
+          </SidebarProvider>
           <main>
-            <SidebarTrigger />
+            
             {/* <NavbarComponent/> */}
-            {children}
           </main>
-        </SidebarProvider>
+        
       </body>
     </html>
   );
 }
+

@@ -11,7 +11,7 @@ const Dashboard = () => {
     <>
       <div className="w-full">
         <div className="flex w-full  text-gray-900">
-          <div className="pb-6 pt-6 lg:pb-4 lg:pt-8 ">
+          <div className="pb-6 pt-6 lg:pb-4 lg:pt-8 w-full">
             <Header name="Dashboard" hasFilters={true} hasTeamFilter={true}/>
           </div>
         </div>

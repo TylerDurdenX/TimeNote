@@ -25,6 +25,10 @@ interface UserListProps {
   users: User[]; // Array of users to be passed as a prop
 }
 
+type Props = {
+  onSelectUser: ( id: number) => void
+}
+
 const employeesData = [
   {
     id: 1,
@@ -132,7 +136,7 @@ const employeesData = [
   },
 ];
 
-const UserList = () => {
+const UserList = ({onSelectUser}: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredEmployees = employeesData.filter((employee) =>
@@ -162,6 +166,7 @@ const UserList = () => {
           <List>
             {filteredEmployees.map((employee) => (
               <React.Fragment key={employee.id}>
+                <button onClick={() => onSelectUser(employee.id)}>
                 <ListItem className="flex items-center justify-between gap-2 cursor-pointer">
                   <Box className="flex items-center gap-2">
                     <Avatar src={employee.avatar} />
@@ -186,6 +191,7 @@ const UserList = () => {
                     </Typography>
                   </Box>
                 </ListItem>
+                </button>
                 <Divider />
               </React.Fragment>
             ))}

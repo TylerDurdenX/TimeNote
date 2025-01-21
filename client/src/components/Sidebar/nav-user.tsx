@@ -75,8 +75,6 @@ export function NavUser({
     }
   };
 
-  const imgbase = ""
-  console.log(user)
   return (
     <SidebarMenu>
       <SidebarMenuItem>

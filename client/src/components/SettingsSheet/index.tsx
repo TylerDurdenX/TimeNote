@@ -11,23 +11,15 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
-import { LockIcon, Settings } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import {Settings } from "lucide-react";
 import { DialogDemo } from "./ProductivitySettings";
 import { useGetUserQuery, useUpdateProfilePictureMutation } from "@/store/api";
 import { useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { getInitials } from "../Sidebar/nav-user";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import {useState } from "react";
 import { toast } from "sonner";
+import { CreateRole } from "./RoleSettings";
 
 export function SheetDemo() {
   const userEmail = useSearchParams().get("email");
@@ -59,7 +51,6 @@ export function SheetDemo() {
     }
   };
 
-  console.log(data?.user);
   const user = data?.user || defaultUser
   return (
     <Sheet>
@@ -124,6 +115,7 @@ export function SheetDemo() {
           </div>
         </div>
         <DialogDemo />
+        <CreateRole />
         <SheetFooter>
           <SheetClose asChild>
             <Button type="submit">Save changes</Button>

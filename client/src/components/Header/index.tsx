@@ -17,7 +17,7 @@ type Props = {
   buttonComponent?: any;
   isSmallText?: boolean;
   hasFilters?: boolean;
-  hasTeamFilter?:boolean
+  hasTeamFilter?: boolean;
 };
 
 const { RangePicker } = DatePicker;
@@ -27,10 +27,10 @@ const Header = ({
   buttonComponent,
   isSmallText = false,
   hasFilters,
-  hasTeamFilter
+  hasTeamFilter,
 }: Props) => {
   return (
-    <div className="flex mb-5 w-full ml-5 items-center justify-between">
+    <div className="flex relative w-full pl-5 h-[35px] mb-5 items-center justify-between">
       <h1
         className={`${
           isSmallText ? "text-lg" : "text-2xl"
@@ -38,13 +38,12 @@ const Header = ({
       >
         {name}
       </h1>
-      <>
-        {hasFilters && hasTeamFilter ? 
-        <>
-        <div
-        className="flex
-         absolute right-0 mr-5 items-center space-x-4 "
-      >
+
+      {/* This div will stick to the right side of the parent */}
+
+      {hasFilters && (
+    <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
+      {hasTeamFilter && (
         <Select>
           <SelectTrigger className="w-[180px] h-[32px] text-gray-800">
             <SelectValue placeholder="Select" />
@@ -60,28 +59,14 @@ const Header = ({
             </SelectGroup>
           </SelectContent>
         </Select>
-        <RangePicker className="text-gray-800" />
-        <Button className="bg-gray-200 hover:bg-gray-100 ">
-          <FilterX className="text-gray-800" />
-        </Button>
-      </div>
-      {buttonComponent} </>
-        : null}
-        {hasFilters ?
-         <>
-         <div
-         className="flex
-          absolute right-0 mr-5 items-center space-x-4 "
-       >
-         <RangePicker className="text-gray-800" />
-         <Button className="bg-gray-200 hover:bg-gray-100 ">
-           <FilterX className="text-gray-800" />
-         </Button>
-       </div>
-       {buttonComponent} </>
-        : null}
-        </>
+      )}
       
+      <RangePicker className="text-gray-800" />
+      <Button className="bg-gray-200 hover:bg-gray-100">
+        <FilterX className="text-gray-800"/>
+      </Button>
+    </div>
+  )}
     </div>
   );
 };

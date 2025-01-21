@@ -271,11 +271,12 @@ Sidebar.displayName = "Sidebar";
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
->(({ className, onClick, ...props }, ref) => {
+>(({ className, onClick, children, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
+  const [isSidebarOpen, setSidebarOpen] = React.useState(true);
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-hidden relative flex flex-col min-w-[1024px] aspect-auto">
       <div className="flex items-center justify-start bg-white py-1 dark:bg-black">
         {/* First Button for toggling sidebar (Left aligned) */}
         <Button
@@ -287,19 +288,21 @@ const SidebarTrigger = React.forwardRef<
           onClick={(event) => {
             onClick?.(event);
             toggleSidebar();
+            setSidebarOpen(!isSidebarOpen)
+            
           }}
           {...props}
         >
           <PanelLeft />
           <span className="sr-only">Toggle Sidebar</span>
+          
         </Button>
-  
-        {/* Second Button for toggling sidebar (Left aligned) */}
-        <Navbar/>
-  
-        {/* Navbar Component */}
-        <NavbarComponent />
+        <NavbarComponent/>
+        <div className="absolute right-0">
+          <Navbar />
+          </div>
       </div>
+      {children}
     </div>
   );
 });

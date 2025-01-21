@@ -12,32 +12,23 @@ const NavbarComponent = () => {
   const { data, isLoading, error } = useGetUsersCountQuery( undefined, {refetchOnMountOrArgChange: true});
   
   return (
-    <div className="flex top-0 absolute right-0 items-center  space-x-4 ">
-                <div className="h-min w-min rounded p-2 ">
-                  <Button className="bg-indigo-600 text-white border-0 p-2.5 rounded-xl w-[120px] text-base cursor-pointer hover:bg-indigo-500">
-                    Download
-                  </Button>
-                </div>
-                <div className="h-min w-min rounded p-2 mt-1.5">
-                  <User className="h-6 w-6 cursor-pointer dark:text-white" />
-                </div>
-                <div className="h-min  rounded  pr-10 mt-1.5">
-                  <h2>{data?.availableUsers} / {data?.totalUsers}</h2>
-                </div>
-                <div className="ml-2 mr-5 hidden min-h-[2em] w-[0.1rem] mt-2 bg-gray-200 md:inline-block"></div>
-                {/* <button onClick={() => setTheme("dark")}
-                  className="h-min w-min rounded p-2 mt-1.5 hover:bg-gray-100"
-                >
-                  <Moon className="h-6 w-6 cursor-pointer dark:text-white" />
-                </button> */}
-                <ModeToggle/>
-                <div
-                  className="h-min w-min pr-6 rounded mt-1.5 p-2 hover:bg-gray-100"
-                >
-                  
-                  <SheetDemo/>
-                </div>
-                
+    <div className="flex left-0  right-0 items-center  space-x-4 ">
+                <div className="flex gap-4 items-center">
+                        <div className="relative flex items-center w-[250px]">
+                          {/* Search Icon */}
+                          <Search
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white cursor-pointer"
+                            aria-label="Search"
+                          />
+                          {/* Search Input */}
+                          <input
+                            className="w-full rounded-xl border border-gray-300 bg-gray-100 p-2 pt-2 mt-1 pl-10 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-white"
+                            type="search"
+                            placeholder="Search..."
+                            aria-label="Search Input"
+                          />
+                        </div>
+                      </div>
               </div>
   )
 }
