@@ -7,14 +7,15 @@ import { Popper } from "@mui/material";
 import { useGetAuthoritiesQuery } from "@/store/api";
 
 interface AuthoritiesFormProps {
-  setSelectedAuthorities: React.Dispatch<React.SetStateAction<any[]>>; // Function to set selected authorities in parent
+  setSelectedAuthorities: React.Dispatch<React.SetStateAction<any[]>>;
+  overrideFlag: boolean
+  label: string
 }
 
-
-
-export default function Tags({ setSelectedAuthorities } : AuthoritiesFormProps) {
+export default function Tags({ setSelectedAuthorities, overrideFlag, label } : AuthoritiesFormProps) {
 
   const { data, isLoading, error } = useGetAuthoritiesQuery();
+  const selectedFlag = false
 
 
   const authoritiesList =
@@ -23,9 +24,16 @@ export default function Tags({ setSelectedAuthorities } : AuthoritiesFormProps) 
       code: authority.code,
     })) || [];
 
+    const updatedList = Array.from(authoritiesList)
+
     const handleAuthorityChange = (_event: any, newValue: any[]) => {
-      setSelectedAuthorities(newValue); // Update selected authorities in parent
+      setSelectedAuthorities(newValue); 
+      selectedFlag: true
+      updatedList : authoritiesList.filter(authority => 
+        !newValue.some(selected => selected.code === authority.code)
+      );    
     };
+
 
   return (
     <Stack
@@ -33,9 +41,9 @@ export default function Tags({ setSelectedAuthorities } : AuthoritiesFormProps) 
       sx={{ width: 520, zIndex: 1500 }}
       style={{ cursor: "pointer" }}
     >
-      <Autocomplete
+      {overrideFlag ? <Autocomplete
         multiple
-        id="tags-standard"
+        id="tags-outlined"
         options={authoritiesList}
         getOptionLabel={(option) => option.name}
         onChange={handleAuthorityChange}
@@ -43,8 +51,9 @@ export default function Tags({ setSelectedAuthorities } : AuthoritiesFormProps) 
           <Popper
             {...props}
             style={{
-              zIndex: 1500, // Ensure dropdown is above other content
-              pointerEvents: "auto", // Ensure dropdown is interactive
+              zIndex: 1500,
+              pointerEvents: "auto",
+              width: "30%",
             }}
           />
         )}
@@ -52,11 +61,38 @@ export default function Tags({ setSelectedAuthorities } : AuthoritiesFormProps) 
           <TextField
             {...params}
             variant="standard"
-            label="Authorities"
-            placeholder="Authorities"
+            label={label}
+            placeholder={label}
           />
         )}
       />
+    : 
+    <Autocomplete
+        multiple
+        id="tags-outlined"
+        options={authoritiesList}
+        getOptionLabel={(option) => option.name}
+        onChange={handleAuthorityChange}
+        PopperComponent={(props) => (
+          <Popper
+            {...props}
+            style={{
+              zIndex: 0,
+              pointerEvents: "auto",
+              width: "30%",
+            }}
+          />
+        )}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="standard"
+            label={label}
+            placeholder={label}
+          />
+        )}
+      />}
+      
     </Stack>
   );
 }

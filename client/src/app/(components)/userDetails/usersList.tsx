@@ -143,8 +143,8 @@ const UserList = ({onSelectUser}: Props) => {
     employee.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
   return (
-    <Paper className="p-2 h-[calc(100%-4rem)] flex flex-col justify-start items-center">
-      <Box className="flex-2 bg-white rounded-2xl flex flex-col w-full max-h-full">
+    <Paper className="p-2 h-[calc(100%-2rem)] flex flex-col justify-start items-center">
+      <Box className="flex-2 bg-white rounded-2xl flex flex-col w-full max-h-full w-full">
         <Typography variant="h6" gutterBottom>
           Employee List
         </Typography>
@@ -160,7 +160,7 @@ const UserList = ({onSelectUser}: Props) => {
           sx={{
             flex: 1,
             overflowY: "auto",
-            maxHeight: "450px",
+            maxHeight: "500px",
           }}
         >
           <List>
@@ -175,7 +175,7 @@ const UserList = ({onSelectUser}: Props) => {
                       secondary={employee.role}
                     />
                   </Box>
-                  <Box className="flex flex-col items-center justify-start gap-2 w-[40px] text-center">
+                  {/* <Box className="flex flex-col items-center justify-start gap-2 w-[40px] text-center right-0">
                     <Box
                       className={`w-4 h-4 rounded-full border-2 ${
                         employee.isActive ? "bg-green-500" : "bg-gray-500"
@@ -185,11 +185,11 @@ const UserList = ({onSelectUser}: Props) => {
                       variant="caption"
                       className={`text-${
                         employee.isActive ? "green" : "gray"
-                      }-500 text-xs capitalize`}
+                      }-500 text-xs capitalize ml-auto`}
                     >
                       {employee.isActive ? "active" : "inactive"}
                     </Typography>
-                  </Box>
+                  </Box> */}
                 </ListItem>
                 </button>
                 <Divider />

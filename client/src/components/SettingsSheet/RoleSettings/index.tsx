@@ -120,7 +120,7 @@ const handleSubmit = async (event: React.FormEvent) => {
               className="col-span-7 shadow border"
             />
             <Label className="text-right mt-3">Authorities</Label>
-            <Tags setSelectedAuthorities={setSelectedAuthorities}/>
+            <Tags setSelectedAuthorities={setSelectedAuthorities} overrideFlag={true} label="Authorities"/>
           </div>
         </div>
 
