@@ -1,9 +1,9 @@
-import { ChartContainer } from "@/components/ui/chart";
+import { getInitials } from "@/components/Sidebar/nav-user";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGetUsersListQuery } from "@/store/api";
 import {
-  Avatar,
   Box,
   Divider,
-  Grid2,
   List,
   ListItem,
   ListItemText,
@@ -11,142 +11,32 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 
-// Define the structure of each user in the list
-interface User {
-  id: number;
-  name: string;
-  pictureUrl: string; // URL to the user's profile picture
-  isOnline: boolean; // Whether the user is online or offline
-}
-
-interface UserListProps {
-  users: User[]; // Array of users to be passed as a prop
-}
-
 type Props = {
-  onSelectUser: ( id: number) => void
-}
+  onSelectUser: (id: number) => void;
+};
 
-const employeesData = [
-  {
-    id: 1,
-    name: "Alice Johnson",
-    role: "Software Engineer",
-    productivity: 95,
-    isActive: true,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 2,
-    name: "Bob Smith",
-    role: "Project Manager",
-    productivity: 88,
-    isActive: true,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 3,
-    name: "Carol Lee",
-    role: "UX Designer",
-    productivity: 80,
-    isActive: true,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 4,
-    name: "David Brown",
-    role: "QA Analyst",
-    productivity: 72,
-    isActive: false,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 5,
-    name: "Eva White",
-    role: "Business Analyst",
-    productivity: 85,
-    isActive: true,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 6,
-    name: "Frank Adams",
-    role: "DevOps Engineer",
-    productivity: 92,
-    isActive: true,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 7,
-    name: "Grace Parker",
-    role: "Product Owner",
-    productivity: 90,
-    isActive: false,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 8,
-    name: "Johnson",
-    role: "Software Engineer",
-    productivity: 95,
-    isActive: true,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 9,
-    name: "Smith",
-    role: "Project Manager",
-    productivity: 88,
-    isActive: false,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 10,
-    name: "Lee",
-    role: "UX Designer",
-    productivity: 80,
-    isActive: true,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 11,
-    name: "Brown",
-    role: "QA Analyst",
-    productivity: 72,
-    isActive: false,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 12,
-    name: "White",
-    role: "Business Analyst",
-    productivity: 85,
-    isActive: true,
-    avatar: "https://via.placeholder.com/50",
-  },
-  {
-    id: 13,
-    name: "Adams",
-    role: "DevOps Engineer",
-    productivity: 92,
-    isActive: true,
-    avatar: "https://via.placeholder.com/50",
-  },
-];
+const UserList = ({ onSelectUser }: Props) => {
+  const userEmail = useSearchParams().get("email");
+  const { data, isLoading, error } = useGetUsersListQuery({
+    email: userEmail!,
+  });
 
-const UserList = ({onSelectUser}: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredEmployees = employeesData.filter((employee) =>
-    employee.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredEmployees =
+    data && Array.isArray(data)
+      ? data.filter((employee) =>
+          employee.username.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : [];
   return (
     <Paper className="p-2 h-[calc(100%-2rem)] flex flex-col justify-start items-center">
       <Box className="flex-2 bg-white rounded-2xl flex flex-col w-full max-h-full w-full">
         <Typography variant="h6" gutterBottom>
-          Employee List
+          Users List
         </Typography>
         <TextField
           fullWidth
@@ -165,17 +55,29 @@ const UserList = ({onSelectUser}: Props) => {
         >
           <List>
             {filteredEmployees.map((employee) => (
-              <React.Fragment key={employee.id}>
-                <button onClick={() => onSelectUser(employee.id)}>
-                <ListItem className="flex items-center justify-between gap-2 cursor-pointer">
-                  <Box className="flex items-center gap-2">
-                    <Avatar src={employee.avatar} />
-                    <ListItemText
-                      primary={employee.name}
-                      secondary={employee.role}
-                    />
-                  </Box>
-                  {/* <Box className="flex flex-col items-center justify-start gap-2 w-[40px] text-center right-0">
+              <React.Fragment key={employee.userId}>
+                <button onClick={() => onSelectUser(employee.userId)}>
+                  <ListItem className="flex items-center justify-between gap-2 cursor-pointer">
+                    <Box className="flex items-center gap-2">
+                      <Avatar className="h-[50px] w-[50px] rounded-full justify-center items-center">
+                        <AvatarImage className="object-cover w-full h-full rounded-full"
+                          src={
+                            employee.profilePicture
+                              ? employee.profilePicture.base64
+                              : ""
+                          }
+                          alt={employee.username}
+                        />
+                        <AvatarFallback className="absolute inset-0 flex justify-center items-center text-[150%]">
+                          {getInitials(employee.username!)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ListItemText
+                        primary={employee.username}
+                        secondary={employee.designation}
+                      />
+                    </Box>
+                    {/* <Box className="flex flex-col items-center justify-start gap-2 w-[40px] text-center right-0">
                     <Box
                       className={`w-4 h-4 rounded-full border-2 ${
                         employee.isActive ? "bg-green-500" : "bg-gray-500"
@@ -190,7 +92,7 @@ const UserList = ({onSelectUser}: Props) => {
                       {employee.isActive ? "active" : "inactive"}
                     </Typography>
                   </Box> */}
-                </ListItem>
+                  </ListItem>
                 </button>
                 <Divider />
               </React.Fragment>

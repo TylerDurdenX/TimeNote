@@ -10,6 +10,7 @@ import {
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import { getUser, getUserCount, updateUserProfilePicture } from "../controller/dashboardController.js";
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
+import { getListOfObjects, getUserDetails, getUsersList, mapRolesToUser } from "../controller/UserDetailsController.js";
 
 const router = express.Router();
 
@@ -26,5 +27,10 @@ router.post("/createRole", createRole)
 router.post("/createAuthority", createAuthority)
 router.get("/checkRoleCode", checkRoleCode)
 router.get("/getAuthorities", getAuthorities)
+router.get("/getUsersList", getUsersList)
+router.get("/mapRolesToUser", mapRolesToUser)
+router.get("/getUserDetails", getUserDetails)
+router.get("/getList", getListOfObjects)
+
 
 export default router;

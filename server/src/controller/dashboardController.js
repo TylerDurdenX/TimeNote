@@ -3,7 +3,6 @@ import { prisma } from "../server.js";
 
 export const getUser = catchAsync(async(req, res, next) => {
     const {email} = req.query
-    console.log('received')
     const dbUser = await prisma.user.findFirst({
       where:{
         email: email
@@ -44,7 +43,6 @@ export const getUser = catchAsync(async(req, res, next) => {
   export const updateUserProfilePicture = catchAsync(async(req, res, next) => {
     const {email} = req.query
     const {base64} = req.body
-    console.log('received PP update req')
 
     const user = await prisma.user.findFirst({
       where:{
@@ -86,7 +84,7 @@ export const getUser = catchAsync(async(req, res, next) => {
       })
     } catch (error) {
       console.log(error)
-      return next(new AppError('There was an error sending the email! Please try again later', 400))
+      return next(new AppError('There was an error updating Profile Picture! Please try again later', 400))
     }    
   
     }

@@ -8,7 +8,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 
 const persistor = persistStore(store)
 
-const ClientProvider = ({children}: {children:ReactNode}) => {
+const ClientProviders = ({children}: {children:ReactNode}) => {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
@@ -18,4 +18,4 @@ const ClientProvider = ({children}: {children:ReactNode}) => {
   )
 }
 
-export default ClientProvider
+export default ClientProviders

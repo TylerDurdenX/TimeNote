@@ -3,10 +3,7 @@ import catchAsync from "../utils/catchAsync.js";
 import { prisma } from "../server.js";
 
 export const createRole = catchAsync(async (req, res, next) => {
-  console.log(req.body)
   const { name, code, description, authorities } = req.body;
-
-  console.log(authorities.length)
 
   if (
     !name ||
@@ -78,7 +75,6 @@ export const createAuthority = catchAsync(async (req, res, next) => {
 //check if role code is already present
 export const checkRoleCode = catchAsync(async (req, res, next) => {
   const {code} = req.query;
-  console.log(code)
   try {
     const result = await prisma.role.findFirst({
       where: {
@@ -88,7 +84,6 @@ export const checkRoleCode = catchAsync(async (req, res, next) => {
         }
       }
     });
-    console.log(result)
     if(result){
       return res.status(200).json({
         flag: true,
