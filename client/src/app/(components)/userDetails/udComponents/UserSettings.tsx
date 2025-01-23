@@ -1,32 +1,33 @@
-import Tags from "@/components/SettingsSheet/AutoCompleteTags";
 import { getInitials } from "@/components/Sidebar/nav-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import AutocompleteTag from "./Autocomplete";
 import {
   useCheckRoleCodeQuery,
   useCreateRoleMutation,
-  useGetObjectListQuery,
   useGetUserDetailsQuery,
 } from "@/store/api";
 import DropdownTag from "./DropdownTag";
 import { useSearchParams } from "next/navigation";
-import { ListResponse } from "@/store/interfaces";
 
 type Props = {
   id: number;
 };
 
 const UserSettings = ({ id }: Props) => {
-  const [selectedOptions, setSelectedOptions] = useState<any[]>([]);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
   const [selectedAuthorities, setSelectedAuthorities] = useState<any[]>([]);
   const [error, setError] = useState("");
+  const [state, setState] = useState(id);
+  const [internalState, setInternalState] = useState(id);
+
+  useEffect(() => {
+    setInternalState(id);
+  }, [id]);
 
   const {
     data: dataUser,
@@ -92,7 +93,7 @@ const UserSettings = ({ id }: Props) => {
               alt={dataUser?.username}
             />
             <AvatarFallback className="rounded-lg text-4xl">
-              {getInitials(dataUser?.username!)}
+              {getInitials(dataUser?.username || "XX")}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -130,13 +131,14 @@ const UserSettings = ({ id }: Props) => {
 
         <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
           <div className="">
-            {/* <AutocompleteTag
-              setSelectedOptions={setSelectedOptions}
+            <AutocompleteTag
               label=""
               placeholder="Projects"
               entityName="Project"
               selectedList={dataUser?.projects!}
-            /> */}
+              key={internalState}
+              email={dataUser?.email!}
+            />
             <div className="col-span-8 flex justify-center">
               {error && <div className="text-red-500 text-sm">{error}</div>}
             </div>
@@ -150,13 +152,15 @@ const UserSettings = ({ id }: Props) => {
 
         <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
           <div className="">
-            {/* <AutocompleteTag
-              setSelectedOptions={setSelectedOptions}
+            <AutocompleteTag
               label=""
               placeholder="Teams"
               entityName="Team"
               selectedList={dataUser?.teams!}
-            /> */}
+              key={internalState}
+              email={dataUser?.email!}
+
+            />
             <div className="col-span-8 flex justify-center">
               {error && <div className="text-red-500 text-sm">{error}</div>}
             </div>
@@ -170,12 +174,15 @@ const UserSettings = ({ id }: Props) => {
 
         <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
           <div className="">
+          
             <AutocompleteTag
-              setSelectedOptions={setSelectedOptions}
               label=""
               placeholder="Roles"
               entityName="Role"
               selectedList={dataUser?.roles!}
+              key={internalState}
+              email={dataUser?.email!}
+
             />
             <div className="col-span-8 flex justify-center">
               {error && <div className="text-red-500 text-sm">{error}</div>}
@@ -191,7 +198,7 @@ const UserSettings = ({ id }: Props) => {
 
         <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
           <div className="">
-            <DropdownTag />
+            <DropdownTag email={dataUser?.email!} key={internalState}/>
             <div className="col-span-8 flex justify-center">
               {error && <div className="text-red-500 text-sm">{error}</div>}
             </div>
@@ -206,13 +213,14 @@ const UserSettings = ({ id }: Props) => {
 
         <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
           <div className="">
-            {/* <AutocompleteTag
-              setSelectedOptions={setSelectedOptions}
+            <AutocompleteTag
               label=""
-              placeholder="Roles"
+              placeholder="Reporting Users"
               entityName="User"
               selectedList={dataUser?.reports!}
-            /> */}
+              key={internalState}
+              email={dataUser?.email!}
+            />
             <div className="col-span-8 flex justify-center">
               {error && <div className="text-red-500 text-sm">{error}</div>}
             </div>

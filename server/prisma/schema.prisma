@@ -47,7 +47,7 @@ model ProfilePicture {
 
 model Project {
   id          Int        @id @default(autoincrement())
-  name        String
+  name        String     @unique
   description String?
   field1      String?
   field2      String?
@@ -141,7 +141,8 @@ model UserProjects {
 
 model Team {
   id          Int        @id @default(autoincrement())
-  name        String
+  name        String     @unique
+  description String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
