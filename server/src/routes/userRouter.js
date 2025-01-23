@@ -10,8 +10,9 @@ import {
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import { getUser, getUserCount, updateUserProfilePicture } from "../controller/dashboardController.js";
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
-import { getListOfObjects, getUserDetails, getUsersList, mapRolesToUser } from "../controller/UserDetailsController.js";
+import { getListOfObjects, getUserDetails, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
+import { createProject } from "../controller/projectController/projectController.js";
 
 const router = express.Router();
 
@@ -33,6 +34,8 @@ router.post("/mapRolesToUser", mapRolesToUser)
 router.get("/getUserDetails", getUserDetails)
 router.get("/getList", getListOfObjects)
 router.post("/createTeam", createTeam)
+router.post("/updateUserSettingsData", updateUserDetailsData)
+router.post("/createProject", createProject)
 
 
 

@@ -1,6 +1,7 @@
 import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 import { prisma } from "../server.js";
+import {isEmpty, extractTitles} from "../utils/genericMethods.js"
 
 //get list of users form the table
 export const getUsersList = catchAsync(async (req, res, next) => {
@@ -175,4 +176,170 @@ export const getListOfObjects = catchAsync(async (req, res, next) => {
       new AppError("There was an error fetching user details : " + error, 400)
     );
   }
+});
+
+export const updateUserDetailsData = catchAsync(async (req, res, next) => {
+  const { reportsTo, projects, teams, roles} = req.body;
+  const {email} = req.query
+  console.log(req.body)
+  console.log(teams)
+  
+  try {
+    // Using Prisma transaction to wrap the operations
+    const result = await prisma.$transaction(async (prisma) => {
+
+      
+      if(!isEmpty(projects)){
+        const dbroject = await prisma.project.findMany({
+          where:{
+            name: {
+              in: extractTitles(projects),}
+          }
+        });
+
+        const currentProjects = await prisma.user.findUnique({
+          where: { email: email },
+          select: { projects: { select: { id: true } } },
+        });
+        await prisma.user.update({
+          where: { email: email },
+          data: {
+            projects: {
+              disconnect: currentProjects?.projects.map(project => ({ id: project.id })),
+              connect: dbroject.map((project) => ({ id: project.id })),
+            },
+          },
+        });
+    }else{
+      const currentProjects = await prisma.user.findUnique({
+        where: { email: email },
+        select: { projects: { select: { id: true } } },
+      });
+      await prisma.user.update({
+        where: { email: email },
+        data: {
+          projects: {
+            disconnect: currentProjects?.projects.map(project => ({ id: project.id })),
+          },
+        },
+      });
+    }
+      
+    if(!isEmpty(teams)){
+      const dbTeams = await prisma.team.findMany({
+        where:{
+          name: {
+            in: extractTitles(teams),}
+        }
+      });
+      
+      const currentTeams = await prisma.user.findUnique({
+        where: { email: email },
+        select: { teams: { select: { id: true } } },
+      });
+      await prisma.user.update({
+        where: { email: email },
+        data: {
+          teams: {
+            disconnect: currentTeams?.teams.map(team => ({ id: team.id })),
+            connect: dbTeams.map((team) => ({ id: team.id })),
+          },
+        },
+      });
+    }else{
+      const currentTeams = await prisma.user.findUnique({
+        where: { email: email },
+        select: { teams: { select: { id: true } } },
+      });
+      await prisma.user.update({
+        where: { email: email },
+        data: {
+          teams: {
+            disconnect: currentTeams?.teams.map(team => ({ id: team.id }))
+          },
+        },
+      });
+    }
+
+    if(!isEmpty(roles)){
+      const dbRoles = await prisma.role.findMany({
+        where:{
+          code: {
+            in: extractTitles(roles),}
+        }
+      });
+      const currentRoles = await prisma.user.findUnique({
+        where: { email: email },
+        select: { roles: { select: { id: true } } },
+      });
+      await prisma.user.update({
+        where: { email: email },
+        data: {
+          roles: {
+            disconnect: currentRoles?.roles.map(role => ({ id: role.id })),
+            connect: dbRoles.map((role) => ({ id: role.id })),
+          },
+        },
+      });
+    }else{
+      const currentRoles = await prisma.user.findUnique({
+        where: { email: email },
+        select: { roles: { select: { id: true } } },
+      });
+      if(currentRoles){
+        await prisma.user.update({
+          where: { email: email },
+          data: {
+            roles: {
+              disconnect: currentRoles?.roles.map(role => ({ id: role.id }))
+            },
+          },
+        });
+      }
+      
+    }
+
+    if(!isEmpty(reportsTo)){
+
+      const manager = await prisma.user.findFirst({
+        where: {
+          email: reportsTo
+        }
+      })
+      
+      await prisma.user.update({
+        where: { email: email },
+        data: {
+          reportsTo: {
+            connect: {
+              userId: manager.userId
+            }
+          }
+        }, 
+      });
+    }else{
+      await prisma.user.update({
+        where: { email: email },
+        data: {
+          reportsTo: {
+            disconnect: true,  // Removes the reporting relationship
+          }, 
+        },
+      });
+    }
+
+      //return [project1, project2, project3]; // Return the result if needed
+    });
+
+    
+  } catch (error) {
+    console.error('Transaction failed:', error);
+      return next(new AppError("There was an error updating user details", error));
+  } finally {
+    await prisma.$disconnect();
+  }
+  res.status(200).json({
+    status: "success",
+    message: `Details updated for user`,
+  });
 });

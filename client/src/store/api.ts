@@ -1,6 +1,6 @@
 import { code } from "@nextui-org/theme";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ListResponse, UserDetails, UsersListResponse } from "./interfaces";
+import { ListResponse, Team, UserDetails, UsersListResponse } from "./interfaces";
 
 export interface Project {
   id: number;
@@ -61,7 +61,7 @@ interface CreateRolePayload {
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
   reducerPath: "api",
-  tagTypes: ["UserCount", "User", "RoleCode", "Authority", "UsersList"],
+  tagTypes: ["UserCount", "User", "RoleCode", "Authority", "UsersList", "UsersData"],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
       query: () => "api/user/getUserCount",
@@ -131,6 +131,7 @@ export const api = createApi({
         const url = `api/user/getUserDetails?id=${id}`;
         return url;
       },
+      providesTags: ["UsersData"]
     }),
     getObjectList: build.query<ListResponse[], { entityName: string }>({
         query: ({ entityName }) => {
@@ -138,6 +139,26 @@ export const api = createApi({
           return url;
         },
       }),
+      
+    updateUserSettingsData: build.mutation<
+      ApiResponse,
+      { email: string; reportingUsers: ListResponse[], reportsTo : string, projects: ListResponse[], teams: ListResponse[],
+        roles: ListResponse[]
+       }
+    >({
+      query: ({ email, reportingUsers, reportsTo, projects , teams, roles}) => {
+        const requestBody = JSON.stringify({ reportingUsers, reportsTo, projects, teams, roles});
+        console.log("Request Body:", requestBody); // Debug log
+        return {
+          url: `api/user/updateUserSettingsData?email=${email}`,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: requestBody,
+        };
+      },invalidatesTags: ["UsersData"]
+    }),
   }),
 });
 
@@ -151,4 +172,5 @@ export const {
   useGetUsersListQuery,
   useGetUserDetailsQuery,
   useGetObjectListQuery,
+  useUpdateUserSettingsDataMutation
 } = api;
