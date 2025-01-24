@@ -1,163 +1,190 @@
-// components/UserHierarchy.tsx
-import React from 'react';
-import {
-  Box,
-  Typography,
-  Avatar,
-  Paper,
-} from '@mui/material';
+import React, { useState, useEffect } from "react";
+import UserCard from "./UserCard"; // Assuming the UserCard component is imported
+import { UserHierarchy as User } from "@/store/interfaces";
+import { useGetUserHierarchyDataQuery } from "@/store/api";
 
-interface User {
-  id: number;
-  name: string;
-  designation: string;
-  imageUrl: string;
-  reportsTo: string | null;
+interface HierarchyPageProps {
+  startingUserId: number;
+  setStartingUserId: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const orgHierarchy: User[] = [
-  {
-    id: 1,
-    name: 'A',
-    designation: 'CEO',
-    imageUrl: 'https://example.com/john-doe.jpg',
-    reportsTo: null,
-  },
-  {
-    id: 2,
-    name: 'B',
-    designation: 'CTO',
-    imageUrl: 'https://example.com/jane-smith.jpg',
-    reportsTo: 'John Doe',
-  },
-  {
-    id: 3,
-    name: 'C',
-    designation: 'Lead Developer',
-    imageUrl: 'https://example.com/emily-davis.jpg',
-    reportsTo: 'Jane Smith',
-  },
-  {
-    id: 4,
-    name: 'D',
-    designation: 'COO',
-    imageUrl: 'https://example.com/michael-brown.jpg',
-    reportsTo: 'John Doe',
-  },
-  // New users reporting to CTO (Jane Smith)
-  {
-    id: 5,
-    name: 'E',
-    designation: 'Software Engineer',
-    imageUrl: 'https://example.com/sarah-johnson.jpg',
-    reportsTo: 'Jane Smith',
-  },
-  {
-    id: 6,
-    name: 'F',
-    designation: 'Frontend Developer',
-    imageUrl: 'https://example.com/david-lee.jpg',
-    reportsTo: 'Jane Smith',
-  },
-  {
-    id: 7,
-    name: 'G',
-    designation: 'Backend Developer',
-    imageUrl: 'https://example.com/samantha-green.jpg',
-    reportsTo: 'Jane Smith',
-  },
-];
+export default function HierarchyPage({ startingUserId, setStartingUserId }: HierarchyPageProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [managers, setManagers] = useState<User[]>([]); // To store managers (hierarchy upwards)
+  const [directReports, setDirectReports] = useState<User[]>([]);
+  const [TopMostUserSelected, setTopMostUserSelected] = useState(false)
+  const [ifBottomUserSelected, setIfBottomUserSelected] = useState(false)
 
-// Function to render each user in the org hierarchy
-const renderOrgTree = (orgHierarchy: User[]) => {
-  return orgHierarchy.map((person) => (
-    <Box key={person.id} sx={{ marginBottom: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
-      {/* Line to indicate report relationships */}
-      {person.reportsTo && (
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            top: '-10px',
-            width: '2px',
-            height: '10px',
-            backgroundColor: '#555',
-            transform: 'translateX(-50%)',
-          }}
-        />
-      )}
-      <Paper
-        elevation={3}
-        sx={{
-          padding: 2,
-          display: 'flex',
-          alignItems: 'center', // Align avatar and text horizontally
-          backgroundColor: '#f5f5f5',
-          borderRadius: 2,
-          boxShadow: 2,
-          width: '100%',
-        }}
-      >
-        <Avatar sx={{ width: 60, height: 60, marginRight: 2 }} src={person.imageUrl} alt={person.name} />
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-            {person.name}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: '0.9rem', color: '#555' }}>
-            {person.designation}
-          </Typography>
-          {person.reportsTo && (
-            <Typography variant="caption" color="textSecondary" sx={{ marginTop: 0.5 }}>
-              Reports to: {person.reportsTo}
-            </Typography>
-          )}
-        </Box>
-      </Paper>
-    </Box>
-  ));
-};
+  // Fetch user hierarchy data based on the starting user ID
+  const {
+    data,
+    isLoading,
+    error,
+  } = useGetUserHierarchyDataQuery(
+    {
+      userId: startingUserId,
+    },
+    {
+      refetchOnMountOrArgChange: true, // Refetch data when startingUserId changes
+    }
+  );
 
-const Organization = () => {
+  useEffect(() => {
+    console.log('useEffect triggered');
+    if (!data || data.length === 0) return;
+  
+    // Find the current user based on the startingUserId
+    const foundUser = data.find((user) => user.userId === startingUserId);
+  
+    if (foundUser) {
+      let currentUser = foundUser;
+      let managersList: User[] = [];
+
+      if(foundUser.reportsToId === null || foundUser.reportsToId === undefined){
+        setTopMostUserSelected(true)
+      }else{
+        setTopMostUserSelected(false)
+      }
+  
+      // Step 1: Find the hierarchy upwards
+      while (currentUser.reportsToId) {
+        const manager = data.find(
+          (user) => user.userId === (currentUser.reportsToId ? Number(currentUser.reportsToId) : null)
+        );
+        if (manager) {
+          managersList.unshift(manager); // Push to the front of the list to keep hierarchy order
+          currentUser = manager;
+        } else {
+          break;
+        }
+      }
+  
+      setUser(foundUser);
+      setManagers(managersList);
+  
+      // Step 2: Find direct reports (downwards in the hierarchy)
+      const reports = data.filter(
+        (user) => Number(user.reportsToId) === foundUser.userId // Direct comparison between userId and reportsToId
+      );
+      setDirectReports(reports);
+      if(directReports=== null || directReports === undefined){
+        setIfBottomUserSelected(true)
+      }else{
+        setIfBottomUserSelected(false)
+      }
+    }
+  }, [startingUserId, data]); // Dependency on startingUserId and data
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading user data</div>;
+  }
+
+  if (!user) {
+    return <div>User not found</div>;
+  }
+
+  const handleCardClick = (id: number) => {
+    setStartingUserId(id);
+  };
+
   return (
-    <div className="flex justify-center items-center py-8">
-        <div className="pt-4">
-          {/* Align CEO and CTO vertically */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
-            {renderOrgTree([orgHierarchy[0], orgHierarchy[1]])}
-          </Box>
+    <div className="flex flex-col items-center mt-8 w-full relative">
+      {/* Render Manager Hierarchy */}
+      <div className="flex flex-col items-center space-y-4 relative">
+        {managers.map((manager, index) => (
+          <div key={manager.userId} className="relative flex items-center  justify-center">
+            {index !== managers.length - 1 && (
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-px h-6 bg-gray-500"></div>
+        )}
+            <button onClick={() => handleCardClick(manager.userId)}>
+              <UserCard
+                name={manager.username}
+                designation={manager.designation}
+                imageUrl={manager.profilePicture?.base64}
+                isHighlighted={false}
+                textAlignment="left"
+              />
+            </button>
+          </div>
+        ))}
+      </div>
+      {TopMostUserSelected ? "" : 
+      <div className=" top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>}
+      
+      
 
-          {/* Horizontal line connecting users reporting to the same person */}
-          <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 4 }}>
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                width: '100%',
-                height: '2px',
-                backgroundColor: '#555',
-                zIndex: -1,
-              }}
-            />
-            {renderOrgTree([orgHierarchy[2], orgHierarchy[5], orgHierarchy[6]])}
-          </Box>
+      {/* Render Current User with Highlight */}
+      <div>
+        <button onClick={() => handleCardClick(user.userId)}>
+          <UserCard
+            name={user.username}
+            designation={user.designation}
+            imageUrl={user.profilePicture?.base64}
+            isHighlighted={true}
+            textAlignment="left"
+          />
+        </button>
+      </div>
 
-          {/* Bottom row with 2 people reporting to COO */}
-          <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', marginTop: 4 }}>
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                width: '100%',
-                height: '2px',
-                backgroundColor: '#555',
-                zIndex: -1,
-              }}
+
+      {directReports.length > 1 ? (
+  <div className="flex flex-col items-center mt-0 relative rounded-lg">
+<div className=" top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>
+
+    <div className=" mt-4 flex flex-col items-center mt-0 relative border border-gray-300 rounded-lg p-8">
+
+    <div className="flex flex-wrap justify-center gap-8">
+      {directReports.map((report) => (
+        <div key={report.userId} className="relative flex flex-col items-center">
+          <button onClick={() => handleCardClick(report.userId)}>
+            <UserCard
+              name={report.username}
+              designation={report.designation}
+              imageUrl={report.profilePicture?.base64}
+              isHighlighted={false}
+              textAlignment="left"
             />
-            {renderOrgTree([orgHierarchy[3], orgHierarchy[4]])}
-          </Box>
+          </button>
         </div>
+      ))}
+    </div>
+    </div>
+
+  </div>
+) : (
+  <div className="flex flex-col items-center mt-0 relative rounded-lg">
+  <div className="flex flex-wrap justify-center gap-8">
+    
+    {directReports.map((report, index) => (
+      <div key={report.userId} className="relative flex flex-col items-center">
+                {ifBottomUserSelected ? "" : <div className=" top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>}
+
+        <button onClick={() => handleCardClick(report.userId)}>
+          <UserCard
+            name={report.username}
+            designation={report.designation}
+            imageUrl={report.profilePicture?.base64}
+            isHighlighted={false}
+            textAlignment="left"
+          />
+        </button>
+
+        {/* Conditionally render a vertical line between cards, but not after the last one */}
+        {index < directReports.length - 1 && !ifBottomUserSelected && (
+          <div className="top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500 mt-4"></div>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
+) }
+
+
     </div>
   );
-};
-
-export default Organization;
+}

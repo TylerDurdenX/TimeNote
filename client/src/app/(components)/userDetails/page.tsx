@@ -5,23 +5,14 @@ import React, { useEffect, useState } from "react";
 import UserList from "./usersList";
 import UserDetailsSection from "./udComponents/userDetailsSection";
 import UserDetailsLP from "./userDetailsLP";
-import { usePathname, useRouter } from "next/navigation";
 
 const Page = () => {
-  const router = useRouter();
   const [isUserSelected, setIsUserSelected] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
 
   const handleSelectUser = (id: number) => {
-    const currentUrl = new URL(window.location.href);
-    const currentParams = new URLSearchParams(currentUrl.search);
     setIsUserSelected(true)
     setUserId(id)
-    console.log("page : " + id)
-    const newUrl = `${
-      currentUrl.origin
-    }/userDetails/${id}?${currentParams.toString()}`;
-    //router.push(newUrl);
   };
 
   return (

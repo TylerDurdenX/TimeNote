@@ -22,7 +22,11 @@ const UserList = ({ onSelectUser }: Props) => {
   const userEmail = useSearchParams().get("email");
   const { data, isLoading, error } = useGetUsersListQuery({
     email: userEmail!,
-  });
+  },
+    {
+      refetchOnMountOrArgChange: true,
+    }
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
 

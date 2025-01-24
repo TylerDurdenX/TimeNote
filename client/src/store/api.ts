@@ -1,6 +1,6 @@
 import { code } from "@nextui-org/theme";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ListResponse, Team, UserDetails, UsersListResponse } from "./interfaces";
+import { ListResponse, Team, UserDetails, UserHierarchy, UsersListResponse } from "./interfaces";
 
 export interface Project {
   id: number;
@@ -139,7 +139,12 @@ export const api = createApi({
           return url;
         },
       }),
-      
+    getUserHierarchyData: build.query<UserHierarchy[], { userId: number }>({
+        query: ({ userId }) => {
+          const url = `api/user/getUserHierarchyData?userId=${userId}`;
+          return url;
+        },
+    }),
     updateUserSettingsData: build.mutation<
       ApiResponse,
       { email: string; reportingUsers: ListResponse[], reportsTo : string, projects: ListResponse[], teams: ListResponse[],
@@ -172,5 +177,6 @@ export const {
   useGetUsersListQuery,
   useGetUserDetailsQuery,
   useGetObjectListQuery,
-  useUpdateUserSettingsDataMutation
+  useUpdateUserSettingsDataMutation,
+  useGetUserHierarchyDataQuery
 } = api;

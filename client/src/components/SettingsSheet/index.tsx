@@ -26,7 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import { Button } from "../ui/button";
 import { Settings } from "lucide-react";
 import { DialogDemo } from "./ProductivitySettings";
@@ -60,8 +60,8 @@ export function SheetDemo() {
       toast.error("Some Error occurred");
       console.log(error);
     }
-    setOpen(false)
-  }
+    setOpen(false);
+  };
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; // Get the selected file
     if (file) {
@@ -79,7 +79,7 @@ export function SheetDemo() {
         }
       };
       reader.readAsDataURL(file); // Read the file as base64
-      setOpen(false)
+      setOpen(false);
     }
   };
 
@@ -105,7 +105,8 @@ export function SheetDemo() {
                 <Avatar className="h-20 w-20 rounded-full justify-center items-center">
                   <AvatarImage
                     src={base64Image || user.avatar}
-                    alt={user.name}/>
+                    alt={user.name}
+                  />
                   <AvatarFallback className="rounded-lg text-4xl">
                     {getInitials(user.name!)}
                   </AvatarFallback>
@@ -115,33 +116,41 @@ export function SheetDemo() {
             <PopoverContent className="flex flex-col p-2 rounded-lg shadow-lg bg-white min-w-[200px]">
               <button
                 className="flex items-center justify-start w-full p-3 rounded-md hover:bg-gray-200 focus:outline-none transition duration-200"
-                onClick={() => document.getElementById("fileInput")?.click()}>
+                onClick={() => document.getElementById("fileInput")?.click()}
+              >
                 <Typography className="text-primary">
                   Change Profile Picture
                 </Typography>
               </button>
               <AlertDialog>
-      <AlertDialogTrigger asChild>
-      <button className="flex items-center justify-start w-full p-3 rounded-md hover:bg-gray-200 focus:outline-none transition duration-200">
-                <Typography className="text-primary">
-                  Remove Profile Picture
-                </Typography>
-              </button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription className="text-gray-700">
-            Do you want to remove your profile picture ?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => {setOpen(false)}}>No</AlertDialogCancel>
-          <AlertDialogAction onClick={removeProfilePicture}>Yes</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-              
+                <AlertDialogTrigger asChild>
+                  <button className="flex items-center justify-start w-full p-3 rounded-md hover:bg-gray-200 focus:outline-none transition duration-200">
+                    <Typography className="text-primary">
+                      Remove Profile Picture
+                    </Typography>
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-700">
+                      Do you want to remove your profile picture ?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel
+                      onClick={() => {
+                        setOpen(false);
+                      }}
+                    >
+                      No
+                    </AlertDialogCancel>
+                    <AlertDialogAction onClick={removeProfilePicture}>
+                      Yes
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </PopoverContent>
           </Popover>
 

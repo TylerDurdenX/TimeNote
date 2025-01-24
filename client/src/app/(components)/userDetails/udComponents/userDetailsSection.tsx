@@ -9,6 +9,7 @@ type Props = {
 
 const userDetailsSection = ({ id }: Props) => {
   const [activeTab, setActiveTab] = useState("User Settings");
+  const [startingUserId, setStartingUserId] = useState(id);
   return (
     <div className="w-full h-full overflow-hidden overflow-y-auto ">
       <UserDetailHeader activeTab={activeTab} setActiveTab={setActiveTab}/>
@@ -16,7 +17,7 @@ const userDetailsSection = ({ id }: Props) => {
         <UserSettings id = {id}/>
         )}
         {activeTab==="Organization" && (
-        <Organization />
+        <Organization startingUserId={startingUserId} setStartingUserId={setStartingUserId}/>
         )}
     </div>
   );

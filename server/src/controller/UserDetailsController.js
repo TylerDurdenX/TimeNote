@@ -181,8 +181,6 @@ export const getListOfObjects = catchAsync(async (req, res, next) => {
 export const updateUserDetailsData = catchAsync(async (req, res, next) => {
   const { reportsTo, projects, teams, roles} = req.body;
   const {email} = req.query
-  console.log(req.body)
-  console.log(teams)
   
   try {
     // Using Prisma transaction to wrap the operations
@@ -343,3 +341,112 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
     message: `Details updated for user`,
   });
 });
+
+  export const getUserHierarchyData = catchAsync(async (req, res, next) => {
+    const { userId } = req.query;
+    try {
+      let userList = []
+
+      let user = await prisma.user.findFirst({
+        where: {
+          userId: Number(userId),
+        },
+        include: {
+          profilePicture :{
+            select: {
+              base64: true,
+            },
+          }
+        }
+      });
+
+      let selectedUser = user
+
+      if(!user){
+        return next(
+          new AppError("No User Found : " , 302)
+        );
+      }
+
+      const {
+        password,
+        profilePictureId,
+        resetPasswordOTP,
+        otpExpires,
+        createdAt,
+        updatedAt,
+        email,
+        phoneNumber,
+        ...newObj
+      } = user;
+      userList.push(newObj)
+      while(!isEmpty(user.reportsToId)){
+        let otherUser = await prisma.user.findFirst({
+          where: {
+            userId: user.reportsToId,
+          },
+          include: {
+            profilePicture :{
+              select: {
+                base64: true,
+              },
+            }
+          }
+        });
+        if(otherUser){
+        const {
+          password,
+          profilePictureId,
+          resetPasswordOTP,
+          otpExpires,
+          createdAt,
+          updatedAt,
+          email,
+          phoneNumber,
+          ...newObj
+        } = otherUser;
+        userList.push(newObj)
+        user = otherUser
+      }else{
+        break
+      }
+      }
+
+      const reportingUsersList = await prisma.user.findMany({
+        where : {
+          reportsTo: selectedUser
+        }, include: {
+          profilePicture :{
+            select: {
+              base64: true,
+            },
+          }
+        }
+      })      
+
+      if(reportingUsersList){
+
+        for (let i = 0; i < reportingUsersList.length; i++) {
+          const {
+            password,
+            profilePictureId,
+            resetPasswordOTP,
+            otpExpires,
+            createdAt,
+            updatedAt,
+            email,
+            phoneNumber,
+            ...newObj
+          } = reportingUsersList[i];
+          userList.push(newObj)
+        }
+      }
+
+      return res.status(200).json(userList);
+    } catch (error) {
+      console.error(error);
+      return next(
+        new AppError("There was an error fetching user hierarchy Data : " + error, 400)
+      );
+    }
+  });

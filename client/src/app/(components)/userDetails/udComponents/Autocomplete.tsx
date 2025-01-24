@@ -92,8 +92,6 @@ export default function AutocompleteTag({
           break;
         case 'User':
           setSelectedReportingUsers(matchedItems); // Update selected reporting users in parent state
-          console.log('no')
-          console.log(matchedItems)
           break;
         default:
           break;

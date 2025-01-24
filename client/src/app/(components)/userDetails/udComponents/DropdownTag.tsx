@@ -18,7 +18,6 @@ export default function DropdownTag({ email, setSelectedReportsTo, reportsTo }: 
   // Handle change event for select
   const handleChange = (event: SelectChangeEvent) => {
     const value = event.target.value;
-    console.log("Selected value:", value); // Add console log for selected value
     setUser(value);  // Update local state
     setSelectedReportsTo(value);  // Update parent state
     setReportsToLocal(value)

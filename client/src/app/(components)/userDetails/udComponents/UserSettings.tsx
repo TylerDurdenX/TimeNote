@@ -27,7 +27,7 @@ type Props = {
 
 const UserSettings = ({ id }: Props) => {
   const [name, setName] = useState("");
-  const [code, setCode] = useState("");
+  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [selectedTeams, setSelectedTeams] = useState<any[]>([]);
   const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<any[]>([]);
@@ -48,17 +48,20 @@ const UserSettings = ({ id }: Props) => {
     data: dataUser,
     isLoading: isLoadingUser,
     error: errorQuery,
-  } = useGetUserDetailsQuery({
-    id: id,
-  },
-  {
-    refetchOnMountOrArgChange: true,
-  });
+  } = useGetUserDetailsQuery(
+    {
+      id: id,
+    },
+    {
+      refetchOnMountOrArgChange: true,
+    }
+  );
 
-
-  const [updateUserData] = useUpdateUserSettingsDataMutation();
+  const [updateUserData, { isLoading }] = useUpdateUserSettingsDataMutation();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isLoading) return;
     try {
       updateUserData({
         email: dataUser?.email!,
@@ -69,12 +72,15 @@ const UserSettings = ({ id }: Props) => {
         roles: selectedRoles,
       });
       toast.success("UserData Updated Successfully!");
+      setOpen(false);
     } catch (error) {
       toast.error("Some Error occurred");
       console.log(error);
     }
     setOpen(false);
   };
+
+  console.log("UserSettings :" + dataUser?.reportsTo || "")
 
   return (
     <div>
@@ -205,7 +211,7 @@ const UserSettings = ({ id }: Props) => {
             <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
               <div className="">
                 <DropdownTag
-                  email={dataUser?.email!} 
+                  email={dataUser?.email!}
                   key={internalState}
                   setSelectedReportsTo={setSelectedReportsTo}
                   reportsTo={dataUser?.reportsTo}
@@ -244,14 +250,16 @@ const UserSettings = ({ id }: Props) => {
           </div> */}
 
           <div className="flex justify-center items-center h-full">
-            <AlertDialog onOpenChange={setOpen}>
+            <AlertDialog open={open} onOpenChange={setOpen}>
               <AlertDialogTrigger asChild>
                 <button
                   className={`flex w-[139px] mt-4 text-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
-            hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 `} //${isLoading ? "cursor-not-allowed opacity-50" : ""}
-                  //disabled={isLoading}
+          hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
+            isLoading ? "cursor-not-allowed opacity-50" : ""
+          }`}
+                  disabled={isLoading}
                 >
-                  {false ? "Saving..." : "Save Changes"}
+                  {isLoading ? "Saving..." : "Save Changes"}
                 </button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -259,11 +267,13 @@ const UserSettings = ({ id }: Props) => {
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
                     This action will change the user settings! Kindly confirm if
-                    you want to proceed with the changes
+                    you want to proceed with the changes.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel onClick={() => setOpen(false)}>
+                    Cancel
+                  </AlertDialogCancel>
                   <AlertDialogAction onClick={handleSubmit}>
                     Proceed
                   </AlertDialogAction>

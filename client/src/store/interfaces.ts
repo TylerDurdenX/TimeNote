@@ -33,7 +33,7 @@ export interface Team {
     name: string
 }
 interface ReportsTo {
-    username: string
+    username: string | null
 }
 export interface ReportingUsers {
     name: string
@@ -43,3 +43,11 @@ export interface ListResponse {
     title : string;
     misc: string;
 }
+
+export interface UserHierarchy {
+    userId: number;
+    username: string;
+    designation: string;
+    profilePicture: ProfilePicture;
+    reportsToId: string | null;
+  }
