@@ -360,13 +360,13 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
         }
       });
 
-      let selectedUser = user
-
       if(!user){
         return next(
           new AppError("No User Found : " , 302)
         );
       }
+
+      let selectedUser = user
 
       const {
         password,
@@ -390,7 +390,7 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
               select: {
                 base64: true,
               },
-            }
+            } 
           }
         });
         if(otherUser){
@@ -441,7 +441,7 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
           userList.push(newObj)
         }
       }
-
+      
       return res.status(200).json(userList);
     } catch (error) {
       console.error(error);

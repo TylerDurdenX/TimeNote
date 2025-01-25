@@ -8,7 +8,7 @@ interface HierarchyPageProps {
   setStartingUserId: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export default function HierarchyPage({ startingUserId, setStartingUserId }: HierarchyPageProps) {
+export default function HierarchyPage({ startingUserId, setStartingUserId}: HierarchyPageProps) {
   const [user, setUser] = useState<User | null>(null);
   const [managers, setManagers] = useState<User[]>([]); // To store managers (hierarchy upwards)
   const [directReports, setDirectReports] = useState<User[]>([]);
@@ -28,6 +28,7 @@ export default function HierarchyPage({ startingUserId, setStartingUserId }: Hie
       refetchOnMountOrArgChange: true, // Refetch data when startingUserId changes
     }
   );
+
 
   useEffect(() => {
     console.log('useEffect triggered');
@@ -73,7 +74,7 @@ export default function HierarchyPage({ startingUserId, setStartingUserId }: Hie
         setIfBottomUserSelected(false)
       }
     }
-  }, [startingUserId, data]); // Dependency on startingUserId and data
+  }, [startingUserId, data,]); // Dependency on startingUserId and data
 
   if (isLoading) {
     return <div>Loading...</div>;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserDetailHeader from "./userDetailHeader";
 import UserSettings from "./UserSettings";
 import Organization from "./Organization";
@@ -10,6 +10,10 @@ type Props = {
 const userDetailsSection = ({ id }: Props) => {
   const [activeTab, setActiveTab] = useState("User Settings");
   const [startingUserId, setStartingUserId] = useState(id);
+
+  useEffect(() => {
+    setStartingUserId(id)
+  }, [id])
   return (
     <div className="w-full h-full overflow-hidden overflow-y-auto ">
       <UserDetailHeader activeTab={activeTab} setActiveTab={setActiveTab}/>
