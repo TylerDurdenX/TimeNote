@@ -1,15 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import { User, Moon, Search, Settings, Sun } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { SheetDemo } from '@/components/SettingsSheet';
-import { useTheme } from "next-themes"
-import { ModeToggle } from '@/components/ModeToggle';
-import { useGetUsersCountQuery, UserCountResponse } from '@/store/api';
+import React from 'react'
+import { Search,} from "lucide-react";
 
 const NavbarComponent = () => {
-  const { setTheme } = useTheme()
-  const { data, isLoading, error } = useGetUsersCountQuery( undefined, {refetchOnMountOrArgChange: true});
   
   return (
     <div className="flex left-0  right-0 items-center  space-x-4 ">

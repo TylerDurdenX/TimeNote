@@ -441,7 +441,6 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
           userList.push(newObj)
         }
       }
-      
       return res.status(200).json(userList);
     } catch (error) {
       console.error(error);

@@ -38,12 +38,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { CreateRole } from "./RoleSettings";
 import { Typography } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { setAuthUser } from "@/store/authSlice";
+import { useRouter } from "next/navigation";
 
 export function SheetDemo() {
   const userEmail = useSearchParams().get("email");
   const { data, isLoading, error } = useGetUserQuery({ email: userEmail! });
   const [open, setOpen] = useState(false);
-  const togglePopover = () => setOpen(!open);
   const defaultUser = {
     name: "XXXX",
     email: "XXX@XXX.XXX",
@@ -52,9 +54,22 @@ export function SheetDemo() {
 
   const [base64Image, setBase64Image] = useState<string | null>(null);
   const [updateProfilePic] = useUpdateProfilePictureMutation();
-  const removeProfilePicture = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const removeProfilePicture = async () => {
     try {
-      updateProfilePic({ email: userEmail!, base64: "" });
+      const res = await updateProfilePic({
+        email: userEmail!,
+        base64: "",
+      }).unwrap();
+      console.log(res);
+      if (Number(res.status) === 401) {
+        dispatch(setAuthUser(null));
+
+        router.push("/");
+
+        toast.success("Session Timeout, Please log in again!");
+      }
       toast.success("Profile Picture Removed Successfully!");
     } catch (error) {
       toast.error("Some Error occurred");

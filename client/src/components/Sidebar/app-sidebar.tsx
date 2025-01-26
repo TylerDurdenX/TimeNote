@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Sideheader from "./side-header";
 import { useState } from "react";
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 import {
   AudioWaveform,
   BookOpen,
@@ -42,38 +40,14 @@ import {
 } from "@/components/ui/sidebar";
 import { useGetUserQuery} from "@/store/api";
 import { useSearchParams } from "next/navigation";
-import axios from "axios";
-import store from "@/store/store";
 
-const items = [
-  {
-    title: "Dashboard",
-    url: "#",
-    icon: LaptopMinimal,
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-];
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const userEmail = useSearchParams().get("email");
+  const [activeTab, setActiveTab] = useState('');
+  const [item1Open, setItem1Open] = useState(false)
+  const [item2Open, setItem2Open] = useState(false)
+
+
   const mockData = {
     teams: [
       {
@@ -191,6 +165,55 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     avatar: ""
   }
 
+  const [items, setItems] = useState([
+    {
+      title: "Live Tracking",
+      url: "#",
+      icon: Radio,
+      isActive: false,
+      items: [
+        {
+          title: "Screenshots",
+          url: `/screenshots?email=${userEmail}`,
+          icon: ScreenShare,
+        },
+        {
+          title: "Live Streaming",
+          url: `/liveStream?email=${userEmail}`,
+          icon: Cast,
+        },
+        {
+          title: "Geo Tracking",
+          url: `/geoTrack?email=${userEmail}`,
+          icon: MapPin,
+        },
+      ],
+    },
+    // Add other items here as needed
+  ]);
+
+  console.log(activeTab)
+  React.useEffect(() => {
+    const updateItemsOnLoad = () => {
+      const updatedItems = items.map((item) => {
+        if (item.items) {
+          item.items = item.items.map((subItem) => {
+            // Check if the activeTab matches any subItem's URL
+            if (subItem.url.split("?")[0].replace("/", "") === activeTab) {
+              setItem1Open(true)
+            }
+            return { ...subItem}; // Otherwise, mark it as inactive
+          });
+        }
+        return item;
+      });
+      // Update the items list after checking activeTab
+      setItems(updatedItems);
+    };
+
+    updateItemsOnLoad(); // Call the function to update the items on page load
+  }, [activeTab]);
+
     const { data, isLoading, error } = useGetUserQuery({ email: userEmail!});
     return (
       <Sidebar collapsible="icon" {...props} variant="floating">
@@ -198,12 +221,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <TeamSwitcher teams={mockData.teams} />
         </SidebarHeader>
         <SidebarContent>
-          <NavProjects projects={mockData.Dashboard} />
-          <NavMain items={mockData.liveTracking} />
-          <NavProjects projects={mockData.items1} />
-          <NavMain items={mockData.projects} />
-          <NavProjects projects={mockData.items2} />
-          {/* <NavMain items={data.navMain} /> */}
+          <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/>
+          <NavMain items={items} activeTab={activeTab} setActiveTab={setActiveTab}
+           isItem1Open = {item1Open}/>
+          <NavProjects projects={mockData.items1} activeTab={activeTab} setActiveTab={setActiveTab}/>
+          <NavMain items={mockData.projects} activeTab={activeTab} setActiveTab={setActiveTab}
+          isItem1Open = {item2Open} key={item2Open ? "open" : "closed"}/>
+          <NavProjects projects={mockData.items2} activeTab={activeTab} setActiveTab={setActiveTab}/>
         </SidebarContent>
         <SidebarFooter>
           <NavUser user={data?.user || defaultUser} />

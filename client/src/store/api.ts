@@ -1,6 +1,11 @@
 import { code } from "@nextui-org/theme";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ListResponse, Team, UserDetails, UserHierarchy, UsersListResponse } from "./interfaces";
+import { ListResponse, ScreenshotResponse, Team, UserDetails, UserHierarchy, UsersListResponse } from "./interfaces";
+
+import { useDispatch } from "react-redux";
+import { setAuthUser } from "@/store/authSlice";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export interface Project {
   id: number;
@@ -24,7 +29,7 @@ interface ErrorRes {
   status: string;
 }
 
-interface ApiResponse {
+export interface ApiResponse {
   status: string;
   error: ErrorRes;
   message: string;
@@ -59,7 +64,9 @@ interface CreateRolePayload {
 }
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
+  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+    credentials: 'include',
+   }),
   reducerPath: "api",
   tagTypes: ["UserCount", "User", "RoleCode", "Authority", "UsersList", "UsersData"],
   endpoints: (build) => ({
@@ -73,7 +80,6 @@ export const api = createApi({
     >({
       query: ({ email, base64 }) => {
         const requestBody = JSON.stringify({ base64 });
-        console.log("Request Body:", requestBody); // Debug log
         return {
           url: `api/user/updatePP?email=${email}`,
           method: "POST",
@@ -102,7 +108,6 @@ export const api = createApi({
     }),
     checkRoleCode: build.query<CheckCodeResponse, { code: string }>({
       query: ({ code }) => {
-        const requestBody = JSON.stringify({ code });
         return {
           url: `api/user/checkRoleCode?code=${code}`,
           method: "GET",
@@ -119,9 +124,10 @@ export const api = createApi({
         };
       },
     }),
-    getUsersList: build.query<UsersListResponse[], { email: string }>({
+    getUsersList: build.query<UsersListResponse[] | ApiResponse, { email: string }>({
       query: ({ email }) => {
-        const url = `api/user/getUsersList?email=${email}`;
+        const encodedEmail = encodeURIComponent(email);
+        const url = `api/user/getUsersList?email=${encodedEmail}`;
         return url;
       },
       providesTags: ["UsersList"],
@@ -145,6 +151,12 @@ export const api = createApi({
           return url;
         },
     }),
+    getScreenshots: build.query<ScreenshotResponse[], { email: string }>({
+      query: ({ email }) => {
+        const url = `api/user/getScreenshots?email=${email}`;
+        return url;
+      },
+  }),
     updateUserSettingsData: build.mutation<
       ApiResponse,
       { email: string; reportingUsers: ListResponse[], reportsTo : string, projects: ListResponse[], teams: ListResponse[],
@@ -178,5 +190,6 @@ export const {
   useGetUserDetailsQuery,
   useGetObjectListQuery,
   useUpdateUserSettingsDataMutation,
-  useGetUserHierarchyDataQuery
+  useGetUserHierarchyDataQuery,
+  useGetScreenshotsQuery
 } = api;

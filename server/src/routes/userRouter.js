@@ -13,6 +13,7 @@ import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../c
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
 import { createProject } from "../controller/projectController/projectController.js";
+import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 
 const router = express.Router();
 
@@ -37,6 +38,9 @@ router.post("/createTeam", createTeam)
 router.post("/updateUserSettingsData", updateUserDetailsData)
 router.post("/createProject", createProject)
 router.get("/getUserHierarchyData", getUserHierarchyData)
+router.post("/saveScreenshot", addscreenshots)
+router.get("/getScreenshots", getScreenshots)
+
 
 
 

@@ -1,19 +1,38 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { User, Moon, Search, Settings, Sun } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useGetUsersCountQuery } from "@/store/api";
+import { ApiResponse, useGetUsersCountQuery } from "@/store/api";
 import { useTheme } from "next-themes";
 import { ModeToggle } from "@/components/ModeToggle";
 import { SheetDemo } from "@/components/SettingsSheet";
-// import { useDispatch } from "react-redux";
-// import { useAppDispatch, useAppSelector } from '@/app/redux'
-//  import { setIsDarkMode, setIsSidebarCollapsed } from '@/app/state'
+
+import { useDispatch } from "react-redux";
+import { setAuthUser } from "@/store/authSlice";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 
 const Navbar = () => {
   const { setTheme } = useTheme();
   const { data, isLoading, error } = useGetUsersCountQuery(undefined, { refetchOnMountOrArgChange: true });
+
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (error) {
+      console.log(error)
+      console.log('new')
+      const apiError = error as ApiResponse;
+
+      if (Number(apiError.status) === 401) {
+        dispatch(setAuthUser(null));
+        router.push("/");
+        toast.success("Session Timeout, Please log in again!");
+      }
+    }
+  }, [error, dispatch, router]);
 
   return (
     <div className="flex justify-between bg-white px-4 h-auto dark:bg-gray-800">

@@ -35,8 +35,18 @@ model User{
   reportsToId Int?
   reports     User[]     @relation("ReportsTo")
   taskHistory       TaskHistory[]     @relation("TaskHistory")
+  screenshot      Screenshots[]
 
   profilePicture  ProfilePicture? @relation(fields: [profilePictureId], references: [id])
+}
+
+model Screenshots {
+  id Int @id @default(autoincrement())
+  username String 
+  time String
+  base64 String
+  userId    Int
+  user      User   @relation(fields: [userId], references: [userId])
 }
 
 model ProfilePicture {

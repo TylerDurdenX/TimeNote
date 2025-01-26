@@ -133,10 +133,9 @@ export default function HierarchyPage({ startingUserId, setStartingUserId}: Hier
 
 
       {directReports.length > 1 ? (
-  <div className="flex flex-col items-center mt-0 relative rounded-lg">
-<div className=" top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>
-
-    <div className=" mt-4 flex flex-col items-center mt-0 relative border border-gray-300 rounded-lg p-8">
+  <div className="flex flex-col items-center relative rounded-lg">
+<div className="top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>
+    <div className="flex flex-col items-center mt-0 relative border border-gray-300 rounded-lg p-4">
 
     <div className="flex flex-wrap justify-center gap-8">
       {directReports.map((report) => (

@@ -51,3 +51,11 @@ export interface UserHierarchy {
     profilePicture: ProfilePicture;
     reportsToId: string | null;
   }
+
+export interface ScreenshotResponse{
+    id : number
+    username: string
+    time: string 
+    base64: string 
+    userId: number
+}

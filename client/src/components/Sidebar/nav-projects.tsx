@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Folder,
@@ -6,7 +6,7 @@ import {
   MoreHorizontal,
   Trash2,
   type LucideIcon,
-} from "lucide-react"
+} from "lucide-react";
 
 import {
   DropdownMenu,
@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -23,33 +23,49 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import Link from "next/link"
+} from "@/components/ui/sidebar";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useLocation } from 'react-router-dom';
 
-export function NavProjects({
-  projects,
-}: {
+interface Props {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
   projects: {
-    name: string
-    url: string
-    icon: LucideIcon
-  }[]
-}) {
-  const { isMobile } = useSidebar()
-  
+    name: string;
+    url: string;
+    icon: LucideIcon;
+  }[];
+}
 
+export function NavProjects({ activeTab, setActiveTab, projects }: Props) {
+  const { isMobile } = useSidebar();
+  useEffect(()=> {
+    if(activeTab===''){
+      const path = window.location.pathname;
+      setActiveTab(path.slice(1))
+    }
+  })
+  
   return (
-    <SidebarGroup >
-      {/* <SidebarGroupLabel>Projects</SidebarGroupLabel> */}
+    <SidebarGroup>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton onClick={() => {setActiveTab(item.url.split('?')[0].replace('/', ''))}}
+              asChild
+              className={`${
+                item.url.split('?')[0].replace('/', '') === activeTab
+                  ? "bg-gray-200"
+                  : "bg-transparent"
+              }`}
+            >
               <Link href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
               </Link>
             </SidebarMenuButton>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
@@ -81,5 +97,5 @@ export function NavProjects({
         ))}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }
