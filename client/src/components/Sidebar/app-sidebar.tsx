@@ -192,7 +192,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     // Add other items here as needed
   ]);
 
-  console.log(activeTab)
   React.useEffect(() => {
     const updateItemsOnLoad = () => {
       const updatedItems = items.map((item) => {

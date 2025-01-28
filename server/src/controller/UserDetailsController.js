@@ -148,6 +148,7 @@ export const getUserDetails = catchAsync(async (req, res, next) => {
 
 export const getListOfObjects = catchAsync(async (req, res, next) => {
   const { entityName } = req.query;
+  console.log(entityName)
   try {
     if (entityName === "Project") {
       const result = await prisma.$queryRaw`

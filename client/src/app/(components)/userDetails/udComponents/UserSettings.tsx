@@ -79,6 +79,7 @@ const UserSettings = ({ id }: Props) => {
     isLoading: dropdownLoading,
     error: dropdownError,
     isSuccess: isSuccessDropdown,
+    refetch
   } = useGetObjectListQuery(
     {
       entityName: "User",
@@ -87,6 +88,11 @@ const UserSettings = ({ id }: Props) => {
       refetchOnMountOrArgChange: true,
     }
   );
+
+  useEffect(() => {
+    // Force refetch every time the component is mounted
+    refetch();
+  }, [id]);
 
   const {
     data: ObjectProjectData,

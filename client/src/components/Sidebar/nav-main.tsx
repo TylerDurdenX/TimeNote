@@ -41,7 +41,6 @@ export function NavMain({
   setActiveTab,
   isItem1Open
 }: Props) {
-  console.log(isItem1Open)
     return (
     <SidebarGroup>
       <SidebarMenu>

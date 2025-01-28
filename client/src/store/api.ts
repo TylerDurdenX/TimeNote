@@ -151,9 +151,11 @@ export const api = createApi({
           return url;
         },
     }),
-    getScreenshots: build.query<ScreenshotResponse[], { email: string }>({
-      query: ({ email }) => {
-        const url = `api/user/getScreenshots?email=${email}`;
+    getScreenshots: build.query<ScreenshotResponse, { userId: number, page: number, limit: number, 
+      from: string, to : string
+     }>({
+      query: ({ userId, page, limit, from, to  }) => {
+        const url = `api/user/getScreenshots?userId=${userId}&page=${page}&limit=${limit}&from=${from}&to=${to}`;
         return url;
       },
   }),

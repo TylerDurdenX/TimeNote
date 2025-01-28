@@ -53,6 +53,12 @@ export interface UserHierarchy {
   }
 
 export interface ScreenshotResponse{
+    screenshotList: ScreenshotObject[]
+    totalPages: number
+    currentPage: number
+}
+
+interface ScreenshotObject{
     id : number
     username: string
     time: string 

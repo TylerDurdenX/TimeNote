@@ -44,6 +44,7 @@ model Screenshots {
   id Int @id @default(autoincrement())
   username String 
   time String
+  date DateTime?  @default(now())
   base64 String
   userId    Int
   user      User   @relation(fields: [userId], references: [userId])

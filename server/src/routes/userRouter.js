@@ -41,7 +41,4 @@ router.get("/getUserHierarchyData", getUserHierarchyData)
 router.post("/saveScreenshot", addscreenshots)
 router.get("/getScreenshots", getScreenshots)
 
-
-
-
 export default router;
