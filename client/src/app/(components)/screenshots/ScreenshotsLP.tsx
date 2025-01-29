@@ -98,7 +98,7 @@ const ScreenshotsLP = ({from, to, setReRenderPage} : Props) => {
     <>
       {!queriesLoaded ? (
         "Loading..."
-      ) : (
+      ) : ( 
         <>
           <div
             className="flex flex-wrap p-5 overflow-y-auto"
@@ -213,7 +213,8 @@ const ScreenshotsLP = ({from, to, setReRenderPage} : Props) => {
 
                     <div className="w-[35%] flex flex-col">
                       <div className="flex-grow text-xs text-gray-500 ml-1">
-                        25 Jan 2025
+                        
+                      {new Date(card.date).toISOString().split('T')[0]}
                       </div>
 
                       <div className="flex-grow text-xs text-gray-500 ml-1">

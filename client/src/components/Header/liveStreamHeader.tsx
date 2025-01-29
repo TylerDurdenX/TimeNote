@@ -1,33 +1,28 @@
 import React from "react";
-import { DatePicker, Space } from "antd";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { FilterX } from "lucide-react";
 import { Button } from "@mui/material";
+import { UserSelectionFilter } from "./UserSelectionFilter";
 
 type Props = {
   name: string;
   buttonComponent?: any;
   isSmallText?: boolean;
   hasFilters?: boolean;
-  hasTeamFilter?: boolean;
+  clearFilter: () => void
+  value: string
+  setValue : React.Dispatch<React.SetStateAction<string>>
+  email: string
 };
-
-const { RangePicker } = DatePicker;
 
 const LiveStreamHeader = ({
   name,
   buttonComponent,
   isSmallText = false,
   hasFilters,
-  hasTeamFilter,
+  email,
+  clearFilter,
+  setValue,
+  value
 }: Props) => {
   return (
     <div className="flex relative w-full pl-5 h-[20px] mb-1 items-center justify-between">
@@ -39,7 +34,18 @@ const LiveStreamHeader = ({
         {name}
       </h1>
 
-      
+      {hasFilters && (
+        <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
+          <UserSelectionFilter setValue= {setValue} value={value} email={email}/>
+          
+          <Button
+            className="bg-gray-200 hover:bg-gray-100"
+            onClick={clearFilter}
+          >
+            <FilterX className="text-gray-800" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -43,7 +43,6 @@ const Page = () => {
     setDate(undefined);
     setFromDate("");
     setToDate("");
-    console.log("cleared filter from page ");
   };
 
   return (
@@ -68,7 +67,11 @@ const Page = () => {
           </div>
           <div className="w-3/5 p-4 shadow-lg overflow-hidden justify-center">
             {isUserSelected ? (
-              <ScreenshotUP id={userId!} />
+              <ScreenshotUP id={userId!} 
+              from={fromDate!}
+                to={toDate!}
+                setReRenderPage={setRetriggerlandingPage}
+                />
             ) : (
               <ScreenshotsLP
                 from={fromDate!}

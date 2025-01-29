@@ -64,4 +64,20 @@ interface ScreenshotObject{
     time: string 
     base64: string 
     userId: number
+    date: string
+}
+
+export interface UserFilterResponse {
+    username: string
+    email: string
+}
+ 
+export interface LiveStreamResponse{
+    email: string
+    username: string
+    screenshot: Screenshot
+}
+
+interface Screenshot {
+    base64: string
 }

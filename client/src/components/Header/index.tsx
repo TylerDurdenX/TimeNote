@@ -18,10 +18,10 @@ type Props = {
   isSmallText?: boolean
   hasFilters?: boolean
   hasTeamFilter?: boolean
-  date: DateRange | undefined
-  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>
-  onRangeSelect: () => void
-  clearFilter: () => void
+  date?: DateRange | undefined
+  setDate?: React.Dispatch<React.SetStateAction<DateRange | undefined>>
+  onRangeSelect?: () => void
+  clearFilter?: () => void
 }
 
 const Header = ({
@@ -62,8 +62,8 @@ const Header = ({
           )}
           <DatePickerWithRange
             date={date}
-            setDate={setDate}
-            onRangeSelect={onRangeSelect}
+            setDate={setDate!}
+            onRangeSelect={onRangeSelect!}
           />
           <Button className="bg-gray-200 hover:bg-gray-100" onClick={clearFilter}>
             <FilterX className="text-gray-800" />

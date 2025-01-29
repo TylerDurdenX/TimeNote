@@ -4,10 +4,9 @@ import * as React from "react";
 import { useState } from "react";
 import {
   AudioWaveform,
-  BookOpen,
-  Bot,
   Command,
   UsersRound,
+  Presentation,
   LaptopMinimal,
   MapPin,
   Bell,
@@ -20,8 +19,7 @@ import {
   Cast,
   Radio,
   FileChartColumnIncreasing,
-  Settings2,
-  SquareTerminal,
+  PresentationIcon,
 } from "lucide-react";
 
 import { NavMain } from "@/components/Sidebar/nav-main";
@@ -109,13 +107,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         isActive: false,
         items: [
           {
-            title: "Screenshots",
-            url: `/Dashboard/screenshots?email=${userEmail}`,
-            icon: ScreenShare,
+            title: "Projects Dashboard",
+            url: `/projectsDashboard?email=${userEmail}`,
+            icon: PresentationIcon,
           },
           {
             title: "Timeline",
-            url: "/liveStream",
+            url: "/projectsTimeline",
             icon: Cast,
           },
         ],

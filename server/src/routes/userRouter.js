@@ -14,6 +14,7 @@ import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, m
 import { createTeam } from "../controller/teamController/controller.js";
 import { createProject } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
+import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 
 const router = express.Router();
 
@@ -40,5 +41,8 @@ router.post("/createProject", createProject)
 router.get("/getUserHierarchyData", getUserHierarchyData)
 router.post("/saveScreenshot", addscreenshots)
 router.get("/getScreenshots", getScreenshots)
+router.get("/getUsersListFilter", getUsersForUserFilter)
+router.get("/getLiveStreamUsers", getLiveStreamUsers)
+
 
 export default router;

@@ -20,7 +20,12 @@ const Page = () => {
       <div className="w-full mb-5">
         <div className="flex w-full text-gray-900">
           <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
-            <Header name="User Details" hasFilters={false} />
+          <Header
+              name="Screenshots"
+              hasFilters={false}
+              hasTeamFilter={false}
+              
+            />
           </div>
         </div>
         <div className="flex gap-4 px-4 mr-4 h-full overflow-hidden">
