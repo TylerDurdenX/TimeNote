@@ -1,85 +1,136 @@
-import { useAppSelector } from '@/app/redux'
-import Header from '@/components/Header'
+'use client'
 
-import React from 'react'
-import {DataGrid, GridColDef} from '@mui/x-data-grid'
-import { dataGridClassNames, dataGridSxStyles } from '@/lib/utils'
+import Header from "@/components/Header";
+
+import React from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@mui/material";
+import { useGetProjectsQuery } from "@/store/api";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 type Props = {
-    id: string
-}
+  email: string;
+};;
 
-const columns: GridColDef[] =[
-    { 
-        field: "title",
-        headerName: "Title",
-        width: 100
-    },   
-    {
-        field: "description",
-        headerName: "Description",
-        width: 200
+const ProjectsTable = ({ email }: Props) => {
+  const { data, isLoading, error} = useGetProjectsQuery(
+    { email: email },
+    { refetchOnMountOrArgChange: true }
+  );
+
+
+const columns: GridColDef[] = [
+  {
+    field: "name",
+    headerName: "Name",
+    width: 250,
+  },
+  {
+    field: "description",
+    headerName: "Description",
+    width: 280,
+  },
+  {
+    field: "status",
+    headerName: "Status",
+    width: 130,
+  },
+  {
+    field: "startDate",
+    headerName: "Start Date",
+    width: 130,
+    valueFormatter: (params) => {
+      const date = new Date(params);
+      return date.toISOString().split("T")[0];
     },
-    {
-        field: "status",
-        headerName: "Status",
-        width: 130,
-        renderCell: (params) => (
-            //TO DO
-            <span className='inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800'>
-                {params.value}
-            </span>
-        )
+  },
+  {
+    field: "endDate",
+    headerName: "Due Date",
+    width: 130,
+    valueFormatter: (params) => {
+      const date = new Date(params);
+      return date.toISOString().split("T")[0];
     },
-    {
-        field: "priority",
-        headerName: "Priority",
-        width: 75
+  },
+  {
+    field: "projectManager",
+    headerName: "Project Manager",
+    width: 170,
+  },
+  {
+    field: "completionStatus",
+    headerName: "Completion Status",
+    width: 150,
+    renderCell: (params) => {
+      const completion = params.value || 0;
+      const completionPercentage = Math.min(Math.max(completion, 0), 100); // Ensuring it's between 0 and 100
+      return (
+        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+          <div
+            style={{
+              backgroundColor: "#e0e0e0", // background color of the bar
+              borderRadius: "5px",
+              height: "10px", // height of the bar
+              width: "80%", // width of the whole bar (adjust according to your requirement)
+              marginRight: "5px",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "green", // color for the filled part of the bar
+                width: `${completionPercentage}%`, // dynamic width based on the percentage
+                height: "100%",
+                borderRadius: "5px 0 0 5px", // optional, rounded corners on the left
+              }}
+            />
+          </div>
+          <span>{completionPercentage}%</span>
+        </div>
+      );
     },
-    {
-        field: "tags",
-        headerName: "Tags",
-        width: 130
+  },
+  {
+    field: "id",
+    headerName: "",
+    width: 150,
+    renderCell: (params) => {
+      return (
+        <div className="flex justify-center items-center h-full">
+            
+          <Button
+            variant="contained"
+            className="text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 px-6 py-2 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105"
+            onClick={() => {
+                console.log(params.value)
+                window.location.href = `/projectsDashboard/${params.value}?email=${email}`;
+            }}
+          >
+            View
+          </Button>
+          
+        </div>
+      );
     },
-    {
-        field: "startDate",
-        headerName: "Start Date",
-        width: 130
-    },
-    {
-        field: "dueDate",
-        headerName: "Due Date",
-        width: 130
-    },
-    {
-        field: "author",
-        headerName: "Author",
-        width: 150,
-        renderCell: (params) => params.value.username || "Unknown"
-    },
-    {
-        field: "assignee",
-        headerName: "Assignee",
-        width: 150,
-        renderCell: (params) => params.value.assignee || "Unassigned"
-    },
+  },
 ]
 
-const ProjectsTable = ({id,}: Props) => {    
-    
+
   return (
-    <div className='h-540px e-full px-4 pb-8 xl:px-6'>
-        <div className='pt-5'>
-            <Header name='Table' isSmallText/>
-        </div>
-        <DataGrid 
-        // rows={[tasks] || []}
+    <div className="h-full w-full px-4 pb-8 xl:px-6">
+      <div className="pt-5">
+        <Header name="Table" isSmallText />
+      </div>
+      <DataGrid
+        rows={data || []}
         columns={columns}
         className={dataGridClassNames}
-        
-        />
+      />
     </div>
-  )
-}
+  );
+};
 
-export default ProjectsTable
+export default ProjectsTable;

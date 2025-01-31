@@ -1,9 +1,15 @@
 import { code } from "@nextui-org/theme";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
+  AddComment,
   ListResponse,
   LiveStreamResponse,
+  ProjectListResponse,
+  ProjectUsers,
   ScreenshotResponse,
+  Task,
+  TaskComments,
+  TaskFormData,
   Team,
   UserDetails,
   UserFilterResponse,
@@ -85,6 +91,9 @@ export const api = createApi({
     "Authority",
     "UsersList",
     "UsersData",
+    "ProjectsList",
+    "Tasks",
+    "Comment"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -198,6 +207,80 @@ export const api = createApi({
         return url;
       },
     }),
+    getProjects: build.query<
+    ProjectListResponse[],
+      { email: string}
+    >({
+      query: ({ email,}) => {
+        const url = `api/user/getProjects?email=${email}`;
+        return url;
+      },
+      providesTags: ["ProjectsList"],
+    }),
+    getProjectTasks: build.query<
+    Task[],
+      { projectId: string}
+    >({
+      query: ({ projectId,}) => {
+        const url = `api/user/getProjectTasks?id=${projectId}`;
+        return url;
+      },
+      providesTags: ["Tasks"],
+    }),
+    getTaskComments: build.query<
+    TaskComments[],
+      { taskId: number, email: string}
+    >({
+      query: ({ taskId,email}) => {
+        const url = `api/user/getComments?taskId=${taskId}&email=${email}`;
+        return url;
+      },
+      providesTags: ["Comment"],
+    }),
+    addComment: build.mutation<
+    ApiResponse[],
+      AddComment
+    >({
+      query: (comment) => ({
+        url: "api/user/addComment",
+        method: "POST",
+        body: comment,
+      }),
+      invalidatesTags: ["Comment"],
+    }),
+    getProjectUsers: build.query<
+    ProjectUsers[],
+      { projectId: string}
+    >({
+      query: ({ projectId,}) => {
+        const url = `api/user/getProjectUsers?id=${projectId}`;
+        return url;
+      },
+    }),
+    updateTaskStatus: build.mutation<Task, {taskId: number, status: string}>({
+      query: ({taskId, status})=> ({
+          url: `api/user/updateTask?taskId=${taskId}`,
+          method: "PATCH",
+          body: {status},
+      }), 
+      invalidatesTags : ["Tasks"]
+  }),
+  updateTaskAssignee: build.mutation<Task, {taskId: number, email: string}>({
+    query: ({taskId, email})=> ({
+        url: `api/user/updateTaskAssignee?taskId=${taskId}&email=${email}`,
+        method: "PATCH",
+        body: {status},
+    }), 
+    invalidatesTags : ["Tasks"]
+}),
+  createTask: build.mutation<ApiResponse, TaskFormData>({
+    query: (task)=> ({
+        url: "api/user/createTask",
+        method: "POST",
+        body: task,
+    }), 
+    invalidatesTags : ["Tasks"]
+}),
     updateUserSettingsData: build.mutation<
       ApiResponse,
       {
@@ -246,5 +329,13 @@ export const {
   useGetUserHierarchyDataQuery,
   useGetScreenshotsQuery,
   useGetUserListFilterQuery,
-  useGetLiveStreamUsersQuery
+  useGetLiveStreamUsersQuery,
+  useGetProjectsQuery,
+  useGetProjectTasksQuery,
+  useUpdateTaskStatusMutation,
+  useGetProjectUsersQuery,
+  useCreateTaskMutation,
+  useUpdateTaskAssigneeMutation,
+  useGetTaskCommentsQuery,
+  useAddCommentMutation
 } = api;

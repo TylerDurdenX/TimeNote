@@ -36,7 +36,7 @@ model User{
   reports     User[]     @relation("ReportsTo")
   taskHistory       TaskHistory[]     @relation("TaskHistory")
   screenshot      Screenshots[]
-
+  project       Project?      @relation()
   profilePicture  ProfilePicture? @relation(fields: [profilePictureId], references: [id])
 }
 
@@ -60,10 +60,10 @@ model Project {
   id          Int        @id @default(autoincrement())
   name        String     @unique
   description String?
-  field1      String?
-  field2      String?
-  field3      String?
-  field4      String?
+  projectManager      Int  @unique
+  startDate      String?
+  endDate      String?
+  status      String?
   field5      String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -71,6 +71,7 @@ model Project {
   // Many-to-many relationship between users and projects (a user can have many projects)
   users       User[]     @relation("UserProjects")
   userProjects UserProjects[]     @relation("UserProjects")
+  user     User  @relation(fields: [projectManager], references: [userId])
 }
 
 model Task {
@@ -113,6 +114,7 @@ model Comment {
   text   String
   taskId Int
   userId Int
+  username String
   commentTime DateTime
 
   task Task @relation(fields: [taskId], references: [id])

@@ -12,7 +12,7 @@ import { getUser, getUserCount, updateUserProfilePicture } from "../controller/d
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
-import { createProject } from "../controller/projectController/projectController.js";
+import { addComment, createProject, createTask, getProjects, getProjectTasks, getProjectUsers, getTaskComments, updateTaskAssignee, updateTaskStatus } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 
@@ -43,6 +43,13 @@ router.post("/saveScreenshot", addscreenshots)
 router.get("/getScreenshots", getScreenshots)
 router.get("/getUsersListFilter", getUsersForUserFilter)
 router.get("/getLiveStreamUsers", getLiveStreamUsers)
-
+router.get("/getProjects", getProjects)
+router.get("/getProjectTasks", getProjectTasks)
+router.get("/getProjectUsers", getProjectUsers)
+router.post("/createTask", createTask)
+router.patch("/updateTask", updateTaskStatus)
+router.patch("/updateTaskAssignee", updateTaskAssignee)
+router.get("/getComments", getTaskComments)
+router.post("/addComment", addComment)
 
 export default router;

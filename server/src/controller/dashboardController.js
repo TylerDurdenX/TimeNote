@@ -1,5 +1,7 @@
 import catchAsync from "../utils/catchAsync.js";
 import { prisma } from "../server.js";
+import AppError from "../utils/appError.js";
+
 
 export const getUser = catchAsync(async(req, res, next) => {
     const {email} = req.query
