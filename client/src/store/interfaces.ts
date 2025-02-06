@@ -174,3 +174,10 @@ export interface AddComment {
     userEmail: string
     commentTime: string
 }
+
+export interface CreateSprint {
+    title: string
+    description: string
+    startDate: string
+    endDate: string
+}

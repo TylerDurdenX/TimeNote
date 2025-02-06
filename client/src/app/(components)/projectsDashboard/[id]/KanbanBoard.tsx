@@ -5,7 +5,7 @@ import {
   useUpdateTaskAssigneeMutation,
   useUpdateTaskStatusMutation,
 } from "../../../../store/api";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Task as TaskType } from "@/store/interfaces";
@@ -33,7 +33,7 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DialogTitle} from "@mui/material";
+import { DialogTitle } from "@mui/material";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -48,11 +48,17 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import Comments from "./Comments";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/components/Sidebar/nav-user";
 
 type BoardProps = {
   id: string;
   setIsModalNewTaskOpen: (isOpen: boolean) => void;
   email: string;
+  priority: string
+    setPriority: (priorityName: string) => void
+    assignedTo: string
+    setAssignedTo: (assignedTo: string) => void
 };
 
 const taskStatus = ["To Do", "Work In Progress", "Under Review", "Completed"];
@@ -219,7 +225,7 @@ const TaskColumn = ({
                       style={{
                         paddingTop: "38.575%",
                       }}
-                    >
+                      >
                       <div className="absolute top-0 left-0 w-[calc(100%)] h-[calc(100%)]">
                         <form onSubmit={handleSubmit}>
                           <div className="grid gap-4 py-1">
@@ -305,7 +311,7 @@ const TaskColumn = ({
                                 }
                               >
                                 <SelectTrigger className="col-span-3 p-2 border rounded-md">
-                                  <SelectValue placeholder="Select a priority" />
+                                  <SelectValue placeholder="Select assignee" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectGroup>
@@ -344,7 +350,6 @@ const TaskColumn = ({
                     </div>
                     <DialogFooter className="w-full justify-between items-center">
                       <div className="absolute flex gap-4 left-10"></div>
-
                       <div className="flex items-center space-x-2"></div>
                     </DialogFooter>
                   </DialogContent>
@@ -359,7 +364,7 @@ const TaskColumn = ({
       {tasks
         .filter((task) => task.status === status)
         .map((task) => (
-          <Task key={task.id} task={task} email={email} projectId={id}/>
+          <Task key={task.id} task={task} email={email} projectId={id} />
         ))}
     </div>
   );
@@ -368,7 +373,7 @@ const TaskColumn = ({
 type TaskProps = {
   task: TaskType;
   email: string;
-  projectId: string
+  projectId: string;
 };
 
 const Task = ({ task, email, projectId }: TaskProps) => {
@@ -431,6 +436,32 @@ const Task = ({ task, email, projectId }: TaskProps) => {
       </div>
     );
   };
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tagRef = useRef<HTMLDivElement>(null);
+  const [overflowCount, setOverflowCount] = useState(0);
+  const [tagWidth, setTagWidth] = useState(0);
+
+  useEffect(() => {
+    // Wait for the component to be rendered, then measure the width of one tag
+    if (tagRef.current) {
+      setTagWidth(tagRef.current.offsetWidth);
+    }
+  }, [taskTagsSplit]);
+
+  useEffect(() => {
+    if (containerRef.current && tagWidth > 0) {
+      const containerWidth = containerRef.current.offsetWidth;
+      const visibleTags = Math.floor(containerWidth / tagWidth);
+
+      if (taskTagsSplit.length > visibleTags) {
+        setOverflowCount(taskTagsSplit.length - visibleTags);
+      } else {
+        setOverflowCount(0);
+      }
+    }
+  }, [taskTagsSplit, tagWidth]);
+
   return (
     <Dialog>
       <div
@@ -455,16 +486,32 @@ const Task = ({ task, email, projectId }: TaskProps) => {
           <div className="flex items-start justify-between">
             <div className="flex flex-1 flex-wrap items-center gap-2">
               {task.priority && <PriorityTag priority={task.priority} />}
-              <div className="flex gap-2">
-                {taskTagsSplit.map((tag) => (
+              <div
+                className="flex flex-1 flex-wrap items-center gap-2"
+                ref={containerRef}
+              >
+                {/* Render only the visible tags */}
+                {taskTagsSplit
+                  .slice(0, taskTagsSplit.length - overflowCount)
+                  .map((tag, index) => (
+                    <div
+                      key={tag}
+                      ref={index === 0 ? tagRef : null} // Attach ref to the first tag for measuring width
+                      className="rounded-full bg-blue-100 px-2 py-1 text-xs"
+                    >
+                      {tag}
+                    </div>
+                  ))}
+
+                {/* Show the "+X" tag if there are any overflowed tags */}
+                {overflowCount > 0 && (
                   <div
-                    key={tag}
-                    className="rounded-full bg-blue-100 px-2 py-1 text-xs"
+                    key="more-tags"
+                    className="rounded-full bg-blue-100 px-2 py-1 text-xs text-gray-500"
                   >
-                    {" "}
-                    {tag}
+                    +{overflowCount}
                   </div>
-                ))}
+                )}
               </div>
             </div>
             <DropdownMenu>
@@ -531,9 +578,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
             <DialogContent className="sm:max-w-[50vw]">
               <DialogHeader>
                 <DialogTitle>{task.title}</DialogTitle>
-                <DialogDescription>
-                  {task.description}
-                </DialogDescription>
+                <DialogDescription>{task.description}</DialogDescription>
               </DialogHeader>
 
               <DialogFooter>
@@ -545,21 +590,29 @@ const Task = ({ task, email, projectId }: TaskProps) => {
             {formattedStartDate && <span>{formattedStartDate} - </span>}
             {formattedDueDate && <span>{formattedDueDate}</span>}
           </div>
-          <p className="text-sm text-gray-600 dark:text-neutral-500">
-            {task.description}
+          <p className="text-sm text-gray-600 dark:text-neutral-500 line-clamp-5">
+           {task.description}
           </p>
+
           <div className="mt-4 border-t border-gray-200 dark:border-stroke-dark" />
           {/* Users */}
           <div className="mt-3 flex items-center justify-between">
             <div className="flex space-x-[6px] overflow-hidden">
               {task.assignee && (
-                <Image
-                  src={`/${task.assignee.profilePicture!}`}
-                  alt={task.assignee.username}
-                  width={30}
-                  height={30}
-                  className="h-8 w-8 rounded-full border-white object-cover dark:border-dark-secondary"
-                />
+                <Avatar className="h-8 w-8 rounded-full border-white object-cover dark:border-dark-secondary">
+                {/* Check if base64 and profilePicture exist before accessing */}
+                {task.assignee?.profilePicture?.base64 ? (
+                  <AvatarImage
+                    src={task.assignee.profilePicture.base64}
+                    alt={task.assignee.username}
+                  />
+                ) : (
+                  <AvatarFallback className="rounded-lg">
+                    {getInitials(task.assignee.username!)} {/* Ensure username is not null/undefined */}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              
               )}
               {task.assignee && (
                 <Label className="text-center mt-3 ml-1">
@@ -579,9 +632,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>History </DialogTitle>
-                      <DialogDescription>
-                        Activity trail
-                      </DialogDescription>
+                      <DialogDescription>Activity trail</DialogDescription>
                     </DialogHeader>
                   </DialogContent>
                 </Dialog>
@@ -596,8 +647,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                   <DialogHeader>
                     <DialogTitle>Comments </DialogTitle>
                   </DialogHeader>
-                  <Comments email= {email} taskId={task.id}/>
-                  
+                  <Comments email={email} taskId={task.id} />
                 </DialogContent>
               </Dialog>
               <span className="ml-1 text-sm dark:text-neutral-400">

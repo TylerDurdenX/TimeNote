@@ -5,15 +5,14 @@ import LiveStreamHeader from "@/components/Header/liveStreamHeader";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useGetLiveStreamUsersQuery, useGetScreenshotsQuery } from "@/store/api";
+import { useGetLiveStreamUsersQuery} from "@/store/api";
 import { useSearchParams } from "next/navigation";
-import { SkeletonCard as SkeletonLoader } from "./SkeletonLoader"; // Import the SkeletonLoader
+import { SkeletonCard as SkeletonLoader } from "./SkeletonLoader"; 
 
 const Page = () => {
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -31,7 +30,7 @@ const Page = () => {
   useEffect(() => {
     if (!isLoading) {
       if (isSuccess) {
-        setQueriesLoaded(true); // Set flag when queries are loaded
+        setQueriesLoaded(true); 
       }
     }
     refetch();

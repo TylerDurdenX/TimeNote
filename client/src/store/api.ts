@@ -2,6 +2,7 @@ import { code } from "@nextui-org/theme";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AddComment,
+  CreateSprint,
   ListResponse,
   LiveStreamResponse,
   ProjectListResponse,
@@ -246,7 +247,7 @@ export const api = createApi({
         method: "POST",
         body: comment,
       }),
-      invalidatesTags: ["Comment"],
+      invalidatesTags: ["Comment","Tasks"],
     }),
     getProjectUsers: build.query<
     ProjectUsers[],
@@ -280,6 +281,14 @@ export const api = createApi({
         body: task,
     }), 
     invalidatesTags : ["Tasks"]
+}),
+createSprint: build.mutation<ApiResponse, CreateSprint>({
+  query: (body)=> ({
+      url: "api/user/createSprint",
+      method: "POST",
+      body: body,
+  }), 
+  invalidatesTags : ["Tasks"]
 }),
     updateUserSettingsData: build.mutation<
       ApiResponse,
@@ -337,5 +346,6 @@ export const {
   useCreateTaskMutation,
   useUpdateTaskAssigneeMutation,
   useGetTaskCommentsQuery,
-  useAddCommentMutation
+  useAddCommentMutation,
+  useCreateSprintMutation
 } = api;

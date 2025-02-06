@@ -15,9 +15,10 @@ import { DateRange } from "react-day-picker";
 type Props = {
   name: string;
   isSmallText?: boolean;
+  buttonName: string
 };
 
-const ProjectsHeader = ({ name, isSmallText = false }: Props) => {
+const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
   return (
     <div className="flex relative w-full pl-5 h-[20px] mb-1 items-center justify-between">
       <h1
@@ -28,9 +29,10 @@ const ProjectsHeader = ({ name, isSmallText = false }: Props) => {
         {name}
       </h1>
       <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
-        <button className="flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-500">
+        <button className="flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-500"
+        >
           <PlusSquare className="h-5 w-5 mr-2 " />
-          Create New Project
+          {buttonName}
         </button>
       </div>
     </div>

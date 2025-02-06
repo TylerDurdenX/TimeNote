@@ -19,6 +19,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
+type Props = {
+  assignedTo: string
+  setAssignedTo: (assignedTo: string) => void
+}
+
 const frameworks = [
   {
     value: "AssignedToMe",
@@ -30,9 +35,8 @@ const frameworks = [
   }
 ]
 
-export function TaskSelectionFilter() {
+export function TaskSelectionFilter({assignedTo, setAssignedTo}: Props) {
   const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("")
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -43,8 +47,8 @@ export function TaskSelectionFilter() {
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value
-            ? frameworks.find((framework) => framework.value === value)?.label
+          {assignedTo
+            ? frameworks.find((framework) => framework.value === assignedTo)?.label
             : "Select Assigned To"}
           <ChevronsUpDown className="opacity-50" />
         </Button>
@@ -58,7 +62,7 @@ export function TaskSelectionFilter() {
                   key={framework.value}
                   value={framework.value}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue)
+                    setAssignedTo(currentValue === assignedTo ? "" : currentValue)
                     setOpen(false)
                   }}
                 >
@@ -66,7 +70,7 @@ export function TaskSelectionFilter() {
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === framework.value ? "opacity-100" : "opacity-0"
+                      assignedTo === framework.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

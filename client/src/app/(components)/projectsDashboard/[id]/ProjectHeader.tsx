@@ -1,25 +1,32 @@
-import Header from '@/components/Header'
-import { Clock, Filter, FilterX, Grid3X3, List, PlusSquare, Share2, Table } from 'lucide-react'
-import React, { useState } from 'react'
+import { Clock,FilterX, Grid3X3, Table } from 'lucide-react'
+import React from 'react'
 import { TaskSelectionFilter } from './TaskSelectionFilter'
 import { Button } from '@mui/material'
+import { HeaderFilter } from './HeaderFilter'
+import { SprintFilter } from './SprintFilter'
+import ProjectsHeader from '../ProjectsHeader'
+import ProjectSectionHeader from './ProjectSectionHeader'
 
 type Props = {
     activeTab: string
     setActiveTab: (tabName: string) => void
+    priority: string
+    setPriority: (priorityName: string) => void
+    assignedTo: string
+    setAssignedTo: (assignedTo: string) => void
+    sprint: string
+    setSprint: (assignedTo: string) => void
 }
 
-const ProjectHeader = ({activeTab, setActiveTab}: Props) => {
-  
-  
-     
+const ProjectHeader = ({activeTab, setActiveTab, priority, setPriority,
+  assignedTo, setAssignedTo, sprint, setSprint
+}: Props) => {
+       
   return (
     <div className='px-4 xl:px-6'>
         
-        <div className='pb-6 pt-6 lg:pb-4 lg:pt-8'>
-            <Header name='Project'>
-            
-            </Header>
+        <div className='pb-6 pt-6 lg:pb-4 lg:pt-8 mb-5 mt-3'>
+            <ProjectSectionHeader name='Project' buttonName='Create New Sprint'/>
         </div>
         {/* Tabs */}
         <div className='flex flex-wrap-reverse gap-2 border-y border-gray-200 pb-[4px] pt-1 dark:border-stroke-dark sm:items-center'>
@@ -27,12 +34,6 @@ const ProjectHeader = ({activeTab, setActiveTab}: Props) => {
                 <TabButton
                 name='Kanban Board'
                 icon={<Grid3X3 className='h-5 w-5'/>}
-                setActiveTab = {setActiveTab}
-                activeTab={activeTab}
-                />
-                <TabButton
-                name='List'
-                icon={<List className='h-5 w-5'/>}
                 setActiveTab = {setActiveTab}
                 activeTab={activeTab}
                 />
@@ -50,10 +51,18 @@ const ProjectHeader = ({activeTab, setActiveTab}: Props) => {
                 />
             </div>
             <div className='flex items-center gap-2'>
-                <TaskSelectionFilter/>
+            <SprintFilter sprint={sprint} 
+        setSprint={setSprint}/>
+                <HeaderFilter priority={priority} 
+        setPriority={setPriority}/>
+                <TaskSelectionFilter  assignedTo={assignedTo} setAssignedTo={setAssignedTo}/>
                 <Button
             className="bg-gray-200 hover:bg-gray-100"
-            //onClick={clearFilter}
+            onClick={() => {
+              setPriority('')
+              setAssignedTo('')
+              setSprint('')
+            }}
           >
             <FilterX className="text-gray-800" />
           </Button>

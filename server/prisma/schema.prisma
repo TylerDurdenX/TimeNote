@@ -24,6 +24,8 @@ model User{
   updatedAt  DateTime   @updatedAt
   authoredTasks Task[] @relation("TaskAuthor")
   assignedTasks Task[] @relation("TaskAssignee")
+  authoredSubTasks Subtask[] @relation("SubTaskAuthor")
+  assignedSubTasks Subtask[] @relation("SubTaskAssignee")
   taskAssignment TaskAssignment[] 
   attachments Attachment[]
   comments Comment[]
@@ -69,9 +71,22 @@ model Project {
   updatedAt   DateTime   @updatedAt
   tasks        Task[]
   // Many-to-many relationship between users and projects (a user can have many projects)
+  sprints       Sprint[]
   users       User[]     @relation("UserProjects")
   userProjects UserProjects[]     @relation("UserProjects")
   user     User  @relation(fields: [projectManager], references: [userId])
+}
+
+model Sprint {
+  id              Int       @id @default(autoincrement())
+  title           String
+  description     String?
+  startDate       DateTime
+  endDate         DateTime
+  projectId       Int
+
+  project         Project   @relation(fields: [projectId], references: [id])
+  tasks           Task[]    
 }
 
 model Task {
@@ -87,6 +102,7 @@ model Task {
   projectId      Int
   authorUserId   Int
   assignedUserId Int?
+  sprintId          Int?
 
   project         Project          @relation(fields: [projectId], references: [id])
   author          User             @relation("TaskAuthor", fields: [authorUserId], references: [userId])
@@ -96,6 +112,26 @@ model Task {
   comments        Comment[]
 
   taskHistory       TaskHistory[]     @relation("TaskHistory")
+  subTasks          Subtask[]
+  sprint            Sprint?        @relation(fields: [sprintId], references: [id])
+}
+
+model Subtask {
+  id              Int       @id @default(autoincrement())
+  title           String
+  description     String?
+  status          String?
+  taskId          Int
+  startDate      DateTime?
+  dueDate        DateTime?
+  authorUserId   Int
+  assignedUserId Int?
+
+  attachments     Attachment[]
+  assignee        User?            @relation("SubTaskAssignee", fields: [assignedUserId], references: [userId])
+  author          User             @relation("SubTaskAuthor", fields: [authorUserId], references: [userId])
+  task            Task      @relation(fields: [taskId], references: [id])
+  comments        Comment[] // Comments related to the Subtask
 }
 
 model TaskHistory{
@@ -104,6 +140,7 @@ model TaskHistory{
   userId         Int
   startDate      DateTime
   endDate        DateTime
+  sprint          String
 
   task            Task    @relation(fields: [taskId], references: [id], name: "TaskHistory")
   user            User    @relation(fields: [userId], references: [userId], name: "TaskHistory")
@@ -116,8 +153,10 @@ model Comment {
   userId Int
   username String
   commentTime DateTime
+  subtaskId       Int? 
 
-  task Task @relation(fields: [taskId], references: [id])
+  task            Task?     @relation(fields: [taskId], references: [id])   // Relation to Task (optional)
+  subtask         Subtask?  @relation(fields: [subtaskId], references: [id])
   user User @relation(fields: [userId], references: [userId])
 }
 
@@ -134,10 +173,12 @@ model Attachment {
   id           Int     @id @default(autoincrement())
   fileURL      String
   fileName     String?
-  taskId       Int
+  taskId       Int?
+  subTaskId     Int?
   uploadedById Int
 
-  task       Task @relation(fields: [taskId], references: [id])
+  task       Task? @relation(fields: [taskId], references: [id])
+  subTask       Subtask? @relation(fields: [subTaskId], references: [id])
   uploadedBy User @relation(fields: [uploadedById], references: [userId])
 }
 

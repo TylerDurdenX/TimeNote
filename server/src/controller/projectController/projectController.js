@@ -115,11 +115,22 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
         projectId: Number(id),
       },
       include: {
-        author: true,
-        assignee: true,
+        author: {
+          select: {
+            username: true
+          }
+          
+        },
+        assignee: {
+          include: {
+            profilePicture: {
+              select: {
+                base64: true
+              }
+            }
+          }
+        },
         comments: true,
-        attachments: true,
-        project: true
       },
     });
     res.json(tasks);
@@ -302,6 +313,36 @@ export const addComment = catchAsync(async (req, res, next) => {
     })
 
     res.json(comment);
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an error creating Task", 400));
+  }
+});
+
+export const createSprint = catchAsync(async (req, res, next) => {
+  const { title, description, startDate, endDate,} = req.body;
+  try {
+
+    const authorUser = await prisma.user.findFirst({
+      where:{
+        email: authorUserId
+      }
+    })
+    const date = new Date(startDate); 
+    const isoStartTime = date.toISOString();
+    const endDate = new Date(endDate); 
+    const isoEndTime = endDate.toISOString();
+    const sprint = await prisma.sprint.create({
+      data:{
+        title,
+      description,
+      startDate: isoStartTime,
+      endDate: isoEndTime,
+      project: 2
+      }
+    })
+
+    res.json(task);
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an error creating Task", 400));

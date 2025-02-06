@@ -10,8 +10,6 @@ type Props = {
 const Comments = ({taskId, email }: Props) => {
   const [newComment, setNewComment] = useState("");
 
-  localStorage.removeItem("persist:root");
-
   const [createTask, { isLoading: isLoadingAddComment }] =
     useAddCommentMutation();
   const {data, isLoading, error, refetch} = useGetTaskCommentsQuery({taskId: taskId, email: email}
