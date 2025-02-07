@@ -108,31 +108,61 @@ export const getProjects = catchAsync(async (req, res, next) => {
 });
 
 export const getProjectTasks = catchAsync(async (req, res, next) => {
-  const { id } = req.query;
-  try {
-    const tasks = await prisma.task.findMany({
+  const { id, sprint, assignedTo, priority } = req.query;
+  try{
+  let whereCondition = {
+    projectId: Number(id),
+  };
+
+  // Conditionally add `sprint` to the where condition if it's not null or empty
+  if (!isEmpty(sprint)) {
+    whereCondition.sprintId = Number(sprint);
+  }
+
+  // Conditionally find the user if `assignedTo` is provided and not empty
+  let assignedUserId;
+  if (!isEmpty(assignedTo)) {
+    const user = await prisma.user.findFirst({
       where: {
-        projectId: Number(id),
-      },
-      include: {
-        author: {
-          select: {
-            username: true
-          }
-          
-        },
-        assignee: {
-          include: {
-            profilePicture: {
-              select: {
-                base64: true
-              }
-            }
-          }
-        },
-        comments: true,
+        email: assignedTo,
       },
     });
+    if (user) {
+      assignedUserId = user.userId;
+      whereCondition.assignedUserId = assignedUserId; // Add to whereCondition if assignedTo is valid
+    }
+  }
+
+  // Conditionally add `priority` to the where condition if it's not null or empty
+  if (!isEmpty(priority)) {
+    whereCondition.priority = priority;
+  }
+
+  // Perform the query with the dynamically built where condition
+  const tasks = await prisma.task.findMany({
+    where: whereCondition,
+    include: {
+      author: {
+        select: {
+          username: true,
+        },
+      },
+      assignee: {
+        include: {
+          profilePicture: {
+            select: {
+              base64: true,
+            },
+          },
+        },
+      },
+      comments: true,
+    },
+  });
+
+  res.json(tasks);
+
+   
     res.json(tasks);
   } catch (error) {
     console.error(error);
@@ -180,7 +210,7 @@ export const getProjectUsers = catchAsync(async (req, res, next) => {
 });
 
 export const createTask = catchAsync(async (req, res, next) => {
-  const { title, description, status, priority, points, startDate, dueDate, tags, assignedUserId, authorUserId, projectId } = req.body;
+  const { title, description, status, priority, points, startDate, dueDate, tags, assignedUserId, authorUserId,sprintId, projectId } = req.body;
   try {
 
     const authorUser = await prisma.user.findFirst({
@@ -204,6 +234,7 @@ export const createTask = catchAsync(async (req, res, next) => {
       points: Number(points),
       projectId: projectId,
       authorUserId: authorUser.userId,
+      sprintId: Number(sprintId),
       assignedUserId: Number(assignedUserId)
       }
     })
@@ -320,31 +351,75 @@ export const addComment = catchAsync(async (req, res, next) => {
 });
 
 export const createSprint = catchAsync(async (req, res, next) => {
-  const { title, description, startDate, endDate,} = req.body;
+  const { title, description, startDate, endDate, email, projectId} = req.body;
   try {
 
-    const authorUser = await prisma.user.findFirst({
+    const user = await prisma.user.findFirst({
       where:{
-        email: authorUserId
+        email: email
+      },
+      include:{
+        roles: true
       }
     })
-    const date = new Date(startDate); 
-    const isoStartTime = date.toISOString();
-    const endDate = new Date(endDate); 
-    const isoEndTime = endDate.toISOString();
-    const sprint = await prisma.sprint.create({
-      data:{
-        title,
-      description,
-      startDate: isoStartTime,
-      endDate: isoEndTime,
-      project: 2
+    
+    const project = await prisma.project.findFirst({
+      where:{
+        id: projectId
       }
     })
 
-    res.json(task);
+    if(project.projectManager === user.userId){
+      const date = new Date(startDate); 
+      const isoStartTime = date.toISOString();
+      const endDay = new Date(endDate); 
+      const isoEndTime = endDay.toISOString();
+      const sprint = await prisma.sprint.create({
+        data:{
+          title,
+        description,
+        startDate: isoStartTime,
+        endDate: isoEndTime,
+        projectId: projectId
+        }
+      })
+      if(sprint)
+      return next(new AppError("Sprint Created Successfully", 200));
+    }else{
+      return next(new AppError("Only Project Manager can create New Sprint", 400));
+    }
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an error creating Task", 400));
+  }
+});
+
+export const getSprint = catchAsync(async (req, res, next) => {
+  const { projectId} = req.query;
+  try {
+    let resultList =[]
+    const sprintList = await prisma.sprint.findMany({
+      where:{
+        projectId: Number(projectId)
+      }
+    })
+
+    sprintList.map((sprint) => {
+      const {
+        description,
+        startDate,
+        endDate,
+        projectId,
+        ...newObj
+      } = sprint;
+      resultList.push(newObj)
+    })
+
+
+    res.status(200).json(resultList)
+
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an getting Sprints", 400));
   }
 });

@@ -16,25 +16,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { useGetSprintQuery } from "@/store/api"
 
 type Props = {
   sprint: string
   setSprint: (assignedTo: string) => void
+  projectId: string
 }
 
-const frameworks = [
-  {
-    value: "AssignedToMe",
-    label: "Assigned To Me",
-  },
-  {
-    value: "AllTasks",
-    label: "All Tasks",
-  }
-]
-
-export function SprintFilter({sprint, setSprint}: Props) {
+export function SprintFilter({sprint, setSprint, projectId}: Props) {
   const [open, setOpen] = React.useState(false)
+
+  const {data, isLoading, isError} = useGetSprintQuery({projectId: projectId })
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -46,8 +39,8 @@ export function SprintFilter({sprint, setSprint}: Props) {
           className="w-[200px] justify-between"
         >
           {sprint
-            ? frameworks.find((framework) => framework.value === sprint)?.label
-            : "Select Sprint"}
+      ? data?.find((s) => s.id === Number(sprint))?.title
+      : "Select Sprint"}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -55,23 +48,23 @@ export function SprintFilter({sprint, setSprint}: Props) {
         <Command>
           <CommandList>
             <CommandGroup>
-              {frameworks.map((framework) => (
+              {data?.map((sprintItem) => (
                 <CommandItem
-                  key={framework.value}
-                  value={framework.value}
-                  onSelect={(currentValue) => {
-                    setSprint(currentValue === sprint ? "" : currentValue)
-                    setOpen(false)
-                  }}
-                >
-                  {framework.label}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      sprint === framework.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
+                key={sprintItem.title}
+                value={String(sprintItem.id)}
+                onSelect={(currentValue) => {
+                  setSprint(currentValue === sprint ? "" : currentValue);
+                  setOpen(false);
+                }}
+              >
+                {sprintItem.title}
+                <Check
+                  className={cn(
+                    "ml-auto",
+                    sprint === sprintItem.title ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              </CommandItem>
               ))}
             </CommandGroup>
           </CommandList>

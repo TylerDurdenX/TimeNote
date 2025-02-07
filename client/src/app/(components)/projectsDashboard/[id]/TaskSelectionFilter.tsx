@@ -22,21 +22,22 @@ import {
 type Props = {
   assignedTo: string
   setAssignedTo: (assignedTo: string) => void
+  email: string
 }
 
-const frameworks = [
-  {
-    value: "AssignedToMe",
-    label: "Assigned To Me",
-  },
-  {
-    value: "AllTasks",
-    label: "All Tasks",
-  }
-]
-
-export function TaskSelectionFilter({assignedTo, setAssignedTo}: Props) {
+export function TaskSelectionFilter({assignedTo, setAssignedTo, email}: Props) {
   const [open, setOpen] = React.useState(false)
+
+  const frameworks = [
+    {
+      value: email,
+      label: "Assigned To Me",
+    },
+    {
+      value: "X",
+      label: "All Tasks",
+    }
+  ]
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -59,7 +60,7 @@ export function TaskSelectionFilter({assignedTo, setAssignedTo}: Props) {
             <CommandGroup>
               {frameworks.map((framework) => (
                 <CommandItem
-                  key={framework.value}
+                  key={framework.label}
                   value={framework.value}
                   onSelect={(currentValue) => {
                     setAssignedTo(currentValue === assignedTo ? "" : currentValue)

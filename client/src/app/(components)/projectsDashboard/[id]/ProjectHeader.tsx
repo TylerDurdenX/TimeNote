@@ -16,17 +16,20 @@ type Props = {
     setAssignedTo: (assignedTo: string) => void
     sprint: string
     setSprint: (assignedTo: string) => void
+    email: string
+    projectId: number
 }
 
 const ProjectHeader = ({activeTab, setActiveTab, priority, setPriority,
-  assignedTo, setAssignedTo, sprint, setSprint
+  assignedTo, setAssignedTo, sprint, setSprint, email, projectId
 }: Props) => {
        
   return (
     <div className='px-4 xl:px-6'>
         
         <div className='pb-6 pt-6 lg:pb-4 lg:pt-8 mb-5 mt-3'>
-            <ProjectSectionHeader name='Project' buttonName='Create New Sprint'/>
+            <ProjectSectionHeader name='Project' buttonName='Create New Sprint' email= {email}
+             projectId = {projectId}/>
         </div>
         {/* Tabs */}
         <div className='flex flex-wrap-reverse gap-2 border-y border-gray-200 pb-[4px] pt-1 dark:border-stroke-dark sm:items-center'>
@@ -52,10 +55,10 @@ const ProjectHeader = ({activeTab, setActiveTab, priority, setPriority,
             </div>
             <div className='flex items-center gap-2'>
             <SprintFilter sprint={sprint} 
-        setSprint={setSprint}/>
+        setSprint={setSprint} projectId={String(projectId)} />
                 <HeaderFilter priority={priority} 
         setPriority={setPriority}/>
-                <TaskSelectionFilter  assignedTo={assignedTo} setAssignedTo={setAssignedTo}/>
+                <TaskSelectionFilter  assignedTo={assignedTo} setAssignedTo={setAssignedTo} email={email}/>
                 <Button
             className="bg-gray-200 hover:bg-gray-100"
             onClick={() => {

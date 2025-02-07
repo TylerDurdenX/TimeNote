@@ -157,7 +157,8 @@ export interface TaskFormData {
     dueDate: string,
     tags?: string,
     assignedUserId: string,
-    authorUserId: string
+    authorUserId: string,
+    sprintId: string
     projectId: number
 };
 
@@ -180,4 +181,11 @@ export interface CreateSprint {
     description: string
     startDate: string
     endDate: string
+    email: string
+    projectId: number
+}
+
+export interface SprintResponse{
+    id: number,
+    title: string
 }

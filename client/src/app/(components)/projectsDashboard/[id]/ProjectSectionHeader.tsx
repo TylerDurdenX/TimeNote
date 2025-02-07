@@ -17,12 +17,16 @@ type Props = {
   name: string;
   isSmallText?: boolean;
   buttonName: string;
+  email: string
+  projectId: number
 };
 
 const ProjectSectionHeader = ({
   name,
   isSmallText = false,
   buttonName,
+  email,
+  projectId
 }: Props) => {
 
   const [isOpen, setIsOpen] = useState(false);
@@ -46,10 +50,16 @@ const ProjectSectionHeader = ({
       description: description,
       startDate: startDate,
       endDate: endDate,
+      email: email,
+      projectId: Number(projectId)
     };
     try {
-      const response = createSprint(formData);
-      toast.success("Sprint Created Successfully");
+      const response = await createSprint(formData);
+      toast.success(response.data?.message);
+      setTitle('')
+      setDescription('')
+      setStartDate('')
+      setEndDate('')
       setIsOpen(false);
     } catch (err: any) {
       toast.error(err.data.message);
@@ -74,7 +84,7 @@ const ProjectSectionHeader = ({
               {buttonName}
             </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[27vw]">
+          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] max-h-[27vw]">
             <DialogHeader>
               <DialogTitle className="mb-2">Create Sprint</DialogTitle>
             </DialogHeader>
@@ -85,9 +95,9 @@ const ProjectSectionHeader = ({
                 paddingTop: "38.575%",
               }}
             >
-              <div className="absolute top-0 left-0 w-[calc(100%)] h-[calc(100%)]">
+              <div className="absolute top-0 left-0 w-[calc(100%)] h-full">
                 <form onSubmit={handleSubmit}>
-                  <div className="grid gap-4 py-1">
+                  <div className="grid gap-4 py-3">
                     <div className="grid grid-cols-8 items-center gap-4 mr-1">
                       <Label className="text-center">Sprint Title</Label>
                       <Input
@@ -122,7 +132,7 @@ const ProjectSectionHeader = ({
                   <DialogFooter>
                     <button
                       type="submit"
-                      className={`flex w-200px mt-4 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+                      className={`flex w-200px mt-7 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
                                 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
                                   !isFormValid() || isLoadingCreateSprint
                                     ? "cursor-not-allowed opacity-50"

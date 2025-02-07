@@ -2,6 +2,7 @@ import {
   useCreateTaskMutation,
   useGetProjectTasksQuery,
   useGetProjectUsersQuery,
+  useGetSprintQuery,
   useUpdateTaskAssigneeMutation,
   useUpdateTaskStatusMutation,
 } from "../../../../store/api";
@@ -56,19 +57,22 @@ type BoardProps = {
   setIsModalNewTaskOpen: (isOpen: boolean) => void;
   email: string;
   priority: string
-    setPriority: (priorityName: string) => void
-    assignedTo: string
-    setAssignedTo: (assignedTo: string) => void
+  setPriority: (priorityName: string) => void
+  assignedTo: string
+  setAssignedTo: (assignedTo: string) => void
+  sprint: string
+  projectId: string
 };
 
 const taskStatus = ["To Do", "Work In Progress", "Under Review", "Completed"];
 
-const BoardView = ({ id, email }: BoardProps) => {
+const BoardView = ({ id, email , priority, assignedTo, sprint, projectId}: BoardProps) => {
+
   const {
     data: tasks,
     isLoading,
     error,
-  } = useGetProjectTasksQuery({ projectId: id });
+  } = useGetProjectTasksQuery({ projectId: id , sprint, assignedTo, priority});
 
   const [updateTaskStatus, response] = useUpdateTaskStatusMutation();
 
@@ -97,6 +101,7 @@ const BoardView = ({ id, email }: BoardProps) => {
             moveTask={moveTask}
             id={id}
             email={email}
+            projectId={projectId}
           />
         ))}
       </div>
@@ -110,6 +115,7 @@ type TaskColumnProps = {
   moveTask: (taskId: number, toStatus: string) => void;
   id: string;
   email: string;
+  projectId: string
 };
 
 const TaskColumn = ({
@@ -118,6 +124,7 @@ const TaskColumn = ({
   moveTask,
   id,
   email,
+  projectId
 }: TaskColumnProps) => {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "task",
@@ -144,12 +151,13 @@ const TaskColumn = ({
   const [dueDate, setDueDate] = useState("");
   const [taskPoints, setTaskPoints] = useState("");
   const [assignedUserId, setAssignedUserId] = useState("");
+  const [sprintId, setSprintId] = useState("");
   const [createTask, { isLoading: isLoadingCreateTask }] =
     useCreateTaskMutation();
   const [isOpen, setIsOpen] = useState(false);
 
   const isFormValid = () => {
-    return taskName && taskDescription && startDate && dueDate;
+    return taskName && taskDescription && startDate && dueDate && sprintId && taskPriority;
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -167,11 +175,21 @@ const TaskColumn = ({
       tags: taskTags,
       assignedUserId: assignedUserId,
       authorUserId: email,
+      sprintId: sprintId,
       projectId: Number(id),
     };
     console.log(formData);
     try {
       const response = createTask(formData);
+      setTaskName('')
+      setTaskDescription('')
+      setTaskPriority('')
+      setTaskTags('')
+      setStartDate('')
+      setDueDate('')
+      setTaskPoints('')
+      setAssignedUserId('')
+      setSprintId('')
       toast.success("Task Created Successfully");
       setIsOpen(false);
     } catch (err: any) {
@@ -181,6 +199,8 @@ const TaskColumn = ({
   };
 
   const { data, isLoading, error } = useGetProjectUsersQuery({ projectId: id });
+  const {data : sprintData, isLoading : sprintLoading, isError} = useGetSprintQuery({projectId: projectId })
+  
 
   return (
     <div
@@ -215,15 +235,15 @@ const TaskColumn = ({
                       <Plus size={24} className="" />
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[27vw]">
+                  <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[29vw]">
                     <DialogHeader>
-                      <DialogTitle className="mb-2">Create Task</DialogTitle>
+                      <DialogTitle className="mb-1">Create Task</DialogTitle>
                     </DialogHeader>
 
                     <div
                       className="relative w-full h-full overflow-hidden"
                       style={{
-                        paddingTop: "38.575%",
+                        paddingTop: "42.575%",
                       }}
                       >
                       <div className="absolute top-0 left-0 w-[calc(100%)] h-[calc(100%)]">
@@ -322,6 +342,30 @@ const TaskColumn = ({
                                         value={String(user.userId)!}
                                       >
                                         {user.username}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
+                              <Label className="text-center">Sprint</Label>
+                              <Select
+                                value={sprintId}
+                                onValueChange={(value) =>
+                                  setSprintId(value)
+                                }
+                              >
+                                <SelectTrigger className="col-span-3 p-2 border rounded-md">
+                                  <SelectValue placeholder="Select sprint" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    
+                                    {sprintData?.map((sprint) => (
+                                      <SelectItem
+                                        key={sprint.title}
+                                        value={String(sprint.id)!}
+                                      >
+                                        {sprint.title}
                                       </SelectItem>
                                     ))}
                                   </SelectGroup>

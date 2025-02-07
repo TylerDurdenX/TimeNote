@@ -8,6 +8,7 @@ import {
   ProjectListResponse,
   ProjectUsers,
   ScreenshotResponse,
+  SprintResponse,
   Task,
   TaskComments,
   TaskFormData,
@@ -94,7 +95,8 @@ export const api = createApi({
     "UsersData",
     "ProjectsList",
     "Tasks",
-    "Comment"
+    "Comment",
+    "SprintCount"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -220,10 +222,10 @@ export const api = createApi({
     }),
     getProjectTasks: build.query<
     Task[],
-      { projectId: string}
+      { projectId: string, sprint: string, assignedTo: string, priority: string}
     >({
-      query: ({ projectId,}) => {
-        const url = `api/user/getProjectTasks?id=${projectId}`;
+      query: ({ projectId, sprint, assignedTo, priority}) => {
+        const url = `api/user/getProjectTasks?id=${projectId}&sprint=${sprint}&assignedTo=${assignedTo}&priority=${priority}`;
         return url;
       },
       providesTags: ["Tasks"],
@@ -288,7 +290,14 @@ createSprint: build.mutation<ApiResponse, CreateSprint>({
       method: "POST",
       body: body,
   }), 
-  invalidatesTags : ["Tasks"]
+  invalidatesTags : ["SprintCount"]
+}),
+getSprint: build.query<SprintResponse[], { projectId: string}>({
+  query: ({ projectId,}) => {
+    const url = `api/user/getSprint?projectId=${projectId}`;
+    return url;
+  },
+  providesTags : ["SprintCount"]
 }),
     updateUserSettingsData: build.mutation<
       ApiResponse,
@@ -347,5 +356,6 @@ export const {
   useUpdateTaskAssigneeMutation,
   useGetTaskCommentsQuery,
   useAddCommentMutation,
-  useCreateSprintMutation
+  useCreateSprintMutation,
+  useGetSprintQuery
 } = api;
