@@ -12,7 +12,7 @@ import { getUser, getUserCount, updateUserProfilePicture } from "../controller/d
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
-import { addComment, createProject, createSprint, createTask, getProjects, getProjectTasks, getProjectUsers, getSprint, getTaskComments, updateTaskAssignee, updateTaskStatus } from "../controller/projectController/projectController.js";
+import { addComment, createProject, createSprint, createTask, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getTask, getTaskComments, updateTaskAssignee, updateTaskStatus } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 
@@ -53,6 +53,9 @@ router.get("/getComments", getTaskComments)
 router.post("/addComment", addComment)
 router.post("/createSprint", createSprint)
 router.get("/getSprint", getSprint )
+router.get("/getPmUsers", getProjectManagers)
+router.get("/getTask", getTask)
+
 
 
 export default router;

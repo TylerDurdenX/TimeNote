@@ -5,6 +5,8 @@ import {
   CreateSprint,
   ListResponse,
   LiveStreamResponse,
+  PmUserResponse,
+  ProjectFormData,
   ProjectListResponse,
   ProjectUsers,
   ScreenshotResponse,
@@ -96,7 +98,8 @@ export const api = createApi({
     "ProjectsList",
     "Tasks",
     "Comment",
-    "SprintCount"
+    "SprintCount",
+    "Task"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -284,6 +287,15 @@ export const api = createApi({
     }), 
     invalidatesTags : ["Tasks"]
 }),
+
+createProject: build.mutation<ApiResponse, ProjectFormData>({
+  query: (project)=> ({
+      url: "api/user/createProject",
+      method: "POST",
+      body: project,
+  }), 
+  invalidatesTags : ["ProjectsList"]
+}),
 createSprint: build.mutation<ApiResponse, CreateSprint>({
   query: (body)=> ({
       url: "api/user/createSprint",
@@ -298,6 +310,20 @@ getSprint: build.query<SprintResponse[], { projectId: string}>({
     return url;
   },
   providesTags : ["SprintCount"]
+}),
+
+getTask: build.query<Task, { taskId: number}>({
+  query: ({ taskId,}) => {
+    const url = `api/user/getTask?taskId=${taskId}`;
+    return url;
+  },
+  providesTags : ["Task"]
+}),
+getProjectManager: build.query<PmUserResponse[], {}>({
+  query: () => {
+    const url = `api/user/getPmUsers`;
+    return url;
+  },
 }),
     updateUserSettingsData: build.mutation<
       ApiResponse,
@@ -357,5 +383,8 @@ export const {
   useGetTaskCommentsQuery,
   useAddCommentMutation,
   useCreateSprintMutation,
-  useGetSprintQuery
+  useGetSprintQuery,
+  useCreateProjectMutation,
+  useGetProjectManagerQuery,
+  useGetTaskQuery
 } = api;

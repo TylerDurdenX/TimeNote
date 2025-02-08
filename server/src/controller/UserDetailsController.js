@@ -162,7 +162,7 @@ export const getListOfObjects = catchAsync(async (req, res, next) => {
       return res.status(200).json(result);
     } else if (entityName === "Role") {
       const result = await prisma.$queryRaw`
-      SELECT code AS title, 1 AS misc 
+      SELECT name AS title, 1 AS misc 
       FROM "Role"`;
       return res.status(200).json(result);
     } else {
@@ -267,16 +267,18 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
             in: extractTitles(roles),}
         }
       });
+      console.log(dbRoles)
       const currentRoles = await prisma.user.findUnique({
         where: { email: email },
         select: { roles: { select: { id: true } } },
       });
+      console.log(currentRoles)
       await prisma.user.update({
         where: { email: email },
         data: {
           roles: {
-            disconnect: currentRoles?.roles.map(role => ({ id: role.id })),
-            connect: dbRoles.map((role) => ({ id: role.id })),
+            disconnect: currentRoles?.roles?.map(role => ({ id: role.id })) || [],
+            connect: dbRoles.map(role => ({ id: role.id })),
           },
         },
       });

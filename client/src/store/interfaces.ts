@@ -189,3 +189,16 @@ export interface SprintResponse{
     id: number,
     title: string
 }
+
+export interface ProjectFormData{
+    title: string
+    description: string
+    startDate: string
+    endDate: string
+    projectManager: string
+}
+
+export interface PmUserResponse{
+    userId: number
+    username: string
+}

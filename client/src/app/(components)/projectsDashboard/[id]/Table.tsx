@@ -1,4 +1,3 @@
-import { useAppSelector } from '@/app/redux'
 import Header from '@/components/Header'
 import { useGetProjectTasksQuery } from '@/store/api'
 import React from 'react'

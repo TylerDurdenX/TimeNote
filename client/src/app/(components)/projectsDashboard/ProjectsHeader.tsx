@@ -1,24 +1,82 @@
-import React from "react";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { PlusSquare } from "lucide-react";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  useCreateProjectMutation,
+  useGetProjectManagerQuery,
+} from "@/store/api";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FilterX, PlusSquare } from "lucide-react";
-import { Button } from "@mui/material";
-import { DateRange } from "react-day-picker";
 
 type Props = {
   name: string;
   isSmallText?: boolean;
-  buttonName: string
+  buttonName: string;
 };
 
 const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [projectManager, setProjectManager] = useState("");
+  const [createProject, { isLoading: isLoadingCreateProject }] =
+    useCreateProjectMutation();
+
+  const { data, isLoading, isError } = useGetProjectManagerQuery({},
+    {
+      refetchOnMountOrArgChange: true
+    }
+  );
+  console.log(data)
+
+  const isFormValid = () => {
+    return title && description && startDate && endDate && projectManager;
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    // Prepare the form data to submit
+    const formData = {
+      title: title,
+      description: description,
+      startDate: startDate,
+      endDate: endDate,
+      projectManager: projectManager,
+    };
+    try {
+      const response = await createProject(formData);
+      toast.success(response.data?.message);
+      setTitle("");
+      setDescription("");
+      setStartDate("");
+      setEndDate("");
+      setProjectManager('')
+      setIsOpen(false);
+    } catch (err: any) {
+      toast.error(err.data.message);
+      console.error("Error creating Project:", err.data.Message);
+    }
+  };
+
   return (
     <div className="flex relative w-full pl-5 h-[20px] mb-1 items-center justify-between">
       <h1
@@ -29,11 +87,103 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
         {name}
       </h1>
       <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
-        <button className="flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-500"
-        >
-          <PlusSquare className="h-5 w-5 mr-2 " />
-          {buttonName}
-        </button>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <button className="flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-500">
+              <PlusSquare className="h-5 w-5 mr-2 " />
+              {buttonName}
+            </button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] max-h-[40vw]">
+            <DialogHeader>
+              <DialogTitle className="mb-2">Create Project</DialogTitle>
+            </DialogHeader>
+
+            <div
+              className="relative w-full h-full overflow-hidden"
+              style={{
+                paddingTop: "44.575%",
+              }}
+            >
+              <div className="absolute top-0 left-0 w-[calc(100%)] h-full">
+                <form onSubmit={handleSubmit}>
+                  <div className="grid gap-4 py-3">
+                    <div className="grid grid-cols-8 items-center gap-4 mr-1">
+                      <Label className="text-center ">Project Name</Label>
+                      <Input
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="col-span-7"
+                        required
+                      />
+                      <Label className="text-center">Project Description</Label>
+                      <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="col-span-7 shadow border"
+                      />
+                      <Label className="text-center">Start Date</Label>
+                      <Input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="col-span-3"
+                      />
+                      <Label className="text-center">End Date</Label>
+                      <Input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="col-span-3"
+                      />
+                      <Label className="text-center">Project Manager</Label>
+                      <Select
+                        value={projectManager}
+                        onValueChange={(value) => setProjectManager(value)}
+                      >
+                        <SelectTrigger className="col-span-7 p-2 border rounded-md">
+                          <SelectValue placeholder="Select Project Manager" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {data?.map((user) => (
+                              <SelectItem
+                                key={user.username}
+                                value={user.username}
+                              >
+                                {user.username}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <button
+                      type="submit"
+                      className={`flex w-200px mt-7 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+                                hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
+                                  !isFormValid() || isLoadingCreateProject
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
+                                }`}
+                      disabled={!isFormValid() || isLoadingCreateProject}
+                    >
+                      {isLoadingCreateProject
+                        ? "Creating..."
+                        : "Create Project"}
+                    </button>
+                  </DialogFooter>
+                </form>
+              </div>
+            </div>
+            <DialogFooter className="w-full justify-between items-center">
+              <div className="absolute flex gap-4 left-10"></div>
+              <div className="flex items-center space-x-2"></div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

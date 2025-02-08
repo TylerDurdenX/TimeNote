@@ -51,6 +51,7 @@ import { Button } from "@/components/ui/button";
 import Comments from "./Comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/components/Sidebar/nav-user";
+import TaskPage from "./TaskPage";
 
 type BoardProps = {
   id: string;
@@ -619,15 +620,8 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                 </div>
               )}
             </div>
-            <DialogContent className="sm:max-w-[50vw]">
-              <DialogHeader>
-                <DialogTitle>{task.title}</DialogTitle>
-                <DialogDescription>{task.description}</DialogDescription>
-              </DialogHeader>
-
-              <DialogFooter>
-                <Button type="submit">Save changes</Button>
-              </DialogFooter>
+            <DialogContent className="max-w-[85vw] mt-5 mb-5 overflow-y-auto">
+              <TaskPage taskId= {task.id} email={email}/>
             </DialogContent>
           </Dialog>
           <div className="text-xs text-gray-500 dark:text-neutral-500">

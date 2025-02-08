@@ -55,14 +55,20 @@ const ProjectSectionHeader = ({
     };
     try {
       const response = await createSprint(formData);
-      toast.success(response.data?.message);
+      // @ts-ignore
+      if(response.error?.data.status === 'Fail'){
+        // @ts-ignore
+        toast.error(response.error?.data.message)
+      }else{
+        toast.success(response.data?.message);
+      }
       setTitle('')
       setDescription('')
       setStartDate('')
       setEndDate('')
       setIsOpen(false);
     } catch (err: any) {
-      toast.error(err.data.message);
+      toast.error(err.data.message.message);
       console.error("Error creating sprint:", err.data.Message);
     }
   };

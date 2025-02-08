@@ -4,7 +4,7 @@ import { prisma } from "../../server.js";
 import { isEmpty } from "../../utils/genericMethods.js";
 
 export const createProject = catchAsync(async (req, res, next) => {
-  const { name, description, startDate, endDate, projectManager } = req.body;
+  const { title, description, startDate, endDate, projectManager } = req.body;
   try {
     const user = await prisma.user.findFirst({
       where: {
@@ -15,7 +15,7 @@ export const createProject = catchAsync(async (req, res, next) => {
 
     const newProject = await prisma.project.create({
       data: {
-        name,
+        name : title,
         description,
         startDate,
         endDate,
@@ -422,4 +422,89 @@ export const getSprint = catchAsync(async (req, res, next) => {
     console.error(error);
     return next(new AppError("There was an getting Sprints", 400));
   }
+});
+
+export const getProjectManagers = catchAsync(async (req, res, next) => {
+  try {
+
+    let ProjectManagerList = []
+
+    const PmRole = await prisma.role.findFirst({
+      where:{
+        code: "PROJECT_MANAGER"
+      }
+    })
+    
+    const usersList = await prisma.user.findMany({
+      include:{
+        roles: true
+      }
+    })
+
+    usersList.forEach((user) => {
+      user.roles.forEach((role) => {
+        if (role.id === PmRole.id) {
+          const {
+            email,
+            password,
+            designation,
+            phoneNumber,
+            profilePictureId,
+            reportsToId,
+            resetPasswordOTP,
+            otpExpires,
+            createdAt,
+            updatedAt,
+            roles,
+            ...newObj
+          } = user;
+          ProjectManagerList.push(newObj);
+        }
+      });
+    });    
+
+    res.status(200).json(ProjectManagerList)
+
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an getting Project Manager Users", 400));
+  }
+});
+
+export const getTask = catchAsync(async (req, res, next) => {
+  const { taskId } = req.query;
+  let resultList = []
+  try {
+    const task = await prisma.task.findFirst({
+      where: {
+        id: Number(taskId),
+      },
+      include:{
+        comments: true,
+        attachments: true,
+        author: {
+          select: {
+            username: true
+          }
+        },
+        subTasks: true
+      }
+    });
+    if(task){
+      const commentsList = task.comments
+      commentsList.map((comment) => {
+        const newObj = {
+          id: comment.id,
+          text: comment.text,
+          username: comment.username,
+          commentTime: comment.commentTime
+        }
+        resultList.push(newObj)
+      })
+    }
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+
 });
