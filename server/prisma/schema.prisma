@@ -172,7 +172,7 @@ model TaskAssignment {
 
 model Attachment {
   id           Int     @id @default(autoincrement())
-  fileURL      String
+  fileBase64      String
   fileName     String?
   taskId       Int?
   subTaskId     Int?

@@ -12,7 +12,7 @@ import { getUser, getUserCount, updateUserProfilePicture } from "../controller/d
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
-import { addComment, createProject, createSprint, createTask, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getTask, getTaskComments, updateTaskAssignee, updateTaskStatus } from "../controller/projectController/projectController.js";
+import { addComment, createProject, createSprint, createTask, deleteAttachment, downloadAttachment, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getTask, getTaskComments, updateTask, updateTaskAssignee, updateTaskStatus, uploadAttachment } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 
@@ -47,7 +47,7 @@ router.get("/getProjects", getProjects)
 router.get("/getProjectTasks", getProjectTasks)
 router.get("/getProjectUsers", getProjectUsers)
 router.post("/createTask", createTask)
-router.patch("/updateTask", updateTaskStatus)
+router.patch("/updateTaskStatus", updateTaskStatus)
 router.patch("/updateTaskAssignee", updateTaskAssignee)
 router.get("/getComments", getTaskComments)
 router.post("/addComment", addComment)
@@ -55,7 +55,10 @@ router.post("/createSprint", createSprint)
 router.get("/getSprint", getSprint )
 router.get("/getPmUsers", getProjectManagers)
 router.get("/getTask", getTask)
-
+router.patch("/updateTask", updateTask)
+router.post("/uploadAttachment", uploadAttachment)
+router.delete("/deleteAttachment", deleteAttachment)
+router.get("/downloadAttachment", downloadAttachment)
 
 
 export default router;

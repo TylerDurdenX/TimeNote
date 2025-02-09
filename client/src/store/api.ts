@@ -2,7 +2,9 @@ import { code } from "@nextui-org/theme";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AddComment,
+  Attachment,
   CreateSprint,
+  DownloadAttachment,
   ListResponse,
   LiveStreamResponse,
   PmUserResponse,
@@ -15,6 +17,8 @@ import {
   TaskComments,
   TaskFormData,
   Team,
+  UpdateTaskData,
+  UploadAttachment,
   UserDetails,
   UserFilterResponse,
   UserHierarchy,
@@ -265,7 +269,7 @@ export const api = createApi({
     }),
     updateTaskStatus: build.mutation<Task, {taskId: number, status: string}>({
       query: ({taskId, status})=> ({
-          url: `api/user/updateTask?taskId=${taskId}`,
+          url: `api/user/updateTaskStatus?taskId=${taskId}`,
           method: "PATCH",
           body: {status},
       }), 
@@ -278,6 +282,22 @@ export const api = createApi({
         body: {status},
     }), 
     invalidatesTags : ["Tasks"]
+}),
+updateTask: build.mutation<ApiResponse, UpdateTaskData>({
+  query: (body)=> ({
+      url: `api/user/updateTask`,
+      method: "PATCH",
+      body: body,
+  }), 
+  invalidatesTags : ["Tasks", "Task"]
+}),
+uploadAttachment: build.mutation<ApiResponse, UploadAttachment>({
+  query: (body)=> ({
+      url: `api/user/uploadAttachment`,
+      method: "POST",
+      body: body,
+  }), 
+  invalidatesTags : ["Task"]
 }),
   createTask: build.mutation<ApiResponse, TaskFormData>({
     query: (task)=> ({
@@ -311,7 +331,19 @@ getSprint: build.query<SprintResponse[], { projectId: string}>({
   },
   providesTags : ["SprintCount"]
 }),
-
+deleteAttachment: build.mutation<ApiResponse, { taskId: number}>({
+  query: ({taskId})=> ({
+    url: `api/user/deleteAttachment?taskId=${taskId}`,
+    method: "DELETE",
+}), 
+  invalidatesTags : ["Task"]
+}),
+downloadAttachment: build.mutation<DownloadAttachment, { taskId: number}>({
+  query: ({taskId})=> ({
+    url: `api/user/downloadAttachment?taskId=${taskId}`,
+    method: "GET",
+}), 
+}),
 getTask: build.query<Task, { taskId: number}>({
   query: ({ taskId,}) => {
     const url = `api/user/getTask?taskId=${taskId}`;
@@ -386,5 +418,9 @@ export const {
   useGetSprintQuery,
   useCreateProjectMutation,
   useGetProjectManagerQuery,
-  useGetTaskQuery
+  useGetTaskQuery,
+  useUpdateTaskMutation,
+  useUploadAttachmentMutation,
+  useDeleteAttachmentMutation,
+  useDownloadAttachmentMutation
 } = api;

@@ -621,7 +621,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
               )}
             </div>
             <DialogContent className="max-w-[85vw] mt-5 mb-5 overflow-y-auto">
-              <TaskPage taskId= {task.id} email={email}/>
+              <TaskPage taskId= {task.id} email={email} projectId={projectId}/>
             </DialogContent>
           </Dialog>
           <div className="text-xs text-gray-500 dark:text-neutral-500">

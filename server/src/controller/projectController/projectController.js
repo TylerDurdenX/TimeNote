@@ -161,9 +161,6 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
   });
 
   res.json(tasks);
-
-   
-    res.json(tasks);
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an error getting Tasks", 400));
@@ -487,7 +484,12 @@ export const getTask = catchAsync(async (req, res, next) => {
             username: true
           }
         },
-        subTasks: true
+        subTasks: true,
+        assignee:{
+          select:{
+            username: true
+          }
+        }
       }
     });
     if(task){
@@ -507,4 +509,98 @@ export const getTask = catchAsync(async (req, res, next) => {
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
+});
+
+export const updateTask = catchAsync(async (req, res, next) => {
+  const { taskId, taskPoints, assignee, taskDescription  } = req.body;
+
+  try {
+
+    const user = await prisma.user.findFirst({
+      where:{
+        username: assignee
+      }
+    })
+
+    console.log(assignee)
+    console.log(user.username)
+
+    const task = await prisma.task.update({
+      where: {
+        id: taskId,
+      },
+      data:{
+        description: taskDescription,
+        points: taskPoints,
+        assignedUserId: user.userId
+    }
+    });
+    res.status(200).json({ message: `Task updated Successfully` });
+  } catch (error) {
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+
+});
+
+export const uploadAttachment = catchAsync(async (req, res, next) => {
+  const { fileBase64, fileName, taskId, uploadedBy} = req.body;
+  try {
+
+    const user = await prisma.user.findFirst({
+      where:{
+        email: uploadedBy
+      }
+    })
+
+      const attachment = await prisma.attachment.create({
+        data:{
+          fileBase64: fileBase64,
+        fileName: fileName,
+        taskId: taskId,
+        uploadedById: user.userId
+        }
+      })
+      if(attachment)
+      return next(new AppError("Attachment uploaded Successfully", 200));
+
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an error uploading Attachment", 400));
+  }
+});
+
+export const deleteAttachment = catchAsync(async (req, res, next) => {
+  const { taskId,} = req.query;
+  try {
+
+    const deletedAttachment = await prisma.attachment.deleteMany({
+      where: {
+        taskId: Number(taskId),  // Replace with the ID of the user to delete
+      },
+    });
+      if(deletedAttachment)
+      return next(new AppError("Attachment deleted Successfully", 200));
+
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an error deleting Attachment", 400));
+  }
+});
+
+export const downloadAttachment = catchAsync(async (req, res, next) => {
+  const { taskId,} = req.query;
+  try {
+
+    const downloadAttachment = await prisma.attachment.findFirst({
+      where: {
+        taskId: Number(taskId),  // Replace with the ID of the user to delete
+      },
+    });
+      if(downloadAttachment)
+      return res.status(200).json(downloadAttachment);
+
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an error downloading Attachment", 400));
+  }
 });

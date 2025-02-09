@@ -116,10 +116,26 @@ export interface User{
 
 export interface Attachment{
     id: number,
-    fileUrl: string,
+    fileBase64: string,
     fileName: string,
     taskId: number,
     uploadedById: number
+}
+
+export interface UploadAttachment{
+    fileBase64: string,
+    fileName: string,
+    taskId: number,
+    uploadedBy: string
+}
+
+export interface DownloadAttachment{
+    id: number,
+    fileBase64: string,
+    fileName: string,
+    taskId: number,
+    uploadedBy: number,
+    subTaskId: number
 }
 
 export interface Task {
@@ -201,4 +217,11 @@ export interface ProjectFormData{
 export interface PmUserResponse{
     userId: number
     username: string
+}
+
+export interface UpdateTaskData {
+    taskId: number
+    taskPoints: number | undefined
+    assignee: string | undefined
+    taskDescription: string
 }
