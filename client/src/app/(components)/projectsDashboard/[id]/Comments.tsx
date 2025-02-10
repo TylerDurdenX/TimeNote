@@ -7,17 +7,18 @@ type Props = {
   taskId: number;
 };
 
-const Comments = ({taskId, email }: Props) => {
+const Comments = ({ taskId, email }: Props) => {
   const [newComment, setNewComment] = useState("");
 
   const [createTask, { isLoading: isLoadingAddComment }] =
     useAddCommentMutation();
-  const {data, isLoading, error, refetch} = useGetTaskCommentsQuery({taskId: taskId, email: email}
-    ,
+
+  const { data, isLoading, error, refetch } = useGetTaskCommentsQuery(
+    { taskId: taskId, email: email },
     {
       refetchOnMountOrArgChange: true,
     }
-  )
+  );
 
   const handleRefetch = () => {
     refetch();
@@ -25,60 +26,63 @@ const Comments = ({taskId, email }: Props) => {
 
   const handleAddComment = async (event: React.FormEvent) => {
     event.preventDefault();
-    const currentDateTime = new Date().toISOString();
-    // Prepare the form data to submit
+    const currentDateTime = new Date();
+
+    currentDateTime.setHours(currentDateTime.getHours() + 5);
+    currentDateTime.setMinutes(currentDateTime.getMinutes() + 30);
+    const indianTimeISOString = currentDateTime.toISOString();
     const formData = {
       text: newComment,
       taskId: taskId,
       userEmail: email,
-      commentTime: currentDateTime,
+      commentTime: indianTimeISOString,
     };
     try {
       const response = createTask(formData);
       toast.success("Comment added Successfully");
-      setNewComment('')
+      setNewComment("");
     } catch (err: any) {
       toast.error(err.data.message);
       console.error("Error creating role:", err.data.Message);
     }
   };
-  
+
   return (
     <div className="w-full mx-auto p-4 bg-white overflow-y-auto rounded-lg shadow-lg">
       {/* Comment list container */}
       <div className="max-h-[55vw] overflow-y-auto space-y-4">
-      {data?.length === 0 ? (
-  <div className="text-center text-gray-500">
-    <p>No comments yet</p>
-  </div>
-) : (
-  data?.map((comment, index) => {
-    // Format the comment time
-    const commentDate = new Date(comment.commentTime);
-    const formattedDate = commentDate.toISOString().split('T')[0]; // "2025-01-31"
-    const formattedTime = commentDate.toISOString().split('T')[1].slice(0, 5); // "19:25"
-    const formattedCommentTime = `${formattedDate} ${formattedTime}`;
+        {data?.length === 0 ? (
+          <div className="text-center text-gray-500">
+            <p>No comments yet</p>
+          </div>
+        ) : (
+          data?.map((comment, index) => {
+            // Format the comment time
+            const commentDate = new Date(comment.commentTime);
+            const formattedDate = commentDate.toISOString().split("T")[0];
+            const formattedTime = commentDate
+              .toISOString()
+              .split("T")[1]
+              .slice(0, 5);
+            const formattedCommentTime = `${formattedDate} ${formattedTime}`;
 
-    return (
-      <div key={index} className="border-b pb-4">
-        {/* Header with username (left) and formatted date/time (right) */}
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-semibold text-lg">
-            {comment.username}
-          </span>
-          <span className="text-sm text-gray-500">{formattedCommentTime}</span>
-        </div>
+            return (
+              <div key={index} className="border-b pb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-lg">
+                    {comment.username}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {formattedCommentTime}
+                  </span>
+                </div>
 
-        {/* Comment body */}
-        <p className="text-gray-800">{comment.text}</p>
+                <p className="text-gray-800">{comment.text}</p>
+              </div>
+            );
+          })
+        )}
       </div>
-    );
-  })
-)}
-
-      </div>
-
-      {/* Textarea for adding a new comment */}
       <div className="mt-4">
         <textarea
           value={newComment}

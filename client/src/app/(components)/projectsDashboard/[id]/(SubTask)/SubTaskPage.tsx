@@ -1,0 +1,518 @@
+import React, { useEffect,  useState } from "react";
+import {  Pencil, Download } from "lucide-react";
+import {  useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetSubTaskQuery, useUpdateSubTaskMutation, useUploadSubTaskAttachmentMutation } from "@/store/api";
+import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import Comments from "../Comments";
+import SubTaskComment from "./SubTaskComments";
+
+type Props = {
+  subTaskId: number;
+  email: string;
+  projectId: string
+};
+
+const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
+
+  const {
+    data: task,
+    isLoading,
+    error,
+  } = useGetSubTaskQuery({ subTaskId }, { refetchOnMountOrArgChange: true });
+
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
+
+  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf', '.xls', '.xlsx'];
+
+  const [uploadSubTaskAttachment, { isLoading: isLoadingUploadAttachment }] =
+  useUploadSubTaskAttachmentMutation();
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const [deleteAttachmentQuery, { isLoading: isLoadingDeleteAttachment }] =
+  useDeleteAttachmentMutation();
+
+  const [downloadAttachmentQuery, { isLoading: isLoadingDownloadAttachment }] =
+  useDownloadAttachmentMutation();
+
+  const maxSize = 1.5 * 1024 * 1024; // in bytes
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      // Read the file as a data URL
+      reader.readAsDataURL(file);
+  
+      // Using the load event to resolve the Promise
+      reader.onload = () => {
+        resolve(reader.result as string); // Cast result to string
+      };
+  
+      // Using the error event to reject the Promise
+      reader.onerror = (error) => {
+        reject(new Error('Error converting file to base64'));
+      };
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      if (fileExtension && !allowedExtensions.includes(`.${fileExtension}`)) {
+        toast.error('File extension not allowed!');
+      } 
+      else if (file.size > maxSize) {
+        toast.error('File size must be less than 1.5 MB!');
+      } else {        
+          const base64String = await fileToBase64(file);
+          const uploadSubTaskAttachmentBody = {
+            subTaskId: subTaskId,
+            fileBase64: base64String,
+            fileName: file.name,
+            uploadedBy: email ,
+          };
+          try {
+            const response = await uploadSubTaskAttachment(uploadSubTaskAttachmentBody);
+            // @ts-ignore
+            if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+                    // @ts-ignore
+                    toast.error(response.error?.data.message)
+                  }else{
+                    toast.success(response.data?.message);
+                  }
+          } catch (err: any) {
+            toast.error(err.data.message);
+            console.error("Error creating role:", err.data.Message);
+          }
+      }
+    }
+  };
+
+  const deleteAttachment = (async() => {
+    try {
+      const response = await deleteAttachmentQuery({taskId: subTaskId, isSubTask: true})
+      // @ts-ignore
+      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+              // @ts-ignore
+              toast.error(response.error?.data.message)
+            }else{
+              toast.success(response.data?.message);
+            }
+    } catch (err: any) {
+      toast.error(err.data.message);
+      console.error("Error creating role:", err.data.Message);
+    }
+  })
+
+  function downloadFile(base64String: string, fileName: string) {
+    const base64Data = base64String.startsWith('data:')
+    ? base64String.split(',')[1]  // Extract the part after the comma
+    : base64String;
+    const binaryString = atob(base64Data);
+    const byteArray = new Uint8Array(binaryString.length);
+  
+    for (let i = 0; i < binaryString.length; i++) {
+      byteArray[i] = binaryString.charCodeAt(i);
+    }
+  
+    const blob = new Blob([byteArray], { type: 'application/octet-stream' }); // MIME type can vary based on file type
+    const fileURL = URL.createObjectURL(blob);
+  
+    const link = document.createElement('a');
+    link.href = fileURL;
+    link.download = fileName;  
+  
+    link.click();
+  
+    URL.revokeObjectURL(fileURL);
+  }
+
+  const downloadAttachment = (async() => {
+    try {
+
+      const response = await downloadAttachmentQuery({taskId: subTaskId, isSubTask: true})
+      downloadFile(response.data?.fileBase64!, response.data?.fileName!)
+
+    } catch (err: any) {
+      toast.error(err.data);
+      console.error(err);
+    }
+  })
+
+  const { data: users } = useGetProjectUsersQuery({ projectId: projectId });
+
+
+  const [isEditableStatus, setIsEditableStatus] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isAssigneeEditable, setIsAssigneeEditable] = useState(false);
+  const [isAssigneeHovered, setIsAssigneeHovered] = useState(false);
+  const [subTaskAssignee, setSubTaskAssignee] = useState(task?.assignee?.username);
+  const [subTaskStatus, setSubTaskStatus] = useState(task?.status);
+  const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
+  const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
+  const [isStatusHovered, setIsStatusHovered] = useState(false);
+  const [subTaskDescription, setSubTaskDescription] = useState(task?.description || "");
+
+  const [initialDescription, setInitialDescription] = useState(
+    task?.description || ""
+  );
+  const [initialAssignee, setInitialAssignee] = useState(
+    task?.assignee?.username || ""
+  );
+  const [initialStatus, setInitialStatus] = useState(
+    task?.status || ""
+  );
+
+  const [isSaveButtonEnabled, setIsSaveButtonEnabled] = useState(false);
+
+useEffect(() => {
+  if (task) {
+    setSubTaskDescription(task.description || "");
+    setSubTaskAssignee(task?.assignee?.username || "");
+    setInitialAssignee(task?.assignee?.username || "");
+    setInitialDescription(task.description || "");
+    setSubTaskStatus(task.status || "")
+    setInitialStatus(task.status || "")
+    setIsSaveButtonEnabled(false);
+  }
+}, [task]);
+
+useEffect(() => {
+  const isChanged =
+    subTaskDescription !== initialDescription ||
+    subTaskAssignee !== initialAssignee ||
+    subTaskStatus!== initialStatus
+  setIsSaveButtonEnabled(isChanged); 
+}, [
+  subTaskDescription,
+  subTaskAssignee,
+  initialDescription,
+  initialAssignee,
+  subTaskStatus,
+  initialStatus
+]);
+
+  const handleEditClick = () => {
+    setIsEditableStatus(true);
+  };
+
+  const handleEditAssigneeClick = () => {
+    setIsAssigneeEditable(true);
+  };
+
+  const handleEditDescriptionClick = () => {
+    setIsDescriptionEditable(true);
+  };
+
+  const handleBlur = () => {
+    setIsEditableStatus(false);
+    setIsHovered(false);
+  };
+
+  const handleAssigneeBlur = () => {
+    setIsAssigneeEditable(false);
+    setIsAssigneeHovered(false);
+  };
+
+  const handleDescriptionBlur = () => {
+    setIsDescriptionEditable(false);
+    setIsDescriptionHovered(false);
+  };
+
+  const handleKeyDown = (e: any) => {
+    if (e.key === "Enter") {
+      handleBlur(); 
+    }
+  };
+
+  const taskStatus = ["To Do", "Work In Progress", "Under Review", "Completed"];
+
+    const [updateSubTask, { isLoading: isLoadingUpdateSubTask }] =
+        useUpdateSubTaskMutation();
+
+  const handleSaveChanges = async (event: React.FormEvent) => {
+      event.preventDefault();
+  
+      // Prepare the form data to submit
+      const updateTaskData = {
+        subTaskId: subTaskId,
+        subTaskStatus: subTaskStatus,
+        subTaskAssignee: subTaskAssignee,
+        subTaskDescription: subTaskDescription,
+      };
+      try {
+        const response = await updateSubTask(updateTaskData);
+        // @ts-ignore
+        if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+                // @ts-ignore
+                toast.error(response.error?.data.message)
+              }else{
+                toast.success(response.data?.message);
+              }
+      } catch (err: any) {
+        toast.error(err.data.message);
+        console.error("Error creating role:", err.data.Message);
+      }
+    };
+
+  return (
+    <div className="w-[80vw] max-h-[90vh] overflow-y-auto mx-auto p-6 bg-white rounded-xl shadow-lg space-y-6 dark:bg-gray-800 dark:text-white">
+      {/* Task Title and Description */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-semibold">{task?.title}</h1>
+        </div>
+
+        <div className="space-y-4 text-gray-600 dark:text-gray-400">
+          <div className="text-sm">
+            <span>
+              {formatDate(task?.startDate!)} - {formatDate(task?.dueDate!)}
+            </span>
+          </div>
+
+          <div className="text-sm">
+            <span className="ml-auto text-gray-500 dark:text-gray-300">
+              Author: {task?.author?.username}
+            </span>
+          </div>
+
+          <div className="text-sm relative">
+            {/* Assignee Editable Section */}
+            {isAssigneeEditable ? (
+              <select
+                value={subTaskAssignee}
+                onChange={(e) => setSubTaskAssignee(e.target.value)} 
+                onBlur={handleAssigneeBlur} 
+                onKeyDown={handleKeyDown} 
+                autoFocus
+                className="border p-1 rounded w-40"
+              >
+                {users?.map((user) => (
+                  <option key={user.userId} value={user.username}>
+                    {user.username}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="flex items-center">
+                {/* Display the text */}
+                <div
+                  className="flex items-center"
+                  onMouseEnter={() => setIsAssigneeHovered(true)}
+                  onMouseLeave={() => setIsAssigneeHovered(false)} // Trigger hover leave
+                >
+                  <span className="cursor-pointer">Assignee: {subTaskAssignee}</span>
+
+                  {/* Pencil icon that appears when hovering over the parent */}
+                  <Pencil
+                    size={16}
+                    className={`ml-2 cursor-pointer ${
+                      isAssigneeHovered ? "opacity-100" : "opacity-0"
+                    } transition-opacity`}
+                    onClick={handleEditAssigneeClick}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="text-sm relative">
+            {/* Assignee Editable Section */}
+            {isEditableStatus ? (
+              <select
+                value={subTaskStatus}
+                onChange={(e) => setSubTaskStatus(e.target.value)} 
+                onBlur={handleBlur} 
+                onKeyDown={handleKeyDown} 
+                autoFocus
+                className="border p-1 rounded w-40"
+              >
+                {taskStatus?.map((obj) => (
+                  <option key={obj} value={obj}>
+                    {obj}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="flex items-center">
+                {/* Display the text */}
+                <div
+                  className="flex items-center"
+                  onMouseEnter={() => setIsStatusHovered(true)}
+                  onMouseLeave={() => setIsStatusHovered(false)} // Trigger hover leave
+                >
+                  <span className="cursor-pointer">Status: {subTaskStatus}</span>
+
+                  {/* Pencil icon that appears when hovering over the parent */}
+                  <Pencil
+                    size={16}
+                    className={`ml-2 cursor-pointer ${
+                      isStatusHovered ? "opacity-100" : "opacity-0"
+                    } transition-opacity`}
+                    onClick={handleEditClick}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+        <div className="text-sm relative">
+          {isDescriptionEditable ? (
+            <textarea
+              value={subTaskDescription}
+              onChange={(e) => setSubTaskDescription(e.target.value)}
+              onBlur={handleDescriptionBlur}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              className="border p-1 rounded w-full h-24 resize-none"
+            />
+          ) : (
+            <div
+              className="flex items-center"
+              onMouseEnter={() => setIsDescriptionHovered(true)}
+              onMouseLeave={() => setIsDescriptionHovered(false)}
+            >
+              <p className="text-gray-700 dark:text-gray-300 cursor-pointer">
+                {subTaskDescription || "Loading status..."} 
+              </p>
+
+              <div
+                className={`ml-2 cursor-pointer ${
+                  isDescriptionHovered ? "opacity-100" : "opacity-0"
+                } transition-opacity`}
+              >
+                <Pencil
+                  size={16}
+                  style={{ width: "16px", height: "16px" }}
+                  onClick={handleEditDescriptionClick}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            onClick={handleSaveChanges}
+            disabled={!isSaveButtonEnabled} 
+            className={`mt-2 bg-gray-900 text-white py-2 px-4 rounded-md hover:bg-gray-700 ${
+              !isSaveButtonEnabled && "opacity-50 cursor-not-allowed"
+            }`}
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      {/* Attachments Section */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Attachments</h2>
+        <div className="border-2 border-dashed border-gray-300 p-4 rounded-lg dark:border-gray-600">
+          <div className="flex items-center justify-between">
+            <div className="flex space-x-4">
+              <div className="flex items-center space-x-2">
+                
+                {(task?.attachments?.length ?? 0) > 0 ? <>
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                <span className="text-2xl text-gray-500">📎</span>
+              </div>
+                <span className="text-gray-800 dark:text-gray-100">
+                {task?.attachments?.[0]?.fileName}
+              </span>
+              <button className="text-blue-600 hover:text-blue-800 ml-2" onClick={downloadAttachment}>
+              <Download/>
+            </button>
+              </>
+                : "Please upload a document of size less than 1 mb" }
+              </div>
+
+              {(task?.attachments?.length ?? 0) > 0 ? 
+              <AlertDialog>
+              <AlertDialogTrigger asChild>
+              <button className="text-blue-600 hover:text-blue-800 ml-2">
+              Delete
+            </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-700">
+                    Do you want to remove the Attachment ?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel
+                    onClick={() => {
+                      //setOpen(false);
+                    }}
+                  >
+                    No
+                  </AlertDialogCancel>
+                  <AlertDialogAction onClick={deleteAttachment} >
+                    Yes
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+              : ""}
+            </div>
+          </div>
+          <div className="mt-4">
+          <div>
+      {/* Button to trigger file input */}
+      {isLoadingUploadAttachment && (
+        <Progress value={uploadProgress} max={100} color="blue" />
+      )}
+      {(task?.attachments?.length ?? 0) > 0 ? ""
+      : 
+      <button
+      className="flex items-center justify-start w-full p-3 text-blue-600 hover:text-blue-800 rounded-md hover:bg-gray-200 focus:outline-none transition duration-200"
+      onClick={() => document.getElementById("fileInputSubTask")?.click()}
+    >
+      + Add Attachment
+    </button>
+    }
+      
+
+      {/* Hidden file input */}
+      <input
+        id="fileInputSubTask"
+        type="file"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+    </div>
+            
+          </div>
+        </div>
+      </div>
+
+      {/* Comments Section */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Comments</h2>
+        <div className="mt-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
+        <div className="border-2 border-gray-300 p-4 rounded-lg dark:border-gray-600">
+          <div className="mt-4 space-y-3">
+            <SubTaskComment subTaskId={subTaskId} email={email}/>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  );
+};
+
+export default SubTaskPage;

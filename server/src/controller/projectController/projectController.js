@@ -2,6 +2,7 @@ import AppError from "../../utils/appError.js";
 import catchAsync from "../../utils/catchAsync.js";
 import { prisma } from "../../server.js";
 import { isEmpty } from "../../utils/genericMethods.js";
+import SuccessResponse from "../../utils/SuccessResponse.js";
 
 export const createProject = catchAsync(async (req, res, next) => {
   const { title, description, startDate, endDate, projectManager } = req.body;
@@ -244,10 +245,46 @@ export const createTask = catchAsync(async (req, res, next) => {
 });
 
 export const updateTaskStatus = catchAsync(async (req, res, next) => {
-  const { taskId } = req.query;
+  const { taskId, email } = req.query;
   const { status } = req.body;
 
   try {
+
+    const task = await prisma.task.findFirst({
+      where:{
+        id: Number(taskId)
+      },
+      include:{
+        assignee: {
+          select: {
+            email: true
+          }
+        }
+      }
+    })
+
+    console.log(task.assignee)
+
+    if(task.assignee.email !== email){
+      return next(new AppError(`Cannot update Task assigned to other people`, 500))
+    }
+
+    if(task.status === 'To Do' && ( status === 'Under Review' || status === 'Completed')){
+      return next(new AppError(`Cannot change status from "To Do" to : ${status}`, 500))
+    }
+
+    if(task.status === 'Work In Progress' && ( status === 'To Do' || status === 'Completed')){
+      return next(new AppError(`Cannot change status from "Work In Progress" to : ${status}`, 500))
+    }
+
+    if(task.status === 'Under Reviews' && ( status === 'To Do' || status === 'Work In Progress')){
+      return next(new AppError(`Cannot change status from "Under Reviews" to : ${status}`, 500))
+    }
+
+    if(task.status === 'Completed' && ( status === 'To Do' || status === 'Work In Progress' || status === 'Under Reviews')){
+      return next(new AppError(`Cannot change status from "Completed" to : ${status}`, 500))
+    }
+
     const updatedTask = await prisma.task.update({
       where: {
         id: Number(taskId),
@@ -256,7 +293,7 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
           status: status
       }
     });
-    res.json("Task status updated successfully");
+    return next(new SuccessResponse("Task status updated Successfully", 200));
   } catch (error) {
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
@@ -293,27 +330,60 @@ export const getTaskComments = catchAsync(async (req, res, next) => {
   const { taskId } = req.query;
   let resultList = []
   try {
-    const task = await prisma.task.findFirst({
-      where: {
-        id: Number(taskId),
-      },
-      include:{
-        comments: true
-      }
-    });
-    if(task){
-      const commentsList = task.comments
-      commentsList.map((comment) => {
-        const newObj = {
-          id: comment.id,
-          text: comment.text,
-          username: comment.username,
-          commentTime: comment.commentTime
+      const task = await prisma.task.findFirst({
+        where: {
+          id: Number(taskId),
+        },
+        include:{
+          comments: true
         }
-        resultList.push(newObj)
-      })
-    }
-    res.json(resultList);
+      });
+      if(task){
+        const commentsList = task.comments
+        commentsList.map((comment) => {
+          const newObj = {
+            id: comment.id,
+            text: comment.text,
+            username: comment.username,
+            commentTime: comment.commentTime
+          }
+          resultList.push(newObj)
+        })
+      }
+      res.json(resultList);
+    
+    
+  } catch (error) {
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+
+});
+
+export const getSubTaskComments = catchAsync(async (req, res, next) => {
+  const { subTaskId, } = req.query;
+  let resultList = []
+  try {
+      const subTask = await prisma.subtask.findFirst({
+        where: {
+          id: Number(subTaskId),
+        },
+        include:{
+          comments: true
+        }
+      });
+      if(subTask){
+        const commentsList = subTask.comments
+        commentsList.map((comment) => {
+          const newObj = {
+            id: comment.id,
+            text: comment.text,
+            username: comment.username,
+            commentTime: comment.commentTime
+          }
+          resultList.push(newObj)
+        })
+      }
+      res.json(resultList);
   } catch (error) {
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
@@ -334,6 +404,33 @@ export const addComment = catchAsync(async (req, res, next) => {
       data:{
         text,
       taskId,
+      userId: user.userId,
+      username: user.username,
+      commentTime,
+      }
+    })
+
+    res.json(comment);
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an error creating Task", 400));
+  }
+});
+
+export const addSubTaskComment = catchAsync(async (req, res, next) => {
+  const { text, taskId, userEmail, commentTime } = req.body;
+  try {
+
+    const user = await prisma.user.findFirst({
+      where:{
+        email: userEmail
+      }
+    })
+    
+    const comment = await prisma.comment.create({
+      data:{
+        text,
+      subtaskId: taskId,
       userId: user.userId,
       username: user.username,
       commentTime,
@@ -484,7 +581,20 @@ export const getTask = catchAsync(async (req, res, next) => {
             username: true
           }
         },
-        subTasks: true,
+        subTasks: {
+          include: {
+            assignee:{
+              select: {
+                username: true
+              }
+            },
+            author: {
+              select: {
+                username: true
+              }
+            }
+          }
+        },
         assignee:{
           select:{
             username: true
@@ -542,8 +652,60 @@ export const updateTask = catchAsync(async (req, res, next) => {
 
 });
 
+export const updateSubTask = catchAsync(async (req, res, next) => {
+  const { subTaskId,subTaskStatus, subTaskAssignee, subTaskDescription  } = req.body;
+
+  try {
+
+    const user = await prisma.user.findFirst({
+      where:{
+        username: subTaskAssignee
+      }
+    })
+
+    if(!isEmpty(subTaskStatus)){
+      const subTask = await prisma.subtask.findFirst({
+        where:{
+          id: subTaskId
+        }
+      })
+
+      if(subTask.status === 'To Do' && ( subTaskStatus === 'Under Review' || subTaskStatus === 'Completed')){
+        return next(new AppError(`Cannot change status from "To Do" to : ${subTaskStatus}`, 500))
+      }
+
+      if(subTask.status === 'Work In Progress' && ( subTaskStatus === 'To Do' || subTaskStatus === 'Completed')){
+        return next(new AppError(`Cannot change status from "Work In Progress" to : ${subTaskStatus}`, 500))
+      }
+
+      if(subTask.status === 'Under Reviews' && ( subTaskStatus === 'To Do' || subTaskStatus === 'Work In Progress')){
+        return next(new AppError(`Cannot change status from "Under Reviews" to : ${subTaskStatus}`, 500))
+      }
+
+      if(subTask.status === 'Completed' && ( subTaskStatus === 'To Do' || subTaskStatus === 'Work In Progress' || subTaskStatus === 'Under Reviews')){
+        return next(new AppError(`Cannot change status from "Completed" to : ${subTaskStatus}`, 500))
+      }
+    }
+
+    const subTask = await prisma.subtask.update({
+      where: {
+        id: subTaskId,
+      },
+      data:{
+        description: subTaskDescription,
+        status: subTaskStatus,
+        assignedUserId: user.userId
+    }
+    });
+    res.status(200).json({ message: `Task updated Successfully` });
+  } catch (error) {
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+
+});
+
 export const uploadAttachment = catchAsync(async (req, res, next) => {
-  const { fileBase64, fileName, taskId, uploadedBy} = req.body;
+  const { fileBase64, fileName, taskId, uploadedBy,} = req.body;
   try {
 
     const user = await prisma.user.findFirst({
@@ -561,7 +723,34 @@ export const uploadAttachment = catchAsync(async (req, res, next) => {
         }
       })
       if(attachment)
-      return next(new AppError("Attachment uploaded Successfully", 200));
+      return next(new SuccessResponse("Attachment uploaded Successfully", 200));
+
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an error uploading Attachment", 400));
+  }
+});
+
+export const uploadSubTaskAttachment = catchAsync(async (req, res, next) => {
+  const { fileBase64, fileName, subTaskId, uploadedBy,} = req.body;
+  try {
+
+    const user = await prisma.user.findFirst({
+      where:{
+        email: uploadedBy
+      }
+    })
+
+      const attachment = await prisma.attachment.create({
+        data:{
+          fileBase64: fileBase64,
+        fileName: fileName,
+        subTaskId: subTaskId,
+        uploadedById: user.userId
+        }
+      })
+      if(attachment)
+      return next(new SuccessResponse("Attachment uploaded Successfully", 200));
 
   } catch (error) {
     console.error(error);
@@ -570,9 +759,18 @@ export const uploadAttachment = catchAsync(async (req, res, next) => {
 });
 
 export const deleteAttachment = catchAsync(async (req, res, next) => {
-  const { taskId,} = req.query;
+  const { taskId, isSubTask} = req.query;
   try {
-
+    const isSubTaskBool = Boolean(isSubTask);
+    if(isSubTaskBool === true){
+      const deletedAttachment = await prisma.attachment.deleteMany({
+        where: {
+          subTaskId: Number(taskId),  // Replace with the ID of the user to delete
+        },
+      });
+        if(deletedAttachment)
+        return next(new AppError("Attachment deleted Successfully", 200));
+    }else{
     const deletedAttachment = await prisma.attachment.deleteMany({
       where: {
         taskId: Number(taskId),  // Replace with the ID of the user to delete
@@ -580,7 +778,7 @@ export const deleteAttachment = catchAsync(async (req, res, next) => {
     });
       if(deletedAttachment)
       return next(new AppError("Attachment deleted Successfully", 200));
-
+    }
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an error deleting Attachment", 400));
@@ -588,9 +786,18 @@ export const deleteAttachment = catchAsync(async (req, res, next) => {
 });
 
 export const downloadAttachment = catchAsync(async (req, res, next) => {
-  const { taskId,} = req.query;
+  const { taskId, isSubTask} = req.query;
+  const isSubTaskBool = Boolean(isSubTask);
   try {
-
+    if(isSubTaskBool === true){
+      const downloadAttachment = await prisma.attachment.findFirst({
+        where: {
+          subTaskId: Number(taskId),  // Replace with the ID of the user to delete
+        },
+      });
+        if(downloadAttachment)
+        return res.status(200).json(downloadAttachment);
+    }else{
     const downloadAttachment = await prisma.attachment.findFirst({
       where: {
         taskId: Number(taskId),  // Replace with the ID of the user to delete
@@ -598,9 +805,120 @@ export const downloadAttachment = catchAsync(async (req, res, next) => {
     });
       if(downloadAttachment)
       return res.status(200).json(downloadAttachment);
-
+    }
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an error downloading Attachment", 400));
   }
+});
+
+export const createSubTask = catchAsync(async (req, res, next) => {
+  const { title, taskId, status, startDate , sprintId, dueDate, description, authorUserId, assignedUserId} = req.body;
+  try {
+
+    const authorUser = await prisma.user.findFirst({
+      where:{
+        email: authorUserId
+      }
+    })
+    const date = new Date(startDate); 
+    const isoStartTime = date.toISOString();
+    const endDate = new Date(dueDate); 
+    const isoDueTime = endDate.toISOString();
+    const subTask = await prisma.subtask.create({
+      data:{
+        title,
+      description,
+      status,
+      taskId,
+      startDate: isoStartTime,
+      dueDate: isoDueTime,
+      authorUserId: authorUser.userId,
+      assignedUserId: Number(assignedUserId)
+      }
+    })
+    return next(new SuccessResponse("SubTask Created Successfully", 200));
+
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an error creating Task", 400));
+  }
+});
+
+export const getSubTask = catchAsync(async (req, res, next) => {
+  const { subTaskId } = req.query;
+  let resultList = []
+  try {
+    const subTask = await prisma.subtask.findFirst({
+      where: {
+        id: Number(subTaskId),
+      },
+      include:{
+        comments: true,
+        attachments: true,
+        author: {
+          select: {
+            username: true
+          }
+        },
+        assignee:{
+          select:{
+            username: true
+          }
+        }
+      }
+    });
+    res.json(subTask);
+  } catch (error) {
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+
+});
+
+export const closeCompletedTask = catchAsync(async (req, res, next) => {
+  const { taskId, email } = req.query;
+
+  try {
+
+    const task = await prisma.task.findFirst({
+      where:{
+        id: Number(taskId)
+      },
+      include:{
+        assignee: {
+          select: {
+            email: true
+          }
+        },
+        subTasks: true
+      }
+    })
+
+    if (task.assignee.email !== email) {
+      return next(new AppError("Cannot close Task assigned to other people", 500));
+    }
+    
+    // Use for...of to check the status of each subtask
+    for (const subTask of task.subTasks) {
+      console.log(subTask.status);
+    
+      // If a subtask is not completed, return an error
+      if (subTask.status !== "Completed") {
+        return next(new AppError("Please complete all the subTasks before closing this task", 500));
+      }
+    }
+
+    const updatedTask = await prisma.task.update({
+      where: {
+        id: Number(taskId),
+      },
+      data:{
+          status: "Closed"
+      }
+    });
+    return next(new SuccessResponse("Task Closed Successfully", 200));
+  } catch (error) {
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+
 });

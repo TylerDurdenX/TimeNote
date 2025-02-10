@@ -3,6 +3,10 @@ import { useGetProjectTasksQuery } from '@/store/api'
 import React from 'react'
 import {DataGrid, GridColDef} from '@mui/x-data-grid'
 import { dataGridClassNames, dataGridSxStyles } from '@/lib/utils'
+import { Button } from '@mui/material'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import TaskPage from './TaskPage'
+import { useSearchParams } from 'next/navigation'
 
 type Props = {
     projectId: string
@@ -11,7 +15,11 @@ type Props = {
     priority: string
 }
 
-const columns: GridColDef[] =[
+const TableView = ({projectId,sprint, assignedTo, priority}: Props) => {
+
+  const userEmail = useSearchParams().get("email");
+
+  const columns: GridColDef[] =[
     {
         field: "title",
         headerName: "Title",
@@ -133,9 +141,38 @@ const columns: GridColDef[] =[
           );
         },
       },   
+      {
+        field: "taskId",
+        headerName: "",
+        width: 150,
+        renderCell: (params) => {
+          return (
+            <div className="flex justify-center items-center h-full">
+                <Dialog>
+            <div className="my-3 flex justify-between">
+              <DialogTrigger asChild>
+              <Button
+                variant="contained"
+                className="text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 px-6 py-2 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105"
+              >
+                View
+              </Button>
+              </DialogTrigger>
+              
+            </div>
+            <DialogContent className="max-w-[85vw] mt-5 mb-5 overflow-y-auto">
+              <TaskPage taskId= {params.row.id} email={userEmail!} projectId={params.row.projectId}/>
+            </DialogContent>
+          </Dialog>
+              
+              
+            </div>
+          );
+        },
+      },
 ]
 
-const TableView = ({projectId,sprint, assignedTo, priority}: Props) => {
+
 const isDarkMode = false// useAppSelector((state) => state.global.isDarkMode)
     const {
             data: tasks,

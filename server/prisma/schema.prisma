@@ -150,7 +150,7 @@ model TaskHistory{
 model Comment {
   id     Int    @id @default(autoincrement())
   text   String
-  taskId Int
+  taskId Int?
   userId Int
   username String
   commentTime DateTime

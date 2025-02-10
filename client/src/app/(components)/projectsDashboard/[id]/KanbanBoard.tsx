@@ -1,4 +1,5 @@
 import {
+  useCloseTaskMutation,
   useCreateTaskMutation,
   useGetProjectTasksQuery,
   useGetProjectUsersQuery,
@@ -52,6 +53,7 @@ import Comments from "./Comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/components/Sidebar/nav-user";
 import TaskPage from "./TaskPage";
+import { Separator } from "@/components/ui/separator";
 
 type BoardProps = {
   id: string;
@@ -77,10 +79,16 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId}: Board
 
   const [updateTaskStatus, response] = useUpdateTaskStatusMutation();
 
-  const moveTask = (taskId: number, toStatus: string) => {
+  const moveTask = async(taskId: number, toStatus: string) => {
     try {
-      updateTaskStatus({ taskId, status: toStatus });
-      toast.success("Task status updated successfully");
+      const response = await updateTaskStatus({ taskId, status: toStatus , email: email});
+       // @ts-ignore
+      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+                      // @ts-ignore
+                      toast.error(response.error?.data.message)
+                    }else{
+                      toast.success(response.data?.message);
+                    }
     } catch (err) {
       toast.error("Some Error occurred, please try again later");
     }
@@ -179,7 +187,6 @@ const TaskColumn = ({
       sprintId: sprintId,
       projectId: Number(id),
     };
-    console.log(formData);
     try {
       const response = createTask(formData);
       setTaskName('')
@@ -440,6 +447,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
     : "";
 
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
+  const [closeCompletedTask] = useCloseTaskMutation();
   const [updateTaskAssignee] = useUpdateTaskAssigneeMutation();
 
   const assignTask = (taskId: number, email: string) => {
@@ -451,10 +459,31 @@ const Task = ({ task, email, projectId }: TaskProps) => {
     }
   };
 
-  const moveTaskFromDropdown = (taskId: number, toStatus: string) => {
+  const moveTaskFromDropdown = async(taskId: number, toStatus: string) => {
     try {
-      updateTaskStatus({ taskId, status: toStatus });
-      toast.success("Task status updated successfully");
+      const response = await updateTaskStatus({ taskId, status: toStatus , email: email});
+       // @ts-ignore
+      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+                      // @ts-ignore
+                      toast.error(response.error?.data.message)
+                    }else{
+                      toast.success(response.data?.message);
+                    }
+    } catch (err) {
+      toast.error("Some Error occurred, please try again later");
+    }
+  };
+
+  const closeTask = async(taskId: number) => {
+    try {
+      const response = await closeCompletedTask({ taskId, email: email});
+       // @ts-ignore
+      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+                      // @ts-ignore
+                      toast.error(response.error?.data.message)
+                    }else{
+                      toast.success(response.data?.message);
+                    }
     } catch (err) {
       toast.error("Some Error occurred, please try again later");
     }
@@ -517,15 +546,6 @@ const Task = ({ task, email, projectId }: TaskProps) => {
           isDragging ? "opacity-60" : "opacity-100"
         }`}
       >
-        {task.attachments && task.attachments.length > 0 && (
-          <Image
-            src={`/${task.attachments[0].fileUrl}`}
-            alt={task.attachments[0].fileName}
-            width={400}
-            height={200}
-            className="h-auto w-full rounded-t-md"
-          />
-        )}
 
         <div className="p-4 md:p-6">
           <div className="flex items-start justify-between">
@@ -601,6 +621,14 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                   }}
                 >
                   Completed
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    closeTask(task.id);
+                  }}
+                >
+                  Close Task
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -685,7 +713,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                   <DialogHeader>
                     <DialogTitle>Comments </DialogTitle>
                   </DialogHeader>
-                  <Comments email={email} taskId={task.id} />
+                  <Comments email={email} taskId={task.id}/>
                 </DialogContent>
               </Dialog>
               <span className="ml-1 text-sm dark:text-neutral-400">

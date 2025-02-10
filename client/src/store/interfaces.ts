@@ -129,6 +129,13 @@ export interface UploadAttachment{
     uploadedBy: string
 }
 
+export interface UploadSubTaskAttachment{
+    fileBase64: string,
+    fileName: string,
+    subTaskId: number,
+    uploadedBy: string
+}
+
 export interface DownloadAttachment{
     id: number,
     fileBase64: string,
@@ -151,6 +158,36 @@ export interface Task {
     projectId : number
     authorUserId? : number
     assignedUserId? : number
+    subTasks: SubTask[]
+
+    author?: User
+    assignee?: User
+    comments?: Comment[]
+    attachments?: Attachment[]
+}
+
+export interface SubTask {
+    id: number,
+    title: string,
+    description: string
+    status: string
+    taskId: number
+    startDate: string
+    dueDate: string
+    authorUserId: number
+    assignedUserId: number
+}
+
+export interface SubTaskObject {
+    id: number,
+    title: string,
+    description: string
+    status: string
+    taskId: number
+    startDate: string
+    dueDate: string
+    authorUserId: number
+    assignedUserId: number
 
     author?: User
     assignee?: User
@@ -177,6 +214,17 @@ export interface TaskFormData {
     sprintId: string
     projectId: number
 };
+
+export interface SubTaskFormData{
+    title: string
+    description: string,
+    status: string,
+    taskId: number,
+    startDate: string,
+    dueDate: string,
+    assignedUserId: string,
+    authorUserId: string,
+}
 
 export interface TaskComments{
     id: number,    
@@ -224,4 +272,11 @@ export interface UpdateTaskData {
     taskPoints: number | undefined
     assignee: string | undefined
     taskDescription: string
+}
+
+export interface UpdateSubTaskData {
+    subTaskId: number
+    subTaskStatus: string | undefined
+    subTaskAssignee: string | undefined
+    subTaskDescription: string
 }

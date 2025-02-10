@@ -13,17 +13,23 @@ import {
   ProjectUsers,
   ScreenshotResponse,
   SprintResponse,
+  SubTask,
+  SubTaskFormData,
+  SubTaskObject,
   Task,
   TaskComments,
   TaskFormData,
   Team,
+  UpdateSubTaskData,
   UpdateTaskData,
   UploadAttachment,
+  UploadSubTaskAttachment,
   UserDetails,
   UserFilterResponse,
   UserHierarchy,
   UsersListResponse,
 } from "./interfaces";
+import axios, { AxiosProgressEvent } from 'axios';
 
 import { useDispatch } from "react-redux";
 import { setAuthUser } from "@/store/authSlice";
@@ -103,7 +109,9 @@ export const api = createApi({
     "Tasks",
     "Comment",
     "SprintCount",
-    "Task"
+    "Task",
+    "SubTask",
+    "SubTaskComment"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -241,11 +249,21 @@ export const api = createApi({
     TaskComments[],
       { taskId: number, email: string}
     >({
-      query: ({ taskId,email}) => {
+      query: ({ taskId,email,}) => {
         const url = `api/user/getComments?taskId=${taskId}&email=${email}`;
         return url;
       },
       providesTags: ["Comment"],
+    }),
+    getSubTaskComments: build.query<
+    TaskComments[],
+      { subTaskId: number, email: string}
+    >({
+      query: ({ subTaskId,email,}) => {
+        const url = `api/user/getSubTaskComments?subTaskId=${subTaskId}&email=${email}`;
+        return url;
+      },
+      providesTags: ["SubTaskComment"],
     }),
     addComment: build.mutation<
     ApiResponse[],
@@ -258,6 +276,17 @@ export const api = createApi({
       }),
       invalidatesTags: ["Comment","Tasks"],
     }),
+    addSubTaskComment: build.mutation<
+    ApiResponse[],
+      AddComment
+    >({
+      query: (comment) => ({
+        url: "api/user/addSubTaskComment",
+        method: "POST",
+        body: comment,
+      }),
+      invalidatesTags: ["SubTaskComment","SubTask"],
+    }),
     getProjectUsers: build.query<
     ProjectUsers[],
       { projectId: string}
@@ -267,14 +296,21 @@ export const api = createApi({
         return url;
       },
     }),
-    updateTaskStatus: build.mutation<Task, {taskId: number, status: string}>({
-      query: ({taskId, status})=> ({
-          url: `api/user/updateTaskStatus?taskId=${taskId}`,
+    updateTaskStatus: build.mutation<ApiResponse, {taskId: number, status: string, email: string}>({
+      query: ({taskId, status, email})=> ({
+          url: `api/user/updateTaskStatus?taskId=${taskId}&email=${email}`,
           method: "PATCH",
           body: {status},
       }), 
       invalidatesTags : ["Tasks"]
   }),
+  closeTask: build.mutation<ApiResponse, {taskId: number, email: string}>({
+    query: ({taskId, email})=> ({
+        url: `api/user/closeCompletedTask?taskId=${taskId}&email=${email}`,
+        method: "PATCH",
+    }), 
+    invalidatesTags : ["Tasks"]
+}),
   updateTaskAssignee: build.mutation<Task, {taskId: number, email: string}>({
     query: ({taskId, email})=> ({
         url: `api/user/updateTaskAssignee?taskId=${taskId}&email=${email}`,
@@ -291,13 +327,42 @@ updateTask: build.mutation<ApiResponse, UpdateTaskData>({
   }), 
   invalidatesTags : ["Tasks", "Task"]
 }),
+updateSubTask: build.mutation<ApiResponse, UpdateSubTaskData >({
+  query: (body)=> ({
+      url: `api/user/updateSubTask`,
+      method: "PATCH",
+      body: body,
+  }), 
+  invalidatesTags : ["Task", "SubTask"]
+}),
 uploadAttachment: build.mutation<ApiResponse, UploadAttachment>({
   query: (body)=> ({
       url: `api/user/uploadAttachment`,
       method: "POST",
       body: body,
+      async onUploadProgress(progressEvent: AxiosProgressEvent) {
+        // Calculate progress as percentage
+        if (progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          return progress; // Return progress percentage
+        }
+      },
   }), 
   invalidatesTags : ["Task"]
+}),
+uploadSubTaskAttachment: build.mutation<ApiResponse, UploadSubTaskAttachment>({
+  query: (body)=> ({
+      url: `api/user/uploadSubTaskAttachment`,
+      method: "POST",
+      body: body,
+      async onUploadProgress(progressEvent: AxiosProgressEvent) {
+        if (progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          return progress; 
+        }
+      },
+  }), 
+  invalidatesTags : ["SubTask"]
 }),
   createTask: build.mutation<ApiResponse, TaskFormData>({
     query: (task)=> ({
@@ -307,7 +372,14 @@ uploadAttachment: build.mutation<ApiResponse, UploadAttachment>({
     }), 
     invalidatesTags : ["Tasks"]
 }),
-
+createSubTask: build.mutation<ApiResponse, SubTaskFormData>({
+  query: (task)=> ({
+      url: "api/user/createSubTask",
+      method: "POST",
+      body: task,
+  }), 
+  invalidatesTags : ["Task"]
+}),
 createProject: build.mutation<ApiResponse, ProjectFormData>({
   query: (project)=> ({
       url: "api/user/createProject",
@@ -331,14 +403,14 @@ getSprint: build.query<SprintResponse[], { projectId: string}>({
   },
   providesTags : ["SprintCount"]
 }),
-deleteAttachment: build.mutation<ApiResponse, { taskId: number}>({
-  query: ({taskId})=> ({
-    url: `api/user/deleteAttachment?taskId=${taskId}`,
+deleteAttachment: build.mutation<ApiResponse, { taskId: number, isSubTask: boolean}>({
+  query: ({taskId, isSubTask})=> ({
+    url: `api/user/deleteAttachment?taskId=${taskId}&isSubTask=${isSubTask}`,
     method: "DELETE",
 }), 
-  invalidatesTags : ["Task"]
+  invalidatesTags : ["Task", "SubTask"]
 }),
-downloadAttachment: build.mutation<DownloadAttachment, { taskId: number}>({
+downloadAttachment: build.mutation<DownloadAttachment, { taskId: number, isSubTask: boolean}>({
   query: ({taskId})=> ({
     url: `api/user/downloadAttachment?taskId=${taskId}`,
     method: "GET",
@@ -350,6 +422,13 @@ getTask: build.query<Task, { taskId: number}>({
     return url;
   },
   providesTags : ["Task"]
+}),
+getSubTask: build.query<SubTaskObject, { subTaskId: number}>({
+  query: ({ subTaskId,}) => {
+    const url = `api/user/getSubTask?subTaskId=${subTaskId}`;
+    return url;
+  },
+  providesTags : ["SubTask"]
 }),
 getProjectManager: build.query<PmUserResponse[], {}>({
   query: () => {
@@ -422,5 +501,12 @@ export const {
   useUpdateTaskMutation,
   useUploadAttachmentMutation,
   useDeleteAttachmentMutation,
-  useDownloadAttachmentMutation
+  useDownloadAttachmentMutation,
+  useCreateSubTaskMutation,
+  useGetSubTaskQuery,
+  useAddSubTaskCommentMutation,
+  useGetSubTaskCommentsQuery,
+  useUploadSubTaskAttachmentMutation,
+  useUpdateSubTaskMutation,
+  useCloseTaskMutation
 } = api;
