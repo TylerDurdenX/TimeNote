@@ -44,7 +44,6 @@ const ProjectSectionHeader = ({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    // Prepare the form data to submit
     const formData = {
       title: title,
       description: description,

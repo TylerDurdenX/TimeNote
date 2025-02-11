@@ -4,7 +4,6 @@ import {  useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProj
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import Comments from "../Comments";
 import SubTaskComment from "./SubTaskComments";
 
 type Props = {
@@ -45,7 +44,7 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
   const [downloadAttachmentQuery, { isLoading: isLoadingDownloadAttachment }] =
   useDownloadAttachmentMutation();
 
-  const maxSize = 1.5 * 1024 * 1024; // in bytes
+  const maxSize = 1.5 * 1024 * 1024; 
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -246,7 +245,6 @@ useEffect(() => {
   const handleSaveChanges = async (event: React.FormEvent) => {
       event.preventDefault();
   
-      // Prepare the form data to submit
       const updateTaskData = {
         subTaskId: subTaskId,
         subTaskStatus: subTaskStatus,
@@ -270,7 +268,6 @@ useEffect(() => {
 
   return (
     <div className="w-[80vw] max-h-[90vh] overflow-y-auto mx-auto p-6 bg-white rounded-xl shadow-lg space-y-6 dark:bg-gray-800 dark:text-white">
-      {/* Task Title and Description */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-semibold">{task?.title}</h1>
@@ -290,7 +287,6 @@ useEffect(() => {
           </div>
 
           <div className="text-sm relative">
-            {/* Assignee Editable Section */}
             {isAssigneeEditable ? (
               <select
                 value={subTaskAssignee}
@@ -308,15 +304,13 @@ useEffect(() => {
               </select>
             ) : (
               <div className="flex items-center">
-                {/* Display the text */}
                 <div
                   className="flex items-center"
                   onMouseEnter={() => setIsAssigneeHovered(true)}
-                  onMouseLeave={() => setIsAssigneeHovered(false)} // Trigger hover leave
+                  onMouseLeave={() => setIsAssigneeHovered(false)} 
                 >
                   <span className="cursor-pointer">Assignee: {subTaskAssignee}</span>
 
-                  {/* Pencil icon that appears when hovering over the parent */}
                   <Pencil
                     size={16}
                     className={`ml-2 cursor-pointer ${
@@ -330,7 +324,6 @@ useEffect(() => {
           </div>
 
           <div className="text-sm relative">
-            {/* Assignee Editable Section */}
             {isEditableStatus ? (
               <select
                 value={subTaskStatus}
@@ -348,15 +341,13 @@ useEffect(() => {
               </select>
             ) : (
               <div className="flex items-center">
-                {/* Display the text */}
                 <div
                   className="flex items-center"
                   onMouseEnter={() => setIsStatusHovered(true)}
-                  onMouseLeave={() => setIsStatusHovered(false)} // Trigger hover leave
+                  onMouseLeave={() => setIsStatusHovered(false)} 
                 >
                   <span className="cursor-pointer">Status: {subTaskStatus}</span>
 
-                  {/* Pencil icon that appears when hovering over the parent */}
                   <Pencil
                     size={16}
                     className={`ml-2 cursor-pointer ${
@@ -417,7 +408,6 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Attachments Section */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Attachments</h2>
         <div className="border-2 border-dashed border-gray-300 p-4 rounded-lg dark:border-gray-600">
@@ -472,7 +462,6 @@ useEffect(() => {
           </div>
           <div className="mt-4">
           <div>
-      {/* Button to trigger file input */}
       {isLoadingUploadAttachment && (
         <Progress value={uploadProgress} max={100} color="blue" />
       )}
@@ -486,8 +475,6 @@ useEffect(() => {
     </button>
     }
       
-
-      {/* Hidden file input */}
       <input
         id="fileInputSubTask"
         type="file"
@@ -500,7 +487,6 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Comments Section */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Comments</h2>
         <div className="mt-2 border-t-2 border-gray-300 dark:border-gray-600"></div>

@@ -3,7 +3,6 @@ import {DataGrid, GridColDef} from '@mui/x-data-grid'
 import { dataGridClassNames, dataGridSxStyles } from '@/lib/utils'
 import { Button } from '@mui/material'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
-import { useSearchParams } from 'next/navigation'
 import { SubTask } from '@/store/interfaces'
 import SubTaskPage from './SubTaskPage'
 
@@ -29,17 +28,17 @@ const SubTaskTable = ({subTasks, email, projectId} :  Props) => {
         {
           field: "title",
           headerName: "Title",
-          flex: 1, // Takes up remaining space equally with other flexible columns
+          flex: 1, 
         },
         {
           field: "description",
           headerName: "Description",
-          flex: 2, // Takes up twice the space as the "title" column
+          flex: 2, 
         },
         {
           field: "status",
           headerName: "Status",
-          flex: 1, // Flexible width
+          flex: 1, 
           renderCell: (params) => {
             let bgColor, textColor;
             switch (params.value) {
@@ -77,29 +76,29 @@ const SubTaskTable = ({subTasks, email, projectId} :  Props) => {
         {
             field: "startDate",
             headerName: "Start Date",
-            flex: 1, // Flexible width
+            flex: 1, 
             renderCell: (params) => {
-              return formatDate(params.value); // Format the startDate value
+              return formatDate(params.value); 
             },
           },
           {
             field: "dueDate",
             headerName: "Due Date",
-            flex: 1, // Flexible width
+            flex: 1, 
             renderCell: (params) => {
-              return formatDate(params.value); // Format the dueDate value
+              return formatDate(params.value); 
             },
           },
         {
           field: "author",
           headerName: "Author",
-          flex: 1, // Flexible width
+          flex: 1, 
           renderCell: (params) => params.value.username || "Unknown",
         },
         {
           field: "assignee",
           headerName: "Assignee",
-          flex: 1, // Flexible width
+          flex: 1, 
           renderCell: (params) => params.value.username || "Unassigned",
         },
         {

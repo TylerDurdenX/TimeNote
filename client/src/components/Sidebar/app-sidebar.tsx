@@ -112,8 +112,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             icon: PresentationIcon,
           },
           {
-            title: "Timeline",
-            url: "/projectsTimeline",
+            title: "Projects Timeline",
+            url: `/projectsTimeline?email=${userEmail}`,
             icon: Cast,
           },
         ],

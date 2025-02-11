@@ -54,6 +54,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/components/Sidebar/nav-user";
 import TaskPage from "./TaskPage";
 import { Separator } from "@/components/ui/separator";
+import TaskHistory from "./History";
 
 type BoardProps = {
   id: string;
@@ -172,7 +173,6 @@ const TaskColumn = ({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    // Prepare the form data to submit
     const formData = {
       title: taskName,
       description: taskDescription,
@@ -188,7 +188,7 @@ const TaskColumn = ({
       projectId: Number(id),
     };
     try {
-      const response = createTask(formData);
+      const response = await createTask(formData);
       setTaskName('')
       setTaskDescription('')
       setTaskPriority('')
@@ -198,7 +198,15 @@ const TaskColumn = ({
       setTaskPoints('')
       setAssignedUserId('')
       setSprintId('')
-      toast.success("Task Created Successfully");
+
+      // @ts-ignore
+      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+        // @ts-ignore
+        toast.error(response.error?.data.message)
+      }else{
+        // @ts-ignore
+        toast.success(response.data?.message);
+      }
       setIsOpen(false);
     } catch (err: any) {
       toast.error(err.data.message);
@@ -453,7 +461,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
   const assignTask = (taskId: number, email: string) => {
     try {
       updateTaskAssignee({ taskId, email });
-      toast.success("Task status updated successfully");
+      toast.success("Task assignee updated successfully");
     } catch (err) {
       toast.error("Some Error occurred, please try again later");
     }
@@ -517,7 +525,6 @@ const Task = ({ task, email, projectId }: TaskProps) => {
   const [tagWidth, setTagWidth] = useState(0);
 
   useEffect(() => {
-    // Wait for the component to be rendered, then measure the width of one tag
     if (tagRef.current) {
       setTagWidth(tagRef.current.offsetWidth);
     }
@@ -535,6 +542,16 @@ const Task = ({ task, email, projectId }: TaskProps) => {
       }
     }
   }, [taskTagsSplit, tagWidth]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
 
   return (
     <Dialog>
@@ -555,20 +572,18 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                 className="flex flex-1 flex-wrap items-center gap-2"
                 ref={containerRef}
               >
-                {/* Render only the visible tags */}
                 {taskTagsSplit
                   .slice(0, taskTagsSplit.length - overflowCount)
                   .map((tag, index) => (
                     <div
                       key={tag}
-                      ref={index === 0 ? tagRef : null} // Attach ref to the first tag for measuring width
+                      ref={index === 0 ? tagRef : null} 
                       className="rounded-full bg-blue-100 px-2 py-1 text-xs"
                     >
                       {tag}
                     </div>
                   ))}
 
-                {/* Show the "+X" tag if there are any overflowed tags */}
                 {overflowCount > 0 && (
                   <div
                     key="more-tags"
@@ -666,7 +681,6 @@ const Task = ({ task, email, projectId }: TaskProps) => {
             <div className="flex space-x-[6px] overflow-hidden">
               {task.assignee && (
                 <Avatar className="h-8 w-8 rounded-full border-white object-cover dark:border-dark-secondary">
-                {/* Check if base64 and profilePicture exist before accessing */}
                 {task.assignee?.profilePicture?.base64 ? (
                   <AvatarImage
                     src={task.assignee.profilePicture.base64}
@@ -674,7 +688,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                   />
                 ) : (
                   <AvatarFallback className="rounded-lg">
-                    {getInitials(task.assignee.username!)} {/* Ensure username is not null/undefined */}
+                    {getInitials(task.assignee.username!)} 
                   </AvatarFallback>
                 )}
               </Avatar>
@@ -695,12 +709,47 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                       <History size={20} className="" />
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>History </DialogTitle>
-                      <DialogDescription>Activity trail</DialogDescription>
-                    </DialogHeader>
+                  <DialogContent className="max-w-[80vw] overflow-y-auto ">
+                  <DialogHeader>
+                    <DialogTitle>Task History</DialogTitle>
+                    <DialogDescription className="ml-7"> Current Status:  
+                    <span
+                      className="inline-flex rounded-full px-2 text-xs ml-1 font-semibold leading-5"
+                      style={{
+                        backgroundColor:
+                          task.status === "To Do"
+                            ? "#2563EB"
+                            : task.status === "Work In Progress"
+                            ? "#059669"
+                            : task.status === "UnderReview"
+                            ? "#D97706"
+                            : task.status === "Completed"
+                            ? "#000000"
+                            : "#E5E7EB", 
+                        color:
+                          task.status === "To Do" ||
+                          task.status === "Work In Progress" ||
+                          task.status === "UnderReview" ||
+                          task.status === "Completed"
+                            ? "#ffffff"
+                            : "#000000", 
+                      }}
+                    >
+                      {task.status}
+                    </span>
+                  </DialogDescription>
+                  <DialogDescription className="ml-7"> Task Duration: {formatDate(task.startDate || "")} - {formatDate(task.dueDate || "")}  
+                  </DialogDescription>
+                  <DialogDescription className="ml-7"> Task Points: {task.points|| "" }  
+                  </DialogDescription>
+                  </DialogHeader>
+
+                    <TaskHistory taskId={task.id}/>
+                    <DialogFooter className="text-gray-600">
+                            All numbers are in hours except total time
+                          </DialogFooter>
                   </DialogContent>
+                  
                 </Dialog>
               </div>
               <Dialog>
@@ -709,7 +758,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                     <MessageSquareMore size={20} />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="max-w-[40vw] max-h-[40vw] overflow-y-auto ">
+                <DialogContent className="max-w-[40vw] overflow-y-auto ">
                   <DialogHeader>
                     <DialogTitle>Comments </DialogTitle>
                   </DialogHeader>

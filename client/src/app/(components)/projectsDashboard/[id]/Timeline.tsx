@@ -14,7 +14,7 @@ type Props = {
 type taskTypeItems = 'task' | 'milestone' | 'project';
 
 const Timeline = ({ projectId, sprint, assignedTo, priority }: Props) => {
-  const isDarkMode = 1; // useAppSelector((state) => state.global.isDarkMode)
+  const isDarkMode = 1; 
   const {
     data: tasks,
     isLoading,
@@ -26,29 +26,23 @@ const Timeline = ({ projectId, sprint, assignedTo, priority }: Props) => {
     locale: 'en-US',
   });
 
-  // Debug log to check the data returned
-  console.log('Fetched tasks:', tasks);
-
   const ganttTasks = useMemo(() => {
-    // Handle if tasks is undefined or null
     if (!tasks || tasks.length === 0) {
-      console.log('No tasks available');
-      return []; // Return an empty array if no tasks
+      return []; 
     }
 
-    // Ensure tasks are valid and filter out invalid or incomplete tasks
     return tasks
       .filter(
         (task) =>
           task != null &&
           task.startDate &&
           task.dueDate &&
-          task.title // Ensure all necessary fields are present
+          task.title 
       )
       .map((task) => ({
         start: task.startDate ? new Date(task.startDate as string) : new Date(),
         end: task.dueDate ? new Date(task.dueDate as string) : new Date(),
-        name: task.title || 'Untitled Task', // Default title if missing
+        name: task.title || 'Untitled Task', 
         id: `Task-${task.id}`,
         type: 'task' as taskTypeItems,
         progress: task.points ? (task.points / 10) * 100 : 0,
@@ -56,10 +50,9 @@ const Timeline = ({ projectId, sprint, assignedTo, priority }: Props) => {
       }));
   }, [tasks]);
 
-  if (isLoading) return <div>Loading tasks...</div>; // Show loading state
-  if (error) return <div>An error occurred while fetching tasks</div>; // Show error message if fetch failed
+  if (isLoading) return <div>Loading tasks...</div>; 
+  if (error) return <div>An error occurred while fetching tasks</div>; 
 
-  // Handle no tasks case
   if (ganttTasks.length === 0) {
     return <div>No tasks available for the selected project.</div>;
   }
@@ -99,7 +92,6 @@ const Timeline = ({ projectId, sprint, assignedTo, priority }: Props) => {
           />
         </div>
         <div className="px-4 pb-5 pt-1">
-          {/* Add New Task button */}
         </div>
       </div>
     </div>

@@ -140,8 +140,9 @@ model TaskHistory{
   taskId         Int
   userId         Int
   startDate      DateTime
-  endDate        DateTime
-  sprint          String
+  endDate        DateTime?
+  sprint          String?
+  time            String?
 
   task            Task    @relation(fields: [taskId], references: [id], name: "TaskHistory")
   user            User    @relation(fields: [userId], references: [userId], name: "TaskHistory")

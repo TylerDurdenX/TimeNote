@@ -49,7 +49,6 @@ const Comments = ({ taskId, email }: Props) => {
 
   return (
     <div className="w-full mx-auto p-4 bg-white overflow-y-auto rounded-lg shadow-lg">
-      {/* Comment list container */}
       <div className="max-h-[55vw] overflow-y-auto space-y-4">
         {data?.length === 0 ? (
           <div className="text-center text-gray-500">
@@ -57,7 +56,6 @@ const Comments = ({ taskId, email }: Props) => {
           </div>
         ) : (
           data?.map((comment, index) => {
-            // Format the comment time
             const commentDate = new Date(comment.commentTime);
             const formattedDate = commentDate.toISOString().split("T")[0];
             const formattedTime = commentDate

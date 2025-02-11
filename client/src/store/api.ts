@@ -19,6 +19,7 @@ import {
   Task,
   TaskComments,
   TaskFormData,
+  TaskHistory,
   Team,
   UpdateSubTaskData,
   UpdateTaskData,
@@ -111,7 +112,8 @@ export const api = createApi({
     "SprintCount",
     "Task",
     "SubTask",
-    "SubTaskComment"
+    "SubTaskComment",
+    "TaskHistory"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -138,7 +140,6 @@ export const api = createApi({
     getUser: build.query<UserResponse, { email: string }>({
       query: ({ email }) => {
         const url = `api/user/getUser?email=${email}`;
-        console.log("Request URL:", url);
         return url;
       },
       providesTags: ["User"],
@@ -403,6 +404,13 @@ getSprint: build.query<SprintResponse[], { projectId: string}>({
   },
   providesTags : ["SprintCount"]
 }),
+getTaskHistory: build.query<TaskHistory[], { taskId: number}>({
+  query: ({ taskId,}) => {
+    const url = `api/user/getTaskHistory?taskId=${taskId}`;
+    return url;
+  },
+  providesTags : ["TaskHistory"]
+}),
 deleteAttachment: build.mutation<ApiResponse, { taskId: number, isSubTask: boolean}>({
   query: ({taskId, isSubTask})=> ({
     url: `api/user/deleteAttachment?taskId=${taskId}&isSubTask=${isSubTask}`,
@@ -455,7 +463,6 @@ getProjectManager: build.query<PmUserResponse[], {}>({
           teams,
           roles,
         });
-        console.log("Request Body:", requestBody); // Debug log
         return {
           url: `api/user/updateUserSettingsData?email=${email}`,
           method: "POST",
@@ -508,5 +515,6 @@ export const {
   useGetSubTaskCommentsQuery,
   useUploadSubTaskAttachmentMutation,
   useUpdateSubTaskMutation,
-  useCloseTaskMutation
+  useCloseTaskMutation,
+  useGetTaskHistoryQuery
 } = api;

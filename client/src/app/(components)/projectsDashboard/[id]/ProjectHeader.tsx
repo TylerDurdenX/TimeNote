@@ -31,7 +31,6 @@ const ProjectHeader = ({activeTab, setActiveTab, priority, setPriority,
             <ProjectSectionHeader name='Project' buttonName='Create New Sprint' email= {email}
              projectId = {projectId}/>
         </div>
-        {/* Tabs */}
         <div className='flex flex-wrap-reverse gap-2 border-y border-gray-200 pb-[4px] pt-1 dark:border-stroke-dark sm:items-center'>
             <div className='flex flex-1 items-center gap-2 md:gap-4'>
                 <TabButton

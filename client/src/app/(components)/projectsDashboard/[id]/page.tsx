@@ -17,7 +17,6 @@ const url = window.location.href;
 const urlParams = new URL(url);
 const idFromUrl = urlParams.pathname.split('/')[2];
  const email =urlParams.searchParams.get("email")
- console.log(idFromUrl)
 
  const[priority, setPriority] = useState('')
  const[assignedTo, setAssignedTo] = useState('')

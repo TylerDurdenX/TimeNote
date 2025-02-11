@@ -83,6 +83,7 @@ interface Screenshot {
 }
 
 export interface ProjectListResponse{
+    id: number
     name: string
     description: string
     status: string
@@ -90,6 +91,19 @@ export interface ProjectListResponse{
     endDate: string
     projectManager: string
     completionStatus: number
+}
+
+export interface TaskHistory{
+    id: number
+    username: string
+    assignedFrom: string
+    assignedTill: string
+    toDo: number
+    WIP: number
+    underReview: number
+    completed: number
+    closed: number
+    totalTime: number
 }
 
 export enum Status {
