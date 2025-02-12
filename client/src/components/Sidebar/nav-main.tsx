@@ -17,7 +17,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface Item {
@@ -32,7 +31,7 @@ interface Props {
   items: Item[]; // Array of `Item` objects
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  isItem1Open: boolean
+  isItem1Open: boolean;
 }
 
 export function NavMain({
@@ -41,7 +40,7 @@ export function NavMain({
   setActiveTab,
   isItem1Open
 }: Props) {
-    return (
+  return (
     <SidebarGroup>
       <SidebarMenu>
         {items.map((item) => (
@@ -53,16 +52,23 @@ export function NavMain({
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon />}
+                <SidebarMenuButton tooltip={item.title} className="text-white">
+                  {item.icon && <item.icon className="text-white mb-0.5" />}
                   <span>{item.title}</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-white" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
+                    <SidebarMenuSubItem
+                      key={subItem.title}
+                      className={`${
+                        subItem.url.split("?")[0].replace("/", "") === activeTab
+                          ? "bg-gray-200 text-black rounded-lg"
+                          : "text-white rounded-xl"
+                      } group`} // Add group class here
+                    >
                       <SidebarMenuSubButton
                         onClick={() => {
                           setActiveTab(
@@ -73,12 +79,23 @@ export function NavMain({
                         className={`${
                           subItem.url.split("?")[0].replace("/", "") ===
                           activeTab
-                            ? "bg-gray-200"
-                            : "bg-transparent"
-                        }`}
+                            ? "bg-gray-200 text-black rounded-xl"
+                            : "bg-transparent text-white hover:bg-gray-100 hover:text-black hover:text-black rounded-xl"
+                        }`} // Hover styles for both text and icon
                       >
-                        <Link href={subItem.url}>
-                          {subItem.icon && <subItem.icon />}
+                        <Link href={subItem.url} className="flex items-center space-x-2">
+                          {subItem.icon && (
+                            <div
+                              className={`${
+                                subItem.url.split("?")[0].replace("/", "") ===
+                                activeTab
+                                  ? "text-black"
+                                  : "text-white hover:text-black"
+                              }`}
+                            >
+                              <subItem.icon className="h-4 w-4" />
+                            </div>
+                          )}
                           <span>{subItem.title}</span>
                         </Link>
                       </SidebarMenuSubButton>

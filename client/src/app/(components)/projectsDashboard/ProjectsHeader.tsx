@@ -45,7 +45,6 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
       refetchOnMountOrArgChange: true
     }
   );
-  console.log(data)
 
   const isFormValid = () => {
     return title && description && startDate && endDate && projectManager;

@@ -1,30 +1,43 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ProjectHeader from './ProjectHeader'
 import KanbanBoard from './KanbanBoard'
 import Timeline from './Timeline'
 import TableView from './Table'
 
-
 const Project = () => {
-const [activeTab, setActiveTab] =useState("Kanban Board")
-const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("Kanban Board")
+  const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false)
 
+  // URL Params State
+  const [idFromUrl, setIdFromUrl] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
 
-const url = window.location.href;
+  // Extra state variables
+  const [priority, setPriority] = useState('')
+  const [assignedTo, setAssignedTo] = useState('')
+  const [sprint, setSprint] = useState('')
 
-const urlParams = new URL(url);
-const idFromUrl = urlParams.pathname.split('/')[2];
- const email =urlParams.searchParams.get("email")
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = window.location.href
+      const urlParams = new URL(url)
+      const id = urlParams.pathname.split('/')[2]  
+      const emailParam = urlParams.searchParams.get('email')  
 
- const[priority, setPriority] = useState('')
- const[assignedTo, setAssignedTo] = useState('')
- const[sprint, setSprint] = useState('')
+      setIdFromUrl(id)
+      setEmail(emailParam)
+    }
+  }, []) 
+
+  if (idFromUrl === null || email === null) {
+    return <div>Loading...</div>  
+  }
 
   return (
     <div>
-        <ProjectHeader activeTab={activeTab} setActiveTab={setActiveTab} priority={priority} 
+      <ProjectHeader activeTab={activeTab} setActiveTab={setActiveTab} priority={priority} 
         setPriority={setPriority} assignedTo={assignedTo} setAssignedTo={setAssignedTo} sprint={sprint}
          setSprint={setSprint} email={email!} projectId= {Number(idFromUrl!)}/>
         {activeTab==="Kanban Board" && (

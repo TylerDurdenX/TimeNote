@@ -211,13 +211,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     updateItemsOnLoad(); // Call the function to update the items on page load
   }, [activeTab]);
 
+  const [isHovered, setIsHovered] = useState(false);
+
     const { data, isLoading, error } = useGetUserQuery({ email: userEmail!});
     return (
       <Sidebar collapsible="icon" {...props} variant="floating">
-        <SidebarHeader>
+        <SidebarHeader className="bg-[#001742] rounded-t-xl">
           <TeamSwitcher teams={mockData.teams} />
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="bg-[#001742]">
           <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/>
           <NavMain items={items} activeTab={activeTab} setActiveTab={setActiveTab}
            isItem1Open = {item1Open}/>
@@ -226,9 +228,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           isItem1Open = {item2Open} key={item2Open ? "open" : "closed"}/>
           <NavProjects projects={mockData.items2} activeTab={activeTab} setActiveTab={setActiveTab}/>
         </SidebarContent>
-        <SidebarFooter>
-          <NavUser user={data?.user || defaultUser} />
-        </SidebarFooter>
+        <SidebarFooter
+      className="bg-[#001742] rounded-b-xl"
+    >
+      <NavUser user={data?.user || defaultUser} />
+    </SidebarFooter>
         <SidebarRail />
       </Sidebar>
     );

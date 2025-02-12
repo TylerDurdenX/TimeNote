@@ -137,7 +137,7 @@ export function LchartInter() {
   )
 
   return (
-    <Card>
+    <Card className="h-[45vh]">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
           <CardTitle>Line Chart - Interactive</CardTitle>
@@ -169,7 +169,7 @@ export function LchartInter() {
       <CardContent className="px-2 sm:p-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
+          className="aspect-auto h-[28vh] w-full"
         >
           <LineChart
             accessibilityLayer

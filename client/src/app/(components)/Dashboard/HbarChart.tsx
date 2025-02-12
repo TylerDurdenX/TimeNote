@@ -44,13 +44,18 @@ const chartConfig = {
 
 export function HbarChart() {
   return (
-    <Card >
-      <CardHeader>
-        <CardTitle>Most Used Applications</CardTitle>
-        <CardDescription>January 2025</CardDescription>
-      </CardHeader>
+    <Card className="h-[45vh]"> {/* Set height to auto or a fixed height */}
+      <div className="flex justify-between w-full">
+        <CardHeader className="text-left">
+          <CardTitle>Most Used Applications</CardTitle>
+        </CardHeader>
+  
+        <CardHeader className="text-right">
+          <CardDescription>January 2025</CardDescription>
+        </CardHeader>
+      </div>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer className='h-[35vh] w-full' config={chartConfig}>
           <BarChart
             accessibilityLayer
             data={chartData}
@@ -98,15 +103,8 @@ export function HbarChart() {
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
     </Card>
-  )
+  );
+  
 }
 

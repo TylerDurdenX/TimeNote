@@ -1,21 +1,17 @@
 'use client'
 
 import React, { useEffect, useState } from "react";
-
-
+import India from "@react-map/india";
 const page = () => {
 
-  const [mapLoaded, setMapLoaded] = useState(false);
-
-  useEffect(() => {
-    // Optionally, you can check when the map has finished loading
-    setMapLoaded(true);
-  }, []);
-
   return (
-    <div style={{ width: "100%", height: "500px" }}>
-      
-    </div>
+    <div className="flex justify-center items-center min-h-screen w-full">
+  <div className="w-full md:w-[100vh] h-[100vh]">
+    <India size={800} hoverColor="orange" type="select-single" />
+  </div>
+</div>
+
+  
   )
 }
 

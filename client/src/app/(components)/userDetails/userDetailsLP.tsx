@@ -5,10 +5,10 @@ import React from "react";
 const UserDetailsLP = () => {
   return (
     <div className="flex items-center justify-center h-full mb-5 flex-col">
-      <div className="w-50 h-50 mb-4">
-        <Avatar className="w-full h-full object-cover flex items-center justify-center" />
-      </div>
-      <div className="mt-4">Please select a user to view details!</div>
+      <div className="flex items-center gap-3">
+  <img src="lynkpng.png" alt="Logo" className="w-90 h-36" />
+</div>
+      <div className="mt-4 text-xl">Please select a user to view details!</div>
     </div>
   );
 };

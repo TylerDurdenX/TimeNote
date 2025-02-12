@@ -22,6 +22,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { setAuthUser } from "@/store/authSlice";
+import { useState } from "react";
 
 export const getInitials = (fullName: string): string => {
   const nameParts = fullName.split(" ");
@@ -33,19 +34,37 @@ export const getInitials = (fullName: string): string => {
 };
 
 export function NavUser({
-  user,
+  user
 }: {
   user: {
     name: string;
     email: string;
     avatar: string;
-  };
-}) {
+  },
+})
+ {
+  const [isHovered, setIsHovered] = useState(false); // State for hover effect
+    const [isActive, setIsActive] = useState(false); // State for click effect
+  
+    const handleMouseEnter = () => setIsHovered(true);
+    const handleMouseLeave = () => setIsHovered(false);
+  
+    const handleClick = () => {
+      setIsActive(true); // Set as active when clicked
+    };
+  
+    const handleMenuClose = () => {
+      setIsActive(false); // Reset active state
+    };
+
+
   const { isMobile } = useSidebar();
   const dispatch = useDispatch();
   const router = useRouter();
   const LogOut = async () => {
     // setLoading(true);
+
+    
 
     try {
       await axios.post(
@@ -64,9 +83,13 @@ export function NavUser({
 
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+      <SidebarMenuItem 
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick} 
+      >
+        <DropdownMenu >
+          <DropdownMenuTrigger asChild >
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -78,11 +101,27 @@ export function NavUser({
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span
+                  className={`truncate font-semibold ${
+                    isHovered || isActive ? "text-black" : "text-white"
+                  }`}
+                >
+                  {user.name}
+                </span>
+                <span
+                  className={`truncate text-xs ${
+                    isHovered || isActive ? "text-black" : "text-white"
+                  }`}
+                >
+                  {user.email}
+                </span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
-            </SidebarMenuButton>
+              <ChevronsUpDown
+                className={`ml-auto size-4 ${
+                  isHovered || isActive ? "text-black" : "text-white"
+                }`}
+              />
+                </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"

@@ -100,17 +100,15 @@ const columns: GridColDef[] = [
     renderCell: (params) => {
       return (
         <div className="flex justify-center items-center h-full">
-            
-          <Button
+            <Link href={`/projectsDashboard/${params.value}?email=${email}`}>
+            <Button
             variant="contained"
             className="text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 px-6 py-2 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105"
-            onClick={() => {
-                console.log(params.value)
-                window.location.href = `/projectsDashboard/${params.value}?email=${email}`;
-            }}
           >
             View
           </Button>
+              </Link>
+          
           
         </div>
       );

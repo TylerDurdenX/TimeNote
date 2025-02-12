@@ -52,7 +52,7 @@ import { ChartConfig,
         }, [])
       
         return (
-          <Card className="flex flex-col">
+          <Card className="flex flex-col h-[45vh]">
             <CardHeader className="items-center pb-0">
               <CardTitle>Pie Chart - Donut with Text</CardTitle>
               <CardDescription>January - June 2024</CardDescription>
