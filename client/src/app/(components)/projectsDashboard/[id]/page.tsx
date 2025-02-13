@@ -10,11 +10,9 @@ const Project = () => {
   const [activeTab, setActiveTab] = useState("Kanban Board")
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false)
 
-  // URL Params State
   const [idFromUrl, setIdFromUrl] = useState<string | null>(null)
   const [email, setEmail] = useState<string | null>(null)
 
-  // Extra state variables
   const [priority, setPriority] = useState('')
   const [assignedTo, setAssignedTo] = useState('')
   const [sprint, setSprint] = useState('')

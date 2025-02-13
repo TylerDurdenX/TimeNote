@@ -1251,7 +1251,7 @@ export const getTaskHistory = catchAsync(async (req, res, next) => {
         underReview: underReview,
         completed: completed,
         closed: closed,
-        totalTime: (toDo + WIP + underReview+ completed + closed) / 8
+        totalTime: ((toDo + WIP + underReview+ completed + closed) / 24).toFixed(2)
       }
       resultList.push(result)
     })

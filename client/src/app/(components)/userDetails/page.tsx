@@ -21,7 +21,7 @@ const Page = () => {
         <div className="flex w-full text-gray-900">
           <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
           <Header
-              name="Screenshots"
+              name="User Details"
               hasFilters={false}
               hasTeamFilter={false}
               

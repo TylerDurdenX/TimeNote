@@ -1,5 +1,5 @@
 import React from "react";
-import { FilterX } from "lucide-react";
+import { Cast, FilterX } from "lucide-react";
 import { Button } from "@mui/material";
 import { UserSelectionFilter } from "./UserSelectionFilter";
 
@@ -27,11 +27,10 @@ const LiveStreamHeader = ({
   return (
     <div className="flex relative w-full pl-5 h-[20px] mb-1 items-center justify-between">
       <h1
-        className={`${
-          isSmallText ? "text-lg" : "text-2xl"
-        } font-semibold dark:text-white`}
+        className={`${isSmallText ? 'text-lg' : 'text-2xl'} font-semibold dark:text-white flex items-center`}
       >
-        {name}
+        <Cast className='mr-2' />
+        {name} 
       </h1>
 
       {hasFilters && (

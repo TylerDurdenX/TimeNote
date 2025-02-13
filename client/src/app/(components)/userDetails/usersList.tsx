@@ -96,11 +96,12 @@ const UserList = ({ onSelectUser }: Props) => {
                 <Typography
                   variant="body1"
                   color="textSecondary"
-                  className="text-center mt-2"
+                  className="text-center mt-2 min-h-screen flex items-center justify-center"
                 >
                   No employees found.
                 </Typography>
               )}
+
             </Box>
           </Box>
         </Paper>

@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PlusSquare } from "lucide-react";
+import { PlusSquare, PresentationIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -79,11 +79,10 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
   return (
     <div className="flex relative w-full pl-5 h-[20px] mb-1 items-center justify-between">
       <h1
-        className={`${
-          isSmallText ? "text-lg" : "text-2xl"
-        } font-semibold dark:text-white`}
+        className={`${isSmallText ? 'text-lg' : 'text-2xl'} font-semibold dark:text-white flex items-center`}
       >
-        {name}
+        <PresentationIcon className='mr-2' />
+        {name} 
       </h1>
       <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

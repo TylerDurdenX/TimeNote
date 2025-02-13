@@ -1,5 +1,4 @@
 import * as React from "react";
-import Chip from "@mui/material/Chip";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
@@ -54,7 +53,7 @@ export default function Tags({
           id="tags-outlined"
           options={authoritiesListLocal}
           getOptionLabel={(option) => option.name}
-          value={selectedAuthoritiesState} // Controlled value to track selected items
+          value={selectedAuthoritiesState} 
           isOptionEqualToValue={(option, value) => option.code === value.code}
           onChange={handleAuthorityChange}
           PopperComponent={(props) => (

@@ -4,7 +4,6 @@ import { TaskSelectionFilter } from './TaskSelectionFilter'
 import { Button } from '@mui/material'
 import { HeaderFilter } from './HeaderFilter'
 import { SprintFilter } from './SprintFilter'
-import ProjectsHeader from '../ProjectsHeader'
 import ProjectSectionHeader from './ProjectSectionHeader'
 
 type Props = {

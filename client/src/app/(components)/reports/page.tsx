@@ -1,10 +1,54 @@
+'use client'
+
+import Header from '@/components/Header'
 import React from 'react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import ReportsTable from './ReportsTable';
+import ReportsConfigurationTable from './ReportsConfigurationTable';
 
-type Props = {}
-
-const page = (props: Props) => {
+const page = () => {
   return (
-    <div>page</div>
+    <>
+      <div className="w-full mb-5">
+        <div className="flex w-full text-gray-900">
+          <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
+          <Header
+              name="Reports"
+              hasFilters={false}
+              hasTeamFilter={false}
+              
+            />
+          </div>
+        </div>
+        <div className="flex gap-4 px-4 w-full h-full  box-border overflow-x-hidden">
+          <Tabs defaultValue="dr" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 w-[400px]">
+              <TabsTrigger value="dr">Download Reports</TabsTrigger>
+              <TabsTrigger value="cr">Configure Reports</TabsTrigger>
+            </TabsList>
+            <TabsContent value="dr" className="w-full">
+              <Card>
+                <ReportsTable/>
+              </Card>
+            </TabsContent>
+            <TabsContent value="cr">
+              <Card>
+                <ReportsConfigurationTable/>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </>
   )
 }
 

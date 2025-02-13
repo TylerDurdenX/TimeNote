@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,21 +10,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { DateRange } from "react-day-picker";
 
 interface Props {
-  date: DateRange | undefined; // Currently selected date range
-  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>; // Function to update the date range
+  date: DateRange | undefined; 
+  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>; 
   onRangeSelect: () => void;
 }
 
 export function DatePickerWithRange({ date, setDate, onRangeSelect  }: Props) {
   const handleRangeChange = (selectedRange: DateRange | undefined) => {
-    // Update the parent state with the selected range
     setDate(selectedRange);
-    // Trigger the method to log the date range once the user selects a range
     onRangeSelect();
   };
 
   const handlePopoverClose = () => {
-    onRangeSelect(); // Trigger the range select logging method when the popover is closed
+    onRangeSelect(); 
   };
 
   return (
@@ -58,7 +56,7 @@ export function DatePickerWithRange({ date, setDate, onRangeSelect  }: Props) {
             initialFocus
             mode="range"
             selected={date}
-            onSelect={handleRangeChange} // Update the date range in the parent component when a date is selected
+            onSelect={handleRangeChange} 
             numberOfMonths={2}
           />
         </PopoverContent>

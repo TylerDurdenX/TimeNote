@@ -743,7 +743,6 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                   <DialogDescription className="ml-7"> Task Points: {task.points|| "" }  
                   </DialogDescription>
                   </DialogHeader>
-
                     <TaskHistory taskId={task.id}/>
                     <DialogFooter className="text-gray-600">
                             All numbers are in hours except total time

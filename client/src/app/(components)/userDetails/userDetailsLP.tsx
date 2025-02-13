@@ -1,5 +1,3 @@
-import Tags from "@/components/SettingsSheet/AutoCompleteTags";
-import { Avatar } from "@mui/material";
 import React from "react";
 
 const UserDetailsLP = () => {

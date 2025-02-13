@@ -20,6 +20,7 @@ import {
   Radio,
   FileChartColumnIncreasing,
   PresentationIcon,
+  CalendarClock,
 } from "lucide-react";
 
 import { NavMain } from "@/components/Sidebar/nav-main";
@@ -64,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         plan: "Free",
       },
     ],
-
+ 
     Dashboard: [
       {
         name: "Dashboard",
@@ -114,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {
             title: "Projects Timeline",
             url: `/projectsTimeline?email=${userEmail}`,
-            icon: Cast,
+            icon: CalendarClock,
           },
         ],
       },

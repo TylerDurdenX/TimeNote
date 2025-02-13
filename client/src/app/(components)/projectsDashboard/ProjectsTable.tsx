@@ -4,11 +4,9 @@ import Header from "@/components/Header";
 
 import React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { dataGridClassNames, } from "@/lib/utils";
 import { Button } from "@mui/material";
 import { useGetProjectsQuery } from "@/store/api";
-import { useRouter } from "next/router";
 import Link from "next/link";
 
 type Props = {
@@ -108,8 +106,6 @@ const columns: GridColDef[] = [
             View
           </Button>
               </Link>
-          
-          
         </div>
       );
     },

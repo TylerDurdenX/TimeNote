@@ -5,6 +5,7 @@ import { DisplayOption, Gantt, ViewMode } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
 import { useSearchParams } from 'next/navigation';
 import { useGetProjectsQuery } from '@/store/api';
+import Header from '@/components/Header';
 
 
 type taskTypeItems = 'task' | 'milestone' | 'project';
@@ -65,8 +66,15 @@ const ProjectsTimeline = () => {
 
   return (
     <div className="px-4 xl:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-2 py-5">
-        <h1 className="me-2 text-lg font-bold dark:text-white">Project Tasks Timeline</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2 py-5 ">
+        <div className="pb-6 pt-6 lg:pb-4 lg:pt-8 w-full">
+            <Header
+              name="Project Tasks Timeline"
+              hasFilters={false}
+              hasTeamFilter={false}
+              
+            />
+        </div>
         <div className="relative inline-block w-64">
           <select
             className="focus:shadow-outline block w-full appearance-none rounded border border-gray-400 bg-white px-4 pr-8 py-2 leading-right shadow hover:border-gray-500 focus:outline-none dark:border-dark-secondary dark:bg-dark-secondary dark:text-white"

@@ -39,12 +39,14 @@ interface Props {
 }
 
 export function NavProjects({ activeTab, setActiveTab, projects }: Props) {
-  const { isMobile } = useSidebar();
+
+  const currentUrl = window.location.href;
+
   useEffect(()=> {
     if(activeTab===''){
       const path = window.location.pathname;
       setActiveTab(path.slice(1))
-    }
+    } [currentUrl]
   })
   
   return (
