@@ -106,6 +106,22 @@ export interface TaskHistory{
     totalTime: number
 }
 
+export interface ConfiguredReports{
+    Reportname: string
+    ReportTime: string
+    ReportDuration: string
+    ProjectTeam: string
+}
+
+export interface ReportConfig{
+    email: string
+    projectTeam: string
+    reportDuration: string
+    time: string
+    period: string
+    reportName: string
+}
+
 export enum Status {
     ToDo = "To Do",
     WorkInProgress = "Work In Progress",

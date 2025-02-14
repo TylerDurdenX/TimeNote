@@ -26,7 +26,6 @@ import {
   Plus,
 } from "lucide-react";
 import { format } from "date-fns";
-import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -48,12 +47,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import Comments from "./Comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/components/Sidebar/nav-user";
 import TaskPage from "./TaskPage";
-import { Separator } from "@/components/ui/separator";
 import TaskHistory from "./History";
 
 type BoardProps = {

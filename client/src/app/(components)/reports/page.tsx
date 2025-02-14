@@ -4,16 +4,11 @@ import Header from '@/components/Header'
 import React from 'react'
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import ReportsTable from './ReportsTable';
 import ReportsConfigurationTable from './ReportsConfigurationTable';
+import ConfiguredReportsTable from './ConfiguredReportsTable';
 
 const page = () => {
   return (
@@ -31,9 +26,10 @@ const page = () => {
         </div>
         <div className="flex gap-4 px-4 w-full h-full  box-border overflow-x-hidden">
           <Tabs defaultValue="dr" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 w-[400px]">
+            <TabsList className="grid w-full grid-cols-3 w-[600px]">
               <TabsTrigger value="dr">Download Reports</TabsTrigger>
               <TabsTrigger value="cr">Configure Reports</TabsTrigger>
+              <TabsTrigger value="cdr">Configured Reports</TabsTrigger>
             </TabsList>
             <TabsContent value="dr" className="w-full">
               <Card>
@@ -43,6 +39,11 @@ const page = () => {
             <TabsContent value="cr">
               <Card>
                 <ReportsConfigurationTable/>
+              </Card>
+            </TabsContent>
+            <TabsContent value="cdr" className="w-full">
+              <Card>
+                <ConfiguredReportsTable/>
               </Card>
             </TabsContent>
           </Tabs>

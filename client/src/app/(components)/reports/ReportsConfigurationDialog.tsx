@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -18,107 +19,135 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { DateRange } from "react-day-picker";
-import { DatePickerWithRange } from "@/components/Header/DateRangePicker";
-import { Autocomplete, Stack, TextField } from "@mui/material";
+import { AmPmCarousel, TimeCarousel } from "./TimeCarousal";
+import { useCreateAutoReportMutation } from "@/store/api";
+import { useSearchParams } from "next/navigation";
 
 type Props = {
   name: string;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const ReportsConfigurationDialog = ({ name }: Props) => {
+const ReportsConfigurationDialog = ({ name, isOpen, setIsOpen }: Props) => {
   const [projectTeam, setProjectTeam] = useState("");
   const [reportDuration, setReportDuration] = useState("");
+  const [time, setTime] = useState("");
+  const [period, setPeriod] = useState("");
+  const isValueSelected = () => {
+    return projectTeam && reportDuration && time && period
+  };
+
+  const userEmail = useSearchParams().get("email")
+
+    const [createAutoReportConfig, { isLoading}] =
+      useCreateAutoReportMutation();
+
+      const saveConfig = async () => {
+        const reportConfig = {
+          email: userEmail!,
+          projectTeam: projectTeam!,
+          reportDuration: reportDuration!,
+          time: time!,
+          period: period!,
+          reportName: (name).replace(/\s+/g, '')!
+        };
+        try {
+          const response = await createAutoReportConfig(reportConfig);
+
+          // @ts-ignore
+          if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+            // @ts-ignore
+            toast.error(response.error?.data.message)
+          }else{
+            // @ts-ignore
+            toast.success(response.data?.message);
+          }
+        } catch (err: any) {
+          toast.error(err.data.message);
+          console.error("Error creating role:", err.data.Message);
+        }
+      };
+
+      const handleSave = () => {
+        saveConfig();  
+        setIsOpen(false);  
+      };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Configure {name}</CardTitle>
-        <CardDescription>
-          Please provide the below data to configure auto-generation of {name}
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-2">
-      <div className="grid grid-cols-8 items-center gap-4 mr-1">
-      <Label className="text-center">Team or Project</Label>
-                              <Select
-                                value={projectTeam}
-                                onValueChange={(value) =>
-                                  setProjectTeam(value)
-                                }
-                              >
-                                <SelectTrigger className="col-span-3 p-2 border rounded-md">
-                                  <SelectValue placeholder="Team/Project" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectGroup>
-                                    <SelectLabel>Priority</SelectLabel>
-                                    <SelectItem value="Urgent">
-                                      Urgent
-                                    </SelectItem>
-                                    <SelectItem value="High">High</SelectItem>
-                                    <SelectItem value="Medium">
-                                      Medium
-                                    </SelectItem>
-                                    <SelectItem value="Low">Low</SelectItem>
-                                    <SelectItem value="Backlog">
-                                      Backlog
-                                    </SelectItem>
-                                  </SelectGroup>
-                                </SelectContent>
-                              </Select>
-                              <Label className="text-center">Report Duration</Label>
-                              <Select
-                                value={reportDuration}
-                                onValueChange={(value) =>
-                                  setReportDuration(value)
-                                }
-                              >
-                                <SelectTrigger className="col-span-3 p-2 border rounded-md">
-                                  <SelectValue placeholder="Select" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Daily">
-                                      Daily Report
-                                    </SelectItem>
-                                    <SelectItem value="LastWeek">Last One week</SelectItem>
-                                    <SelectItem value="LastMonth">
-                                      Last One Month
-                                    </SelectItem>
-                                    
-                                </SelectContent>
-                              </Select>
-                              {/* <Stack spacing={3} className="w-[100%]">
-      <Autocomplete
-        multiple
-        id="tags-standard"
-        limitTags={2}
-        options={[]}
-        // onChange={}
-        getOptionLabel={(option) => option.title}
-        value={value} 
-        isOptionEqualToValue={(option, value) => option.title === value.title}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="standard"
-            label={label}
-            placeholder={placeholder}
-          />
-        )}
-      />
-    </Stack> */}
-                              </div>
-      </CardContent>
+        <Card>
+          <CardHeader>
+            <CardTitle>Configure {name}</CardTitle>
+            <CardDescription>
+              Please provide the below data to configure auto-generation of {name}
+            </CardDescription>
+          </CardHeader>
 
-      <CardFooter>
-        <CardDescription>
-            The Report will be sent to the email of configured people daily at 8 PM
-        </CardDescription>
-        <Button className="ml-auto">Save Configuration</Button>
-      </CardFooter>
-    </Card>
+          <CardContent className="space-y-2">
+            <div className="grid grid-cols-8 items-center gap-4 mr-1">
+              <Label className="text-center">Team or Project</Label>
+              <Select
+                value={projectTeam}
+                onValueChange={(value) => setProjectTeam(value)}
+              >
+                <SelectTrigger className="col-span-3 p-2 border rounded-md">
+                  <SelectValue placeholder="Team/Project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Priority</SelectLabel>
+                    <SelectItem value="Urgent">Urgent</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Backlog">Backlog</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Label className="text-center">Report Duration</Label>
+              <Select
+                value={reportDuration}
+                onValueChange={(value) => setReportDuration(value)}
+              >
+                <SelectTrigger className="col-span-3 p-2 border rounded-md">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Daily">Daily Report</SelectItem>
+                  <SelectItem value="LastWeek">Last One week</SelectItem>
+                  <SelectItem value="LastMonth">Last One Month</SelectItem>
+                </SelectContent>
+              </Select>
+              <Label className="text-center">Set Time</Label>
+              <TimeCarousel
+                time={time}
+                setTime={setTime}
+                period={period}
+                setPeriod={setPeriod}
+              />
+              <AmPmCarousel
+                time={time}
+                setTime={setTime}
+                period={period}
+                setPeriod={setPeriod}
+              />
+            </div>
+          </CardContent>
+
+          <CardFooter>
+            <CardDescription>
+              The Report will be sent to your email at the configured time
+            </CardDescription>
+            <Button
+              className="ml-auto"
+              onClick={handleSave} 
+              disabled={!isValueSelected()}
+            >
+              Save Configuration
+            </Button>
+          </CardFooter>
+        </Card>
+      
   );
 };
 

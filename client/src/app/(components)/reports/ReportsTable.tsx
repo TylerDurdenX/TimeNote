@@ -1,6 +1,6 @@
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import React from 'react'
-import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
+import { dataGridClassNames,} from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@mui/material';
 import ReportsDialog from './ReportsDialog';
@@ -9,7 +9,8 @@ type Props = {}
 
 function ReportsTable({}: Props) {
 
-    const reports = [{
+    const reports = [
+      {
         id: 1,
         title: "Attendance Report",
         description: "Attendance Report of users",
@@ -33,7 +34,6 @@ function ReportsTable({}: Props) {
         description: "Project and Tasks Report",
         name: "Project Report",
     }
-
 ]
 
     const columns: GridColDef[] = [
@@ -65,7 +65,7 @@ function ReportsTable({}: Props) {
                       </Button>
                     </DialogTrigger>
                   </div>
-                  <DialogContent className="max-w-[60vw] mt-5 mb-5 overflow-y-auto">
+                  <DialogContent className="max-w-[65vw] mt-5 mb-5 overflow-y-auto">
                     <ReportsDialog name={params.value}/>
                   </DialogContent>
                 </Dialog>

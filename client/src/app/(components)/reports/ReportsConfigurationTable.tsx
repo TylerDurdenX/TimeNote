@@ -1,15 +1,19 @@
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import React from 'react'
+import React, { useState } from 'react'
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@mui/material';
 import ReportsConfigurationDialog from './ReportsConfigurationDialog';
+import ReportsDialog from './ReportsDialog';
 
 type Props = {}
 
 function ReportsConfigurationTable({}: Props) {
 
-    const reports = [{
+  const [isOpen, setIsOpen] = useState(false); 
+
+    const reports = [
+      {
         id: 1,
         title: "Attendance Report",
         description: "Attendance Report of users",
@@ -54,7 +58,7 @@ function ReportsConfigurationTable({}: Props) {
           renderCell: (params) => {
             return (
               <div className="flex justify-center items-center h-full">
-                <Dialog>
+                <Dialog >
                   <div className="my-3 flex justify-between">
                     <DialogTrigger asChild>
                       <Button
@@ -65,8 +69,8 @@ function ReportsConfigurationTable({}: Props) {
                       </Button>
                     </DialogTrigger>
                   </div>
-                  <DialogContent className="max-w-[60vw] mt-5 mb-5 overflow-y-auto">
-                    <ReportsConfigurationDialog name={params.value}/>
+                  <DialogContent className="max-w-[65vw] mt-5 mb-5 overflow-y-auto">
+                    <ReportsConfigurationDialog name={params.value}  isOpen={isOpen} setIsOpen={setIsOpen}/>
                   </DialogContent>
                 </Dialog>
               </div>

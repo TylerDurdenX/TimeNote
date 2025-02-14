@@ -3,6 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AddComment,
   Attachment,
+  ConfiguredReports,
   CreateSprint,
   DownloadAttachment,
   ListResponse,
@@ -11,6 +12,7 @@ import {
   ProjectFormData,
   ProjectListResponse,
   ProjectUsers,
+  ReportConfig,
   ScreenshotResponse,
   SprintResponse,
   SubTask,
@@ -113,7 +115,8 @@ export const api = createApi({
     "Task",
     "SubTask",
     "SubTaskComment",
-    "TaskHistory"
+    "TaskHistory",
+    "AutoReports"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -373,6 +376,28 @@ uploadSubTaskAttachment: build.mutation<ApiResponse, UploadSubTaskAttachment>({
     }), 
     invalidatesTags : ["Tasks"]
 }),
+createAutoReport: build.mutation<ApiResponse, ReportConfig>({
+  query: (reportConfig)=> ({
+      url: "api/user/createReportsConfig",
+      method: "POST",
+      body: reportConfig,
+  }), 
+  invalidatesTags : ["AutoReports"]
+}),
+getConfiguredReports: build.query<ConfiguredReports[], { email: string}>({
+  query: ({ email,}) => {
+    const url = `api/user/getConfiguredReports?email=${email}`;
+    return url;
+  },
+  providesTags : ["AutoReports"]
+}),
+deleteConfigReports: build.mutation<ApiResponse, { reportId: number}>({
+  query: ({reportId})=> ({
+    url: `api/user/deleteConfigReport?reportId=${reportId}`,
+    method: "DELETE",
+}), 
+  invalidatesTags : ["AutoReports"]
+}),
 createSubTask: build.mutation<ApiResponse, SubTaskFormData>({
   query: (task)=> ({
       url: "api/user/createSubTask",
@@ -516,5 +541,8 @@ export const {
   useUploadSubTaskAttachmentMutation,
   useUpdateSubTaskMutation,
   useCloseTaskMutation,
-  useGetTaskHistoryQuery
+  useGetTaskHistoryQuery,
+  useCreateAutoReportMutation,
+  useGetConfiguredReportsQuery,
+  useDeleteConfigReportsMutation
 } = api;

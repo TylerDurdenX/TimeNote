@@ -40,6 +40,7 @@ model User{
   taskHistory       TaskHistory[]     @relation("TaskHistory")
   screenshot      Screenshots[]
   project       Project?      @relation()
+  autoReport       AutoReports[]      @relation()
   profilePicture  ProfilePicture? @relation(fields: [profilePictureId], references: [id])
 }
 
@@ -261,7 +262,17 @@ model RoleAuthorities {
   @@id([roleId, authorityId]) // Composite primary key for the many-to-many relation
 }
 
+model AutoReports {
+  id       Int     @id @default(autoincrement()) 
+  ReportName   String  
+  ReportTime String 
+  ReportDuration String
+  ProjectTeam String
+  userId    Int
 
+  user            User    @relation(fields: [userId], references: [userId])
+  @@unique([userId, ReportName,ProjectTeam])
+}
 
 model Customer {
   id       Int     @id @default(autoincrement()) 

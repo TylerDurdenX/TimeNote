@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DateRange } from "react-day-picker";
 import { DatePickerWithRange } from "@/components/Header/DateRangePicker";
+import { Input } from "@/components/ui/input";
 
 type Props = {
   name: string;
@@ -32,8 +33,8 @@ const ReportsDialog = ({ name }: Props) => {
     to: undefined,
   });
 
-    const [fromDate, setFromDate] = useState<string>("2000-01-01T00:00:00Z");
-    const [toDate, setToDate] = useState<string>("2000-01-01T00:00:00Z");
+  const [fromDate, setFromDate] = useState<string>("2000-01-01T00:00:00Z");
+  const [toDate, setToDate] = useState<string>("2000-01-01T00:00:00Z");
 
   const logDateRange = () => {
     if (date?.from && date?.to) {
@@ -57,46 +58,45 @@ const ReportsDialog = ({ name }: Props) => {
           download the report.
         </CardDescription>
       </CardHeader>
-      
-      <CardContent className="space-y-2">
-      <div className="grid grid-cols-8 items-center gap-4 mr-1">
-      <Label className="text-center">Team or Project</Label>
-                              <Select
-                                value={projectTeam}
-                                onValueChange={(value) =>
-                                  setProjectTeam(value)
-                                }
-                              >
-                                <SelectTrigger className="col-span-3 p-2 border rounded-md">
-                                  <SelectValue placeholder="Team/Project" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectGroup>
-                                    <SelectLabel>Priority</SelectLabel>
-                                    <SelectItem value="Urgent">
-                                      Urgent
-                                    </SelectItem>
-                                    <SelectItem value="High">High</SelectItem>
-                                    <SelectItem value="Medium">
-                                      Medium
-                                    </SelectItem>
-                                    <SelectItem value="Low">Low</SelectItem>
-                                    <SelectItem value="Backlog">
-                                      Backlog
-                                    </SelectItem>
-                                  </SelectGroup>
-                                </SelectContent>
-                              </Select>
-                              <Label className="text-center">Time Frame</Label>
-                              <DatePickerWithRange
-                                          date={date}
-                                          setDate={setDate!}
-                                          onRangeSelect={logDateRange!}
-                                          
-                                        />
-                                    </div>
-      </CardContent>
 
+      <CardContent className="space-y-2">
+        <div className="grid grid-cols-10 items-center gap-4 mr-1">
+          <Label className="text-center">Team/Project</Label>
+          <Select
+            value={projectTeam}
+            onValueChange={(value) => setProjectTeam(value)}
+          >
+            <SelectTrigger className="col-span-2 p-2 border rounded-md">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Priority</SelectLabel>
+                <SelectItem value="Urgent">Urgent</SelectItem>
+                <SelectItem value="High">High</SelectItem>
+                <SelectItem value="Medium">Medium</SelectItem>
+                <SelectItem value="Low">Low</SelectItem>
+                <SelectItem value="Backlog">Backlog</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Label className="text-center">From</Label>
+          <Input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="col-span-2"
+          />
+          <Label className="text-center">To</Label>
+          <Input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="col-span-2"
+          />
+      </div>
+      </CardContent>
+      
       <CardFooter>
         <Button className="ml-auto">Generate Report</Button>
       </CardFooter>
