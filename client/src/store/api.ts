@@ -241,10 +241,10 @@ export const api = createApi({
     }),
     getProjectTasks: build.query<
     Task[],
-      { projectId: string, sprint: string, assignedTo: string, priority: string}
+      { projectId: string, sprint: string, assignedTo: string, priority: string, isTaskOrSubTask: string, email: string}
     >({
-      query: ({ projectId, sprint, assignedTo, priority}) => {
-        const url = `api/user/getProjectTasks?id=${projectId}&sprint=${sprint}&assignedTo=${assignedTo}&priority=${priority}`;
+      query: ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask, email}) => {
+        const url = `api/user/getProjectTasks?id=${projectId}&sprint=${sprint}&assignedTo=${assignedTo}&priority=${priority}&isTaskOrSubTask=${isTaskOrSubTask}&email=${email}`;
         return url;
       },
       providesTags: ["Tasks"],

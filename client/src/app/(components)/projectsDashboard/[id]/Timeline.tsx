@@ -3,23 +3,27 @@ import React, { useMemo, useState } from 'react';
 import { DisplayOption, Gantt, ViewMode } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
 import { useGetProjectTasksQuery } from '@/store/api';
+import { useSearchParams } from 'next/navigation';
 
 type Props = {
   projectId: string;
   sprint: string;
   assignedTo: string;
   priority: string;
+  isTaskOrSubTask: string;
 };
 
 type taskTypeItems = 'task' | 'milestone' | 'project';
 
-const Timeline = ({ projectId, sprint, assignedTo, priority }: Props) => {
+const Timeline = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: Props) => {
+  const email = useSearchParams().get("email")
+
   const isDarkMode = 1; 
   const {
     data: tasks,
     isLoading,
     error,
-  } = useGetProjectTasksQuery({ projectId, sprint, assignedTo, priority });
+  } = useGetProjectTasksQuery({ projectId, sprint, assignedTo, priority, isTaskOrSubTask, email: email! });
 
   const [displayOptions, setDisplayOptions] = useState<DisplayOption>({
     viewMode: ViewMode.Month,

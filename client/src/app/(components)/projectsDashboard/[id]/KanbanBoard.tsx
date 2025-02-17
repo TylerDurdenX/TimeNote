@@ -24,6 +24,7 @@ import {
   History,
   MessageSquareMore,
   Plus,
+  PlusSquare,
 } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -52,6 +53,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/components/Sidebar/nav-user";
 import TaskPage from "./TaskPage";
 import TaskHistory from "./History";
+import { useSearchParams } from "next/navigation";
+import SubTaskPage from "./(SubTask)/SubTaskPage";
+import SubTaskComment from "./(SubTask)/SubTaskComments";
 
 type BoardProps = {
   id: string;
@@ -63,19 +67,43 @@ type BoardProps = {
   setAssignedTo: (assignedTo: string) => void
   sprint: string
   projectId: string
+  isTaskOrSubTask: string
+  setIsTaskOrSubTask: (isTask: string) => void
 };
 
 const taskStatus = ["To Do", "Work In Progress", "Under Review", "Completed"];
 
-const BoardView = ({ id, email , priority, assignedTo, sprint, projectId}: BoardProps) => {
+const BoardView = ({ id, email , priority, assignedTo, sprint, projectId, 
+  isTaskOrSubTask, setIsTaskOrSubTask
+}: BoardProps) => {
+
+  const userEmail = useSearchParams().get("email")
+  localStorage.removeItem("persist:root");
 
   const {
     data: tasks,
     isLoading,
     error,
-  } = useGetProjectTasksQuery({ projectId: id , sprint, assignedTo, priority});
+    refetch
+  } = useGetProjectTasksQuery({ projectId: id , sprint, assignedTo, priority, isTaskOrSubTask, email: userEmail!},
+    {refetchOnMountOrArgChange: true}
+  );
+
+  useEffect(() => {
+    refetch();
+  }, [priority, isTaskOrSubTask, assignedTo, sprint]);
 
   const [updateTaskStatus, response] = useUpdateTaskStatusMutation();
+
+  Object.defineProperty(window, 'localStorage', {
+    value: {
+      getItem: () => null, // Prevent reading
+      setItem: () => {},   // Prevent setting values
+      removeItem: () => {},// Prevent removing items
+      clear: () => {}      // Prevent clearing
+    },
+    writable: false
+  });
 
   const moveTask = async(taskId: number, toStatus: string) => {
     try {
@@ -92,8 +120,6 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId}: Board
     }
   };
 
-  localStorage.removeItem("persist:root");
-
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>An error occurred while fetching tasks</div>;
 
@@ -109,6 +135,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId}: Board
             id={id}
             email={email}
             projectId={projectId}
+            isTaskOrSubTask= {isTaskOrSubTask}
           />
         ))}
       </div>
@@ -123,6 +150,7 @@ type TaskColumnProps = {
   id: string;
   email: string;
   projectId: string
+  isTaskOrSubTask: string
 };
 
 const TaskColumn = ({
@@ -131,7 +159,8 @@ const TaskColumn = ({
   moveTask,
   id,
   email,
-  projectId
+  projectId,
+  isTaskOrSubTask
 }: TaskColumnProps) => {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "task",
@@ -243,11 +272,16 @@ const TaskColumn = ({
             {status === "To Do" ? (
               <>
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                  <DialogTrigger asChild>
-                    <button className="flex h-6 w-6 items-center justfy-center rounded bg-gray-200 dark:bg-dark-tertiary dark:text-white">
-                      <Plus size={24} className="" />
-                    </button>
-                  </DialogTrigger>
+                  
+                    {isTaskOrSubTask === 'Task' ? <>
+                      <DialogTrigger asChild>
+                      <button className="flex items-center rounded-md bg-blue-600 px-2 py-1.5 text-white hover:bg-blue-500">
+                        <PlusSquare className="h-4 w-4 mr-1.5" />
+                        Create Task
+                      </button>
+                      </DialogTrigger>
+
+                    </> : ""}
                   <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[29vw]">
                     <DialogHeader>
                       <DialogTitle className="mb-1">Create Task</DialogTitle>
@@ -306,7 +340,7 @@ const TaskColumn = ({
                                   </SelectGroup>
                                 </SelectContent>
                               </Select>
-                              <Label className="text-center">Points</Label>
+                              <Label className="text-center">Estimated Hours</Label>
                               <Input
                                 placeholder="Please enter a number"
                                 value={taskPoints}
@@ -421,7 +455,7 @@ const TaskColumn = ({
       {tasks
         .filter((task) => task.status === status)
         .map((task) => (
-          <Task key={task.id} task={task} email={email} projectId={id} />
+          <Task key={task.id} task={task} email={email} projectId={id} isTaskOrSubTask={isTaskOrSubTask}/>
         ))}
     </div>
   );
@@ -431,9 +465,10 @@ type TaskProps = {
   task: TaskType;
   email: string;
   projectId: string;
+  isTaskOrSubTask: string
 };
 
-const Task = ({ task, email, projectId }: TaskProps) => {
+const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "task",
     item: { id: task.id },
@@ -467,10 +502,12 @@ const Task = ({ task, email, projectId }: TaskProps) => {
   const moveTaskFromDropdown = async(taskId: number, toStatus: string) => {
     try {
       const response = await updateTaskStatus({ taskId, status: toStatus , email: email});
+      toast.error("AAA")
        // @ts-ignore
       if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
                       // @ts-ignore
                       toast.error(response.error?.data.message)
+                      console.log('1')
                     }else{
                       toast.success(response.data?.message);
                     }
@@ -562,9 +599,11 @@ const Task = ({ task, email, projectId }: TaskProps) => {
       >
 
         <div className="p-4 md:p-6">
+        {isTaskOrSubTask === 'Task' ? <>
           <div className="flex items-start justify-between">
             <div className="flex flex-1 flex-wrap items-center gap-2">
-              {task.priority && <PriorityTag priority={task.priority} />}
+              
+                {task.priority && <PriorityTag priority={task.priority} />}
               <div
                 className="flex flex-1 flex-wrap items-center gap-2"
                 ref={containerRef}
@@ -645,6 +684,7 @@ const Task = ({ task, email, projectId }: TaskProps) => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+          </> : ""}
           <Dialog>
             <div className="my-3 flex justify-between">
               <DialogTrigger asChild>
@@ -656,12 +696,15 @@ const Task = ({ task, email, projectId }: TaskProps) => {
               </DialogTrigger>
               {typeof task.points === "number" && (
                 <div className="text-xs font-semibold dark:text-white">
-                  {task.points} pts
+                  {task.points} hrs
                 </div>
               )}
             </div>
             <DialogContent className="max-w-[85vw] mt-5 mb-5 overflow-y-auto">
+              {isTaskOrSubTask === 'Task' ? 
               <TaskPage taskId= {task.id} email={email} projectId={projectId}/>
+              : <SubTaskPage subTaskId={task.id} email={email} projectId={projectId}/> }
+              
             </DialogContent>
           </Dialog>
           <div className="text-xs text-gray-500 dark:text-neutral-500">
@@ -702,9 +745,10 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                 {" "}
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button>
+                    {isTaskOrSubTask === 'Task' ? <button>
                       <History size={20} className="" />
-                    </button>
+                    </button> : ""}
+                    
                   </DialogTrigger>
                   <DialogContent className="max-w-[80vw] overflow-y-auto ">
                   <DialogHeader>
@@ -758,7 +802,11 @@ const Task = ({ task, email, projectId }: TaskProps) => {
                   <DialogHeader>
                     <DialogTitle>Comments </DialogTitle>
                   </DialogHeader>
-                  <Comments email={email} taskId={task.id}/>
+                  {isTaskOrSubTask === 'Task' ?
+                  <Comments email={email} taskId={task.id} /> : 
+                  <SubTaskComment email={email} subTaskId={task.id} /> }
+                  
+                  
                 </DialogContent>
               </Dialog>
               <span className="ml-1 text-sm dark:text-neutral-400">

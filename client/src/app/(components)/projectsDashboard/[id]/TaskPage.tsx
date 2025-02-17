@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { PlusSquare, Pencil, Download } from "lucide-react";
+import { PlusSquare, Pencil, Download, Maximize2 } from "lucide-react";
 import { SubTask, Task as TaskType } from "@/store/interfaces";
 import { useCreateSubTaskMutation, useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetTaskQuery, useUpdateTaskMutation, useUploadAttachmentMutation } from "@/store/api";
 import Comments from "./Comments";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SubTaskTable from "./(SubTask)/SubTaskTable";
+import Link from "next/link";
 
 type Props = {
   taskId: number;
@@ -19,6 +20,8 @@ type Props = {
 };
 
 const TaskPage = ({ taskId, email, projectId }: Props) => {
+
+  localStorage.removeItem("persist:root");
 
   const {
     data: task,
@@ -60,6 +63,16 @@ const TaskPage = ({ taskId, email, projectId }: Props) => {
       </div>
     );
   };
+
+  Object.defineProperty(window, 'localStorage', {
+    value: {
+      getItem: () => null, // Prevent reading
+      setItem: () => {},   // Prevent setting values
+      removeItem: () => {},// Prevent removing items
+      clear: () => {}      // Prevent clearing
+    },
+    writable: false
+  });
 
   const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf', '.xls', '.xlsx'];
 
@@ -186,6 +199,7 @@ const TaskPage = ({ taskId, email, projectId }: Props) => {
   const taskTagsSplit = task?.tags ? task.tags.split(",") : [];
 
   const [isEditable, setIsEditable] = useState(false);
+  const [isEditableStatus, setIsEditableStatus] = useState(false);
   const [editedText, setEditedText] = useState(task?.points); 
   const [isHovered, setIsHovered] = useState(false);
   const [isAssigneeEditable, setIsAssigneeEditable] = useState(false);
@@ -194,6 +208,9 @@ const TaskPage = ({ taskId, email, projectId }: Props) => {
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
   const [description, setDescription] = useState(task?.description || "");
+  const [taskStatus, setTaskStatus] = useState(task?.status);
+  const [isStatusHovered, setIsStatusHovered] = useState(false);
+  
 
   const [initialDescription, setInitialDescription] = useState(
     task?.description || ""
@@ -342,13 +359,46 @@ useEffect(() => {
     }
   };
 
+  const [isProgressStarted, setIsProgressStarted] = useState(false);
+
+  const toggleProgress = () => {
+    setIsProgressStarted((prevState) => {
+      const newState = !prevState;
+      if (newState) {
+        console.log('Progress started');
+      } else {
+        console.log('Progress stopped');
+      }
+      return newState;
+    });
+  };
+
+  const taskStatusList = ["To Do", "Work In Progress", "Under Review", "Completed"];
+
   return (
     <div className="w-[80vw] max-h-[90vh] overflow-y-auto mx-auto p-6 bg-white rounded-xl shadow-lg space-y-6 dark:bg-gray-800 dark:text-white">
       {/* Task Title and Description */}
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-semibold">{task?.title}</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-semibold">{task?.title}</h1>
+        <div className="flex space-x-4 ml-auto">
+        <button
+            onClick={toggleProgress}
+            className="px-4 py-2 text-white rounded-lg bg-black hover:bg-gray-300 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 "
+          >
+            {isProgressStarted ? 'Stop Progress' : 'Start Progress'}
+          </button>
+            <Link href={`/projectsDashboard/${projectId}/${task?.code}?email=${email}`}>
+            <button className="px-4 py-2 text-gray-900 rounded-lg bg-gray-200 hover:bg-gray-300 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick={() => {
+              sessionStorage.setItem("projectId", projectId);
+              sessionStorage.setItem("taskId", String(task?.id));
+            }}>
+            <Maximize2 />
+            </button>
+            </Link>
         </div>
+      </div>
 
         <div className="space-y-4 text-gray-600 dark:text-gray-400">
           <div className="text-sm">
@@ -441,9 +491,53 @@ useEffect(() => {
             )}
           </div>
 
+          <div className="flex items-center text-sm relative">
+          Priority: 
+            <span className="text-gray-500 dark:text-gray-300 whitespace-nowrap">
+              {task?.priority && <PriorityTag priority={task.priority} />}
+            </span>
+          </div>
+
+          <div className="text-sm relative">
+                      {isEditableStatus ? (
+                        <select
+                          value={taskStatus}
+                          onChange={(e) => setSubTaskStatus(e.target.value)} 
+                          onBlur={handleBlur} 
+                          onKeyDown={handleKeyDown} 
+                          autoFocus
+                          className="border p-1 rounded w-40"
+                        >
+                          {taskStatusList?.map((obj) => (
+                            <option key={obj} value={obj}>
+                              {obj}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div className="flex items-center">
+                          <div
+                            className="flex items-center"
+                            onMouseEnter={() => setIsStatusHovered(true)}
+                            onMouseLeave={() => setIsStatusHovered(false)} 
+                          >
+                            <span className="cursor-pointer">Status: {taskStatus}</span>
+          
+                            <Pencil
+                              size={16}
+                              className={`ml-2 cursor-pointer ${
+                                isStatusHovered ? "opacity-100" : "opacity-0"
+                              } transition-opacity`}
+                              onClick={handleEditClick}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold">Tags:</span>
-            {task?.priority && <PriorityTag priority={task.priority} />}
+            
             <div
               className="flex flex-wrap items-center gap-2"
               ref={containerRef}

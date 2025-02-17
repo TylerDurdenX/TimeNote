@@ -55,7 +55,7 @@ export function HeaderFilter({priority, setPriority}: Props) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-[150px] justify-between"
         >
           {priority
             ? frameworks.find((framework) => framework.value === priority)?.label
@@ -63,7 +63,7 @@ export function HeaderFilter({priority, setPriority}: Props) {
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[150px] p-0">
         <Command>
           <CommandList>
             <CommandGroup>

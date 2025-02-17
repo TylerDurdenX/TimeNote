@@ -16,6 +16,7 @@ const Project = () => {
   const [priority, setPriority] = useState('')
   const [assignedTo, setAssignedTo] = useState('')
   const [sprint, setSprint] = useState('')
+  const [isTaskOrSubTask, setIsTaskOrSubTask] = useState('Task')
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -37,17 +38,17 @@ const Project = () => {
     <div>
       <ProjectHeader activeTab={activeTab} setActiveTab={setActiveTab} priority={priority} 
         setPriority={setPriority} assignedTo={assignedTo} setAssignedTo={setAssignedTo} sprint={sprint}
-         setSprint={setSprint} email={email!} projectId= {Number(idFromUrl!)}/>
+         setSprint={setSprint} email={email!} projectId= {Number(idFromUrl!)} isTaskOrSubTask={isTaskOrSubTask} setIsTaskOrSubTask={setIsTaskOrSubTask}/>
         {activeTab==="Kanban Board" && (
         <KanbanBoard id={idFromUrl} email={email!} setIsModalNewTaskOpen={setIsModalNewTaskOpen}
         priority={priority} 
         setPriority={setPriority} assignedTo={assignedTo} setAssignedTo={setAssignedTo} sprint= {sprint}
-        projectId= {idFromUrl!}/>
+        projectId= {idFromUrl!} isTaskOrSubTask={isTaskOrSubTask} setIsTaskOrSubTask={setIsTaskOrSubTask}/>
         )}
          {activeTab==="Timeline" && (
-        <Timeline projectId={idFromUrl!} sprint= {sprint} assignedTo={assignedTo} priority={priority} />
+        <Timeline projectId={idFromUrl!} sprint= {sprint} assignedTo={assignedTo} priority={priority} isTaskOrSubTask={isTaskOrSubTask}/>
         )} {activeTab==="Table" && (
-          <TableView projectId={idFromUrl!} sprint= {sprint} assignedTo={assignedTo} priority={priority}/>
+          <TableView projectId={idFromUrl!} sprint= {sprint} assignedTo={assignedTo} priority={priority} isTaskOrSubTask={isTaskOrSubTask}/>
           )}
     </div>
   )

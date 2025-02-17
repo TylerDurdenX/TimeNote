@@ -1,3 +1,5 @@
+'use client'
+
 import { useAddCommentMutation, useGetTaskCommentsQuery } from "@/store/api";
 import React, { useState } from "react";
 import { toast } from "sonner";

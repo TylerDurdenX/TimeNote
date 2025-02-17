@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect,  useState } from "react";
 import {  Pencil, Download } from "lucide-react";
 import {  useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetSubTaskQuery, useUpdateSubTaskMutation, useUploadSubTaskAttachmentMutation } from "@/store/api";
@@ -272,6 +274,7 @@ useEffect(() => {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-semibold">{task?.title}</h1>
         </div>
+        
 
         <div className="space-y-4 text-gray-600 dark:text-gray-400">
           <div className="text-sm">

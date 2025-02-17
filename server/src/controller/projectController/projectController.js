@@ -12,7 +12,6 @@ export const createProject = catchAsync(async (req, res, next) => {
         username: projectManager,
       },
     });
-    console.log(user.username);
 
     const newProject = await prisma.project.create({
       data: {
@@ -109,10 +108,8 @@ export const getProjects = catchAsync(async (req, res, next) => {
         },
       });
 
-      console.log(projects)
 
       projects.map((project) => {
-        console.log(project.users)
         project.users.map((user) => {
           if(user.email === email){
             projectList.push(project)
@@ -170,71 +167,181 @@ export const getProjects = catchAsync(async (req, res, next) => {
 });
 
 export const getProjectTasks = catchAsync(async (req, res, next) => {
-  const { id, sprint, assignedTo, priority } = req.query;
+  const { id, sprint, assignedTo, priority , isTaskOrSubTask, email} = req.query;
   try{
-  let whereCondition = {
-    projectId: Number(id),
-  };
-
-  if (!isEmpty(sprint)) {
-    whereCondition.sprintId = Number(sprint);
-  }
-
-  let assignedUserId;
-  if (!isEmpty(assignedTo)) {
     const user = await prisma.user.findFirst({
       where: {
-        email: assignedTo,
-      },
-    });
-    if (user) {
-      assignedUserId = user.userId;
-      whereCondition.assignedUserId = assignedUserId; 
-    }
-  }
-
-  if (!isEmpty(priority)) {
-    whereCondition.priority = priority;
-  }
-
-  const tasks = await prisma.task.findMany({
-    where: whereCondition,
-    include: {
-      author: {
-        select: {
-          username: true,
-        },
-      },
-      assignee: {
-        include: {
-          profilePicture: {
-            select: {
-              base64: true,
-            },
-          },
-        },
-      },
-      comments: true,
-    },
-  });
-
-  tasks.map((task) => {
-    const assignee = task.assignee
-      const {
-        password,
-        designation,
-        phoneNumber,
-        reportsToId,
-        resetPasswordOTP,
-        otpExpires,
-        createdAt,
-        updatedAt,
-        ...newAssignee
-      } = task.assignee;
-      task.assignee = newAssignee;
+        email: email
+      }, 
+      include: {
+        roles: true
+      }
     })
+    if(user.roles.some((role) => role.code === "ADMIN")){
+      if(isTaskOrSubTask==='Task'){
+        let whereCondition = {
+          projectId: Number(id),
+        };
+      
+        if (!isEmpty(sprint)) {
+          whereCondition.sprintId = Number(sprint);
+        }
+      
+        let assignedUserId;
+        if (!isEmpty(assignedTo)) {
+          const user = await prisma.user.findFirst({
+            where: {
+              email: assignedTo,
+            },
+          });
+          if (user) {
+            assignedUserId = user.userId;
+            whereCondition.assignedUserId = assignedUserId; 
+          }
+        }
+      
+        if (!isEmpty(priority)) {
+          whereCondition.priority = priority;
+        }
+      
+        const tasks = await prisma.task.findMany({
+          where: whereCondition,
+          include: {
+            author: {
+              select: {
+                username: true,
+              },
+            },
+            assignee: {
+              include: {
+                profilePicture: {
+                  select: {
+                    base64: true,
+                  },
+                },
+              },
+            },
+            comments: true,
+          },
+        });
+      
+        tasks.map((task) => {
+          const assignee = task.assignee
+            const {
+              password,
+              designation,
+              phoneNumber,
+              reportsToId,
+              resetPasswordOTP,
+              otpExpires,
+              createdAt,
+              updatedAt,
+              ...newAssignee
+            } = task.assignee;
+            task.assignee = newAssignee;
+          })
+      
+        res.json(tasks);
+      }else{
+        let whereCondition = {
+          projectId: Number(id),
+        };
+      
+        if (!isEmpty(sprint)) {
+          whereCondition.sprintId = Number(sprint);
+        }
+      
+        let assignedUserId;
+        if (!isEmpty(assignedTo)) {
+          const user = await prisma.user.findFirst({
+            where: {
+              email: assignedTo,
+            },
+          });
+          if (user) {
+            assignedUserId = user.userId;
+            whereCondition.assignedUserId = assignedUserId; 
+          }
+        }
+      
+        if (!isEmpty(priority)) {
+          whereCondition.priority = priority;
+        }
+      
+        const tasks = await prisma.task.findMany({
+          where: whereCondition,
+          include: {
+            author: {
+              select: {
+                username: true,
+              },
+            },
+            assignee: {
+              include: {
+                profilePicture: {
+                  select: {
+                    base64: true,
+                  },
+                },
+              },
+            },
+            comments: true,
+            subTasks: {
+              include: {
+                assignee: {
+                  include: {
+                    profilePicture: {
+                      select: {
+                        base64: true
+                      }
+                    }
+                  }
+                },
+                author: {
+                  select: {
+                    username: true,
+                  },
+                },
+                comments: true
+              }
+            }
+          },
+        });
+      
+        const subTaskList = tasks.map(item => item.subTasks);
 
-  res.json(tasks);
+        const flattenedList = subTaskList.filter(list => list.length > 0).flat();
+        let filteredList
+        if(assignedTo!=='X'){
+          filteredList = flattenedList.filter(item => item.assignee.email === email);
+        }else if(assignedTo!==''){
+          filteredList = flattenedList
+        }else{
+          filteredList = flattenedList
+        }
+
+        filteredList.map((subTask) => {
+          const assignee = subTask.assignee
+            const {
+              password,
+              designation,
+              phoneNumber,
+              reportsToId,
+              resetPasswordOTP,
+              otpExpires,
+              createdAt,
+              updatedAt,
+              ...newAssignee
+            } = subTask.assignee;
+            subTask.assignee = newAssignee;
+        })
+      
+        res.json(filteredList);
+      }
+      
+    }else{
+
+    }
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an error getting Tasks", 400));
@@ -296,6 +403,11 @@ export const createTask = catchAsync(async (req, res, next) => {
 
     const result = await prisma.$transaction(async (prisma) => {
 
+      const project = await prisma.project.findFirst({
+        where: {
+          id: projectId
+        }
+      })
 
     const task = await prisma.task.create({
       data:{
@@ -314,6 +426,17 @@ export const createTask = catchAsync(async (req, res, next) => {
       }
     })
 
+    const taskCode = project.code + (String(task.id).padStart(6, '0'))
+    console.log(taskCode)
+    const updatedTask = await prisma.task.update({
+      where:{
+        id: task.id,
+      },
+      data: {
+        code: taskCode
+      }
+    })
+
     const currentDateTime = new Date();
     const indianTimeISOString = currentDateTime.toISOString();
 
@@ -327,7 +450,6 @@ export const createTask = catchAsync(async (req, res, next) => {
       }
     })
   
-
     if (taskHistory && task) {
       return next(new SuccessResponse("Task Created Successfully", 200));
     }
@@ -523,7 +645,6 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
       }
     }
 
-    console.log(newTimeString)
     const currentDateTime = new Date();
     const indianTimeISOString = currentDateTime.toISOString();
 
@@ -909,7 +1030,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
         break;
       }
       default: {
-        console.log("Unknown task status: ", updatedTask.status);
+        console.log("Unknown task status: ", task.status);
       }
     }
 
@@ -1053,23 +1174,22 @@ export const uploadSubTaskAttachment = catchAsync(async (req, res, next) => {
 export const deleteAttachment = catchAsync(async (req, res, next) => {
   const { taskId, isSubTask} = req.query;
   try {
-    const isSubTaskBool = Boolean(isSubTask);
-    if(isSubTaskBool === true){
+    if(isSubTask === 'true'){
       const deletedAttachment = await prisma.attachment.deleteMany({
         where: {
-          subTaskId: Number(taskId),  // Replace with the ID of the user to delete
+          subTaskId: Number(taskId),  
         },
       });
         if(deletedAttachment)
-        return next(new AppError("Attachment deleted Successfully", 200));
+        return next(new SuccessResponse("Attachment deleted Successfully", 200));
     }else{
     const deletedAttachment = await prisma.attachment.deleteMany({
       where: {
-        taskId: Number(taskId),  // Replace with the ID of the user to delete
+        taskId: Number(taskId),  
       },
     });
       if(deletedAttachment)
-      return next(new AppError("Attachment deleted Successfully", 200));
+      return next(new SuccessResponse("Attachment deleted Successfully", 200));
     }
   } catch (error) {
     console.error(error);
@@ -1194,11 +1314,8 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
       return next(new AppError(`Cannot close Task at "${task.status}" state`, 500));
     }
     
-    // Use for...of to check the status of each subtask
     for (const subTask of task.subTasks) {
-      console.log(subTask.status);
     
-      // If a subtask is not completed, return an error
       if (subTask.status !== "Completed") {
         return next(new AppError("Please complete all the subTasks before closing this task", 500));
       }

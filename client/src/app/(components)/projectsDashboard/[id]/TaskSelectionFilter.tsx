@@ -25,7 +25,7 @@ type Props = {
   email: string
 }
 
-export function TaskSelectionFilter({assignedTo, setAssignedTo, email}: Props) {
+export function TaskSelectionFilter({ assignedTo, setAssignedTo, email }: Props) {
   const [open, setOpen] = React.useState(false)
 
   const frameworks = [
@@ -46,7 +46,7 @@ export function TaskSelectionFilter({assignedTo, setAssignedTo, email}: Props) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-[180px] justify-between"
         >
           {assignedTo
             ? frameworks.find((framework) => framework.value === assignedTo)?.label
@@ -54,16 +54,17 @@ export function TaskSelectionFilter({assignedTo, setAssignedTo, email}: Props) {
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[180px] p-0">
         <Command>
           <CommandList>
             <CommandGroup>
               {frameworks.map((framework) => (
                 <CommandItem
-                  key={framework.label}
+                  key={framework.value}  // use value as key for uniqueness
                   value={framework.value}
-                  onSelect={(currentValue) => {
-                    setAssignedTo(currentValue === assignedTo ? "" : currentValue)
+                  onSelect={() => {
+                    // Directly set the assignedTo value or clear it if it's already selected
+                    setAssignedTo(framework.value)
                     setOpen(false)
                   }}
                 >

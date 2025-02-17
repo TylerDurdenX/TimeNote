@@ -179,6 +179,7 @@ export interface Task {
     id: number
     title : string
     description? : string
+    code: string
     status? : Status
     priority? : Priority
     tags? : string

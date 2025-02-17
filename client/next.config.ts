@@ -11,6 +11,19 @@ module.exports = {
   typescript: {
     ignoreBuildErrors: true,  // Disables TypeScript checks during production builds
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",  // Apply this rule to all paths
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

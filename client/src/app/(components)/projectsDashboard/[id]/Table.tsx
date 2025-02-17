@@ -15,9 +15,10 @@ type Props = {
   sprint: string;
   assignedTo: string;
   priority: string;
+  isTaskOrSubTask: string;
 };
 
-const TableView = ({ projectId, sprint, assignedTo, priority }: Props) => {
+const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: Props) => {
   const userEmail = useSearchParams().get("email");
 
   const columns: GridColDef[] = [
@@ -181,6 +182,8 @@ const TableView = ({ projectId, sprint, assignedTo, priority }: Props) => {
     sprint,
     assignedTo,
     priority,
+    isTaskOrSubTask,
+    email: userEmail!
   });
 
   const removeColumns = (data: any[], columnsToExclude: string[]) => {

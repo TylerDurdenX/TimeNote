@@ -65,24 +65,24 @@ const columns: GridColDef[] = [
     width: 150,
     renderCell: (params) => {
       const completion = params.value || 0;
-      const completionPercentage = Math.min(Math.max(completion, 0), 100); // Ensuring it's between 0 and 100
+      const completionPercentage = Math.min(Math.max(completion, 0), 100); 
       return (
         <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
           <div
             style={{
-              backgroundColor: "#e0e0e0", // background color of the bar
+              backgroundColor: "#e0e0e0", 
               borderRadius: "5px",
-              height: "10px", // height of the bar
-              width: "80%", // width of the whole bar (adjust according to your requirement)
+              height: "10px", 
+              width: "80%",
               marginRight: "5px",
             }}
           >
             <div
               style={{
-                backgroundColor: "green", // color for the filled part of the bar
-                width: `${completionPercentage}%`, // dynamic width based on the percentage
+                backgroundColor: "green", 
+                width: `${completionPercentage}%`, 
                 height: "100%",
-                borderRadius: "5px 0 0 5px", // optional, rounded corners on the left
+                borderRadius: "5px 0 0 5px", 
               }}
             />
           </div>

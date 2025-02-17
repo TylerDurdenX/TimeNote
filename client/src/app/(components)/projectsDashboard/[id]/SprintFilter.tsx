@@ -36,7 +36,7 @@ export function SprintFilter({sprint, setSprint, projectId}: Props) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-[150px] justify-between"
         >
           {sprint
       ? data?.find((s) => s.id === Number(sprint))?.title
@@ -44,7 +44,7 @@ export function SprintFilter({sprint, setSprint, projectId}: Props) {
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[150px] p-0">
         <Command>
           <CommandList>
             <CommandGroup>
