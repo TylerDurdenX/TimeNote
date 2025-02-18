@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from "react";
-import { PlusSquare, Pencil, Download, Maximize2 } from "lucide-react";
+import { PlusSquare, Pencil, Download, Maximize2, EllipsisVertical } from "lucide-react";
 import { SubTask, Task as TaskType } from "@/store/interfaces";
-import { useCreateSubTaskMutation, useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetTaskQuery, useUpdateTaskMutation, useUploadAttachmentMutation } from "@/store/api";
+import { useCloseTaskMutation, useCreateSubTaskMutation, useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetTaskQuery, useUpdateTaskAssigneeMutation, useUpdateTaskMutation, useUpdateTaskProgressMutation, useUpdateTaskStatusMutation, useUploadAttachmentMutation } from "@/store/api";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -15,6 +15,7 @@ import Comments from "../Comments";
 import SubTaskTable from "../(SubTask)/SubTaskTable";
 import { useSearchParams } from "next/navigation";
 import TaskHistory from "../History";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const TaskPageFull = () => {
 
@@ -22,9 +23,6 @@ const TaskPageFull = () => {
   const taskIdFromSession = sessionStorage.getItem("taskId");
   const taskId = Number(taskIdFromSession)
   const email = useSearchParams().get("email")
-
-  console.log(taskIdFromSession)
-  console.log(projectId)
 
   const {
     data: task,
@@ -192,16 +190,18 @@ const TaskPageFull = () => {
 
   const { data: users } = useGetProjectUsersQuery({ projectId: projectId! });
 
-  const taskTagsSplit = task?.tags ? task.tags.split(",") : [];
+  const taskTagsSplit = task?.tags 
+  ? task.tags.split(",").filter(tag => tag.trim() !== "") 
+  : [];
 
   const [isEditable, setIsEditable] = useState(false);
   const [editedText, setEditedText] = useState(task?.points); 
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(true);
   const [isAssigneeEditable, setIsAssigneeEditable] = useState(false);
-  const [isAssigneeHovered, setIsAssigneeHovered] = useState(false);
+  const [isAssigneeHovered, setIsAssigneeHovered] = useState(true);
   const [assignee, setAssignee] = useState(task?.assignee?.username);
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
-  const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
+  const [isDescriptionHovered, setIsDescriptionHovered] = useState(true);
   const [description, setDescription] = useState(task?.description || "");
 
   const [initialDescription, setInitialDescription] = useState(
@@ -223,11 +223,36 @@ const TaskPageFull = () => {
     const [subTaskDueDate, setSubTaskDueDate] = useState("");
     const [subTaskAssignedUserId, setSubTaskAssignedUserId] = useState("");
     const [isEditableStatus, setIsEditableStatus] = useState(false);
-    const [taskStatus, setTaskStatus] = useState(task?.status);
+    const [taskStatus, setTaskStatus] = useState(task?.status || "");
     const [isStatusHovered, setIsStatusHovered] = useState(false);
     const [createSubTask, { isLoading: isLoadingCreateSubTask }] =
     useCreateSubTaskMutation();
     const [isOpen, setIsOpen] = useState(false);
+    const [closeCompletedTask] = useCloseTaskMutation();
+    const [updateTaskAssignee] = useUpdateTaskAssigneeMutation();
+    const [updateTaskStatus] = useUpdateTaskStatusMutation();
+    const [updateTaskProgress] = useUpdateTaskProgressMutation();
+    const [isProgressStarted, setIsProgressStarted] = useState(task?.inProgressStartTime === null ? false : true);
+
+    
+    const assignTask =async (taskId: number, email: string) => {
+      try {
+        const response = await updateTaskAssignee({ taskId, email });
+        if (response.error) {
+          if ('data' in response.error) {
+            const errorData = response.error.data as {message: string }; 
+              toast.error(errorData.message);
+            
+          } else {
+            toast.error('An unexpected error occurred');
+          }
+        } else {
+          toast.success(String(response.data));
+        }
+      } catch (err) {
+        toast.error("Some Error occurred, please try again later");
+      }
+    };
   
     const isFormValid = () => {
       return subTaskName && subTaskDescription && subTaskStartDate && subTaskDueDate && subTaskAssignedUserId;
@@ -268,6 +293,7 @@ const TaskPageFull = () => {
 useEffect(() => {
   if (task) {
     setDescription(task.description || "");
+    setTaskStatus(task.status || "")
     setAssignee(task?.assignee?.username || "");
     setEditedText(task?.points)
     setInitialAssignee(task?.assignee?.username || "");
@@ -276,6 +302,7 @@ useEffect(() => {
     setSubTasks(task?.subTasks || [])
     setInitialStatus(task?.status || "")
     setIsSaveButtonEnabled(false);
+    setIsProgressStarted(task?.inProgressStartTime === null ? false : true)
     setIsLoadingSubTasks(false);
   }
 }, [task]);
@@ -292,17 +319,15 @@ useEffect(() => {
   description,
   assignee,
   editedText,
+  taskStatus,
   initialDescription,
   initialAssignee,
   initialPoints,
+  initialStatus
 ]);
 
   const handleEditClick = () => {
     setIsEditable(true);
-  };
-
-  const handleEditStatusClick = () => {
-    setIsEditableStatus(true);
   };
 
   const handleEditAssigneeClick = () => {
@@ -315,22 +340,17 @@ useEffect(() => {
 
   const handleBlur = () => {
     setIsEditable(false);
-    setIsHovered(false);
+    setIsHovered(true);
   };
 
   const handleAssigneeBlur = () => {
     setIsAssigneeEditable(false);
-    setIsAssigneeHovered(false);
-  };
-
-  const handleStatusBlur = () => {
-    setIsEditableStatus(false);
-    setIsStatusHovered(false);
+    setIsAssigneeHovered(true);
   };
 
   const handleDescriptionBlur = () => {
     setIsDescriptionEditable(false);
-    setIsDescriptionHovered(false);
+    setIsDescriptionHovered(true);
   };
 
   const handleKeyDown = (e: any) => {
@@ -354,32 +374,112 @@ useEffect(() => {
     };
     try {
       const response = await updateTask(updateTaskData);
-      // @ts-ignore
-      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
-              // @ts-ignore
-              toast.error(response.error?.data.message)
-            }else{
-              toast.success(response.data?.message);
-            }
+
+      if (response.error) {
+        if ('data' in response.error) {
+          const errorData = response.error.data as { status: string; message: string }; // Type assertion
+      
+          if (errorData.status === 'Error' || errorData.status === 'Fail') {
+            toast.error(errorData.message);
+          }
+        } else {
+          toast.error('An unexpected error occurred');
+        }
+      } else {
+        toast.success(response.data?.message);
+      }
+
+      // if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+      //   toast.error(response.error?.data.message)
+      // }else{
+      //   toast.success(response.data?.message);
+      // }
     } catch (err: any) {
       toast.error(err.data.message);
       console.error("Error creating role:", err.data.Message);
     }
   };
 
-  const [isProgressStarted, setIsProgressStarted] = useState(false);
-
-  const toggleProgress = () => {
-    setIsProgressStarted((prevState) => {
-      const newState = !prevState;
-      if (newState) {
-        console.log('Progress started');
-      } else {
-        console.log('Progress stopped');
+  const toggleProgress = async () => {
+    const newState = !isProgressStarted;
+    if (newState) {
+      console.log('Progress started');
+      try {
+        const response = await updateTaskProgress({
+          taskId: Number(task?.id),
+          progressStart: true
+        });
+        if (response.error) {
+          if ('data' in response.error) {
+            const errorData = response.error.data as {message: string }; 
+              toast.error(errorData.message);
+            
+          } else {
+            toast.error('An unexpected error occurred');
+          }
+        } else {
+          setIsProgressStarted(newState); 
+          toast.success(String(response.data.message));
+        }
+      } catch (error) {
+        console.error('Error updating task progress:', error);
       }
-      return newState;
-    });
+    } else {
+      console.log('Progress stopped');
+      try {
+        const response = await updateTaskProgress({
+          taskId: Number(task?.id),
+          progressStart: false
+        });
+        if (response.error) {
+          if ('data' in response.error) {
+            const errorData = response.error.data as {message: string }; 
+              toast.error(errorData.message);
+            
+          } else {
+            toast.error('An unexpected error occurred');
+          }
+        } else {
+          setIsProgressStarted(newState); 
+          toast.success(String(response.data.message));
+        }
+      } catch (error) {
+        console.error('Error updating task progress:', error);
+      }
+    }
   };
+  
+
+  const closeTask = async(taskId: number) => {
+      try {
+        const response = await closeCompletedTask({ taskId, email: email!});
+         // @ts-ignore
+        if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+                        // @ts-ignore
+                        toast.error(response.error?.data.message)
+                      }else{
+                        toast.success(response.data?.message);
+                      }
+      } catch (err) {
+        toast.error("Some Error occurred, please try again later");
+      }
+    };
+
+  const moveTaskFromDropdown = async(taskId: number, toStatus: string) => {
+      try {
+        const response = await updateTaskStatus({ taskId, status: toStatus , email: email!});
+         // @ts-ignore
+        if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+                        // @ts-ignore
+                        toast.error(response.error?.data.message)
+                        console.log('1')
+                      }else{
+                        toast.success(response.data?.message);
+                      }
+      } catch (err) {
+        toast.error("Some Error occurred, please try again later");
+      }
+    };
 
   const taskStatusList = ["To Do", "Work In Progress", "Under Review", "Completed"];
 
@@ -391,11 +491,64 @@ useEffect(() => {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold">{task?.title} - {task?.code}</h1>
         <div className="flex space-x-4 ml-auto">
+        <DropdownMenu>
+              <DropdownMenuTrigger className="flex h-8 w-6 mt-1 flex-shrink-0 items-center justify-center dark:text-neutral-500">
+                <EllipsisVertical size={52} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => {
+                    assignTask(task?.id!, email!);
+                  }}
+                >
+                  Assign To Me
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuLabel>Move Task To :</DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() => {
+                    moveTaskFromDropdown(task?.id!, "To Do");
+                  }}
+                >
+                  To Do
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    moveTaskFromDropdown(task?.id!, "Work In Progress");
+                  }}
+                >
+                  Work In Progress
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    moveTaskFromDropdown(task?.id!, "Under Review");
+                  }}
+                >
+                  Under Review
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    moveTaskFromDropdown(task?.id!, "Completed");
+                  }}
+                >
+                  Completed
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    closeTask(task?.id!);
+                  }}
+                >
+                  Close Task
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
         <button
             onClick={toggleProgress}
             className="px-4 py-2 text-white rounded-lg bg-black hover:bg-gray-300 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 "
           >
-            {isProgressStarted ? 'Stop Progress' : 'Start Progress'}
+            {isProgressStarted ? 'Pause Progress' : 'Start Progress'}
           </button>
         </div>
       </div>
@@ -426,10 +579,10 @@ useEffect(() => {
                 <div
                   className="flex items-center"
                   onMouseEnter={() => setIsHovered(true)} // Trigger hover enter
-                  onMouseLeave={() => setIsHovered(false)} // Trigger hover leave
+                  onMouseLeave={() => setIsHovered(true)} // Trigger hover leave
                 >
                   <span className="cursor-pointer">
-                    Task Points: {editedText}
+                    Estimated hours: {editedText}
                   </span>
 
                   {/* Pencil icon that appears when hovering over the parent */}
@@ -500,41 +653,34 @@ useEffect(() => {
           </div>
 
           <div className="text-sm relative">
-                                {isEditableStatus ? (
-                                  <select
-                                    value={taskStatus}
-                                    onChange={(e) => setSubTaskStatus(e.target.value)} 
-                                    onBlur={handleStatusBlur} 
-                                    onKeyDown={handleKeyDown} 
-                                    autoFocus
-                                    className="border p-1 rounded w-40"
-                                  >
-                                    {taskStatusList?.map((obj) => (
-                                      <option key={obj} value={obj}>
-                                        {obj}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <div className="flex items-center">
-                                    <div
-                                      className="flex items-center"
-                                      onMouseEnter={() => setIsStatusHovered(true)}
-                                      onMouseLeave={() => setIsStatusHovered(false)} 
-                                    >
-                                      <span className="cursor-pointer">Status: {taskStatus}</span>
-                    
-                                      <Pencil
-                                        size={16}
-                                        className={`ml-2 cursor-pointer ${
-                                          isStatusHovered ? "opacity-100" : "opacity-0"
-                                        } transition-opacity`}
-                                        onClick={handleEditStatusClick}
-                                      />
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
+                      {isEditableStatus ? (
+                        <select
+                          value={taskStatus}
+                          onChange={(e) => setTaskStatus(e.target.value)} 
+                          onKeyDown={handleKeyDown} 
+                          autoFocus
+                          className="border p-1 rounded w-40"
+                        >
+                          {taskStatusList?.map((obj) => (
+                            <option key={obj} value={obj}>
+                              {obj}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div className="flex items-center">
+                          <div
+                            className="flex items-center"
+                            // onMouseEnter={() => setIsStatusHovered(true)}
+                            // onMouseLeave={() => setIsStatusHovered(false)} 
+                          >
+                            <span className="cursor-pointer">Status: {taskStatus}</span>
+          
+                            
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold">Tags:</span>
@@ -573,7 +719,7 @@ useEffect(() => {
             <div
               className="flex items-center"
               onMouseEnter={() => setIsDescriptionHovered(true)}
-              onMouseLeave={() => setIsDescriptionHovered(false)}
+              onMouseLeave={() => setIsDescriptionHovered(true)}
             >
               <p className="text-gray-700 dark:text-gray-300 cursor-pointer">
                 {description || "Loading description..."} 
@@ -662,7 +808,6 @@ useEffect(() => {
           </div>
           <div className="mt-4">
           <div>
-      {/* Button to trigger file input */}
       {isLoadingUploadAttachment && (
         <Progress value={uploadProgress} max={100} color="blue" />
       )}
@@ -830,7 +975,7 @@ useEffect(() => {
         <div className="mt-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
         <div className="border-2 border-gray-300 p-4 rounded-lg dark:border-gray-600">
           <div className="mt-4 space-y-3">
-            <TaskHistory taskId={taskId}/>
+            <TaskHistory taskId={taskId} estimatedHours = {String(task?.points)!} task={task} fullPageFlag={true}/>
           </div>
         </div>
       </div>

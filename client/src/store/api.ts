@@ -306,7 +306,7 @@ export const api = createApi({
           method: "PATCH",
           body: {status},
       }), 
-      invalidatesTags : ["Tasks"]
+      invalidatesTags : ["Tasks", "Task"]
   }),
   closeTask: build.mutation<ApiResponse, {taskId: number, email: string}>({
     query: ({taskId, email})=> ({
@@ -321,7 +321,14 @@ export const api = createApi({
         method: "PATCH",
         body: {status},
     }), 
-    invalidatesTags : ["Tasks"]
+    invalidatesTags : ["Tasks", "Task","TaskHistory"]
+}),
+updateTaskProgress: build.mutation<ApiResponse, {taskId: number, progressStart: boolean}>({
+  query: ({taskId, progressStart})=> ({
+      url: `api/user/startTaskProgress?taskId=${taskId}&progressStart=${progressStart}`,
+      method: "PATCH",
+  }), 
+  invalidatesTags : ["Task",]
 }),
 updateTask: build.mutation<ApiResponse, UpdateTaskData>({
   query: (body)=> ({
@@ -329,7 +336,7 @@ updateTask: build.mutation<ApiResponse, UpdateTaskData>({
       method: "PATCH",
       body: body,
   }), 
-  invalidatesTags : ["Tasks", "Task"]
+  invalidatesTags : ["Tasks", "Task", "TaskHistory"]
 }),
 updateSubTask: build.mutation<ApiResponse, UpdateSubTaskData >({
   query: (body)=> ({
@@ -544,5 +551,6 @@ export const {
   useGetTaskHistoryQuery,
   useCreateAutoReportMutation,
   useGetConfiguredReportsQuery,
-  useDeleteConfigReportsMutation
+  useDeleteConfigReportsMutation,
+  useUpdateTaskProgressMutation
 } = api;

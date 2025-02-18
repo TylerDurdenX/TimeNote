@@ -102,6 +102,8 @@ model Task {
   tags           String?
   startDate      DateTime?
   dueDate        DateTime?
+  inProgressStartTime DateTime?
+  inProgressTimeinMinutes String?
   points         Int?
   projectId      Int
   authorUserId   Int

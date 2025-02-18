@@ -472,6 +472,49 @@ function calculateHoursPassed(providedDateStr) {
   return roundedHours;
 }
 
+export const updateTaskProgress = catchAsync(async (req, res, next) => {
+  const { taskId, progressStart } = req.query;
+
+  const result = await prisma.$transaction(async (prisma) => {
+
+    const currentDateTime = new Date();
+
+    if(progressStart === 'true'){
+
+      const task = await prisma.task.update({
+        where:{
+          id: Number(taskId)
+        }, data: {
+          inProgressStartTime: currentDateTime
+        }
+      })
+
+      return next(new SuccessResponse("Task Updated Successfully", 200))
+    }else{
+    const taskToBeUpdated = await prisma.task.findFirst({
+      where: {
+        id: Number(taskId)
+      }
+    })
+
+    const differenceInMilliseconds = currentDateTime - new Date(taskToBeUpdated.inProgressStartTime);
+    const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+    const progressTime = Number(taskToBeUpdated.inProgressTimeinMinutes || 0) + differenceInMinutes
+
+    const task = await prisma.task.update({
+      where:{
+        id: Number(taskId)
+      },data: {
+        inProgressStartTime: null,
+        inProgressTimeinMinutes: String(progressTime)
+      }
+    })
+
+    return next(new SuccessResponse("Task updated Successfully",200))
+  }
+  })
+})
+
 export const updateTaskStatus = catchAsync(async (req, res, next) => {
   const { taskId, email } = req.query;
   const { status } = req.body;
@@ -505,7 +548,7 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
       return next(new AppError(`Cannot change status from "Work In Progress" to : ${status}`, 500))
     }
 
-    if(task.status === 'Under Reviews' && ( status === 'To Do' || status === 'Work In Progress')){
+    if(task.status === 'Under Review' && ( status === 'To Do' || status === 'Work In Progress')){
       return next(new AppError(`Cannot change status from "Under Reviews" to : ${status}`, 500))
     }
 
@@ -513,69 +556,144 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
       return next(new AppError(`Cannot change status from "Completed" to : ${status}`, 500))
     }
 
-    const updatedTask = await prisma.task.update({
-      where: {
-        id: Number(taskId),
-      },
-      data:{
-          status: status
+    if(task.inProgressStartTime === null){
+      const updatedTask = await prisma.task.update({
+        where: {
+          id: Number(taskId),
+        },
+        data:{
+            status: status
+        }
+      });
+  
+      const taskHistoryList = await prisma.taskHistory.findMany({
+        where: {
+          taskId: updatedTask.id
+        }
+      })
+   
+      taskHistoryList.sort((a, b) => b.id - a.id);
+      let [toDo, WIP, underReview, completed, closed] = taskHistoryList[0].time.split(',').map(Number);
+  
+      let newTimeString = ""
+  
+      const date = taskHistoryList[0].startDate;  
+  
+      switch(task.status){
+        case  "To Do" : {
+          const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
+          toDo = toDo + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
+        case  "Work In Progress" : {
+          const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
+          WIP = WIP + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
+        case  "Under Review" : {
+          const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
+          underReview = underReview + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
+        case  "Completed" : {
+          const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
+          completed = completed + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
       }
-    });
+  
+      const currentDateTime = new Date();
+      const indianTimeISOString = currentDateTime.toISOString();
+  
+      const updatedTaskHistory = await prisma.taskHistory.update({
+        where: {
+          id: taskHistoryList[0].id
+        },
+        data: {
+          time: newTimeString,
+          startDate: indianTimeISOString
+        }
+      })
+  
+      return next(new SuccessResponse("Task status updated Successfully", 200));
+    }else{
+      const currentDateTimeNow = new Date();
+      const differenceInMilliseconds = currentDateTimeNow - new Date(task.inProgressStartTime);
+      const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+      const progressTime = Number(task.inProgressTimeinMinutes || 0) + differenceInMinutes;
 
-    const taskHistoryList = await prisma.taskHistory.findMany({
-      where: {
-        taskId: updatedTask.id
+      const updatedTask = await prisma.task.update({
+        where: {
+          id: Number(taskId),
+        },
+        data:{
+            status: status,
+            inProgressStartTime: null,
+            inProgressTimeinMinutes: String(progressTime)
+        }
+      });
+  
+      const taskHistoryList = await prisma.taskHistory.findMany({
+        where: {
+          taskId: updatedTask.id
+        }
+      })
+   
+      taskHistoryList.sort((a, b) => b.id - a.id);
+      let [toDo, WIP, underReview, completed, closed] = taskHistoryList[0].time.split(',').map(Number);
+  
+      let newTimeString = ""
+  
+      const date = taskHistoryList[0].startDate;  
+  
+      switch(task.status){
+        case  "To Do" : {
+          const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
+          toDo = toDo + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
+        case  "Work In Progress" : {
+          const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
+          WIP = WIP + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
+        case  "Under Review" : {
+          const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
+          underReview = underReview + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
+        case  "Completed" : {
+          const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
+          completed = completed + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
       }
-    })
- 
-    taskHistoryList.sort((a, b) => b.id - a.id);
-    let [toDo, WIP, underReview, completed, closed] = taskHistoryList[0].time.split(',').map(Number);
-
-    let newTimeString = ""
-
-    const date = taskHistoryList[0].startDate;  
-
-    switch(task.status){
-      case  "To Do" : {
-        const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
-        toDo = toDo + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
-      case  "Work In Progress" : {
-        const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
-        WIP = WIP + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
-      case  "Under Review" : {
-        const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
-        underReview = underReview + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
-      case  "Completed" : {
-        const hours = Math.abs(calculateHoursPassed(date)).toFixed(2);
-        completed = completed + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
+  
+      const currentDateTime = new Date();
+      const indianTimeISOString = currentDateTime.toISOString();
+  
+      const updatedTaskHistory = await prisma.taskHistory.update({
+        where: {
+          id: taskHistoryList[0].id
+        },
+        data: {
+          time: newTimeString,
+          startDate: indianTimeISOString
+        }
+      })
+  
+      return next(new SuccessResponse("Task status updated Successfully", 200));
     }
 
-    const currentDateTime = new Date();
-    const indianTimeISOString = currentDateTime.toISOString();
-
-    const updatedTaskHistory = await prisma.taskHistory.update({
-      where: {
-        id: taskHistoryList[0].id
-      },
-      data: {
-        time: newTimeString,
-        startDate: indianTimeISOString
-      }
-    })
-
-    return next(new SuccessResponse("Task status updated Successfully", 200));
+    
   } catch (error) {
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
@@ -595,80 +713,107 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
       }
     })
 
-    const updatedTask = await prisma.task.update({
-      where: {
-        id: Number(taskId),
-      },
-      data:{
-          assignedUserId: user.userId
-      }
-    });
-
-    const taskHistoryList = await prisma.taskHistory.findMany({
-      where: {
-        taskId: updatedTask.id
+    const taskToBeUpdated = await prisma.task.findFirst({
+      where:{
+        id: Number(taskId)
       }
     })
 
-
-    taskHistoryList.sort((a, b) => b.id - a.id);
-    const [toDo, WIP, underReview, completed, closed] = taskHistoryList[0].time.split(',').map(Number);
-
-    let newTimeString = ""
-    switch(updatedTask.status){
-      case  "To Do" : {
-        const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
-        const newtoDo = toDo + hours
-        newTimeString = [String(newtoDo), String(WIP), String(underReview), String(completed), String(closed)].join(',');
-        break;
-      }
-      case  "Work In Progress" : {
-        const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
-        WIP = WIP + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
-      case  "Under Review" : {
-        const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
-        underReview = underReview + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
-      case  "Completed" : {
-        const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
-        completed = completed + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
-      default: {
-        console.log("Unknown task status: ", updatedTask.status);
-      }
+    if(user.userId === taskToBeUpdated.assignedUserId){
+      return next(new AppError("Task already assigned to same person", 500))
     }
 
-    const currentDateTime = new Date();
-    const indianTimeISOString = currentDateTime.toISOString();
+    if(taskToBeUpdated.inProgressStartTime === null){
+      const updatedTask = await prisma.task.update({
+        where: {
+          id: Number(taskId),
+        },
+        data:{
+            assignedUserId: user.userId
+        }
+      });
+    }else{
+      const currentDateTimeNow = new Date();
+      const differenceInMilliseconds = currentDateTimeNow - new Date(taskToBeUpdated.inProgressStartTime);
+      const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+      const progressTime = Number(taskToBeUpdated.inProgressTimeinMinutes || 0) + differenceInMinutes
 
-    const updatedTaskHistory = await prisma.taskHistory.update({
-      where: {
-        id: taskHistoryList[0].id
-      },
-      data: {
-        time: newTimeString,
-        endDate: indianTimeISOString
+      const updatedTask = await prisma.task.update({
+        where: {
+          id: Number(taskId),
+        },
+        data:{
+            assignedUserId: user.userId,
+            inProgressStartTime: null,
+            inProgressTimeinMinutes: String(progressTime)
+        }
+      });
+      const taskHistoryList = await prisma.taskHistory.findMany({
+        where: {
+          taskId: updatedTask.id
+        }
+      })
+  
+  
+      taskHistoryList.sort((a, b) => b.id - a.id);
+      let [toDo, WIP, underReview, completed, closed] = taskHistoryList[0].time.split(',').map(Number);
+  
+      let newTimeString = ""
+      switch(updatedTask.status){
+        case  "To Do" : {
+          const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+          const newtoDo = toDo + hours
+          newTimeString = [String(newtoDo), String(WIP), String(underReview), String(completed), String(closed)].join(',');
+          break;
+        }
+        case  "Work In Progress" : {
+          const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+          WIP = WIP + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
+        case  "Under Review" : {
+          const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+          underReview = underReview + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
+        case  "Completed" : {
+          const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+          completed = completed + hours
+          newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+          break;
+        }
+        default: {
+          console.log("Unknown task status: ", updatedTask.status);
+        }
       }
-    })
-
-    const taskHistory = await prisma.taskHistory.create({
-      data: {
-        taskId: updatedTask.id,
-        userId: user.userId,
-        startDate: indianTimeISOString,
-        sprint: String(updatedTask.sprintId),
-        time: "0,0,0,0,0",
-      }
-    })
-
-    res.json("Task status updated successfully");
+  
+      const currentDateTime = new Date();
+      const indianTimeISOString = currentDateTime.toISOString();
+  
+      const updatedTaskHistory = await prisma.taskHistory.update({
+        where: {
+          id: taskHistoryList[0].id
+        },
+        data: {
+          time: newTimeString,
+          endDate: indianTimeISOString
+        }
+      })
+  
+      const taskHistory = await prisma.taskHistory.create({
+        data: {
+          taskId: updatedTask.id,
+          userId: user.userId,
+          startDate: indianTimeISOString,
+          sprint: String(updatedTask.sprintId),
+          time: "0,0,0,0,0",
+        }
+      })
+  
+      res.json("Task status updated successfully");
+    }
   } catch (error) {
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
@@ -972,98 +1117,221 @@ export const getTask = catchAsync(async (req, res, next) => {
 });
 
 export const updateTask = catchAsync(async (req, res, next) => {
-  const { taskId, taskPoints, assignee, taskDescription  } = req.body;
+  const { taskId, taskPoints, assignee, taskDescription } = req.body;
 
-  const result = await prisma.$transaction(async (prisma) => {
   try {
+    // Wrap the operations inside a Prisma transaction
+    await prisma.$transaction(async (prisma) => {
 
-    const user = await prisma.user.findFirst({
-      where:{
-        username: assignee
+      const currentDateTime = new Date()
+
+      const user = await prisma.user.findFirst({
+        where: {
+          username: assignee,
+        },
+      });
+
+      const taskToBeUpdated = await prisma.task.findFirst({
+        where: {
+          id: taskId,
+        },
+      });
+
+      if (!user || !taskToBeUpdated) {
+        throw new Error('User or Task not found');
       }
-    })
 
-    const task = await prisma.task.update({
-      where: {
-        id: taskId,
-      },
-      data:{
-        description: taskDescription,
-        points: taskPoints,
-        assignedUserId: user.userId
-    }
+      if (taskToBeUpdated.assignedUserId === user.userId) {
+        // Update task if user is the same as assigned user
+        await prisma.task.update({
+          where: {
+            id: taskId,
+          },
+          data: {
+            description: taskDescription,
+            points: taskPoints,
+          },
+        });
+        return res.status(200).json({ message: 'Task updated successfully' });
+      } else {
+        // Handle case when task is not in progress
+        if (taskToBeUpdated.inProgressStartTime === null) {
+          await prisma.task.update({
+            where: {
+              id: taskId,
+            },
+            data: {
+              description: taskDescription,
+              points: taskPoints,
+              assignedUserId: user.userId,
+            },
+          });
+          // Update task history
+          const taskHistoryList = await prisma.taskHistory.findMany({
+            where: {
+              taskId: taskId,
+            },
+          });
+
+          taskHistoryList.sort((a, b) => b.id - a.id);
+
+          let [toDo, WIP, underReview, completed, closed] = taskHistoryList[0].time.split(',').map(Number);
+
+          let newTimeString = '';
+          switch (taskToBeUpdated.status) {
+            case 'To Do': {
+              const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+              const newToDo = toDo + hours;
+              newTimeString = [String(newToDo), String(WIP), String(underReview), String(completed), String(closed)].join(',');
+              break;
+            }
+            case 'Work In Progress': {
+              const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+              WIP = WIP + hours;
+              newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+              break;
+            }
+            case 'Under Review': {
+              const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+              underReview = underReview + hours;
+              newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+              break;
+            }
+            case 'Completed': {
+              const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+              completed = completed + hours;
+              newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+              break;
+            }
+            default: {
+              console.log('Unknown task status:', taskToBeUpdated.status);
+            }
+          }
+
+          const indianTimeISOString = currentDateTime.toISOString();
+
+          await prisma.taskHistory.update({
+            where: {
+              id: taskHistoryList[0].id,
+            },
+            data: {
+              time: newTimeString,
+              endDate: indianTimeISOString,
+            },
+          });
+
+          await prisma.taskHistory.create({
+            data: {
+              taskId: taskId,
+              userId: user.userId,
+              startDate: indianTimeISOString,
+              sprint: String(taskToBeUpdated.sprintId),
+              time: '0,0,0,0,0',
+            },
+          });
+
+          return res.status(200).json({ message: 'Task updated successfully' });
+        } else {
+          // Calculate the progress time if in progress
+          const currentDateTime = new Date();
+          const differenceInMilliseconds = currentDateTime - new Date(taskToBeUpdated.inProgressStartTime);
+          const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+          const progressTime = Number(taskToBeUpdated.inProgressTimeinMinutes || 0) + differenceInMinutes;
+
+          await prisma.task.update({
+            where: {
+              id: taskId,
+            },
+            data: {
+              description: taskDescription,
+              points: taskPoints,
+              assignedUserId: user.userId,
+              inProgressStartTime: null,
+              inProgressTimeinMinutes: String(progressTime),
+            },
+          });
+
+          // Update task history
+          const taskHistoryList = await prisma.taskHistory.findMany({
+            where: {
+              taskId: taskId,
+            },
+          });
+
+          taskHistoryList.sort((a, b) => b.id - a.id);
+
+          let [toDo, WIP, underReview, completed, closed] = taskHistoryList[0].time.split(',').map(Number);
+
+          let newTimeString = '';
+          switch (taskToBeUpdated.status) {
+            case 'To Do': {
+              const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+              const newToDo = toDo + hours;
+              newTimeString = [String(newToDo), String(WIP), String(underReview), String(completed), String(closed)].join(',');
+              break;
+            }
+            case 'Work In Progress': {
+              const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+              WIP = WIP + hours;
+              newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+              break;
+            }
+            case 'Under Review': {
+              const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+              underReview = underReview + hours;
+              newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+              break;
+            }
+            case 'Completed': {
+              const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
+              completed = completed + hours;
+              newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
+              break;
+            }
+            default: {
+              console.log('Unknown task status:', taskToBeUpdated.status);
+            }
+          }
+
+          const indianTimeISOString = currentDateTime.toISOString();
+
+          await prisma.taskHistory.update({
+            where: {
+              id: taskHistoryList[0].id,
+            },
+            data: {
+              time: newTimeString,
+              endDate: indianTimeISOString,
+            },
+          });
+
+          await prisma.taskHistory.create({
+            data: {
+              taskId: taskId,
+              userId: user.userId,
+              startDate: indianTimeISOString,
+              sprint: String(taskToBeUpdated.sprintId),
+              time: '0,0,0,0,0',
+            },
+          });
+
+          return res.status(200).json({ message: 'Task updated successfully' });
+        }
+      }
     });
-
-    const taskHistoryList = await prisma.taskHistory.findMany({
-      where: {
-        taskId: task.id
-      }
-    })
-
-    taskHistoryList.sort((a, b) => b.id - a.id);
-    let [toDo, WIP, underReview, completed, closed] = taskHistoryList[0].time.split(',').map(Number);
-
-    let newTimeString = ""
-    switch(task.status){
-      case  "To Do" : {
-        const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
-        const newtoDo = toDo + hours
-        newTimeString = [String(newtoDo), String(WIP), String(underReview), String(completed), String(closed)].join(',');
-        break;
-      }
-      case  "Work In Progress" : {
-        const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
-        WIP = WIP + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
-      case  "Under Review" : {
-        const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
-        underReview = underReview + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
-      case  "Completed" : {
-        const hours = Math.abs(calculateHoursPassed(taskHistoryList[0].startDate)).toFixed(2);
-        completed = completed + hours
-        newTimeString = [toDo, WIP, underReview, completed, closed].join(',');
-        break;
-      }
-      default: {
-        console.log("Unknown task status: ", task.status);
-      }
-    }
-
-    const currentDateTime = new Date();
-    const indianTimeISOString = currentDateTime.toISOString();
-
-    const updatedTaskHistory = await prisma.taskHistory.update({
-      where: {
-        id: taskHistoryList[0].id
-      },
-      data: {
-        time: newTimeString,
-        endDate: indianTimeISOString
-      }
-    })
-
-    const taskHistory = await prisma.taskHistory.create({
-      data: {
-        taskId: task.id,
-        userId: user.userId,
-        startDate: indianTimeISOString,
-        sprint: String(task.sprintId),
-        time: "0,0,0,0,0",
-      }
-    })
-
-    res.status(200).json({ message: `Task updated Successfully` });
   } catch (error) {
-    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+    // Log the error for debugging
+    console.error('Error occurred during task update:', error);
+
+    // Respond with a proper error message
+    res.status(500).json({ message: `Error occurred: ${error.message}` });
+
+    // If you are using custom error handling middleware, you can propagate the error further
+    return next(new AppError('Some error occurred', 500));
   }
-  })
-  return next(new AppError("Some Error Occurred", 500))
 });
+
+
 
 export const updateSubTask = catchAsync(async (req, res, next) => {
   const { subTaskId,subTaskStatus, subTaskAssignee, subTaskDescription  } = req.body;
@@ -1178,7 +1446,7 @@ export const deleteAttachment = catchAsync(async (req, res, next) => {
       const deletedAttachment = await prisma.attachment.deleteMany({
         where: {
           subTaskId: Number(taskId),  
-        },
+        }, 
       });
         if(deletedAttachment)
         return next(new SuccessResponse("Attachment deleted Successfully", 200));

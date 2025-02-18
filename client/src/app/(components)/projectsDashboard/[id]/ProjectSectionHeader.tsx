@@ -73,7 +73,7 @@ const ProjectSectionHeader = ({
   };
 
   return (
-    <div className="flex relative w-full pl-5 h-[20px] mb-1 items-center justify-between">
+    <div className="flex relative w-full pl-4 h-[20px] mb-1 items-center justify-between">
       <h1
         className={`${
           isSmallText ? "text-lg" : "text-2xl"

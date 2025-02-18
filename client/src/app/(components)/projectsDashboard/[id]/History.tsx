@@ -1,16 +1,19 @@
 "use client";
 
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useSearchParams } from "next/navigation";
 import React from "react";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { useGetProjectTasksQuery, useGetTaskHistoryQuery } from "@/store/api";
+import { Task } from "@/store/interfaces";
 
 type Props = {
   taskId: number;
+  estimatedHours: string
+  task?: Task
+  fullPageFlag: boolean
 };
 
-const TaskHistory = ({taskId}: Props) => {
+const TaskHistory = ({taskId, estimatedHours, task, fullPageFlag}: Props) => {
 
   const { data, isLoading: isTaskHistoryLoading, error: isTaskHistoryError } = useGetTaskHistoryQuery({ taskId: taskId },
     {
@@ -96,6 +99,25 @@ const TaskHistory = ({taskId}: Props) => {
       },
   ];
 
+  const currentDateTime = new Date()
+  let consumedHours = 0
+
+  if(task?.inProgressStartTime===null){
+    consumedHours = Math.floor(Number(task.inProgressTimeinMinutes)/60)
+  }else{
+    const differenceInMilliseconds = currentDateTime.getTime() - new Date(task?.inProgressStartTime!).getTime();
+    const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+    const progressTime = Number(task?.inProgressTimeinMinutes || 0) + differenceInMinutes
+
+    consumedHours = Math.floor(progressTime/60)
+  }
+
+  let hoursOverrun = 0
+  const estimatedHoursNum = Number(estimatedHours)
+  if(consumedHours > estimatedHoursNum){
+    hoursOverrun = Math.abs(consumedHours - estimatedHoursNum)
+  }
+  
   const isDarkMode = false;
 
   if (isTaskHistoryLoading) return <div>Loading...</div>;
@@ -104,12 +126,38 @@ const TaskHistory = ({taskId}: Props) => {
   return (
     <div className="h-540px e-full px-4 pb-8 xl:px-6">
       <DataGrid
-        rows={data || []}
+        rows={[...data || []].sort((a, b) => a.id - b.id)}
         columns={columns}
         className={dataGridClassNames}
         sx={dataGridSxStyles(isDarkMode)}
+        disableColumnFilter={true}
       />
+      {fullPageFlag ? <>
+        <div className="mt-4 p-4 bg-green-300 dark:bg-gray-800 rounded-lg flex justify-between items-center">
+    <span className="font-semibold text-lg">Estimated Hours</span>
+    <span className="font-bold text-lg">
+      {estimatedHoursNum} hours
+    </span>
+  </div>
+  <div className="mt-4 p-4 bg-yellow-300 dark:bg-gray-800 rounded-lg flex justify-between items-center">
+    <span className="font-semibold text-lg">Total Consumed Hours</span>
+    <span className="font-bold text-lg">
+      {consumedHours} hours
+    </span>
+  </div>
+  <div className="mt-4 p-4 bg-red-300 dark:bg-gray-800 rounded-lg flex justify-between items-center">
+    <span className="font-semibold text-lg">Total Hours Overrun</span>
+    <span className="font-bold text-lg">
+      {hoursOverrun} hours
+    </span>
+  </div>
+  <div className="mt-4 p-4 flex justify-between items-center">
+    
+  </div>
+  </> :""}
+      
     </div>
+    
   );
 };
 export default TaskHistory;

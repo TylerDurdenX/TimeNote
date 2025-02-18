@@ -36,17 +36,36 @@ const ProjectHeader = ({
   isTaskOrSubTask,
   setIsTaskOrSubTask,
 }: Props) => {
+
+  const projectName = sessionStorage.getItem("projectName");
+
+  //query to be fired
+
   return (
-    <div className="px-4 xl:px-6">
-      <div className="pb-6 pt-6 lg:pb-4 lg:pt-8 mb-5 mt-3">
+    <div className="px-4 xl:px-4">
+      <div className="pb-6 pt-6 lg:pb-4 lg:pt-8 mb-3 mt-3">
         <ProjectSectionHeader
-          name="Project"
+          name={projectName || "Project"}
           buttonName="Create New Sprint"
           email={email}
           projectId={projectId}
         />
       </div>
-      <div className="flex flex-wrap-reverse gap-2 border-y border-gray-200 pb-[4px] pt-1 dark:border-stroke-dark sm:items-center">
+      <div className="p-2 flex justify-between items-center dark:border-gray-600 rounded-lg">
+  <div className="w-full sm:w-[25%] h-8 p-1 bg-green-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+    <span className="font-semibold text-lg text-center">Estimated Hours : 1</span>
+  </div>
+  <div className="w-full sm:w-[25%] h-8 p-1 bg-yellow-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+    <span className="font-semibold text-lg text-center">Total Consumed Hours : 2</span>
+  </div>
+
+  <div className="w-full sm:w-[25%] h-8 p-1 bg-red-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+    <span className="font-semibold text-lg text-center">Total Hours Overrun : 3</span>
+  </div>
+</div>
+
+
+      <div className="flex flex-wrap-reverse mt-2 gap-2 border-y border-gray-200 pb-[4px] pt-1 dark:border-stroke-dark sm:items-center">
         <div className="flex flex-1 items-center gap-2 md:gap-4">
           <TabButton
             name="Kanban Board"

@@ -193,7 +193,7 @@ const TaskColumn = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const isFormValid = () => {
-    return taskName && taskDescription && startDate && dueDate && sprintId && taskPriority;
+    return taskName && taskDescription && startDate && dueDate && sprintId && taskPriority && taskPoints;
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -477,7 +477,10 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
     }),
   }));
 
-  const taskTagsSplit = task.tags ? task.tags.split(",") : [];
+  const taskTagsSplit = task.tags 
+  ? task.tags.split(",").filter(tag => tag.trim() !== "") 
+  : [];
+
 
   const formattedStartDate = task.startDate
     ? format(new Date(task.startDate), "P")
@@ -502,7 +505,6 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
   const moveTaskFromDropdown = async(taskId: number, toStatus: string) => {
     try {
       const response = await updateTaskStatus({ taskId, status: toStatus , email: email});
-      toast.error("AAA")
        // @ts-ignore
       if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
                       // @ts-ignore
@@ -784,7 +786,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                   <DialogDescription className="ml-7"> Task Points: {task.points|| "" }  
                   </DialogDescription>
                   </DialogHeader>
-                    <TaskHistory taskId={task.id}/>
+                    <TaskHistory taskId={task.id} estimatedHours={String(task.points)} fullPageFlag={false}/>
                     <DialogFooter className="text-gray-600">
                             All numbers are in hours except total time
                           </DialogFooter>
