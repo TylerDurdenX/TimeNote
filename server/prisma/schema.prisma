@@ -30,6 +30,7 @@ model User{
   taskAssignment TaskAssignment[] 
   attachments Attachment[]
   comments Comment[]
+  alert     Alert[]
 
   teamMembers TeamMembers[]   @relation("TeamMembers")
   userProjects UserProjects[]     @relation("UserProjects")
@@ -151,6 +152,17 @@ model TaskHistory{
 
   task            Task    @relation(fields: [taskId], references: [id], name: "TaskHistory")
   user            User    @relation(fields: [userId], references: [userId], name: "TaskHistory")
+}
+
+model Alert {
+  id        Int   @id @default(autoincrement())
+  title     String
+  description   String
+  triggeredDate     DateTime
+  status        String?
+
+  userId          Int?
+  user         User?  @relation(fields: [userId], references: [userId])
 }
 
 model Comment {

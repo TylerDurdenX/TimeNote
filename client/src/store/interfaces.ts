@@ -277,6 +277,20 @@ export interface AddComment {
     taskId: number
     userEmail: string
     commentTime: string
+    taskCode: string
+}
+
+export interface AlertCount {
+    count: number
+}
+
+export interface Alert {
+    id: number
+    title: string
+    description: string
+    status: string
+    triggeredDate: string
+    userId: number
 }
 
 export interface CreateSprint {

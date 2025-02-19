@@ -124,7 +124,7 @@ const TaskHistory = ({taskId, estimatedHours, task, fullPageFlag}: Props) => {
   if (isTaskHistoryError) return <div>An error occurred while fetching tasks</div>;
 
   return (
-    <div className="h-540px e-full px-4 pb-8 xl:px-6">
+    <div className="h-540px e-full px-4 pb-8 xl:px-6 mt-4">
       <DataGrid
         rows={[...data || []].sort((a, b) => a.id - b.id)}
         columns={columns}

@@ -806,12 +806,12 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                     <MessageSquareMore size={20} />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="max-w-[40vw] overflow-y-auto ">
+                <DialogContent className="max-w-[40vw] overflow-y-auto max-h-[85vh]">
                   <DialogHeader>
                     <DialogTitle>Comments </DialogTitle>
                   </DialogHeader>
                   {isTaskOrSubTask === 'Task' ?
-                  <Comments email={email} taskId={task.id} /> : 
+                  <Comments email={email} taskId={task.id} taskCode={task.code}/> : 
                   <SubTaskComment email={email} subTaskId={task.id} /> }
                   
                   

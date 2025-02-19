@@ -2,6 +2,8 @@ import { code } from "@nextui-org/theme";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AddComment,
+  Alert,
+  AlertCount,
   Attachment,
   ConfiguredReports,
   CreateSprint,
@@ -119,7 +121,9 @@ export const api = createApi({
     "SubTaskComment",
     "TaskHistory",
     "AutoReports",
-    "ProjectHours"
+    "ProjectHours",
+    "AlertCount",
+    "Alert"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -281,7 +285,7 @@ export const api = createApi({
         method: "POST",
         body: comment,
       }),
-      invalidatesTags: ["Comment","Tasks"],
+      invalidatesTags: ["Comment","Tasks", "AlertCount"],
     }),
     addSubTaskComment: build.mutation<
     ApiResponse[],
@@ -401,12 +405,33 @@ getConfiguredReports: build.query<ConfiguredReports[], { email: string}>({
   },
   providesTags : ["AutoReports"]
 }),
+getAlertsCount: build.query<AlertCount, { email: string}>({
+  query: ({ email,}) => {
+    const url = `api/user/getAlertCount?email=${email}`;
+    return url;
+  },
+  providesTags : ["AlertCount"]
+}),
+getAlerts: build.query<Alert[], { email: string}>({
+  query: ({ email,}) => {
+    const url = `api/user/getAlert?email=${email}`;
+    return url;
+  },
+  providesTags: ["Alert"]
+}),
 deleteConfigReports: build.mutation<ApiResponse, { reportId: number}>({
   query: ({reportId})=> ({
     url: `api/user/deleteConfigReport?reportId=${reportId}`,
     method: "DELETE",
 }), 
   invalidatesTags : ["AutoReports"]
+}),
+deleteTriggeredAlerts: build.mutation<ApiResponse, { alertId: number}>({
+  query: ({alertId})=> ({
+    url: `api/user/deleteAlert?alertId=${alertId}`,
+    method: "DELETE",
+}), 
+  invalidatesTags : ["Alert", "AlertCount"]
 }),
 createSubTask: build.mutation<ApiResponse, SubTaskFormData>({
   query: (task)=> ({
@@ -570,5 +595,8 @@ export const {
   useDeleteConfigReportsMutation,
   useUpdateTaskProgressMutation,
   useGetProjectHoursEstimationQuery,
-  useGetMentionedUsersQuery
+  useGetMentionedUsersQuery,
+  useGetAlertsCountQuery,
+  useGetAlertsQuery,
+  useDeleteTriggeredAlertsMutation
 } = api;

@@ -1,10 +1,54 @@
+'use client'
+
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import React from 'react'
+import React, { useState } from 'react'
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@mui/material';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { toast } from "sonner";
+import { useDeleteTriggeredAlertsMutation, useGetAlertsQuery } from '@/store/api';
+import { useSearchParams } from 'next/navigation';
+import { Trash2 } from 'lucide-react';
 
 const AlertsPage = () => {
+
+  const userEmail = useSearchParams().get("email")
+
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null); 
+
+  const {data: alertData, isLoading} = useGetAlertsQuery({email: userEmail!},
+    {refetchOnMountOrArgChange: true}
+  )
+  
+  const handleDeleteClick = (id: number) => {
+    setSelectedId(id); 
+    setOpen(true); 
+  };
+
+  const [deleteAlert] = useDeleteTriggeredAlertsMutation()
+  
+  const handleDeleteConfirmation = async () => {
+    if (selectedId !== null) {
+        try {
+            const response = await deleteAlert({alertId: selectedId})
+
+            // @ts-ignore
+            if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+              // @ts-ignore
+              toast.error(response.error?.data.message)
+            }else{
+              // @ts-ignore
+              toast.success(response.data?.message);
+            }
+          } catch (err: any) {
+            toast.error(err.data.message);
+            console.error("Error creating role:", err.data.Message);
+          }
+      
+      setOpen(false);
+      setSelectedId(null); 
+    }
+  };
   
   const columns: GridColDef[] = [
     {
@@ -61,37 +105,55 @@ const AlertsPage = () => {
         flex: 1, 
         
       },
-    {
-      field: "id",
-      headerName: "",
-      flex: 1, 
-      renderCell: (params) => {
-        return (
-          <div className="flex justify-center items-center h-full">
-            <Dialog>
-              <div className="my-3 flex justify-between">
-                <DialogTrigger asChild>
-                  <Button
-                    variant="contained"
-                    className="text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 px-6 py-2 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105"
+      {
+        field: "id",
+        headerName: "",
+        flex: 1,
+        renderCell: (params) => {
+          return (
+            <div className="flex justify-center items-center h-full">
+              <AlertDialog open={open} onOpenChange={setOpen}>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className="hover:from-red-400 hover:to-blue-500 px-6 py-2 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 text-red-700"
+                    onClick={() => handleDeleteClick(Number(params.id))}
                   >
-                    View Details
-                  </Button>
-                </DialogTrigger>
-              </div>
-              <DialogContent className="max-w-[85vw] mt-5 mb-5 overflow-y-auto">
-              </DialogContent>
-            </Dialog>
-          </div>
-        );
-      },
-    },
+                    <Trash2 />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-700">
+                      Do you want to delete this configuration?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel
+                      onClick={() => {
+                        setOpen(false);
+                      }}
+                    >
+                      No
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteConfirmation}
+                    >
+                      Yes
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          );
+        },
+      }
   ];
 
   return (
     <div className="h-full w-full px-4 pb-8 xl:px-6">
       <DataGrid
-        rows={[]}
+        rows={alertData || []}
         columns={columns}
         className={dataGridClassNames}
       />

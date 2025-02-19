@@ -6,6 +6,7 @@ import { SubTask, Task as TaskType } from "@/store/interfaces";
 import { useCloseTaskMutation, useCreateSubTaskMutation, useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetTaskQuery, useUpdateTaskAssigneeMutation, useUpdateTaskMutation, useUpdateTaskProgressMutation, useUpdateTaskStatusMutation, useUploadAttachmentMutation } from "@/store/api";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,9 @@ import SubTaskTable from "../(SubTask)/SubTaskTable";
 import { useSearchParams } from "next/navigation";
 import TaskHistory from "../History";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import AlertsPage from "@/app/(components)/alerts/AlertsPage";
+import TaskActivity from "./TaskActivity";
 
 const TaskPageFull = () => {
 
@@ -966,18 +970,36 @@ useEffect(() => {
         <div className="mt-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
         <div className="border-2 border-gray-300 p-4 rounded-lg dark:border-gray-600">
           <div className="mt-4 space-y-3">
-            <Comments taskId={taskId} email={email!}/>
+            <Comments taskId={taskId} email={email!} taskCode = {task?.code!}/>
           </div>
         </div>
       </div>
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Task History</h2>
-        <div className="mt-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
-        <div className="border-2 border-gray-300 p-4 rounded-lg dark:border-gray-600">
-          <div className="mt-4 space-y-3">
-            <TaskHistory taskId={taskId} estimatedHours = {String(task?.points)!} task={task} fullPageFlag={true}/>
-          </div>
-        </div>
+      <Tabs defaultValue="alerts" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 w-[400px] h-[55px]">
+              <TabsTrigger value="alerts" className="font-semibold text-lg">Task History</TabsTrigger>
+              <TabsTrigger value="configure" className="font-semibold text-lg ">Activity</TabsTrigger>
+            </TabsList>
+            <div className="mt-2 mb-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
+
+            <TabsContent value="alerts" className="w-full">
+              <Card>
+              <TaskHistory taskId={taskId} estimatedHours = {String(task?.points)!} task={task} fullPageFlag={true}/>
+              </Card>
+            </TabsContent>
+            <TabsContent value="configure">
+              <Card>
+                <CardHeader>
+                  <CardDescription>{task?.title} - {task?.code} Activity</CardDescription>
+                  
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <TaskActivity/>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+       
       </div>
     </div>
   );

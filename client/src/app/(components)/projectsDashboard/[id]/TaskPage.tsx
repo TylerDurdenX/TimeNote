@@ -424,7 +424,7 @@ useEffect(() => {
       {/* Task Title and Description */}
       <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-semibold">{task?.title}</h1>
+        <h1 className="text-3xl font-semibold">{task?.title} - {task?.code}</h1>
         <div className="flex space-x-4 ml-auto">
         <button
             onClick={toggleProgress}
@@ -822,7 +822,7 @@ useEffect(() => {
         <div className="mt-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
         <div className="border-2 border-gray-300 p-4 rounded-lg dark:border-gray-600">
           <div className="mt-4 space-y-3">
-            <Comments taskId={taskId} email={email}/>
+            <Comments taskId={taskId} email={email} taskCode={task?.code!}/>
           </div>
         </div>
       </div>

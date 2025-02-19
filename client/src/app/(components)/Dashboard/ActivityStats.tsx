@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import StatTable from "./StatTable"
+import ActivityStatTables from "./ActivityStatTable"
 
 export function ActivityStats() {
   return (
@@ -22,7 +23,7 @@ export function ActivityStats() {
       </CardHeader>
 
       <CardContent className="px-6 py-4">
-        <StatTable activeTrend={true} />
+        <ActivityStatTables activeTrend={true} />
       </CardContent>
 
       <CardDescription className="text-sm text-gray-500 mt-1 flex items-center space-x-2 ml-4">
@@ -31,7 +32,7 @@ export function ActivityStats() {
         </CardDescription>
 
       <CardContent className="px-6 py-4">
-        <StatTable activeTrend={false} />
+        <ActivityStatTables activeTrend={false} />
       </CardContent>
     </Card>
   )

@@ -8,9 +8,10 @@ import { toast } from "sonner";
 type Props = {
   email: string;
   taskId: number;
+  taskCode: string
 };
 
-const Comments = ({ taskId, email }: Props) => {
+const Comments = ({ taskId, email , taskCode}: Props) => {
 
   const [newComment, setNewComment] = useState("");
   const [currentQuery, setCurrentQuery] = useState('');
@@ -94,6 +95,7 @@ const Comments = ({ taskId, email }: Props) => {
       taskId: taskId,
       userEmail: email,
       commentTime: indianTimeISOString,
+      taskCode: taskCode
     };
     try {
       const response = addComment(formData);
@@ -123,60 +125,60 @@ const Comments = ({ taskId, email }: Props) => {
             const formattedCommentTime = `${formattedDate} ${formattedTime}`;
 
             return (
-              <div key={index} className="border-b pb-4">
+              <div key={index} className="border-b pb-4 ">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-lg">{comment.username}</span>
                   <span className="text-sm text-gray-500">{formattedCommentTime}</span>
                 </div>
             
                 <p className="text-gray-800">
-  {(() => {
-    const result = [];
-    let currentText = '';
-    let isInsideBrackets = false;
-    let mention = '';
+    {(() => {
+      const result = [];
+      let currentText = '';
+      let isInsideBrackets = false;
+      let mention = '';
 
-    for (let i = 0; i < comment.text.length; i++) {
-      const char = comment.text[i];
+      for (let i = 0; i < comment.text.length; i++) {
+        const char = comment.text[i];
 
-      // Check if we're inside brackets
-      if (char === '[') {
-        if (currentText) {
-          result.push(currentText); // Push any text before the mention
-        }
-        currentText = ''; // Reset for the mention text inside brackets
-        isInsideBrackets = true; // We are inside a mention
-      } else if (char === ']' && isInsideBrackets) {
-        // When we reach the closing bracket, add the mention
-        result.push(
-          <span
-            key={i}
-            style={{
-              color: 'blue', // Highlight text inside brackets
-              cursor: 'pointer',
-              textDecoration: 'underline', // Optional: underline for better UX
-            }}
-            onClick={() => alert(`You clicked on ${mention}`)} // Handle click
-          >
-            [{mention}]
-          </span>
-        );
-        mention = ''; // Clear the mention after it's been added
-        isInsideBrackets = false; // Exit the mention mode
-      } else if (isInsideBrackets) {
-        mention += char; // Collect characters inside the brackets
-      } else {
-        currentText += char; // Collect regular text outside brackets
-      }
-    }
+        // Check if we're inside brackets
+        if (char === '[') {
+          if (currentText) {
+            result.push(currentText); // Push any text before the mention
+          }
+          currentText = ''; // Reset for the mention text inside brackets
+          isInsideBrackets = true; // We are inside a mention
+        } else if (char === ']' && isInsideBrackets) {
+          // When we reach the closing bracket, add the mention
+          result.push(
+                    <span
+                      key={i}
+                      style={{
+                        color: 'blue', // Highlight text inside brackets
+                        cursor: 'pointer',
+                        textDecoration: 'underline', // Optional: underline for better UX
+                      }}
+                      onClick={() => alert(`You clicked on ${mention}`)} // Handle click
+                    >
+                      [{mention}]
+                      </span>
+                    );
+                    mention = ''; // Clear the mention after it's been added
+                    isInsideBrackets = false; // Exit the mention mode
+                  } else if (isInsideBrackets) {
+                    mention += char; // Collect characters inside the brackets
+                  } else {
+                    currentText += char; // Collect regular text outside brackets
+                  }
+                }
 
-    if (currentText) {
-      result.push(currentText); // Push remaining text after the last mention
-    }
+                if (currentText) {
+                  result.push(currentText); // Push remaining text after the last mention
+                }
 
-    return result;
-  })()}
-</p>
+                return result;
+              })()}
+            </p>
 
               </div>
             );

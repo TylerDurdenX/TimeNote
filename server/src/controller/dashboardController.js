@@ -106,3 +106,28 @@ SELECT "Allowed_User_Count"::bigInt FROM public."Customer";
     
   })
   })
+
+  export const getAlertCount = catchAsync(async (req, res, next) => {
+    const { email } = req.query;
+    try {
+      await prisma.$transaction(async (prisma) => {
+
+        const user = await prisma.user.findFirst({
+          where:{
+            email: email
+          }
+        })
+  
+      const alerts = await prisma.alert.findMany({
+        where:{
+          userId: user.userId
+        }
+      })
+  
+      res.json(alerts.length);
+    })
+    } catch (error) {
+      console.error(error);
+      return next(new AppError("There was an error getting alert count", 400));
+    }
+  });

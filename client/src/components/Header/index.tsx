@@ -87,11 +87,9 @@ const Header = ({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>All Projects</SelectLabel>
-                  <SelectItem value="apple">Apple</SelectItem>
-                  <SelectItem value="banana">Banana</SelectItem>
-                  <SelectItem value="blueberry">Blueberry</SelectItem>
-                  <SelectItem value="grapes">Grapes</SelectItem>
-                  <SelectItem value="pineapple">Pineapple</SelectItem>
+                  <SelectItem value="apple">TCS</SelectItem>
+                  <SelectItem value="banana">Infosys</SelectItem>
+                  <SelectItem value="blueberry">KPMG</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>

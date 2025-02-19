@@ -121,15 +121,15 @@ const chartData = [
 
 const chartConfig = {
     tab: {
-        label: "Tab",
+        label: "Unproductive time",
         color: "hsl(var(--chart-1))",
       },
   desktop: {
-    label: "Desktop",
+    label: "Productive time",
     color: "hsl(var(--chart-2))",
   },
   mobile: {
-    label: "Mobile",
+    label: "Active time",
     color: "hsl(var(--chart-3))",
   },
 } satisfies ChartConfig
@@ -155,9 +155,9 @@ export function ProductivityTrend() {
     <Card className="rounded-lg shadow-lg border border-gray-200 h-[45vh]">
       <CardHeader className="flex items-center gap-4 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-2 text-center sm:text-left">
-          <CardTitle className="text-xl font-semibold text-gray-800">Area Chart - Interactive</CardTitle>
+          <CardTitle className="text-xl font-semibold text-gray-800">Productivity Analysis</CardTitle>
           <CardDescription className="text-gray-500">
-            Showing total visitors for the last 3 months
+            Showing Active Time, Productive Time and Unproductive Time
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>

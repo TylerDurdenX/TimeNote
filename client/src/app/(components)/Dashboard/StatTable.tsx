@@ -51,7 +51,7 @@ export default function StatTables({activeTrend}: Props) {
                 <StyledTableCell>#</StyledTableCell>
                 <StyledTableCell>Name</StyledTableCell>
                 <StyledTableCell align="center">Avg. Productivity (Last 7 days)</StyledTableCell>
-                <StyledTableCell align="right">Protein Percentage</StyledTableCell>
+                <StyledTableCell align="right">Percentage</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>

@@ -39,15 +39,14 @@ const page = (props: Props) => {
             <TabsContent value="configure">
               <Card>
                 <CardHeader>
-                  <CardTitle>Password</CardTitle>
+                  <CardTitle>Alerts</CardTitle>
                   <CardDescription>
-                    Change your password here. After saving, you'll be logged
-                    out.
+                    Alerts Configuration Page
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2"></CardContent>
                 <CardFooter>
-                  <Button>Save password</Button>
+                  <Button>Save Configuration</Button>
                 </CardFooter>
               </Card>
             </TabsContent>

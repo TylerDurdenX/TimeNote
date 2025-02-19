@@ -886,15 +886,52 @@ export const getSubTaskComments = catchAsync(async (req, res, next) => {
 
 });
 
+function extractTextInBrackets(str) {
+  // Regular expression to match text inside square brackets
+  const regex = /\[([^\]]+)\]/g;
+  let matches = [];
+  let match;
+
+  // Using the regex to find all matches
+  while ((match = regex.exec(str)) !== null) {
+    // Push the matched text (inside the brackets) to the matches array
+    matches.push(match[1]);
+  }
+
+  return matches;
+}
+
 export const addComment = catchAsync(async (req, res, next) => {
-  const { text, taskId, userEmail, commentTime } = req.body;
+  const { text, taskId, userEmail, commentTime, taskCode } = req.body;
   try {
+    await prisma.$transaction(async (prisma) => {
 
     const user = await prisma.user.findFirst({
       where:{
         email: userEmail
       }
     })
+    const result = extractTextInBrackets(text);
+    const userList = await prisma.user.findMany({
+      where:{
+        username: {
+          in: result
+        }
+      }
+    })
+
+    if(!isEmpty(userList)){
+      userList.map( async(u) => {
+        const alert = await prisma.alert.create({
+          data: {
+            title: "Mentioned in Comment",
+            description: `${u.username} mentioned you in task :${taskCode}`,
+            triggeredDate: commentTime,
+            userId: u.userId
+          }
+        })
+      })
+    }
     
     const comment = await prisma.comment.create({
       data:{
@@ -907,9 +944,10 @@ export const addComment = catchAsync(async (req, res, next) => {
     })
 
     res.json(comment);
+  })
   } catch (error) {
     console.error(error);
-    return next(new AppError("There was an error creating Task", 400));
+    return next(new AppError("There was an error adding Comment", 400));
   }
 });
 

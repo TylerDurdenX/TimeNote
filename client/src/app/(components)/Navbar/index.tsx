@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { User, Moon, Search, Settings, Sun, AlertCircleIcon, Bell, MailIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ApiResponse, useGetUsersCountQuery } from "@/store/api";
+import { ApiResponse, useGetAlertsCountQuery, useGetUsersCountQuery } from "@/store/api";
 import { useTheme } from "next-themes";
 import { ModeToggle } from "@/components/ModeToggle";
 import { SheetDemo } from "@/components/SettingsSheet";
@@ -36,6 +36,10 @@ const Navbar = () => {
 
   const userEmail = useSearchParams().get("email");
 
+  const {data: alertCountData} = useGetAlertsCountQuery({email: userEmail!}, 
+    {refetchOnMountOrArgChange: true}
+  )
+
   return (
     <div className="flex justify-between bg-white px-4 h-auto dark:bg-gray-800">
       
@@ -43,7 +47,7 @@ const Navbar = () => {
       <div className="flex items-center space-x-4 ml-auto">
       <div className="h-min w-min rounded p-2 mt-1.5">
       <Link href={`/alerts?email=${userEmail}`}>
-      <Badge color="error" badgeContent={2} max={9}>
+      <Badge color="error" badgeContent={Number(alertCountData)} max={9}>
         <Bell />
       </Badge>
       </Link>

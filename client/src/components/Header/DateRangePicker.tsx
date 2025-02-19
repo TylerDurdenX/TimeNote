@@ -18,11 +18,11 @@ interface Props {
 export function DatePickerWithRange({ date, setDate, onRangeSelect  }: Props) {
   const handleRangeChange = (selectedRange: DateRange | undefined) => {
     setDate(selectedRange);
-    onRangeSelect();
+    //onRangeSelect();
   };
 
   const handlePopoverClose = () => {
-    onRangeSelect(); 
+    //onRangeSelect(); 
   };
 
   return (

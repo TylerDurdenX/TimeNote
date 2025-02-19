@@ -8,7 +8,7 @@ import {
   signup,
 } from "../controller/authController.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
-import { getUser, getUserCount, updateUserProfilePicture } from "../controller/dashboardController.js";
+import { getAlertCount, getUser, getUserCount, updateUserProfilePicture } from "../controller/dashboardController.js";
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
@@ -16,6 +16,7 @@ import { addComment, addSubTaskComment, closeCompletedTask, createProject, creat
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 import {createAutoReportConfig, deleteAutoReportConfig, getAutoReportConfig } from "../controller/reportsController/controller.js";
+import { deleteAlert, getAlerts } from "../controller/alertController/alertController.js";
 
 const router = express.Router();
 
@@ -74,6 +75,9 @@ router.delete("/deleteConfigReport", deleteAutoReportConfig)
 router.patch("/startTaskProgress", updateTaskProgress)
 router.get("/getProjectHoursEstimation", getProjectHoursEstimation)
 router.get("/getMentionedUsers", getMentionedUsers)
+router.get("/getAlertCount", getAlertCount)
+router.get("/getAlert", getAlerts)
+router.delete("/deleteAlert", deleteAlert)
 
 
 export default router;

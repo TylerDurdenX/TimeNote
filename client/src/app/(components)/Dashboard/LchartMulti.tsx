@@ -124,17 +124,17 @@ const chartConfig = {
     label: "Visitors",
   },
   desktop: {
-    label: "Desktop",
+    label: "Hours Overrun",
     color: "hsl(var(--chart-1))",
   },
   mobile: {
-    label: "Mobile",
+    label: "Estimated Hours",
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig
 
 export function LchartMulti() {
-  const [timeRange, setTimeRange] = React.useState("90d")
+  const [timeRange, setTimeRange] = React.useState("7d")
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date)
@@ -154,9 +154,9 @@ export function LchartMulti() {
     <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>Area Chart - Interactive</CardTitle>
+          <CardTitle>Project Analysis</CardTitle>
           <CardDescription>
-            Showing total visitors for the last 3 months
+            Showing estimated hours vs hours overrun
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
@@ -164,17 +164,17 @@ export function LchartMulti() {
             className="w-[160px] rounded-lg sm:ml-auto"
             aria-label="Select a value"
           >
-            <SelectValue placeholder="Last 3 months" />
+            <SelectValue placeholder="TCS" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="90d" className="rounded-lg">
-              Last 3 months
+            <SelectItem value="7d" className="rounded-lg">
+              TCS
             </SelectItem>
             <SelectItem value="30d" className="rounded-lg">
-              Last 30 days
+              INFY
             </SelectItem>
-            <SelectItem value="7d" className="rounded-lg">
-              Last 7 days
+            <SelectItem value="90d" className="rounded-lg">
+              KPMG
             </SelectItem>
           </SelectContent>
         </Select>

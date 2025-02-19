@@ -44,14 +44,14 @@ const chartConfig = {
 
 export function HbarChart() {
   return (
-    <Card className="h-[45vh]"> {/* Set height to auto or a fixed height */}
+    <Card className="h-[45vh]"> 
       <div className="flex justify-between w-full">
         <CardHeader className="text-left">
           <CardTitle>Most Used Applications</CardTitle>
         </CardHeader>
   
         <CardHeader className="text-right">
-          <CardDescription>January 2025</CardDescription>
+          <CardDescription>Feb 2025</CardDescription>
         </CardHeader>
       </div>
       <CardContent>

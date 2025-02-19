@@ -28,11 +28,11 @@ const chartData = [
 
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label: "Active Time",
     color: "hsl(var(--chart-1))",
   },
   mobile: {
-    label: "Mobile",
+    label: "Idle Time",
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig
@@ -43,7 +43,7 @@ export function ActivityTrend() {
       <CardHeader>
         <CardTitle>Activity Trend</CardTitle>
         <CardDescription>
-          Showing total visitors for the last 6 months
+          Showing Active Time and Idle time of users
         </CardDescription>
       </CardHeader>
       <CardContent>
