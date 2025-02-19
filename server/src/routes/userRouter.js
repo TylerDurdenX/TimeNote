@@ -12,7 +12,7 @@ import { getUser, getUserCount, updateUserProfilePicture } from "../controller/d
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
-import { addComment, addSubTaskComment, closeCompletedTask, createProject, createSprint, createSubTask, createTask, deleteAttachment, downloadAttachment, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskComments, getTaskHistory, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
+import { addComment, addSubTaskComment, closeCompletedTask, createProject, createSprint, createSubTask, createTask, deleteAttachment, downloadAttachment, getMentionedUsers, getProjectHoursEstimation, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskComments, getTaskHistory, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 import {createAutoReportConfig, deleteAutoReportConfig, getAutoReportConfig } from "../controller/reportsController/controller.js";
@@ -72,6 +72,8 @@ router.post("/createReportsConfig", createAutoReportConfig)
 router.get("/getConfiguredReports", getAutoReportConfig)
 router.delete("/deleteConfigReport", deleteAutoReportConfig)
 router.patch("/startTaskProgress", updateTaskProgress)
+router.get("/getProjectHoursEstimation", getProjectHoursEstimation)
+router.get("/getMentionedUsers", getMentionedUsers)
 
 
 export default router;

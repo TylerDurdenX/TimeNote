@@ -14,9 +14,9 @@ export function TeamSwitcher({
 
   return (
     <div className="flex items-center gap-3">
-  <img src="lynklogo.png" alt="Logo" className="w-8 h-8" />
+  <img src="/lynklogo.png" alt="Logo" className="w-8 h-8" />
   <div>
-  <img src="whitepng.png" alt="lynk.png" className="w-full mt-1 h-10" />
+  <img src="/whitepng.png" alt="lynk.png" className="w-full mt-1 h-10" />
   </div>
 </div>
 

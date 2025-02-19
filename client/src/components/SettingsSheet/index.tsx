@@ -187,30 +187,10 @@ export function SheetDemo() {
           </div>
         </div>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input id="name" value="Pedro Duarte" className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Username
-            </Label>
-            <Input
-              id="username"
-              value={data?.user.name}
-              className="col-span-3"
-            />
-          </div>
         </div>
         <DialogDemo />
-        <CreateRole />
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button type="submit">Save changes</Button>
-          </SheetClose>
-        </SheetFooter>
+        <CreateRole/>
+        
       </SheetContent>
     </Sheet>
   );

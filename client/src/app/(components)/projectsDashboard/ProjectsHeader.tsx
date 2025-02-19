@@ -36,6 +36,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [projectCode, setProjectCode] = useState("");
   const [projectManager, setProjectManager] = useState("");
   const [createProject, { isLoading: isLoadingCreateProject }] =
     useCreateProjectMutation();
@@ -47,7 +48,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
   );
 
   const isFormValid = () => {
-    return title && description && startDate && endDate && projectManager;
+    return title && description && projectCode && startDate && endDate && projectManager;
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -57,18 +58,26 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
     const formData = {
       title: title,
       description: description,
+      projectCode: projectCode,
       startDate: startDate,
       endDate: endDate,
       projectManager: projectManager,
     };
     try {
       const response = await createProject(formData);
-      toast.success(response.data?.message);
+      // @ts-ignore
+      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+                            // @ts-ignore
+                            toast.error(response.error?.data.message)
+                          }else{
+                            toast.success(response.data?.message);
+                          }
       setTitle("");
       setDescription("");
       setStartDate("");
       setEndDate("");
       setProjectManager('')
+      setProjectCode('')
       setIsOpen(false);
     } catch (err: any) {
       toast.error(err.data.message);
@@ -92,7 +101,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
               {buttonName}
             </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] max-h-[40vw]">
+          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] h-[25vw]">
             <DialogHeader>
               <DialogTitle className="mb-2">Create Project</DialogTitle>
             </DialogHeader>
@@ -100,7 +109,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
             <div
               className="relative w-full h-full overflow-hidden"
               style={{
-                paddingTop: "44.575%",
+                paddingTop: "70.575%",
               }}
             >
               <div className="absolute top-0 left-0 w-[calc(100%)] h-full">
@@ -119,6 +128,13 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         className="col-span-7 shadow border"
+                      />
+                       <Label className="text-center ">Project Code</Label>
+                      <Input
+                        value={projectCode}
+                        onChange={(e) => setProjectCode(e.target.value)}
+                        className="col-span-7"
+                        required
                       />
                       <Label className="text-center">Start Date</Label>
                       <Input
@@ -160,7 +176,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                   <DialogFooter>
                     <button
                       type="submit"
-                      className={`flex w-200px mt-7 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+                      className={`flex w-200px mt-2 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
                                 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
                                   !isFormValid() || isLoadingCreateProject
                                     ? "cursor-not-allowed opacity-50"
@@ -176,10 +192,6 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                 </form>
               </div>
             </div>
-            <DialogFooter className="w-full justify-between items-center">
-              <div className="absolute flex gap-4 left-10"></div>
-              <div className="flex items-center space-x-2"></div>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

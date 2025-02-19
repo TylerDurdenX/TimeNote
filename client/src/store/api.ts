@@ -8,8 +8,10 @@ import {
   DownloadAttachment,
   ListResponse,
   LiveStreamResponse,
+  MentionedUser,
   PmUserResponse,
   ProjectFormData,
+  ProjectHours,
   ProjectListResponse,
   ProjectUsers,
   ReportConfig,
@@ -116,7 +118,8 @@ export const api = createApi({
     "SubTask",
     "SubTaskComment",
     "TaskHistory",
-    "AutoReports"
+    "AutoReports",
+    "ProjectHours"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -328,7 +331,7 @@ updateTaskProgress: build.mutation<ApiResponse, {taskId: number, progressStart: 
       url: `api/user/startTaskProgress?taskId=${taskId}&progressStart=${progressStart}`,
       method: "PATCH",
   }), 
-  invalidatesTags : ["Task",]
+  invalidatesTags : ["Task","ProjectHours"]
 }),
 updateTask: build.mutation<ApiResponse, UpdateTaskData>({
   query: (body)=> ({
@@ -344,7 +347,7 @@ updateSubTask: build.mutation<ApiResponse, UpdateSubTaskData >({
       method: "PATCH",
       body: body,
   }), 
-  invalidatesTags : ["Task", "SubTask"]
+  invalidatesTags : ["Task", "SubTask", "Tasks"]
 }),
 uploadAttachment: build.mutation<ApiResponse, UploadAttachment>({
   query: (body)=> ({
@@ -435,6 +438,19 @@ getSprint: build.query<SprintResponse[], { projectId: string}>({
     return url;
   },
   providesTags : ["SprintCount"]
+}),
+getProjectHoursEstimation: build.query<ProjectHours, { projectId: number}>({
+  query: ({ projectId,}) => {
+    const url = `api/user/getProjectHoursEstimation?projectId=${projectId}`;
+    return url;
+  },
+  providesTags : ["ProjectHours"]
+}),
+getMentionedUsers: build.query<MentionedUser[], { name: string}>({
+  query: ({ name,}) => {
+    const url = `api/user/getMentionedUsers?name=${name}`;
+    return url;
+  },
 }),
 getTaskHistory: build.query<TaskHistory[], { taskId: number}>({
   query: ({ taskId,}) => {
@@ -552,5 +568,7 @@ export const {
   useCreateAutoReportMutation,
   useGetConfiguredReportsQuery,
   useDeleteConfigReportsMutation,
-  useUpdateTaskProgressMutation
+  useUpdateTaskProgressMutation,
+  useGetProjectHoursEstimationQuery,
+  useGetMentionedUsersQuery
 } = api;

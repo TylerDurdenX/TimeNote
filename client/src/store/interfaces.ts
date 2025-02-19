@@ -228,6 +228,12 @@ export interface SubTaskObject {
     attachments?: Attachment[]
 }
 
+export interface ProjectHours{
+    totalHours: number
+    consumedHours: number
+    hoursOverrun: number
+}
+
 export interface ProjectUsers{
     userId: number
     username: string
@@ -290,9 +296,15 @@ export interface SprintResponse{
 export interface ProjectFormData{
     title: string
     description: string
+    projectCode: string
     startDate: string
     endDate: string
     projectManager: string
+}
+
+export interface MentionedUser {
+    userId: number
+    username: string
 }
 
 export interface PmUserResponse{

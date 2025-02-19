@@ -157,14 +157,14 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
 
 
   const [isEditableStatus, setIsEditableStatus] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(true);
   const [isAssigneeEditable, setIsAssigneeEditable] = useState(false);
-  const [isAssigneeHovered, setIsAssigneeHovered] = useState(false);
+  const [isAssigneeHovered, setIsAssigneeHovered] = useState(true);
   const [subTaskAssignee, setSubTaskAssignee] = useState(task?.assignee?.username);
   const [subTaskStatus, setSubTaskStatus] = useState(task?.status);
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
-  const [isDescriptionHovered, setIsDescriptionHovered] = useState(false);
-  const [isStatusHovered, setIsStatusHovered] = useState(false);
+  const [isDescriptionHovered, setIsDescriptionHovered] = useState(true);
+  const [isStatusHovered, setIsStatusHovered] = useState(true);
   const [subTaskDescription, setSubTaskDescription] = useState(task?.description || "");
 
   const [initialDescription, setInitialDescription] = useState(
@@ -220,17 +220,17 @@ useEffect(() => {
 
   const handleBlur = () => {
     setIsEditableStatus(false);
-    setIsHovered(false);
+    setIsHovered(true);
   };
 
   const handleAssigneeBlur = () => {
     setIsAssigneeEditable(false);
-    setIsAssigneeHovered(false);
+    setIsAssigneeHovered(true);
   };
 
   const handleDescriptionBlur = () => {
     setIsDescriptionEditable(false);
-    setIsDescriptionHovered(false);
+    setIsDescriptionHovered(true);
   };
 
   const handleKeyDown = (e: any) => {
@@ -310,7 +310,7 @@ useEffect(() => {
                 <div
                   className="flex items-center"
                   onMouseEnter={() => setIsAssigneeHovered(true)}
-                  onMouseLeave={() => setIsAssigneeHovered(false)} 
+                  onMouseLeave={() => setIsAssigneeHovered(true)} 
                 >
                   <span className="cursor-pointer">Assignee: {subTaskAssignee}</span>
 
@@ -347,7 +347,7 @@ useEffect(() => {
                 <div
                   className="flex items-center"
                   onMouseEnter={() => setIsStatusHovered(true)}
-                  onMouseLeave={() => setIsStatusHovered(false)} 
+                  onMouseLeave={() => setIsStatusHovered(true)} 
                 >
                   <span className="cursor-pointer">Status: {subTaskStatus}</span>
 
@@ -377,7 +377,7 @@ useEffect(() => {
             <div
               className="flex items-center"
               onMouseEnter={() => setIsDescriptionHovered(true)}
-              onMouseLeave={() => setIsDescriptionHovered(false)}
+              onMouseLeave={() => setIsDescriptionHovered(true)}
             >
               <p className="text-gray-700 dark:text-gray-300 cursor-pointer">
                 {subTaskDescription || "Loading status..."} 

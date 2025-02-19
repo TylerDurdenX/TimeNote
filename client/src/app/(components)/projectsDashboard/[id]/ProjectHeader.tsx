@@ -6,6 +6,7 @@ import { HeaderFilter } from "./HeaderFilter";
 import { SprintFilter } from "./SprintFilter";
 import ProjectSectionHeader from "./ProjectSectionHeader";
 import { SubTaskFilter } from "./SubTaskFilter";
+import { useGetProjectHoursEstimationQuery } from "@/store/api";
 
 type Props = {
   activeTab: string;
@@ -39,7 +40,7 @@ const ProjectHeader = ({
 
   const projectName = sessionStorage.getItem("projectName");
 
-  //query to be fired
+  const {data} = useGetProjectHoursEstimationQuery({projectId}, {refetchOnMountOrArgChange: true})
 
   return (
     <div className="px-4 xl:px-4">
@@ -52,18 +53,17 @@ const ProjectHeader = ({
         />
       </div>
       <div className="p-2 flex justify-between items-center dark:border-gray-600 rounded-lg">
-  <div className="w-full sm:w-[25%] h-8 p-1 bg-green-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
-    <span className="font-semibold text-lg text-center">Estimated Hours : 1</span>
-  </div>
-  <div className="w-full sm:w-[25%] h-8 p-1 bg-yellow-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
-    <span className="font-semibold text-lg text-center">Total Consumed Hours : 2</span>
-  </div>
+        <div className="w-full sm:w-[25%] h-8 p-1 bg-green-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+          <span className="font-semibold text-lg text-center">Estimated Hours : {data?.totalHours}</span>
+        </div>
+        <div className="w-full sm:w-[25%] h-8 p-1 bg-yellow-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+          <span className="font-semibold text-lg text-center">Total Consumed Hours : {data?.consumedHours}</span>
+        </div>
 
-  <div className="w-full sm:w-[25%] h-8 p-1 bg-red-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
-    <span className="font-semibold text-lg text-center">Total Hours Overrun : 3</span>
-  </div>
-</div>
-
+        <div className="w-full sm:w-[25%] h-8 p-1 bg-red-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+          <span className="font-semibold text-lg text-center">Total Hours Overrun : {data?.hoursOverrun}</span>
+        </div>
+      </div>
 
       <div className="flex flex-wrap-reverse mt-2 gap-2 border-y border-gray-200 pb-[4px] pt-1 dark:border-stroke-dark sm:items-center">
         <div className="flex flex-1 items-center gap-2 md:gap-4">

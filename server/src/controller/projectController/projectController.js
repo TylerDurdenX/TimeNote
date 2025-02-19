@@ -5,18 +5,19 @@ import { isEmpty } from "../../utils/genericMethods.js";
 import SuccessResponse from "../../utils/SuccessResponse.js";
 
 export const createProject = catchAsync(async (req, res, next) => {
-  const { title, description, startDate, endDate, projectManager } = req.body;
+  const { title, description,projectCode, startDate, endDate, projectManager } = req.body;
   try {
     const user = await prisma.user.findFirst({
       where: {
         username: projectManager,
       },
     });
-
+    console.log(user.email)
     const newProject = await prisma.project.create({
       data: {
         name : title,
         description,
+        code: projectCode,
         startDate,
         endDate,
         projectManager: user.userId,
@@ -1610,6 +1611,12 @@ export const getTaskHistory = catchAsync(async (req, res, next) => {
   await prisma.$transaction(async (prisma) => {
 
   try {
+    const task = await prisma.task.findFirst({
+      where: {
+        id: Number(taskId)
+      }
+    })
+
     const taskHistory = await prisma.taskHistory.findMany({
       where: {
         taskId: Number(taskId),
@@ -1624,8 +1631,39 @@ export const getTaskHistory = catchAsync(async (req, res, next) => {
     
     const resultList = []
 
-    taskHistory.map((historyRecord) => {
-      const [toDo, WIP, underReview, completed, closed] = historyRecord.time.split(',').map(Number);
+    taskHistory.sort((a, b) => a.id - b.id);
+    const currentDateTime = new Date()
+    let hoursPassed =0 
+
+    taskHistory.map((historyRecord, index) => {
+      let [toDo, WIP, underReview, completed, closed] = historyRecord.time.split(',').map(Number);
+      if (index === taskHistory.length - 1) {
+        const differenceInMilliseconds = currentDateTime.getTime() - new Date(historyRecord.startDate).getTime();
+            const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+            hoursPassed = Math.floor(differenceInMinutes / 60);
+        switch(task.status){
+          case  "To Do" : {
+            const hours = Math.abs(hoursPassed);
+            toDo = toDo + hours
+            break;
+          }
+          case  "Work In Progress" : {
+            const hours = Math.abs(hoursPassed);
+            WIP = WIP + hours
+            break;
+          }
+          case  "Under Review" : {
+            const hours = Math.abs(hoursPassed);
+            underReview = underReview + hours
+            break;
+          }
+          case  "Completed" : {
+            const hours = Math.abs(hoursPassed);
+            completed = completed + hours
+            break;
+          }
+        }
+      }
       const result = {
         id: historyRecord.id,
         username: historyRecord.user.username,
@@ -1648,5 +1686,84 @@ export const getTaskHistory = catchAsync(async (req, res, next) => {
   }
   })
   return next(new AppError("Some error occurred, please try after some time", 500))
+
+});
+
+export const getProjectHoursEstimation = catchAsync(async (req, res, next) => {
+  const { projectId } = req.query;
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      const taskList = await prisma.task.findMany({
+        where: {
+          projectId: Number(projectId),
+        }
+      });
+
+      let totalHours = 0
+      let consumedHours = 0 
+      const currentDateTime = new Date()
+
+      taskList.forEach((task) => {
+        totalHours += task.points;
+
+        if (task.inProgressTimeinMinutes !== null && task.inProgressTimeinMinutes !== undefined) {
+          // Ensure inProgressTimeinMinutes is a valid number and convert minutes to hours
+          consumedHours += Math.floor(Number(task.inProgressTimeinMinutes) / 60);
+        } else {
+          // Ensure inProgressStartTime is valid
+          if (task.inProgressStartTime) {
+            const differenceInMilliseconds = currentDateTime.getTime() - new Date(task.inProgressStartTime).getTime();
+            const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+            
+            // If inProgressTimeinMinutes is null, assume 0 and add the calculated difference
+            const progressTime = Number(task.inProgressTimeinMinutes || 0) + differenceInMinutes;
+            consumedHours += Math.floor(progressTime / 60);
+          }
+        }
+      });
+
+
+      let hoursOverrun = 0
+      if(consumedHours > totalHours){
+        hoursOverrun = Math.abs(consumedHours - totalHours)
+      }
+
+      const result = {
+        totalHours: totalHours,
+        consumedHours: consumedHours,
+        hoursOverrun: hoursOverrun
+      };
+      res.json(result);
+    })
+  } catch (error) {
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+
+});
+
+export const getMentionedUsers = catchAsync(async (req, res, next) => {
+  const { name } = req.query;
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      const userList = await prisma.user.findMany({
+        where: {
+          username: {
+            startsWith: name,
+            mode: 'insensitive',
+          },
+        },
+        select: {
+          userId: true,
+          username: true,
+        },
+        take: 5, 
+      });
+      
+      res.json(userList);
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
 
 });

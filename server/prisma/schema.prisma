@@ -39,7 +39,7 @@ model User{
   reports     User[]     @relation("ReportsTo")
   taskHistory       TaskHistory[]     @relation("TaskHistory")
   screenshot      Screenshots[]
-  project       Project?      @relation()
+  project       Project[]      @relation()
   autoReport       AutoReports[]      @relation()
   profilePicture  ProfilePicture? @relation(fields: [profilePictureId], references: [id])
 }
@@ -65,7 +65,7 @@ model Project {
   name        String     @unique
   code        String?     @unique
   description String?
-  projectManager      Int  @unique
+  projectManager      Int  
   startDate      String?
   endDate      String?
   status      String?

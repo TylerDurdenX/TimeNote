@@ -14,7 +14,7 @@ const Project = () => {
   const [email, setEmail] = useState<string | null>(null)
 
   const [priority, setPriority] = useState('')
-  const [assignedTo, setAssignedTo] = useState('')
+  const [assignedTo, setAssignedTo] = useState('X')
   const [sprint, setSprint] = useState('')
   const [isTaskOrSubTask, setIsTaskOrSubTask] = useState('Task')
 
