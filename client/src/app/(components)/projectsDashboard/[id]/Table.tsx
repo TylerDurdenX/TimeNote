@@ -1,7 +1,9 @@
+'use client'
+
 import Header from "@/components/Header";
 import { useGetProjectTasksQuery } from "@/store/api";
 import React from "react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import TaskPage from "./TaskPage";
@@ -9,6 +11,7 @@ import { useSearchParams } from "next/navigation";
 import * as XLSX from "xlsx";
 import { Button } from "@mui/material";
 import { FileDown } from "lucide-react";
+import CircularLoading from "@/components/Sidebar/loading";
 
 type Props = {
   projectId: string;
@@ -20,22 +23,33 @@ type Props = {
 
 const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: Props) => {
   const userEmail = useSearchParams().get("email");
+  localStorage.removeItem("persist:root");
+
+  const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+    
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0"); 
+        const year = date.getFullYear();
+    
+        return `${day}/${month}/${year}`;
+      };
 
   const columns: GridColDef[] = [
     {
       field: "title",
       headerName: "Title",
-      width: 100,
+      flex: 0.8, 
     },
     {
       field: "description",
       headerName: "Description",
-      width: 200,
+      flex: 1, 
     },
     {
       field: "status",
       headerName: "Status",
-      width: 150,
+      flex: 0.9, 
       renderCell: (params) => {
         let bgColor, textColor;
 
@@ -75,36 +89,9 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
       },
     },
     {
-      field: "tags",
-      headerName: "Tags",
-      width: 130,
-    },
-    {
-      field: "startDate",
-      headerName: "Start Date",
-      width: 130,
-    },
-    {
-      field: "dueDate",
-      headerName: "Due Date",
-      width: 130,
-    },
-    {
-      field: "author",
-      headerName: "Author",
-      width: 150,
-      renderCell: (params) => params.value.username || "Unknown",
-    },
-    {
-      field: "assignee",
-      headerName: "Assignee",
-      width: 150,
-      renderCell: (params) => params.value.username || "Unassigned",
-    },
-    {
       field: "priority",
       headerName: "Priority",
-      width: 75,
+      flex: 0.6, 
       renderCell: (params) => {
         const priority = params.value;
 
@@ -142,9 +129,52 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
       },
     },
     {
+      field: "tags",
+      headerName: "Tags",
+      flex: 0.8, 
+    },
+    {
+      field: "startDate",
+      headerName: "Start Date",
+      flex: 0.6, 
+      renderCell: (params) => {
+        return formatDate(params.value); 
+      },
+    },
+    {
+      field: "dueDate",
+      headerName: "Due Date",
+      flex: 0.6, 
+      renderCell: (params) => {
+        return formatDate(params.value); 
+      },
+    },
+    {
+      field: "points",
+      headerName: "Estimated",
+      flex: 0.5, 
+     
+    },
+    {
+      field: "consumedHours",
+      headerName: "Consumed",
+      flex: 0.6, 
+    },
+    {
+      field: "hoursOverrun",
+      headerName: "Overrun",
+      flex: 0.5, 
+    },
+    {
+      field: "assignee",
+      headerName: "Assignee",
+      flex: 0.8, 
+      renderCell: (params) => params.value.username || "Unassigned",
+    },
+    {
       field: "taskId",
       headerName: "",
-      width: 150,
+      flex: 0.7, 
       renderCell: (params) => {
         return (
           <div className="flex justify-center items-center h-full">
@@ -184,7 +214,7 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
     priority,
     isTaskOrSubTask,
     email: userEmail!
-  });
+  },{refetchOnMountOrArgChange: true});
 
   const removeColumns = (data: any[], columnsToExclude: string[]) => {
     return data.map((item) => {
@@ -234,7 +264,14 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
 
   const isDarkMode = false;
 
-  if (isLoading) return <div>Loading...</div>;
+  const getRowClassName = (params: GridRowParams) => {
+    if (params.row.hoursOverrun > 0) {
+      return 'bg-red-100';  // Add the custom class if hoursOverrun > 0
+    }
+    return '';  // Return empty string for default style
+  };
+
+  if (isLoading) return <div><CircularLoading/></div>;
   if (error) return <div>An error occurred while fetching tasks</div>;
 
   return (
@@ -256,6 +293,7 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
         columns={columns}
         className={dataGridClassNames}
         sx={dataGridSxStyles(isDarkMode)}
+        getRowClassName={getRowClassName}
       />
     </div>
   );

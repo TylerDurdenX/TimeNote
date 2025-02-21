@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { PlusSquare, Pencil, Download, Maximize2 } from "lucide-react";
+import { PlusSquare, Pencil, Download, Maximize2, Clock } from "lucide-react";
 import { SubTask, Task as TaskType } from "@/store/interfaces";
 import { useCreateSubTaskMutation, useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetTaskQuery, useUpdateTaskMutation, useUpdateTaskProgressMutation, useUploadAttachmentMutation } from "@/store/api";
 import Comments from "./Comments";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SubTaskTable from "./(SubTask)/SubTaskTable";
 import Link from "next/link";
+import CircularLoading from "@/components/Sidebar/loading";
 
 type Props = {
   taskId: number;
@@ -418,6 +419,49 @@ useEffect(() => {
       }
     };
 
+    const [timeDiff, setTimeDiff] = useState<string>("");
+    
+      useEffect(() => {
+        if (!isProgressStarted && task?.inProgressTimeinMinutes!==null) {
+          const minutes = Number(task?.inProgressTimeinMinutes);
+          const hours = Math.floor(minutes / 60); 
+          const remainingMinutes = minutes % 60;
+          setTimeDiff(`${hours}:${remainingMinutes}`)
+        };
+    
+        const targetTime = new Date(task?.inProgressStartTime!); 
+        let intervalId: NodeJS.Timeout | null = null;
+    
+        const updateTime = () => {
+          const currentTime = new Date(); 
+          let diff = currentTime.getTime() - targetTime.getTime(); 
+    
+          if(task?.inProgressTimeinMinutes !== null)
+            diff += Number(task?.inProgressTimeinMinutes!) * 60 * 1000;
+    
+          const seconds = Math.floor(diff / 1000); 
+          const minutes = Math.floor(seconds / 60);
+          const hours = Math.floor(minutes / 60);
+          const remainingMinutes = minutes % 60; 
+          const remainingSeconds = seconds % 60;
+    
+          setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
+        };
+    
+        if (isProgressStarted) {
+          intervalId = setInterval(updateTime, 1000);
+        }
+    
+        return () => {
+          if (intervalId) {
+            clearInterval(intervalId);
+          }
+        };
+      }, [isProgressStarted, task]);
+
+         if (isLoading) return <div><CircularLoading/></div>;
+      
+
 
   return (
     <div className="w-[80vw] max-h-[90vh] overflow-y-auto mx-auto p-6 bg-white rounded-xl shadow-lg space-y-6 dark:bg-gray-800 dark:text-white">
@@ -445,10 +489,18 @@ useEffect(() => {
       </div>
 
         <div className="space-y-4 text-gray-600 dark:text-gray-400">
-          <div className="text-sm">
+        <div className="text-sm flex justify-between items-center">
             <span>
               {formatDate(task?.startDate!)} - {formatDate(task?.dueDate!)}
             </span>
+            <>
+            <span className="text-gray-600 text-lg inline-flex items-center mr-5">
+            <Clock className="mr-2 " /> 
+            <div className="text-center text-lg font-semibold">
+            Consumed time: {timeDiff}
+            </div>
+          </span>
+          </>
           </div>
 
           <div className="text-sm relative">

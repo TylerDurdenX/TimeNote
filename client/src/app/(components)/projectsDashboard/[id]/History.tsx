@@ -5,6 +5,7 @@ import React from "react";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { useGetProjectTasksQuery, useGetTaskHistoryQuery } from "@/store/api";
 import { Task } from "@/store/interfaces";
+import CircularLoading from "@/components/Sidebar/loading";
 
 type Props = {
   taskId: number;
@@ -120,7 +121,7 @@ const TaskHistory = ({taskId, estimatedHours, task, fullPageFlag}: Props) => {
   
   const isDarkMode = false;
 
-  if (isTaskHistoryLoading) return <div>Loading...</div>;
+  if (isTaskHistoryLoading) return <div><CircularLoading/></div>;
   if (isTaskHistoryError) return <div>An error occurred while fetching tasks</div>;
 
   return (

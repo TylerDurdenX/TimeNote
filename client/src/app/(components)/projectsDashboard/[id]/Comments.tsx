@@ -1,74 +1,75 @@
-'use client'
+"use client";
 
-import { useAddCommentMutation, useGetMentionedUsersQuery, useGetTaskCommentsQuery } from "@/store/api";
+import CircularLoading from "@/components/Sidebar/loading";
+import {
+  useAddCommentMutation,
+  useGetMentionedUsersQuery,
+  useGetTaskCommentsQuery,
+} from "@/store/api";
 import { MentionedUser } from "@/store/interfaces";
+import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
 type Props = {
   email: string;
   taskId: number;
-  taskCode: string
+  taskCode: string;
 };
 
-const Comments = ({ taskId, email , taskCode}: Props) => {
-
+const Comments = ({ taskId, email, taskCode }: Props) => {
   const [newComment, setNewComment] = useState("");
-  const [currentQuery, setCurrentQuery] = useState('');
+  const [currentQuery, setCurrentQuery] = useState("");
   const [userSuggestions, setUserSuggestions] = useState<MentionedUser[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isUserSelected, setIsUserSelected] = useState(false);
 
-  // Use RTK query to fetch users based on `currentQuery`
   const { data: users, isLoading: loading } = useGetMentionedUsersQuery(
     { name: currentQuery },
-    { skip: !currentQuery || isUserSelected} // Only fetch if `currentQuery` is not empty
+    { skip: !currentQuery || isUserSelected } 
   );
 
-  // Handle input change in the textarea
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setNewComment(value);
 
-    // Find the last '@' symbol and extract the text after it
-    const atIndex = value.lastIndexOf('@');
-    
+    const atIndex = value.lastIndexOf("@");
+
     if (atIndex !== -1) {
-      const searchText = value.slice(atIndex + 1).trim(); // Extract text after '@'
-      
+      const searchText = value.slice(atIndex + 1).trim(); 
+
       if (searchText.length > 0 && !isUserSelected) {
-        setCurrentQuery(searchText); // Update the query to trigger fetching
-        setShowDropdown(true); // Show the dropdown when there's a search query
+        setCurrentQuery(searchText); 
+        setShowDropdown(true);
       } else {
-        setCurrentQuery(''); // If empty text after '@', reset currentQuery
-        setShowDropdown(false); // Hide dropdown if no search text
+        setCurrentQuery(""); 
+        setShowDropdown(false); 
       }
     } else {
-      setCurrentQuery(''); // Clear query if '@' is not found
-      setShowDropdown(false); // Hide dropdown if no '@'
+      setCurrentQuery("");
+      setShowDropdown(false);
     }
   };
 
   const handleUserSelect = (user: MentionedUser) => {
-    const atIndex = newComment.lastIndexOf('@'); // Get index of last '@'
-    
-    if (atIndex !== -1) {
-      const beforeAt = newComment.slice(0, atIndex); // Everything before the last '@'
-      const afterAt = newComment.slice(atIndex); // Everything after the last '@'
-      
-      // Replace the portion after the last '@' with the selected username in brackets
-      const newCommentValue = `${beforeAt}[${user.username}] ${afterAt.slice(user.username.length + 1)}`;
-      
-      setNewComment(newCommentValue); // Update comment with selected user
-    }
-  
-    setIsUserSelected(false); // Mark that a user has been selected
-    setUserSuggestions([]); // Clear suggestions
-    setShowDropdown(false); // Close dropdown
-  };
-  
+    const atIndex = newComment.lastIndexOf("@");
 
-  // Reset isUserSelected flag when user changes the comment
+    if (atIndex !== -1) {
+      const beforeAt = newComment.slice(0, atIndex);
+      const afterAt = newComment.slice(atIndex);
+
+      const newCommentValue = `${beforeAt}[${user.username}] ${afterAt.slice(
+        user.username.length + 1
+      )}`;
+
+      setNewComment(newCommentValue); 
+    }
+
+    setIsUserSelected(false); 
+    setUserSuggestions([]);
+    setShowDropdown(false); 
+  };
+
   const handleBlur = () => {
     setIsUserSelected(false);
   };
@@ -95,7 +96,7 @@ const Comments = ({ taskId, email , taskCode}: Props) => {
       taskId: taskId,
       userEmail: email,
       commentTime: indianTimeISOString,
-      taskCode: taskCode
+      taskCode: taskCode,
     };
     try {
       const response = addComment(formData);
@@ -127,107 +128,113 @@ const Comments = ({ taskId, email , taskCode}: Props) => {
             return (
               <div key={index} className="border-b pb-4 ">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-semibold text-lg">{comment.username}</span>
-                  <span className="text-sm text-gray-500">{formattedCommentTime}</span>
+                  <span className="font-semibold text-lg">
+                    {comment.username}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {formattedCommentTime}
+                  </span>
                 </div>
-            
+
                 <p className="text-gray-800">
-    {(() => {
-      const result = [];
-      let currentText = '';
-      let isInsideBrackets = false;
-      let mention = '';
+                  {(() => {
+                    const result = [];
+                    let currentText = "";
+                    let isInsideBrackets = false;
+                    let mention = "";
 
-      for (let i = 0; i < comment.text.length; i++) {
-        const char = comment.text[i];
+                    for (let i = 0; i < comment.text.length; i++) {
+                      const char = comment.text[i];
 
-        // Check if we're inside brackets
-        if (char === '[') {
-          if (currentText) {
-            result.push(currentText); // Push any text before the mention
-          }
-          currentText = ''; // Reset for the mention text inside brackets
-          isInsideBrackets = true; // We are inside a mention
-        } else if (char === ']' && isInsideBrackets) {
-          // When we reach the closing bracket, add the mention
-          result.push(
-                    <span
-                      key={i}
-                      style={{
-                        color: 'blue', // Highlight text inside brackets
-                        cursor: 'pointer',
-                        textDecoration: 'underline', // Optional: underline for better UX
-                      }}
-                      onClick={() => alert(`You clicked on ${mention}`)} // Handle click
-                    >
-                      [{mention}]
-                      </span>
-                    );
-                    mention = ''; // Clear the mention after it's been added
-                    isInsideBrackets = false; // Exit the mention mode
-                  } else if (isInsideBrackets) {
-                    mention += char; // Collect characters inside the brackets
-                  } else {
-                    currentText += char; // Collect regular text outside brackets
-                  }
-                }
+                      if (char === "[") {
+                        if (currentText) {
+                          result.push(currentText);
+                        }
+                        currentText = ""; 
+                        isInsideBrackets = true; 
+                      } else if (char === "]" && isInsideBrackets) {
+                        result.push(
+                          <Link href={`/user?email=${email}`}>
+                          <span
+                            key={i}
+                            style={{
+                              color: "blue",
+                              cursor: "pointer",
+                              textDecoration: "underline",
+                            }}
+                            onClick={(e) => {
+                              const content = (
+                                e.target as HTMLElement
+                              ).textContent?.slice(1, -1); 
+                              if (content) {
+                                sessionStorage.setItem("userName", content);
+                              }
+                            }}
+                          >
+                            {`[${mention}]`}
+                          </span>
+                          </Link>
+                        );
 
-                if (currentText) {
-                  result.push(currentText); // Push remaining text after the last mention
-                }
+                        mention = "";
+                        isInsideBrackets = false; 
+                      } else if (isInsideBrackets) {
+                        mention += char;
+                      } else {
+                        currentText += char; 
+                      }
+                    }
+                    if (currentText) {
+                      result.push(currentText);
+                    }
 
-                return result;
-              })()}
-            </p>
-
+                    return result;
+                  })()}
+                </p>
               </div>
             );
-            
           })
         )}
       </div>
       <div className="mt-4">
-      <div>
-      {/* Your Textarea */}
-      <textarea
-        value={newComment}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        className="w-full p-2 border rounded-md shadow-sm resize-none"
-        placeholder="Add a comment..."
-      />
+        <div>
+          <textarea
+            value={newComment}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className="w-full p-2 border rounded-md shadow-sm resize-none"
+            placeholder="Add a comment..."
+          />
 
-      {/* Dropdown with filtered users */}
-      {showDropdown && currentQuery && !loading && (
-        <div
-          className="left-0 bg-white border mt-1 rounded-md shadow-lg"
-          style={{
-            width: '100%',
-            maxHeight: '200px',
-            overflowY: 'auto',
-          }}
-        >
-          <ul>
-            {/* Render users */}
-            {users?.length! > 0 ? (
-              users?.map((user: MentionedUser) => (
-                <li
-                  key={user.userId}
-                  className="p-2 cursor-pointer hover:bg-gray-200"
-                  onClick={() => handleUserSelect(user)} // Select user when clicked
-                >
-                  {user.username}
-                </li>
-              ))
-            ) : (
-              <li className="p-2 text-gray-500">No users available</li> // Show message if no users found
-            )}
-          </ul>
+          {showDropdown && currentQuery && !loading && (
+            <div
+              className="left-0 bg-white border mt-1 rounded-md shadow-lg"
+              style={{
+                width: "100%",
+                maxHeight: "200px",
+                overflowY: "auto",
+              }}
+            >
+              <ul>
+                {users?.length! > 0 ? (
+                  users?.map((user: MentionedUser) => (
+                    <li
+                      key={user.userId}
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => handleUserSelect(user)} 
+                    >
+                      {user.username}
+                    </li>
+                  ))
+                ) : (
+                  <li className="p-2 text-gray-500">No users available</li> 
+                )}
+              </ul>
+            </div>
+          )}
+
+          {loading && <div><CircularLoading/></div>}
         </div>
-      )}
-
-      {loading && <div>Loading...</div>}
-    </div>
         <button
           onClick={handleAddComment}
           className="mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-500"

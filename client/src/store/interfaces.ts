@@ -23,6 +23,17 @@ export interface UserDetails {
     reports: ReportingUsers[]
 }
 
+export interface UserData {
+    userId: number,
+    email: string,
+    username: string,
+    designation: string,
+    phoneNumber: string,
+    profilePicture: ProfilePicture,
+    projects: Project[],
+    teams: Team[],
+}
+
 export interface Role {
     name: string
 }

@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import CircularLoading from "@/components/Sidebar/loading";
 
 type Props = {
   id: number;
@@ -307,7 +308,7 @@ const UserSettings = ({ id }: Props) => {
   return (
     <div>
       {!queriesLoaded ? (
-        "Loading..."
+        <CircularLoading/>
       ) : (
         <form onSubmit={handleSubmit}>
           <div className="flex h-full w-full">

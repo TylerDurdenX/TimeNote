@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import UserCard from "./UserCard"; // Assuming the UserCard component is imported
 import { UserHierarchy as User } from "@/store/interfaces";
 import { useGetUserHierarchyDataQuery } from "@/store/api";
+import CircularLoading from "@/components/Sidebar/loading";
 
 interface HierarchyPageProps {
   startingUserId: number;
@@ -77,7 +78,7 @@ export default function HierarchyPage({ startingUserId, setStartingUserId}: Hier
   }, [startingUserId, data,]); // Dependency on startingUserId and data
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div><CircularLoading/></div>;
   }
 
   if (error) {
@@ -101,7 +102,7 @@ export default function HierarchyPage({ startingUserId, setStartingUserId}: Hier
             {index !== managers.length - 1 && (
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-px h-6 bg-gray-500"></div>
         )}
-            <button onClick={() => handleCardClick(manager.userId)}>
+            <button onClick={() => handleCardClick(manager.userId)} className="transition-all transform hover:scale-105">
               <UserCard
                 name={manager.username}
                 designation={manager.designation}
@@ -120,7 +121,7 @@ export default function HierarchyPage({ startingUserId, setStartingUserId}: Hier
 
       {/* Render Current User with Highlight */}
       <div>
-        <button onClick={() => handleCardClick(user.userId)}>
+        <button onClick={() => handleCardClick(user.userId)} className="transition-all transform hover:scale-105">
           <UserCard
             name={user.username}
             designation={user.designation}
@@ -137,10 +138,10 @@ export default function HierarchyPage({ startingUserId, setStartingUserId}: Hier
 <div className="top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>
     <div className="flex flex-col items-center mt-0 relative border border-gray-300 rounded-lg p-4">
 
-    <div className="flex flex-wrap justify-center gap-8">
+    <div className="flex flex-wrap justify-center gap-8 bg-white shadow-md p-6 w-full">
       {directReports.map((report) => (
         <div key={report.userId} className="relative flex flex-col items-center">
-          <button onClick={() => handleCardClick(report.userId)}>
+          <button onClick={() => handleCardClick(report.userId)} className="transition-all transform hover:scale-105">
             <UserCard
               name={report.username}
               designation={report.designation}
@@ -163,7 +164,7 @@ export default function HierarchyPage({ startingUserId, setStartingUserId}: Hier
       <div key={report.userId} className="relative flex flex-col items-center">
                 {ifBottomUserSelected ? "" : <div className=" top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>}
 
-        <button onClick={() => handleCardClick(report.userId)}>
+        <button onClick={() => handleCardClick(report.userId)} className="transition-all transform hover:scale-105">
           <UserCard
             name={report.username}
             designation={report.designation}

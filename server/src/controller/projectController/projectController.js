@@ -225,6 +225,8 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             comments: true,
           },
         });
+
+        const currentDateTime = new Date()
       
         tasks.map((task) => {
           const assignee = task.assignee
@@ -240,6 +242,29 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
               ...newAssignee
             } = task.assignee;
             task.assignee = newAssignee;
+
+            let hoursOverrun = 0
+            let totalHours =0
+            let consumedHours = 0
+
+            totalHours += task.points
+            if (task.inProgressTimeinMinutes !== null && task.inProgressTimeinMinutes !== undefined) {
+              consumedHours += Math.floor(Number(task.inProgressTimeinMinutes) / 60);
+            } else {
+              if (task.inProgressStartTime) {
+                const differenceInMilliseconds = currentDateTime.getTime() - new Date(task.inProgressStartTime).getTime();
+                const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+                const progressTime = Number(task.inProgressTimeinMinutes || 0) + differenceInMinutes;
+                consumedHours += Math.floor(progressTime / 60);
+              }
+            }
+
+            if(consumedHours > totalHours){
+              hoursOverrun = Math.abs(consumedHours - totalHours)
+            }
+
+            task.consumedHours = consumedHours
+            task.hoursOverrun = hoursOverrun
           })
       
         res.json(tasks);
@@ -1798,6 +1823,41 @@ export const getMentionedUsers = catchAsync(async (req, res, next) => {
       });
       
       res.json(userList);
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+
+});
+
+export const getUserData = catchAsync(async (req, res, next) => {
+  const { username } = req.query;
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          username: username,
+        },
+        include: {
+          profilePicture: {
+            select: {
+              base64: true,
+            },
+          },
+          projects: {
+            select: {
+              name: true,
+            },
+          },
+          teams: {
+            select: {
+              name: true,
+            },
+          }
+        },
+      });
+      res.json(user);
     })
   } catch (error) {
     console.log(error)

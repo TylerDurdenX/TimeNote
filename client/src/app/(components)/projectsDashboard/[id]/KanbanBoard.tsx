@@ -56,6 +56,9 @@ import TaskHistory from "./History";
 import { useSearchParams } from "next/navigation";
 import SubTaskPage from "./(SubTask)/SubTaskPage";
 import SubTaskComment from "./(SubTask)/SubTaskComments";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import BulkCreate from "./[taskId]/BulkCreate";
 
 type BoardProps = {
   id: string;
@@ -173,7 +176,7 @@ const TaskColumn = ({
       isOver: !!monitor.isOver(),
     }),
   }));
-  const tasksCount = tasks.filter((task) => task.status === status).length;
+  const tasksCount = Array.isArray(tasks) ? tasks.filter((task) => task.status === status).length : 0;
 
   const statusColor: any = {
     "To Do": "#2563EB",
@@ -244,8 +247,8 @@ const TaskColumn = ({
     }
   };
 
-  const { data, isLoading, error } = useGetProjectUsersQuery({ projectId: id });
-  const {data : sprintData, isLoading : sprintLoading, isError} = useGetSprintQuery({projectId: projectId })
+  const { data, isLoading, error } = useGetProjectUsersQuery({ projectId: id }, {refetchOnMountOrArgChange: true});
+  const {data : sprintData, isLoading : sprintLoading, isError} = useGetSprintQuery({projectId: projectId }, {refetchOnMountOrArgChange: true})
   
 
   return (
@@ -286,12 +289,19 @@ const TaskColumn = ({
                       </DialogTrigger>
 
                     </> : ""}
-                  <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[29vw]">
+                  <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[38vw]">
                     <DialogHeader>
-                      <DialogTitle className="mb-1">Create Task</DialogTitle>
+                      <DialogTitle className="font-semibold text-lg">Create Task</DialogTitle>
                     </DialogHeader>
+                    <Tabs defaultValue="alerts" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 w-[400px] h-[46px]">
+              <TabsTrigger value="Manual" className="font-semibold text-lg">Create Manually</TabsTrigger>
+              <TabsTrigger value="Upload" className="font-semibold text-lg ">Upload Excel</TabsTrigger>
+            </TabsList>
+            <div className="mt-2 mb-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
 
-                    <div
+            <TabsContent value="Manual" className="w-full">
+              <div
                       className="relative w-full h-full overflow-hidden"
                       style={{
                         paddingTop: "42.575%",
@@ -443,6 +453,21 @@ const TaskColumn = ({
                         </form>
                       </div>
                     </div>
+            </TabsContent>
+            <TabsContent value="Upload">
+              <Card>
+                <CardHeader>
+                  <CardDescription>Bulk Create Tasks</CardDescription>
+                  
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <BulkCreate/>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+                   
                     <DialogFooter className="w-full justify-between items-center">
                       <div className="absolute flex gap-4 left-10"></div>
                       <div className="flex items-center space-x-2"></div>

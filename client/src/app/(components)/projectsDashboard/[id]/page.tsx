@@ -5,8 +5,10 @@ import ProjectHeader from './ProjectHeader'
 import KanbanBoard from './KanbanBoard'
 import Timeline from './Timeline'
 import TableView from './Table'
+import CircularLoading from '@/components/Sidebar/loading'
 
 const Project = () => {
+
   const [activeTab, setActiveTab] = useState("Kanban Board")
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false)
 
@@ -31,7 +33,7 @@ const Project = () => {
   }, []) 
 
   if (idFromUrl === null || email === null) {
-    return <div>Loading...</div>  
+    return <div><CircularLoading/></div>  
   }
 
   return (

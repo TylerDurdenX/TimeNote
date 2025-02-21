@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input"; 
 import { Label } from "@/components/ui/label";
-import { PlusSquare } from "lucide-react";
+import { FilePenLine, PlusSquare, SquarePen } from "lucide-react";
 import { useCreateSprintMutation } from "@/store/api";
 
 type Props = {
@@ -75,12 +75,12 @@ const ProjectSectionHeader = ({
   return (
     <div className="flex relative w-full pl-4 h-[20px] mb-1 items-center justify-between">
       <h1
-        className={`${
-          isSmallText ? "text-lg" : "text-2xl"
-        } font-semibold dark:text-white`}
-      >
-        {name}
-      </h1>
+          className={`${
+            isSmallText ? "text-lg" : "text-2xl"
+          } font-semibold dark:text-white flex items-center`}
+        >
+          {name} <SquarePen className="ml-2" />
+        </h1>
       <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>

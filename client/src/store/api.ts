@@ -31,6 +31,7 @@ import {
   UpdateTaskData,
   UploadAttachment,
   UploadSubTaskAttachment,
+  UserData,
   UserDetails,
   UserFilterResponse,
   UserHierarchy,
@@ -196,6 +197,12 @@ export const api = createApi({
         return url;
       },
       providesTags: ["UsersData"],
+    }),
+    getUserData: build.query< UserData, { username: string }>({
+      query: ({ username }) => {
+        const url = `api/user/getUserData?username=${username}`;
+        return url;
+      },
     }),
     getObjectList: build.query<ListResponse[], { entityName: string }>({
       query: ({ entityName }) => {
@@ -598,5 +605,6 @@ export const {
   useGetMentionedUsersQuery,
   useGetAlertsCountQuery,
   useGetAlertsQuery,
-  useDeleteTriggeredAlertsMutation
+  useDeleteTriggeredAlertsMutation,
+  useGetUserDataQuery
 } = api;

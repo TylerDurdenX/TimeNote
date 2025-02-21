@@ -21,6 +21,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { Stack } from "@mui/material";
+import CircularLoading from "@/components/Sidebar/loading";
 
 type Props = {
   id: number;
@@ -96,7 +97,7 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage} : Props) => {
   return (
    <>
          {!queriesLoaded ? (
-           "Loading..."
+           <CircularLoading/>
          ) : ( 
            <>
              <div
