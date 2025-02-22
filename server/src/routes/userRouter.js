@@ -12,7 +12,7 @@ import { getAlertCount, getUser, getUserCount, updateUserProfilePicture } from "
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
-import { addComment, addSubTaskComment, closeCompletedTask, createProject, createSprint, createSubTask, createTask, deleteAttachment, downloadAttachment, getMentionedUsers, getProjectHoursEstimation, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskComments, getTaskHistory, getUserData, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
+import { addComment, addSubTaskComment, closeCompletedTask, createProject, createSprint, createSubTask, createTask, deleteAttachment, downloadAttachment, getMentionedUsers, getProject, getProjectHoursEstimation, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskComments, getTaskHistory, getUserData, updateProject, updateProjectStatus, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadProjectAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 import {createAutoReportConfig, deleteAutoReportConfig, getAutoReportConfig } from "../controller/reportsController/controller.js";
@@ -79,6 +79,9 @@ router.get("/getAlertCount", getAlertCount)
 router.get("/getAlert", getAlerts)
 router.delete("/deleteAlert", deleteAlert)
 router.get("/getUserData", getUserData)
-
+router.get("/getProject", getProject)
+router.patch("/updateProjectStatus",updateProjectStatus)
+router.patch("/updateProject", updateProject)
+router.post("/uploadProjectAttachment", uploadProjectAttachment)
 
 export default router;

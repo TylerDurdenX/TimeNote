@@ -31,6 +31,7 @@ model User{
   attachments Attachment[]
   comments Comment[]
   alert     Alert[]
+  projectAttachments    ProjectAttachments[]
 
   teamMembers TeamMembers[]   @relation("TeamMembers")
   userProjects UserProjects[]     @relation("UserProjects")
@@ -70,15 +71,27 @@ model Project {
   startDate      String?
   endDate      String?
   status      String?
-  field5      String?
+  clientName      String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   tasks        Task[]
+  projectAttachments      ProjectAttachments[]
   // Many-to-many relationship between users and projects (a user can have many projects)
   sprints       Sprint[]
   users       User[]     @relation("UserProjects")
   userProjects UserProjects[]     @relation("UserProjects")
   user     User  @relation(fields: [projectManager], references: [userId])
+}
+
+model ProjectAttachments {
+  id        Int       @id @default(autoincrement())
+  fileBase64      String
+  fileName     String?
+  projectId       Int?
+  uploadedById    Int
+
+  project       Project? @relation(fields: [projectId], references: [id])
+  uploadedBy User @relation(fields: [uploadedById], references: [userId])
 }
 
 model Sprint {

@@ -53,15 +53,15 @@ const ProjectHeader = ({
         />
       </div>
       <div className="p-2 flex justify-between items-center dark:border-gray-600 rounded-lg">
-        <div className="w-full sm:w-[25%] h-8 p-1 bg-green-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
-          <span className="font-semibold text-lg text-center">Estimated Hours : {data?.totalHours}</span>
+        <div className="w-full sm:w-[25%] h-8 p-1 bg-green-700 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+          <span className="font-semibold text-lg text-center text-white">Estimated Hours : {data?.totalHours}</span>
         </div>
-        <div className="w-full sm:w-[25%] h-8 p-1 bg-yellow-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
-          <span className="font-semibold text-lg text-center">Total Consumed Hours : {data?.consumedHours}</span>
+        <div className="w-full sm:w-[25%] h-8 p-1 bg-yellow-500 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+          <span className="font-semibold text-lg text-center text-white">Total Consumed Hours : {data?.consumedHours}</span>
         </div>
 
-        <div className="w-full sm:w-[25%] h-8 p-1 bg-red-300 dark:bg-gray-800 rounded-lg flex flex-col items-center">
-          <span className="font-semibold text-lg text-center">Total Hours Overrun : {data?.hoursOverrun}</span>
+        <div className="w-full sm:w-[25%] h-8 p-1 bg-red-500 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+          <span className="font-semibold text-lg text-center text-white">Total Hours Overrun : {data?.hoursOverrun}</span>
         </div>
       </div>
 

@@ -491,7 +491,7 @@ useEffect(() => {
       const minutes = Number(task?.inProgressTimeinMinutes);
       const hours = Math.floor(minutes / 60); 
       const remainingMinutes = minutes % 60;
-      setTimeDiff(`${hours}:${remainingMinutes}`)
+      setTimeDiff(`${hours}:${remainingMinutes}:00`)
     };
 
     const targetTime = new Date(task?.inProgressStartTime!); 

@@ -93,6 +93,33 @@ interface Screenshot {
     base64: string
 }
 
+export interface ProjectResponse{
+    id: number
+    projectName: string
+    projectDescription: string
+    projectCode: string
+    clientName: string
+    startDate: string
+    dueDate: string
+    status: string
+    projectManager : string
+
+    projectAttachments : ProjectAttachments[]
+}
+
+interface ProjectAttachments {
+    id: number
+    fileName: string
+}
+
+export interface UpdateProjectData{
+    email:string
+    projectId: number,
+    projectManager: string
+    clientName: string
+    projectDescription: string
+}
+
 export interface ProjectListResponse{
     id: number
     name: string
@@ -100,6 +127,7 @@ export interface ProjectListResponse{
     status: string
     startDate: string
     endDate: string
+    clientName: string
     projectManager: string
     completionStatus: number
 }
@@ -168,6 +196,13 @@ export interface UploadAttachment{
     fileName: string,
     taskId: number,
     uploadedBy: string
+}
+
+export interface UploadProjectAttachment{
+    email: string
+    fileBase64: string,
+    fileName: string,
+    projectId: number
 }
 
 export interface UploadSubTaskAttachment{
@@ -320,6 +355,7 @@ export interface SprintResponse{
 
 export interface ProjectFormData{
     title: string
+    clientName: string
     description: string
     projectCode: string
     startDate: string

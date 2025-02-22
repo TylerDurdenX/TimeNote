@@ -5,7 +5,7 @@ import { isEmpty } from "../../utils/genericMethods.js";
 import SuccessResponse from "../../utils/SuccessResponse.js";
 
 export const createProject = catchAsync(async (req, res, next) => {
-  const { title, description,projectCode, startDate, endDate, projectManager } = req.body;
+  const { title,clientName, description,projectCode, startDate, endDate, projectManager } = req.body;
   try {
     const user = await prisma.user.findFirst({
       where: {
@@ -17,6 +17,7 @@ export const createProject = catchAsync(async (req, res, next) => {
       data: {
         name : title,
         description,
+        clientName: clientName,
         code: projectCode,
         startDate,
         endDate,
@@ -65,9 +66,10 @@ export const getProjects = catchAsync(async (req, res, next) => {
             id: project.id,
             name: project.name,
             description: project.description,
-            status: project.status | "",
+            status: project.status,
             startDate: project.startDate,
             endDate: project.endDate,
+            clientName : project.clientName,
             projectManager: project.user.username,
             completionStatus: 0
           });
@@ -76,9 +78,10 @@ export const getProjects = catchAsync(async (req, res, next) => {
             id: project.id,
             name: project.name,
             description: project.description,
-            status: project.status || "In Progress",
+            status: project.status,
             startDate: project.startDate,
             endDate: project.endDate,
+            clientName : project.clientName,
             projectManager: project.user.username,
             completionStatus: (() => {
               const tasksList = project.tasks;
@@ -127,9 +130,10 @@ export const getProjects = catchAsync(async (req, res, next) => {
             id: project.id,
             name: project.name,
             description: project.description,
-            status: project.status | "",
+            status: project.status,
             startDate: project.startDate,
             endDate: project.endDate,
+            clientName : project.clientName,
             projectManager: project.user.username,
             completionStatus: 0
           });
@@ -138,9 +142,10 @@ export const getProjects = catchAsync(async (req, res, next) => {
             id: project.id,
             name: project.name,
             description: project.description,
-            status: project.status || "In Progress",
+            status: project.status,
             startDate: project.startDate,
             endDate: project.endDate,
+            clientName : project.clientName,
             projectManager: project.user.username,
             completionStatus: (() => {
               const tasksList = project.tasks;
@@ -248,15 +253,15 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             let consumedHours = 0
 
             totalHours += task.points
-            if (task.inProgressTimeinMinutes !== null && task.inProgressTimeinMinutes !== undefined) {
-              consumedHours += Math.floor(Number(task.inProgressTimeinMinutes) / 60);
-            } else {
-              if (task.inProgressStartTime) {
-                const differenceInMilliseconds = currentDateTime.getTime() - new Date(task.inProgressStartTime).getTime();
-                const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
-                const progressTime = Number(task.inProgressTimeinMinutes || 0) + differenceInMinutes;
-                consumedHours += Math.floor(progressTime / 60);
+            if(task.inProgressStartTime === null || task.inProgressStartTime === undefined){
+              if(task.inProgressTimeinMinutes !== null || task.inProgressTimeinMinutes !== undefined){
+                consumedHours += Math.floor(Number(task.inProgressTimeinMinutes) / 60);
               }
+            }else{
+              const differenceInMilliseconds = currentDateTime.getTime() - new Date(task.inProgressStartTime).getTime();
+              const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+              const progressTime = Number(task.inProgressTimeinMinutes || 0) + differenceInMinutes;
+              consumedHours += Math.floor(progressTime / 60);
             }
 
             if(consumedHours > totalHours){
@@ -1834,7 +1839,7 @@ export const getMentionedUsers = catchAsync(async (req, res, next) => {
 export const getUserData = catchAsync(async (req, res, next) => {
   const { username } = req.query;
   try {
-    const result = await prisma.$transaction(async (prisma) => {
+    await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
           username: username,
@@ -1864,4 +1869,171 @@ export const getUserData = catchAsync(async (req, res, next) => {
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
+});
+
+export const getProject = catchAsync(async (req, res, next) => {
+  const { projectId } = req.query;
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const project = await prisma.project.findFirst({
+        where: {
+          id : Number(projectId)
+        },
+        include: {
+          user: {
+            select: {
+              username: true
+            }
+          }
+        }
+      })
+
+      const projectAttachmentList = await prisma.projectAttachments.findMany({
+        where: {
+          projectId: Number(projectId)
+        }
+      })
+
+      const result = {
+        id: project.id,
+        projectName: project.name,
+        projectDescription: project.description,
+        projectCode: project.code,
+        clientName: project.clientName,
+        startDate: project.startDate,
+        dueDate: project.endDate,
+        status: project.status,
+        projectManager: project.user.username,
+        projectAttachments: projectAttachmentList
+      };
+      res.json(result);
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+});
+
+export const updateProjectStatus = catchAsync(async (req, res, next) => {
+  const { projectId, email } = req.query;
+  const {status} = req.body
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email
+        }
+      })
+
+      const project = await prisma.project.findFirst({
+        where: {
+          id : Number(projectId)
+        }
+      })
+
+      if(project.projectManager !== user.userId){
+        return next(new AppError('Only Project Mananger can edit Project',500))
+      }
+
+      const result = await prisma.project.update({
+        where: {
+          id: Number(projectId)
+        },
+        data: {
+          status: status
+        }
+      })
+      
+      return next(new SuccessResponse('Project Updated Successfully',200))
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+});
+
+export const updateProject = catchAsync(async (req, res, next) => {
+  const {email, projectId,projectManager,clientName,projectDescription} = req.body
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email
+        }
+      })
+
+      const project = await prisma.project.findFirst({
+        where: {
+          id : Number(projectId)
+        }
+      })
+
+      if(project.projectManager !== user.userId){
+        return next(new AppError('Only Project Mananger can edit Project',500))
+      }
+
+      const projectManagerUser = await prisma.user.findFirst({
+        where:{
+          username : projectManager
+        }
+      })
+
+      const result = await prisma.project.update({
+        where: {
+          id: Number(projectId)
+        },
+        data: {
+          projectManager: projectManagerUser.userId,
+          clientName: clientName,
+          description: projectDescription
+        }
+      })
+      
+      return next(new SuccessResponse('Project Updated Successfully',200))
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+  }
+});
+
+export const uploadProjectAttachment = catchAsync(async (req, res, next) => {
+  const { fileBase64, fileName, projectId, email,} = req.body;
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email
+        }
+      })
+
+      const project = await prisma.project.findFirst({
+        where: {
+          id : Number(projectId)
+        }
+      })
+
+      if(project.projectManager !== user.userId){
+        return next(new AppError('Only Project Mananger can upload Attachments',500))
+      }
+
+      const attachment = await prisma.projectAttachments.create({
+        data: {
+          fileBase64: fileBase64,
+          fileName: fileName,
+          uploadedBy: {
+            connect: {userId: user.userId}
+          },
+          project: {
+            connect: {id: projectId}
+          }
+        }
+      })
+      
+      return next(new SuccessResponse('Attachment Uploaded Successfully',200))
+    })
+  } catch (error) {
+    console.log(error)
+    return next(new AppError('Error during file upload',200))
+  }
 });

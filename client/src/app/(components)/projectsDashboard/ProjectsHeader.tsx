@@ -33,6 +33,7 @@ type Props = {
 const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
+  const [clientName, setClientName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -57,6 +58,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
     // Prepare the form data to submit
     const formData = {
       title: title,
+      clientName: clientName,
       description: description,
       projectCode: projectCode,
       startDate: startDate,
@@ -101,7 +103,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
               {buttonName}
             </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] h-[25vw]">
+          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] h-[28vw]">
             <DialogHeader>
               <DialogTitle className="mb-2">Create Project</DialogTitle>
             </DialogHeader>
@@ -109,7 +111,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
             <div
               className="relative w-full h-full overflow-hidden"
               style={{
-                paddingTop: "70.575%",
+                paddingTop: "90.575%",
               }}
             >
               <div className="absolute top-0 left-0 w-[calc(100%)] h-full">
@@ -120,6 +122,13 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                       <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
+                        className="col-span-7"
+                        required
+                      />
+                      <Label className="text-center ">Client Name</Label>
+                      <Input
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
                         className="col-span-7"
                         required
                       />

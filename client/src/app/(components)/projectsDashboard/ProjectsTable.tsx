@@ -23,23 +23,38 @@ const ProjectsTable = ({ email }: Props) => {
 const columns: GridColDef[] = [
   {
     field: "name",
-    headerName: "Name",
-    width: 250,
+    headerName: "Project Name",
+    flex: 1,
+    renderCell: (params) => (
+      <Link href={`project/${params.value}?email=${email}`} 
+      rel="noopener noreferrer"
+      style={{ color: 'blue' ,textDecoration: 'underline', fontWeight: 500}}
+      onClick={() => {
+        sessionStorage.setItem("projectId", params.row.id)
+      }}>
+        {params.value}
+      </Link>
+    ),
+  },  
+  {
+    field: "clientName",
+    headerName: "Client Name",
+    flex: 1
   },
   {
     field: "description",
-    headerName: "Description",
-    width: 280,
+    headerName: "Project Description",
+    flex: 1.5
   },
   {
     field: "status",
     headerName: "Status",
-    width: 130,
+    flex: 1
   },
   {
     field: "startDate",
     headerName: "Start Date",
-    width: 130,
+    flex: 1,
     valueFormatter: (params) => {
       const date = new Date(params);
       return date.toISOString().split("T")[0];
@@ -48,7 +63,7 @@ const columns: GridColDef[] = [
   {
     field: "endDate",
     headerName: "Due Date",
-    width: 130,
+    flex: 1,
     valueFormatter: (params) => {
       const date = new Date(params);
       return date.toISOString().split("T")[0];
@@ -57,12 +72,12 @@ const columns: GridColDef[] = [
   {
     field: "projectManager",
     headerName: "Project Manager",
-    width: 170,
+    flex: 1,
   },
   {
     field: "completionStatus",
     headerName: "Completion Status",
-    width: 150,
+    flex: 1.6,
     renderCell: (params) => {
       const completion = params.value || 0;
       const completionPercentage = Math.min(Math.max(completion, 0), 100); 

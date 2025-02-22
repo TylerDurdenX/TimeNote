@@ -1,10 +1,8 @@
-import { code } from "@nextui-org/theme";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AddComment,
   Alert,
   AlertCount,
-  Attachment,
   ConfiguredReports,
   CreateSprint,
   DownloadAttachment,
@@ -15,21 +13,22 @@ import {
   ProjectFormData,
   ProjectHours,
   ProjectListResponse,
+  ProjectResponse,
   ProjectUsers,
   ReportConfig,
   ScreenshotResponse,
   SprintResponse,
-  SubTask,
   SubTaskFormData,
   SubTaskObject,
   Task,
   TaskComments,
   TaskFormData,
   TaskHistory,
-  Team,
+  UpdateProjectData,
   UpdateSubTaskData,
   UpdateTaskData,
   UploadAttachment,
+  UploadProjectAttachment,
   UploadSubTaskAttachment,
   UserData,
   UserDetails,
@@ -37,12 +36,8 @@ import {
   UserHierarchy,
   UsersListResponse,
 } from "./interfaces";
-import axios, { AxiosProgressEvent } from 'axios';
+import { AxiosProgressEvent } from 'axios';
 
-import { useDispatch } from "react-redux";
-import { setAuthUser } from "@/store/authSlice";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export interface Project {
   id: number;
@@ -124,7 +119,8 @@ export const api = createApi({
     "AutoReports",
     "ProjectHours",
     "AlertCount",
-    "Alert"
+    "Alert",
+    "Project"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -243,6 +239,16 @@ export const api = createApi({
         return url;
       },
     }),
+    getProject: build.query<
+    ProjectResponse,
+      { projectId: number}
+    >({
+      query: ({ projectId,}) => {
+        const url = `api/user/getProject?projectId=${projectId}`;
+        return url;
+      },
+      providesTags: ["Project"],
+    }),
     getProjects: build.query<
     ProjectListResponse[],
       { email: string}
@@ -322,6 +328,14 @@ export const api = createApi({
       }), 
       invalidatesTags : ["Tasks", "Task"]
   }),
+  updateProjectStatus: build.mutation<ApiResponse, {projectId: number, status: string, email: string}>({
+    query: ({projectId, status, email})=> ({
+        url: `api/user/updateProjectStatus?projectId=${projectId}&email=${email}`,
+        method: "PATCH",
+        body: {status},
+    }), 
+    invalidatesTags : ["Project"]
+}),
   closeTask: build.mutation<ApiResponse, {taskId: number, email: string}>({
     query: ({taskId, email})=> ({
         url: `api/user/closeCompletedTask?taskId=${taskId}&email=${email}`,
@@ -352,6 +366,14 @@ updateTask: build.mutation<ApiResponse, UpdateTaskData>({
   }), 
   invalidatesTags : ["Tasks", "Task", "TaskHistory"]
 }),
+updateProject: build.mutation<ApiResponse, UpdateProjectData>({
+  query: (body)=> ({
+      url: `api/user/updateProject`,
+      method: "PATCH",
+      body: body,
+  }), 
+  invalidatesTags : ["Project"]
+}),
 updateSubTask: build.mutation<ApiResponse, UpdateSubTaskData >({
   query: (body)=> ({
       url: `api/user/updateSubTask`,
@@ -374,6 +396,20 @@ uploadAttachment: build.mutation<ApiResponse, UploadAttachment>({
       },
   }), 
   invalidatesTags : ["Task"]
+}),
+uploadProjectAttachment: build.mutation<ApiResponse, UploadProjectAttachment>({
+  query: (body)=> ({
+      url: `api/user/uploadProjectAttachment`,
+      method: "POST",
+      body: body,
+      async onUploadProgress(progressEvent: AxiosProgressEvent) {
+        if (progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          return progress; 
+        }
+      },
+  }), 
+  invalidatesTags : ["Project"]
 }),
 uploadSubTaskAttachment: build.mutation<ApiResponse, UploadSubTaskAttachment>({
   query: (body)=> ({
@@ -606,5 +642,9 @@ export const {
   useGetAlertsCountQuery,
   useGetAlertsQuery,
   useDeleteTriggeredAlertsMutation,
-  useGetUserDataQuery
+  useGetUserDataQuery,
+  useGetProjectQuery,
+  useUpdateProjectStatusMutation,
+  useUpdateProjectMutation,
+  useUploadProjectAttachmentMutation
 } = api;
