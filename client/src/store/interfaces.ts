@@ -221,6 +221,12 @@ export interface DownloadAttachment{
     subTaskId: number
 }
 
+export interface DownloadProjectAttachment{
+    id: number,
+    fileBase64: string,
+    fileName: string,
+}
+
 export interface Task {
     id: number
     title : string

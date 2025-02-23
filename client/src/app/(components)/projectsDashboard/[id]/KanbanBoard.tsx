@@ -461,7 +461,7 @@ const TaskColumn = ({
                   
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <BulkCreate/>
+                  <BulkCreate sprintList={sprintData!} email={email} projectId={Number(projectId)}/>
                 </CardContent>
               </Card>
             </TabsContent>

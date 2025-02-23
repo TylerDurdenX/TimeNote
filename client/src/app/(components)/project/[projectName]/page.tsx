@@ -2,7 +2,7 @@
 
 import React, { useEffect,  useState } from "react";
 import { Pencil, Download, EllipsisVertical,} from "lucide-react";
-import { useCreateSubTaskMutation, useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectManagerQuery, useGetProjectQuery, useUpdateProjectMutation,  useUpdateProjectStatusMutation, useUploadProjectAttachmentMutation } from "@/store/api";
+import { useCreateSubTaskMutation, useDeleteAttachmentMutation, useDeleteProjectAttachmentMutation, useDownloadAttachmentMutation, useDownloadProjectAttachmentMutation, useGetProjectManagerQuery, useGetProjectQuery, useUpdateProjectMutation,  useUpdateProjectStatusMutation, useUploadProjectAttachmentMutation } from "@/store/api";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -39,10 +39,10 @@ const ProjectPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const [deleteAttachmentQuery, { isLoading: isLoadingDeleteAttachment }] =
-  useDeleteAttachmentMutation();
+  useDeleteProjectAttachmentMutation();
 
   const [downloadAttachmentQuery, { isLoading: isLoadingDownloadAttachment }] =
-  useDownloadAttachmentMutation();
+  useDownloadProjectAttachmentMutation();
 
   const maxSize = 1.5 * 1024 * 1024; // in bytes
 
@@ -96,20 +96,20 @@ const ProjectPage = () => {
     }
   };
 
-  const deleteAttachment = (async() => {
-    // try {
-    //   const response = await deleteAttachmentQuery({taskId, isSubTask: false})
-    //   // @ts-ignore
-    //   if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
-    //           // @ts-ignore
-    //           toast.error(response.error?.data.message)
-    //         }else{
-    //           toast.success(response.data?.message);
-    //         }
-    // } catch (err: any) {
-    //   toast.error(err.data.message);
-    //   console.error("Error creating role:", err.data.Message);
-    // }
+  const deleteAttachment = (async(id: number) => {
+    try {
+      const response = await deleteAttachmentQuery({attachmentId: id, email: email!, projectId: project?.id!})
+      // @ts-ignore
+      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+              // @ts-ignore
+              toast.error(response.error?.data.message)
+            }else{
+              toast.success(response.data?.message);
+            }
+    } catch (err: any) {
+      toast.error(err.data.message);
+      console.error("Error Deleting attachment:", err.data.Message);
+    }
   })
 
   function downloadFile(base64String: string, fileName: string) {
@@ -135,17 +135,25 @@ const ProjectPage = () => {
     URL.revokeObjectURL(fileURL);
   }
 
-  const downloadAttachment = (async() => {
-    // try {
-
-    //   const response = await downloadAttachmentQuery({taskId, isSubTask: false})
-    //   downloadFile(response.data?.fileBase64!, response.data?.fileName!)
-
-    // } catch (err: any) {
-    //   toast.error(err.data);
-    //   console.error(err);
-    // }
-  })
+  const downloadAttachment = async (id: number) => {
+    try {
+      // Fetch the attachment data
+      const response = await downloadAttachmentQuery({ attachmentId: id });
+  
+      // Check if response data exists and proceed with the download
+      if (response.data?.fileBase64 && response.data?.fileName) {
+        downloadFile(response.data.fileBase64, response.data.fileName);
+      } else {
+        toast.error("File data is missing.");
+      }
+  
+    } catch (err: any) {
+      // Handle any error that occurs during the download process
+      toast.error("An error occurred while downloading the file.");
+      console.error(err);
+    }
+  };
+  
 
   const [isHovered, setIsHovered] = useState(true);
   const [isEditable, setIsEditable] = useState(false);
@@ -278,6 +286,7 @@ const handleEditClick = () => {
           toast.error('An unexpected error occurred');
         }
       } else {
+        setIsSaveButtonEnabled(false)
         toast.success(response.data?.message);
       }
 
@@ -496,34 +505,41 @@ const handleEditClick = () => {
         <div className="border-2 border-dashed border-gray-300 p-4 rounded-lg dark:border-gray-600">
           <div className="flex items-center justify-between">
             <div className="flex space-x-4">
-              <div className="flex items-center space-x-2">
-                
-                {(project?.projectAttachments?.length ?? 0) > 0 ? <>
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                <span className="text-2xl text-gray-500">📎</span>
-              </div>
-                <span className="text-gray-800 dark:text-gray-100">
-                {project?.projectAttachments?.[0]?.fileName}
-              </span>
-              <button className="text-blue-600 hover:text-blue-800 ml-2" onClick={downloadAttachment}>
-              <Download/>
-            </button>
-              </>
-                : "Please upload a document of size less than 1 mb" }
-              </div>
+            <div className="space-y-2"> {/* Use space-y-2 to add vertical spacing between attachments */}
+              {(project?.projectAttachments?.length ?? 0) > 0 ? (
+                <>
+                  {project?.projectAttachments.map((attachment, index) => {
+                    return (
+                      <div key={index} className="flex items-center space-x-2">
+                        {/* Attachment icon */}
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-2xl text-gray-500">📎</span>
+                        </div>
+                        {/* Attachment file name */}
+                        <span className="text-gray-800 dark:text-gray-100">
+                          {attachment?.fileName}
+                        </span>
+                        {/* Download button */}
+                        <button
+                          className="text-blue-600 hover:text-blue-800 ml-2"
+                          onClick={async () => {
+                            await downloadAttachment(attachment.id);
+                          }}
+                        >
+                          <Download />
+                        </button>
 
-              {(project?.projectAttachments?.length ?? 0) > 0 ? 
-              <AlertDialog>
-              <AlertDialogTrigger asChild>
-              <button className="text-blue-600 hover:text-blue-800 ml-2">
-              Delete
-            </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
+                        <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                     <button className="text-blue-600 hover:text-blue-800 ml-2">
+                        Delete
+                      </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription className="text-gray-700">
-                    Do you want to remove the Attachment ?
+                    Do you want to remove the Attachment : {attachment.fileName} ?
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -534,13 +550,25 @@ const handleEditClick = () => {
                   >
                     No
                   </AlertDialogCancel>
-                  <AlertDialogAction onClick={deleteAttachment} >
-                    Yes
-                  </AlertDialogAction>
+                  <AlertDialogAction
+                      onClick={async () => {
+                        await deleteAttachment(attachment.id); // Await your async function here
+                      }}
+                    >
+                      Yes
+                    </AlertDialogAction>
+
                 </AlertDialogFooter>
               </AlertDialogContent>
-            </AlertDialog>
-              : ""}
+                        </AlertDialog>
+                      </div>
+                    );
+                  })}
+                </>
+              ) : (
+                "Please upload a document of size less than 1 MB"
+              )}
+            </div>
             </div>
           </div>
           <div className="mt-4">
@@ -548,7 +576,7 @@ const handleEditClick = () => {
       {isLoadingUploadAttachment && (
         <Progress value={uploadProgress} max={100} color="blue" />
       )}
-      {(project?.projectAttachments?.length ?? 0) > 0 ? ""
+      {(project?.projectAttachments?.length ?? 0) > 2 ? ""
       : 
       <button
       className="flex items-center justify-start w-full p-3 text-blue-600 hover:text-blue-800 rounded-md hover:bg-gray-200 focus:outline-none transition duration-200"

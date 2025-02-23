@@ -6,6 +6,7 @@ import {
   ConfiguredReports,
   CreateSprint,
   DownloadAttachment,
+  DownloadProjectAttachment,
   ListResponse,
   LiveStreamResponse,
   MentionedUser,
@@ -433,6 +434,14 @@ uploadSubTaskAttachment: build.mutation<ApiResponse, UploadSubTaskAttachment>({
     }), 
     invalidatesTags : ["Tasks"]
 }),
+createBulkTasks: build.mutation<ApiResponse, TaskFormData[]>({
+  query: (tasks)=> ({
+      url: "api/user/createBulkTasks",
+      method: "POST",
+      body: tasks,
+  }), 
+  invalidatesTags : ["Tasks"]
+}),
 createAutoReport: build.mutation<ApiResponse, ReportConfig>({
   query: (reportConfig)=> ({
       url: "api/user/createReportsConfig",
@@ -534,9 +543,22 @@ deleteAttachment: build.mutation<ApiResponse, { taskId: number, isSubTask: boole
 }), 
   invalidatesTags : ["Task", "SubTask"]
 }),
+deleteProjectAttachment: build.mutation<ApiResponse, { attachmentId: number, email: string, projectId: number}>({
+  query: ({attachmentId, email,projectId})=> ({
+    url: `api/user/deleteProjectAttachment?attachmentId=${attachmentId}&email=${email}&projectId=${projectId}`,
+    method: "DELETE",
+}), 
+  invalidatesTags : ["Project"]
+}),
 downloadAttachment: build.mutation<DownloadAttachment, { taskId: number, isSubTask: boolean}>({
   query: ({taskId})=> ({
     url: `api/user/downloadAttachment?taskId=${taskId}`,
+    method: "GET",
+}), 
+}),
+downloadProjectAttachment: build.mutation<DownloadProjectAttachment, { attachmentId: number}>({
+  query: ({attachmentId})=> ({
+    url: `api/user/downloadProjectAttachment?attachmentId=${attachmentId}`,
     method: "GET",
 }), 
 }),
@@ -646,5 +668,8 @@ export const {
   useGetProjectQuery,
   useUpdateProjectStatusMutation,
   useUpdateProjectMutation,
-  useUploadProjectAttachmentMutation
+  useUploadProjectAttachmentMutation,
+  useDeleteProjectAttachmentMutation,
+  useDownloadProjectAttachmentMutation,
+  useCreateBulkTasksMutation
 } = api;

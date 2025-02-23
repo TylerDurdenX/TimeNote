@@ -2037,3 +2037,209 @@ export const uploadProjectAttachment = catchAsync(async (req, res, next) => {
     return next(new AppError('Error during file upload',200))
   }
 });
+
+export const deleteProjectAttachment = catchAsync(async (req, res, next) => {
+  const { attachmentId, email, projectId} = req.query;
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email
+        }
+      })
+
+      const project = await prisma.project.findFirst({
+        where: {
+          id : Number(projectId)
+        }
+      })
+
+      if(project.projectManager !== user.userId){
+        return next(new AppError('Only Project Mananger can upload Attachments',500))
+      }
+
+      const attachment = await prisma.projectAttachments.delete({
+        where: {
+          id: Number(attachmentId)
+        }
+      })
+      
+      return next(new SuccessResponse('Attachment Deleted Successfully',200))
+    })
+  } catch (error) {
+    console.log(error)
+    return next(new AppError('Error during file deletion',200))
+  }
+});
+
+export const downloadProjectAttachment = catchAsync(async (req, res, next) => {
+  const { attachmentId} = req.query;
+  try {
+    await prisma.$transaction(async (prisma) => {
+
+      const attachment = await prisma.projectAttachments.findFirst({
+        where: {
+          id: Number(attachmentId)
+        }
+      })
+
+      const result = {
+        id: attachment.id,
+        fileBase64: attachment.fileBase64,
+        fileName: attachment.fileName
+      }
+      return res.status(200).json(result)
+    })
+  } catch (error) {
+    console.log(error)
+    return next(new AppError('Error during file deletion',200))
+  }
+});
+
+function convertToDateTime(dateString) {
+  // Regular expression to match "DD-MM-YYYY" format
+  const regex = /^(\d{2})-(\d{2})-(\d{4})$/;
+
+  const match = dateString.match(regex);
+  if (!match) {
+    console.error('Invalid date format. Expected format: DD-MM-YYYY');
+    return null; // Return null if the date format is incorrect
+  }
+
+  const day = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10) - 1; // Month is 0-indexed (0 = January, 11 = December)
+  const year = parseInt(match[3], 10);
+
+  // Create a Date object from the parsed date components
+  const date = new Date(year, month, day);
+
+  // Check if the created Date object is valid
+  if (isNaN(date.getTime())) {
+    console.error('Invalid date values');
+    return null; // Return null if the date is invalid
+  }
+
+  // Return the ISO 8601 format (DateTime format)
+  return date.toISOString();
+}
+
+export const createBulkTasks = catchAsync(async (req, res, next) => {
+  const taskList = req.body;
+  console.log(taskList)
+  try {
+    // await prisma.$transaction(async (prisma) => {
+      let errorFlag = ""
+
+    const authorUser = await prisma.user.findFirst({
+      where:{
+        email: taskList[0].authorUserId
+      }
+    })
+    
+
+      const project = await prisma.project.findFirst({
+        where: {
+          id: taskList[0].projectId
+        }
+      })
+        try{
+          const taskPromises = taskList.map(async(taskObj) => {
+            let date 
+            let isoStartTime
+            let endDate
+            let isoDueTime 
+            try{
+            date = taskObj.startDate; 
+            isoStartTime = convertToDateTime(date);
+            endDate = taskObj.dueDate; 
+            isoDueTime = convertToDateTime(endDate);
+
+            }catch(error){
+              console.log(error)
+              errorFlag = 'Please check the data of Start Date and Due Date'
+              return next(new AppError('Please check the data of Start Date and Due Date',500))
+            }
+            const sprint = await prisma.sprint.findFirst({
+              where: {
+                title: taskObj.sprintId
+              }
+            })
+            let assignee 
+            try{
+              assignee = await prisma.user.findFirst({
+                where:{
+                  email: taskObj.assignedUserId
+                }
+              })
+            }catch(error){
+              console.log(error)
+              errorFlag = 'Please check Assignee mail ids'
+              return next(new AppError('Please check Assignee mail ids',500)) 
+            }
+            if(assignee===null || assignee === undefined){
+              errorFlag = 'Please check Assignee mail ids'
+              return next(new AppError('Please check Assignee mail ids',500)) 
+            }
+            try{
+            const task = await prisma.task.create({
+              data:{
+                title: taskObj.title,
+              description: taskObj.description,
+              status : "To Do",
+              priority: taskObj.priority,
+              tags: taskObj.tags,
+              startDate: isoStartTime,
+              dueDate: isoDueTime,
+              points: Number(taskObj.points),
+              projectId: taskObj.projectId,
+              authorUserId: authorUser.userId,
+              sprintId: Number(sprint.id),
+              assignedUserId: Number(assignee.userId)
+              }
+            })
+          }catch(error){
+            console.log(error)
+            errorFlag
+          }
+    
+            const taskCode = project.code + (String(task.id).padStart(6, '0'))
+            console.log(taskCode)
+            const updatedTask = await prisma.task.update({
+              where:{
+                id: task.id,
+              },
+              data: {
+                code: taskCode
+              }
+            })
+    
+            const currentDateTime = new Date();
+            const indianTimeISOString = currentDateTime.toISOString();
+    
+            const taskHistory = await prisma.taskHistory.create({
+              data: {
+                taskId: task.id,
+                userId: Number(assignee.userId),
+                startDate: indianTimeISOString,
+                sprint: sprint.id,
+                time: "0,0,0,0,0",
+              }
+            })
+          })
+        }catch(error){
+          console.log(error)
+          return next(new AppError('Error during task creation',500))
+        }
+      if(errorFlag === ''){
+        return next(new SuccessResponse("Tasks Created Successfully", 200));
+      }else{
+        return next(new AppError(errorFlag,500))
+
+      }
+    
+    // })
+  } catch (error) {
+    console.log(error)
+    return next(new AppError('Error during Task Creation',500))
+  }
+});

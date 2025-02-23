@@ -12,7 +12,7 @@ import { getAlertCount, getUser, getUserCount, updateUserProfilePicture } from "
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
-import { addComment, addSubTaskComment, closeCompletedTask, createProject, createSprint, createSubTask, createTask, deleteAttachment, downloadAttachment, getMentionedUsers, getProject, getProjectHoursEstimation, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskComments, getTaskHistory, getUserData, updateProject, updateProjectStatus, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadProjectAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
+import { addComment, addSubTaskComment, closeCompletedTask, createBulkTasks, createProject, createSprint, createSubTask, createTask, deleteAttachment, deleteProjectAttachment, downloadAttachment, downloadProjectAttachment, getMentionedUsers, getProject, getProjectHoursEstimation, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskComments, getTaskHistory, getUserData, updateProject, updateProjectStatus, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadProjectAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 import {createAutoReportConfig, deleteAutoReportConfig, getAutoReportConfig } from "../controller/reportsController/controller.js";
@@ -83,5 +83,9 @@ router.get("/getProject", getProject)
 router.patch("/updateProjectStatus",updateProjectStatus)
 router.patch("/updateProject", updateProject)
 router.post("/uploadProjectAttachment", uploadProjectAttachment)
+router.delete("/deleteProjectAttachment", deleteProjectAttachment)
+router.get("/downloadProjectAttachment", downloadProjectAttachment)
+router.post("/createBulkTasks", createBulkTasks)
+
 
 export default router;
