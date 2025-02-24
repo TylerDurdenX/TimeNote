@@ -21,6 +21,7 @@ import {
   FileChartColumnIncreasing,
   PresentationIcon,
   CalendarClock,
+  FileClock,
 } from "lucide-react";
 
 import { NavMain } from "@/components/Sidebar/nav-main";
@@ -155,6 +156,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: `/reports?email=${userEmail}`,
         icon: FileChartColumnIncreasing,
       },
+      {
+        name: "Timesheet",
+        url: `/timesheet?email=${userEmail}`,
+        icon: FileClock
+      }
     ],
   };
 

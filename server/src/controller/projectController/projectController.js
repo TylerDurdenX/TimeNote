@@ -458,7 +458,19 @@ export const createTask = catchAsync(async (req, res, next) => {
     })
 
     const taskCode = project.code + (String(task.id).padStart(6, '0'))
-    console.log(taskCode)
+    
+    if(task){
+      const taskActivity = await prisma.taskActivity.create({
+        data: {
+          taskId: task.id,
+          userId: authorUser.userId,
+          username: authorUser.username,
+          date: indianTimeISOString,
+          activity: ` created task : ${taskCode}`
+        }
+      })
+    }
+
     const updatedTask = await prisma.task.update({
       where:{
         id: task.id,
@@ -509,16 +521,43 @@ export const updateTaskProgress = catchAsync(async (req, res, next) => {
   const result = await prisma.$transaction(async (prisma) => {
 
     const currentDateTime = new Date();
+    const indianTimeISOString = currentDateTime.toISOString();
 
     if(progressStart === 'true'){
 
-      const task = await prisma.task.update({
+      await prisma.task.update({
         where:{
           id: Number(taskId)
         }, data: {
           inProgressStartTime: currentDateTime
         }
       })
+
+      const task = await prisma.task.findFirst({
+        where: {
+          id: Number(taskId)
+        }, 
+        include: {
+          assignee: {
+            select: {
+              userId: true,
+              username: true
+            }
+          }
+        }
+      })
+
+      if(task){
+        const taskActivity = await prisma.taskActivity.create({
+          data: {
+            taskId: task.id,
+            userId: task.assignee.userId,
+            username: task.assignee.username,
+            date: indianTimeISOString,
+            activity: ` Started Task Progress`
+          }
+        })
+      }
 
       return next(new SuccessResponse("Task Updated Successfully", 200))
     }else{
@@ -532,7 +571,7 @@ export const updateTaskProgress = catchAsync(async (req, res, next) => {
     const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
     const progressTime = Number(taskToBeUpdated.inProgressTimeinMinutes || 0) + differenceInMinutes
 
-    const task = await prisma.task.update({
+    await prisma.task.update({
       where:{
         id: Number(taskId)
       },data: {
@@ -540,6 +579,32 @@ export const updateTaskProgress = catchAsync(async (req, res, next) => {
         inProgressTimeinMinutes: String(progressTime)
       }
     })
+
+    const task = await prisma.task.findFirst({
+      where: {
+        id: Number(taskId)
+      }, 
+      include: {
+        assignee: {
+          select: {
+            userId: true,
+            username: true
+          }
+        }
+      }
+    })
+
+    if(task){
+      const taskActivity = await prisma.taskActivity.create({
+        data: {
+          taskId: task.id,
+          userId: task.assignee.userId,
+          username: task.assignee.username,
+          date: indianTimeISOString,
+          activity: ` Paused Task Progress`
+        }
+      })
+    }
 
     return next(new SuccessResponse("Task updated Successfully",200))
   }
@@ -554,6 +619,9 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
 
   try {
 
+    const currentDateTime = new Date();
+    const indianTimeISOString = currentDateTime.toISOString();
+
     const task = await prisma.task.findFirst({
       where:{
         id: Number(taskId)
@@ -561,7 +629,9 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
       include:{
         assignee: {
           select: {
-            email: true
+            userId: true,
+            email: true,
+            username: true
           }
         }
       }
@@ -596,6 +666,18 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
             status: status
         }
       });
+
+      if(updatedTask){
+        const taskActivity = await prisma.taskActivity.create({
+          data: {
+            taskId: updatedTask.id,
+            userId: task.assignee.userId,
+            username: task.assignee.username,
+            date: indianTimeISOString,
+            activity: ` updated status to : ${updatedTask.status}`
+          }
+        })
+      }
   
       const taskHistoryList = await prisma.taskHistory.findMany({
         where: {
@@ -637,9 +719,6 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
         }
       }
   
-      const currentDateTime = new Date();
-      const indianTimeISOString = currentDateTime.toISOString();
-  
       const updatedTaskHistory = await prisma.taskHistory.update({
         where: {
           id: taskHistoryList[0].id
@@ -667,6 +746,18 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
             inProgressTimeinMinutes: String(progressTime)
         }
       });
+
+      if(updatedTask){
+        const taskActivity = await prisma.taskActivity.create({
+          data: {
+            taskId: updatedTask.id,
+            userId: task.assignee.userId,
+            username: task.assignee.username,
+            date: indianTimeISOString,
+            activity: ` updated status to : ${updatedTask.status}`
+          }
+        })
+      }
   
       const taskHistoryList = await prisma.taskHistory.findMany({
         where: {
@@ -735,9 +826,10 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
 export const updateTaskAssignee = catchAsync(async (req, res, next) => {
   const { taskId } = req.query;
   const { email } = req.query;
-
-  const result = await prisma.$transaction(async (prisma) => {
   try {
+    const currentDateTime = new Date();
+    const currentTimeISOString = currentDateTime.toISOString();
+  const result = await prisma.$transaction(async (prisma) => {
     const user = await prisma.user.findFirst({
       where: {
         email: email
@@ -747,6 +839,14 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
     const taskToBeUpdated = await prisma.task.findFirst({
       where:{
         id: Number(taskId)
+      },
+      include: {
+        assignee: {
+          select: {
+            userId: true,
+            username: true
+          }
+        }
       }
     })
 
@@ -763,6 +863,19 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
             assignedUserId: user.userId
         }
       });
+
+      if(updatedTask){
+        const taskActivity = await prisma.taskActivity.create({
+          data: {
+            taskId: updatedTask.id,
+            userId: user.userId,
+            username: user.username,
+            date: currentTimeISOString,
+            activity: ` Assigned the task to : [${user.username}]`
+          }
+        })
+      }
+    
     }else{
       const currentDateTimeNow = new Date();
       const differenceInMilliseconds = currentDateTimeNow - new Date(taskToBeUpdated.inProgressStartTime);
@@ -779,6 +892,18 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
             inProgressTimeinMinutes: String(progressTime)
         }
       });
+      console.log('yes')
+      if(updatedTask){
+        const taskActivity = await prisma.taskActivity.create({
+          data: {
+            taskId: updatedTask.id,
+            userId: taskToBeUpdated.assignee.userId,
+            username: taskToBeUpdated.assignee.username,
+            date: currentTimeISOString,
+            activity: ` Assigned the task to : [${user.username}]`
+          }
+        })
+      }
       const taskHistoryList = await prisma.taskHistory.findMany({
         where: {
           taskId: updatedTask.id
@@ -843,13 +968,14 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
         }
       })
   
-      res.json("Task status updated successfully");
+      return next(new SuccessResponse("Task updated Successfully",200));
     }
-  } catch (error) {
-    res.status(500).json({ message: `Error Occurred : ${error.message}` });
-  }
+  
 })
-return next(new AppError("Some Error Occurred", 500))
+} catch (error) {
+  console.log(error)
+  return next(new AppError('Some Error occurred',500));
+}
 });
 
 export const getTaskComments = catchAsync(async (req, res, next) => {
@@ -1187,13 +1313,9 @@ export const getTask = catchAsync(async (req, res, next) => {
 
 export const updateTask = catchAsync(async (req, res, next) => {
   const { taskId, taskPoints, assignee, taskDescription } = req.body;
-
+  
   try {
-    // Wrap the operations inside a Prisma transaction
     await prisma.$transaction(async (prisma) => {
-
-      const currentDateTime = new Date()
-
       const user = await prisma.user.findFirst({
         where: {
           username: assignee,
@@ -1203,6 +1325,13 @@ export const updateTask = catchAsync(async (req, res, next) => {
       const taskToBeUpdated = await prisma.task.findFirst({
         where: {
           id: taskId,
+        }, include: {
+          assignee: {
+            select: {
+              username: true,
+              userId: true
+            }
+          }
         },
       });
 
@@ -1212,7 +1341,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
 
       if (taskToBeUpdated.assignedUserId === user.userId) {
         // Update task if user is the same as assigned user
-        await prisma.task.update({
+        const updatedTask = await prisma.task.update({
           where: {
             id: taskId,
           },
@@ -1221,11 +1350,39 @@ export const updateTask = catchAsync(async (req, res, next) => {
             points: taskPoints,
           },
         });
+
+        let descriptionError =""
+
+        if(taskToBeUpdated.description != updatedTask.description && taskToBeUpdated.points != updatedTask.points){
+          descriptionError = "updated Task Description and Task Points"
+        }else
+        if(taskToBeUpdated.description != updatedTask.description){
+          descriptionError = "updated Task Description"
+        }else
+        if(taskToBeUpdated.points != updatedTask.points){
+          descriptionError = "updated Task Points"
+        }
+
+        const currentDateTime = new Date();
+        const indianTimeISOString = currentDateTime.toISOString();
+        
+        if(updatedTask){
+          const taskActivity = await prisma.taskActivity.create({
+            data: {
+              taskId: updatedTask.id,
+              userId: taskToBeUpdated.assignee.userId,
+              username: taskToBeUpdated.assignee.username,
+              date: indianTimeISOString,
+              activity: ` ${descriptionError}`
+            }
+          })
+        }
+
         return res.status(200).json({ message: 'Task updated successfully' });
       } else {
         // Handle case when task is not in progress
         if (taskToBeUpdated.inProgressStartTime === null) {
-          await prisma.task.update({
+          const updatedTask = await prisma.task.update({
             where: {
               id: taskId,
             },
@@ -1235,6 +1392,46 @@ export const updateTask = catchAsync(async (req, res, next) => {
               assignedUserId: user.userId,
             },
           });
+
+        let descriptionError =""
+
+        if(taskToBeUpdated.description !== updatedTask.description && taskToBeUpdated.points !== updatedTask.points){
+          descriptionError = "updated Task Description and Task Points"
+        }else
+        if(taskToBeUpdated.description !== updatedTask.description){
+          descriptionError = "updated Task Description"
+        }else
+        if(taskToBeUpdated.points !== updatedTask.points){
+          descriptionError = "updated Task Points"
+        }
+
+        const currentDateTime = new Date();
+        const currentTimeISOString = currentDateTime.toISOString();
+
+        if(updatedTask && !isEmpty(descriptionError)){
+          const taskActivity = await prisma.taskActivity.create({
+            data: {
+              taskId: updatedTask.id,
+              userId: taskToBeUpdated.assignee.userId,
+              username: taskToBeUpdated.assignee.username,
+              date: currentTimeISOString,
+              activity: ` ${descriptionError}`
+            }
+          })
+        }
+
+        if(taskToBeUpdated.assignedUserId !== updatedTask.assignedUserId){
+          const taskActivity = await prisma.taskActivity.create({
+            data: {
+              taskId: updatedTask.id,
+              userId: taskToBeUpdated.assignee.userId,
+              username: taskToBeUpdated.assignee.username,
+              date: currentTimeISOString,
+              activity: ` Assigned the task to : [${user.username}]`
+            }
+          })
+        }
+
           // Update task history
           const taskHistoryList = await prisma.taskHistory.findMany({
             where: {
@@ -1307,7 +1504,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
           const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
           const progressTime = Number(taskToBeUpdated.inProgressTimeinMinutes || 0) + differenceInMinutes;
 
-          await prisma.task.update({
+          const updatedTask = await prisma.task.update({
             where: {
               id: taskId,
             },
@@ -1319,6 +1516,43 @@ export const updateTask = catchAsync(async (req, res, next) => {
               inProgressTimeinMinutes: String(progressTime),
             },
           });
+
+          let descriptionError =""
+
+          if(taskToBeUpdated.description !== updatedTask.description && taskToBeUpdated.points !== updatedTask.points){
+            descriptionError = "updated Task Description and Task Points"
+          }else
+          if(taskToBeUpdated.description !== updatedTask.description){
+            descriptionError = "updated Task Description"
+          }else
+          if(taskToBeUpdated.points !== updatedTask.points){
+            descriptionError = "updated Task Points"
+          }
+          const currentTimeISOString = currentDateTime.toISOString();
+  
+          if(updatedTask && !isEmpty(descriptionError)){
+            const taskActivity = await prisma.taskActivity.create({
+              data: {
+                taskId: updatedTask.id,
+                userId: taskToBeUpdated.assignee.userId,
+                username: taskToBeUpdated.assignee.username,
+                date: currentTimeISOString,
+                activity: ` ${descriptionError}`
+              }
+            })
+          }
+  
+          if(taskToBeUpdated.assignedUserId !== updatedTask.assignedUserId){
+            const taskActivity = await prisma.taskActivity.create({
+              data: {
+                taskId: updatedTask.id,
+                userId: taskToBeUpdated.assignee.userId,
+                username: taskToBeUpdated.assignee.username,
+                date: currentTimeISOString,
+                activity: ` Assigned the task to : [${user.username}]`
+              }
+            })
+          }
 
           // Update task history
           const taskHistoryList = await prisma.taskHistory.findMany({
@@ -1400,8 +1634,6 @@ export const updateTask = catchAsync(async (req, res, next) => {
   }
 });
 
-
-
 export const updateSubTask = catchAsync(async (req, res, next) => {
   const { subTaskId,subTaskStatus, subTaskAssignee, subTaskDescription  } = req.body;
 
@@ -1457,6 +1689,10 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
 export const uploadAttachment = catchAsync(async (req, res, next) => {
   const { fileBase64, fileName, taskId, uploadedBy,} = req.body;
   try {
+    await prisma.$transaction(async (prisma) => {
+
+      const currentDateTime = new Date();
+      const indianTimeISOString = currentDateTime.toISOString();
 
     const user = await prisma.user.findFirst({
       where:{
@@ -1472,9 +1708,20 @@ export const uploadAttachment = catchAsync(async (req, res, next) => {
         uploadedById: user.userId
         }
       })
-      if(attachment)
+      if(attachment){
+          const taskActivity = await prisma.taskActivity.create({
+            data: {
+              taskId: Number(taskId),
+              userId: user.userId,
+              username: user.username,
+              date: indianTimeISOString,
+              activity: ` Uploaded an attachment : ${attachment.fileName}`
+            }
+          })
+        
+      }
       return next(new SuccessResponse("Attachment uploaded Successfully", 200));
-
+    })
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an error uploading Attachment", 400));
@@ -1509,7 +1756,7 @@ export const uploadSubTaskAttachment = catchAsync(async (req, res, next) => {
 });
 
 export const deleteAttachment = catchAsync(async (req, res, next) => {
-  const { taskId, isSubTask} = req.query;
+  const { taskId, isSubTask, email} = req.query;
   try {
     if(isSubTask === 'true'){
       const deletedAttachment = await prisma.attachment.deleteMany({
@@ -1520,12 +1767,38 @@ export const deleteAttachment = catchAsync(async (req, res, next) => {
         if(deletedAttachment)
         return next(new SuccessResponse("Attachment deleted Successfully", 200));
     }else{
+      const attachment = await prisma.attachment.findFirst({
+        where: {
+          taskId: Number(taskId),  
+        },
+      });
     const deletedAttachment = await prisma.attachment.deleteMany({
       where: {
         taskId: Number(taskId),  
       },
     });
-      if(deletedAttachment)
+      if(deletedAttachment){
+        const currentDateTime = new Date();
+        const indianTimeISOString = currentDateTime.toISOString();
+        const user = await prisma.user.findFirst({
+          where:{
+            email: email
+          },
+          select:{
+            userId: true,
+            username: true
+          }
+        })
+        const taskActivity = await prisma.taskActivity.create({
+          data: {
+            taskId: Number(taskId),
+            userId: user.userId,
+            username: user.username,
+            date: indianTimeISOString,
+            activity: ` deleted an attachment : ${attachment.fileName}`
+          }
+      })
+    }
       return next(new SuccessResponse("Attachment deleted Successfully", 200));
     }
   } catch (error) {
@@ -2096,150 +2369,158 @@ export const downloadProjectAttachment = catchAsync(async (req, res, next) => {
   }
 });
 
-function convertToDateTime(dateString) {
-  // Regular expression to match "DD-MM-YYYY" format
-  const regex = /^(\d{2})-(\d{2})-(\d{4})$/;
+export const getTaskActivity = catchAsync(async (req, res, next) => {
+  const { taskId} = req.query;
+  try {
+    await prisma.$transaction(async (prisma) => {
+      let resultList =[]
+      const taskActivityList = await prisma.taskActivity.findMany({
+        where: {
+          taskId: Number(taskId)
+        }
+      })
 
-  const match = dateString.match(regex);
-  if (!match) {
-    console.error('Invalid date format. Expected format: DD-MM-YYYY');
-    return null; // Return null if the date format is incorrect
+      taskActivityList.map((activity) => {
+        resultList.push({
+          id: activity.id,
+          username: activity.username,
+          date: activity.date,
+          activity: activity.activity
+        });
+      })
+      
+      return res.status(200).json(resultList)
+    })
+  } catch (error) {
+    console.log(error)
+    return next(new AppError('Error during getting task activity',200))
   }
-
-  const day = parseInt(match[1], 10);
-  const month = parseInt(match[2], 10) - 1; // Month is 0-indexed (0 = January, 11 = December)
-  const year = parseInt(match[3], 10);
-
-  // Create a Date object from the parsed date components
-  const date = new Date(year, month, day);
-
-  // Check if the created Date object is valid
-  if (isNaN(date.getTime())) {
-    console.error('Invalid date values');
-    return null; // Return null if the date is invalid
-  }
-
-  // Return the ISO 8601 format (DateTime format)
-  return date.toISOString();
-}
+});
 
 export const createBulkTasks = catchAsync(async (req, res, next) => {
   const taskList = req.body;
-  console.log(taskList)
   try {
-    // await prisma.$transaction(async (prisma) => {
-      let errorFlag = ""
-
+     await prisma.$transaction(async (prisma) => {
+    let errorFlag = "";
+  
     const authorUser = await prisma.user.findFirst({
-      where:{
+      where: {
         email: taskList[0].authorUserId
       }
-    })
-    
-
-      const project = await prisma.project.findFirst({
-        where: {
-          id: taskList[0].projectId
+    });
+  
+    const project = await prisma.project.findFirst({
+      where: {
+        id: taskList[0].projectId
+      }
+    });
+  
+      const taskPromises = taskList.map(async (taskObj) => {
+        
+          const startDate = taskObj.startDate;
+          const dateObj = new Date(startDate);
+          const isoStartDateString = dateObj.toISOString();
+          const endDate = taskObj.dueDate;
+          const endDateObj = new Date(endDate);
+          const isoDueDateString = endDateObj.toISOString();
+          // Validate the start and due dates
+          if (isNaN(new Date(isoDueDateString).getTime()) || isNaN(new Date(isoStartDateString).getTime())) {
+            errorFlag= 'Please check the data of Start Date and Due Date'
+            throw new Error('Invalid date format');
+          }
+  
+        const sprint = await prisma.sprint.findFirst({
+          where: {
+            title: taskObj.sprintId
+          }
+        });
+  
+        let assignee;
+          assignee = await prisma.user.findFirst({
+            where: {
+              email: taskObj.assignedUserId
+            }
+          });
+          if(!assignee){
+            errorFlag= 'Please check Assignee mail ids'
+            throw new Error('Invalid date format');
+          }
+  
+        if (assignee === null || assignee === undefined) {
+          errorFlag = 'Please check Assignee mail ids';
+          throw new Error('Please check Assignee mail ids'); 
         }
-      })
-        try{
-          const taskPromises = taskList.map(async(taskObj) => {
-            let date 
-            let isoStartTime
-            let endDate
-            let isoDueTime 
-            try{
-            date = taskObj.startDate; 
-            isoStartTime = convertToDateTime(date);
-            endDate = taskObj.dueDate; 
-            isoDueTime = convertToDateTime(endDate);
-
-            }catch(error){
-              console.log(error)
-              errorFlag = 'Please check the data of Start Date and Due Date'
-              return next(new AppError('Please check the data of Start Date and Due Date',500))
-            }
-            const sprint = await prisma.sprint.findFirst({
-              where: {
-                title: taskObj.sprintId
-              }
-            })
-            let assignee 
-            try{
-              assignee = await prisma.user.findFirst({
-                where:{
-                  email: taskObj.assignedUserId
-                }
-              })
-            }catch(error){
-              console.log(error)
-              errorFlag = 'Please check Assignee mail ids'
-              return next(new AppError('Please check Assignee mail ids',500)) 
-            }
-            if(assignee===null || assignee === undefined){
-              errorFlag = 'Please check Assignee mail ids'
-              return next(new AppError('Please check Assignee mail ids',500)) 
-            }
-            try{
-            const task = await prisma.task.create({
-              data:{
-                title: taskObj.title,
+  
+          const task = await prisma.task.create({
+            data: {
+              title: taskObj.title,
               description: taskObj.description,
-              status : "To Do",
+              status: "To Do",
               priority: taskObj.priority,
               tags: taskObj.tags,
-              startDate: isoStartTime,
-              dueDate: isoDueTime,
+              startDate: isoStartDateString,
+              dueDate: isoDueDateString,
               points: Number(taskObj.points),
               projectId: taskObj.projectId,
               authorUserId: authorUser.userId,
               sprintId: Number(sprint.id),
               assignedUserId: Number(assignee.userId)
-              }
-            })
-          }catch(error){
-            console.log(error)
-            errorFlag
-          }
-    
-            const taskCode = project.code + (String(task.id).padStart(6, '0'))
-            console.log(taskCode)
-            const updatedTask = await prisma.task.update({
-              where:{
-                id: task.id,
-              },
-              data: {
-                code: taskCode
-              }
-            })
-    
-            const currentDateTime = new Date();
-            const indianTimeISOString = currentDateTime.toISOString();
-    
-            const taskHistory = await prisma.taskHistory.create({
+            }
+          });
+
+          const currentDateTime = new Date();
+          const indianTimeISOString = currentDateTime.toISOString();
+          const taskCode = project.code + (String(task.id).padStart(6, '0'));
+
+          if(task){
+            const taskActivity = await prisma.taskActivity.create({
               data: {
                 taskId: task.id,
-                userId: Number(assignee.userId),
-                startDate: indianTimeISOString,
-                sprint: sprint.id,
-                time: "0,0,0,0,0",
+                userId: authorUser.userId,
+                username: authorUser.username,
+                date: indianTimeISOString,
+                activity: ` created task : ${taskCode}`
               }
             })
-          })
-        }catch(error){
-          console.log(error)
-          return next(new AppError('Error during task creation',500))
-        }
-      if(errorFlag === ''){
-        return next(new SuccessResponse("Tasks Created Successfully", 200));
-      }else{
-        return next(new AppError(errorFlag,500))
+          }
+  
+  
+          const updatedTask = await prisma.task.update({
+            where: {
+              id: task.id,
+            },
+            data: {
+              code: taskCode
+            }
+          });
+  
+          const taskHistory = await prisma.taskHistory.create({
+            data: {
+              taskId: task.id,
+              userId: Number(assignee.userId),
+              startDate: indianTimeISOString,
+              sprint: String(sprint.id),
+              time: "0,0,0,0,0",
+            }
+          });
 
-      }
-    
-    // })
+          if(!task || !updatedTask || !taskHistory){
+            errorFlag = 'Error occurred while creating task';
+            throw new Error('Error occurred while creating task'); 
+          }
+      });
+  
+      await Promise.all(taskPromises); // Ensure all tasks are processed before finishing
+  
+    if (isEmpty(errorFlag)) {
+      return next(new SuccessResponse("Tasks Created Successfully", 200));
+    } else {
+      return next(new AppError(errorFlag, 500)); // Return the error message
+    }
+     })
   } catch (error) {
-    console.log(error)
-    return next(new AppError('Error during Task Creation',500))
+    console.log(error);
+    return next(new AppError('Unexpected error', 500));
   }
+  
 });

@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Bell, CalendarClock, Cast, ChartCandlestick, ChartNoAxesCombined, FileChartColumnIncreasing, FilterX, LaptopMinimal, MapPin, ScreenShare, User, UsersRound } from 'lucide-react'
+import { Bell, CalendarClock, Cast, ChartCandlestick, ChartNoAxesCombined, FileChartColumnIncreasing, FileClock, FilterX, LaptopMinimal, MapPin, ScreenShare, User, UsersRound } from 'lucide-react'
 import { Button } from '@mui/material'
 import { DatePickerWithRange } from './DateRangePicker' 
 import { DateRange } from 'react-day-picker'
@@ -68,6 +68,9 @@ const Header = ({
     case 'Reports':
       icon = <FileChartColumnIncreasing className='mr-2'/>;  
       break;
+      case 'Timesheet':
+        icon = <FileClock className='mr-2'/>;  
+        break;
   }
 
   return (

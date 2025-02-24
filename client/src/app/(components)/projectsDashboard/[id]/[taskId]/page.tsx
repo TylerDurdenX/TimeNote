@@ -140,7 +140,7 @@ const TaskPageFull = () => {
 
   const deleteAttachment = (async() => {
     try {
-      const response = await deleteAttachmentQuery({taskId, isSubTask: false})
+      const response = await deleteAttachmentQuery({taskId, isSubTask: false, email: email!})
       // @ts-ignore
       if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
               // @ts-ignore
@@ -1041,7 +1041,7 @@ useEffect(() => {
                   
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <TaskActivity/>
+                  <TaskActivity taskId={task?.id!}/>
                 </CardContent>
               </Card>
             </TabsContent>

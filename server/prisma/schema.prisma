@@ -132,6 +132,7 @@ model Task {
   comments        Comment[]
 
   taskHistory       TaskHistory[]     @relation("TaskHistory")
+  taskActivity      TaskActivity[]    @relation("TaskActivity")
   subTasks          Subtask[]
   sprint            Sprint?        @relation(fields: [sprintId], references: [id])
 }
@@ -165,6 +166,17 @@ model TaskHistory{
 
   task            Task    @relation(fields: [taskId], references: [id], name: "TaskHistory")
   user            User    @relation(fields: [userId], references: [userId], name: "TaskHistory")
+}
+
+model TaskActivity{
+  id             Int       @id @default(autoincrement())
+  taskId         Int
+  userId         Int
+  date      DateTime
+  username        String?
+  activity          String?
+
+  task            Task    @relation(fields: [taskId], references: [id], name: "TaskActivity")
 }
 
 model Alert {

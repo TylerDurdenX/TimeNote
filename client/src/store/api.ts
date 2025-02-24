@@ -22,6 +22,7 @@ import {
   SubTaskFormData,
   SubTaskObject,
   Task,
+  TaskActivity,
   TaskComments,
   TaskFormData,
   TaskHistory,
@@ -121,7 +122,8 @@ export const api = createApi({
     "ProjectHours",
     "AlertCount",
     "Alert",
-    "Project"
+    "Project",
+    "TaskActivity"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -357,7 +359,7 @@ updateTaskProgress: build.mutation<ApiResponse, {taskId: number, progressStart: 
       url: `api/user/startTaskProgress?taskId=${taskId}&progressStart=${progressStart}`,
       method: "PATCH",
   }), 
-  invalidatesTags : ["Task","ProjectHours"]
+  invalidatesTags : ["Task","ProjectHours", "TaskActivity"]
 }),
 updateTask: build.mutation<ApiResponse, UpdateTaskData>({
   query: (body)=> ({
@@ -365,7 +367,7 @@ updateTask: build.mutation<ApiResponse, UpdateTaskData>({
       method: "PATCH",
       body: body,
   }), 
-  invalidatesTags : ["Tasks", "Task", "TaskHistory"]
+  invalidatesTags : ["Tasks", "Task", "TaskHistory", "TaskActivity"]
 }),
 updateProject: build.mutation<ApiResponse, UpdateProjectData>({
   query: (body)=> ({
@@ -396,7 +398,7 @@ uploadAttachment: build.mutation<ApiResponse, UploadAttachment>({
         }
       },
   }), 
-  invalidatesTags : ["Task"]
+  invalidatesTags : ["Task", "TaskActivity"]
 }),
 uploadProjectAttachment: build.mutation<ApiResponse, UploadProjectAttachment>({
   query: (body)=> ({
@@ -440,7 +442,7 @@ createBulkTasks: build.mutation<ApiResponse, TaskFormData[]>({
       method: "POST",
       body: tasks,
   }), 
-  invalidatesTags : ["Tasks"]
+  invalidatesTags : ["Tasks", "ProjectHours"]
 }),
 createAutoReport: build.mutation<ApiResponse, ReportConfig>({
   query: (reportConfig)=> ({
@@ -536,12 +538,19 @@ getTaskHistory: build.query<TaskHistory[], { taskId: number}>({
   },
   providesTags : ["TaskHistory"]
 }),
-deleteAttachment: build.mutation<ApiResponse, { taskId: number, isSubTask: boolean}>({
-  query: ({taskId, isSubTask})=> ({
-    url: `api/user/deleteAttachment?taskId=${taskId}&isSubTask=${isSubTask}`,
+getTaskActivity: build.query<TaskActivity[], { taskId: number}>({
+  query: ({ taskId,}) => {
+    const url = `api/user/getTaskActivity?taskId=${taskId}`;
+    return url;
+  },
+  providesTags : ["TaskActivity"]
+}),
+deleteAttachment: build.mutation<ApiResponse, { taskId: number, isSubTask: boolean, email: string}>({
+  query: ({taskId, isSubTask, email})=> ({
+    url: `api/user/deleteAttachment?taskId=${taskId}&isSubTask=${isSubTask}&email=${email}`,
     method: "DELETE",
 }), 
-  invalidatesTags : ["Task", "SubTask"]
+  invalidatesTags : ["Task", "SubTask","TaskActivity"]
 }),
 deleteProjectAttachment: build.mutation<ApiResponse, { attachmentId: number, email: string, projectId: number}>({
   query: ({attachmentId, email,projectId})=> ({
@@ -671,5 +680,6 @@ export const {
   useUploadProjectAttachmentMutation,
   useDeleteProjectAttachmentMutation,
   useDownloadProjectAttachmentMutation,
-  useCreateBulkTasksMutation
+  useCreateBulkTasksMutation,
+  useGetTaskActivityQuery
 } = api;

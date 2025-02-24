@@ -1,3 +1,5 @@
+'use client'
+
 import {
   useCloseTaskMutation,
   useCreateTaskMutation,
@@ -59,6 +61,7 @@ import SubTaskComment from "./(SubTask)/SubTaskComments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import BulkCreate from "./[taskId]/BulkCreate";
+import CircularLoading from "@/components/Sidebar/loading";
 
 type BoardProps = {
   id: string;
@@ -81,6 +84,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
 }: BoardProps) => {
 
   const userEmail = useSearchParams().get("email")
+  localStorage.clear();
   localStorage.removeItem("persist:root");
 
   const {
@@ -98,15 +102,15 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
 
   const [updateTaskStatus, response] = useUpdateTaskStatusMutation();
 
-  Object.defineProperty(window, 'localStorage', {
-    value: {
-      getItem: () => null, // Prevent reading
-      setItem: () => {},   // Prevent setting values
-      removeItem: () => {},// Prevent removing items
-      clear: () => {}      // Prevent clearing
-    },
-    writable: false
-  });
+  // Object.defineProperty(window, 'localStorage', {
+  //   value: {
+  //     getItem: () => null, // Prevent reading
+  //     setItem: () => {},   // Prevent setting values
+  //     removeItem: () => {},// Prevent removing items
+  //     clear: () => {}      // Prevent clearing
+  //   },
+  //   writable: false
+  // });
 
   const moveTask = async(taskId: number, toStatus: string) => {
     try {
@@ -127,7 +131,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div><CircularLoading/></div>;
   if (error) return <div>An error occurred while fetching tasks</div>;
 
   return (
@@ -461,7 +465,7 @@ const TaskColumn = ({
                   
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <BulkCreate sprintList={sprintData!} email={email} projectId={Number(projectId)}/>
+                  <BulkCreate sprintList={sprintData!} email={email} projectId={Number(projectId)} setIsOpen={setIsOpen}/>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -522,10 +526,19 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
   const [closeCompletedTask] = useCloseTaskMutation();
   const [updateTaskAssignee] = useUpdateTaskAssigneeMutation();
 
-  const assignTask = (taskId: number, email: string) => {
+  const assignTask = async (taskId: number, email: string) => {
     try {
-      updateTaskAssignee({ taskId, email });
-      toast.success("Task assignee updated successfully");
+      const response = await updateTaskAssignee({ taskId, email });
+      toast.success('Task Updated Successfully')
+      console.log(response)
+      // @ts-ignore
+      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+        // @ts-ignore
+        toast.error(response.error?.data.message)
+      }else{
+        // @ts-ignore
+        toast.success(response.data?.message);
+      }
     } catch (err) {
       toast.error("Some Error occurred, please try again later");
     }

@@ -145,6 +145,13 @@ export interface TaskHistory{
     totalTime: number
 }
 
+export interface TaskActivity{
+    id: number
+    username: string
+    date: string
+    activity: string
+}
+
 export interface ConfiguredReports{
     Reportname: string
     ReportTime: string

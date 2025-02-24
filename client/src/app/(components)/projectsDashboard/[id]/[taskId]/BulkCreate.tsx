@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CloudUpload, Download } from "@mui/icons-material"; 
 import { Box, Button } from "@mui/material"; 
 import { SprintResponse, TaskFormData } from "@/store/interfaces";
@@ -12,9 +12,10 @@ type Props ={
   sprintList : SprintResponse[]
   email: string
   projectId: number
+  setIsOpen: (isOpen: boolean) => void
 }
 
-const BulkCreate = ({sprintList, email, projectId} :Props) => {
+const BulkCreate = ({sprintList, email, projectId, setIsOpen} :Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadedData, setUploadedData] = useState<any[]>([]);
@@ -25,23 +26,53 @@ const BulkCreate = ({sprintList, email, projectId} :Props) => {
   const maxSize = 1 * 1024 * 1024; // in bytes
 
   const [taskList, setTaskList] = useState<TaskFormData[]>()
+  const [isOver, setIsOver] = useState(false);
 
   let sprints: string[] = []
   sprintList.map((sprint) => {
     sprints.push(sprint.title)
   })
-  
+
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      setFile(droppedFile);
+    e.preventDefault();  
+    
+    const file = e.dataTransfer?.files[0];
+    if (file) {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      if (fileExtension && !allowedExtensions.includes(`.${fileExtension}`)) {
+        toast.error('File extension not allowed!');
+      } 
+      else if (file.size > maxSize) {
+        toast.error('File size must be less than 1 MB!');
+      } else {        
+        validateExcelData(file)
+      }
     }
+    setIsOver(false); 
   };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsOver(false); 
+  };
+
+  useEffect(() => {
+    const handleGlobalDragOver = (e: DragEvent) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener('dragover', handleGlobalDragOver);
+    return () => {
+      document.removeEventListener('dragover', handleGlobalDragOver);
+    };
+  }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
     if (file) {
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
       if (fileExtension && !allowedExtensions.includes(`.${fileExtension}`)) {
@@ -132,7 +163,8 @@ const BulkCreate = ({sprintList, email, projectId} :Props) => {
                   rowIsValid = false;
                   errors.push(`Row ${rowIndex} - Start Date cannot be empty.`);
                 }else{
-                  rowTaskData.startDate = cell.text
+                  console.log(cell.text)
+                  rowTaskData.startDate = cell.value!.toString()
                 }
               }
               if (colIndex === 6) {
@@ -140,7 +172,8 @@ const BulkCreate = ({sprintList, email, projectId} :Props) => {
                   rowIsValid = false;
                   errors.push(`Row ${rowIndex} - Due Date cannot be empty.`);
                 }else{
-                  rowTaskData.dueDate = cell.text
+                  console.log(cell.text)
+                  rowTaskData.dueDate = cell.value!.toString()
                 }
               }
               if (colIndex === 8 ) {
@@ -166,11 +199,11 @@ const BulkCreate = ({sprintList, email, projectId} :Props) => {
                   }
               }
             });
+            console.log(rowTaskData)
             tasksList.push(rowTaskData)
           });
           setTaskList(tasksList)
           console.log(tasksList)
-          console.log(taskList)
           if (errors.length > 0) {
             setError(errors.join(' ')); // Set the validation errors
 
@@ -193,11 +226,10 @@ const BulkCreate = ({sprintList, email, projectId} :Props) => {
             link.href = URL.createObjectURL(blob);
             link.download = 'validation_errors.xlsx';
             link.click();
-          } else {
-            setError(null); // No validation errors
-          }
+          } 
           try {
             const response = await createBulkTasks(tasksList!);
+            setIsOpen(false)
             // @ts-ignore
             if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
                     // @ts-ignore
@@ -235,14 +267,28 @@ const BulkCreate = ({sprintList, email, projectId} :Props) => {
     <div className="flex h-full">
       {/* Left Half - File Drag and Drop */}
       <div className="w-1/2 flex flex-col items-center justify-center p-8 ">
-        <div
-          className="w-full h-64 border-dashed border-4 border-gray-300 rounded-xl flex flex-col items-center justify-center"
-          onDrop={handleFileDrop}
-          onDragOver={(e) => e.preventDefault()}
-        >
-          <CloudUpload className="text-gray-600 text-4xl" />
-          <p className="text-gray-600 mt-4 text-lg">Drag & Drop a file here</p>
-        </div>
+      <div className="w-full">
+      {/* File input */}
+    
+      {/* Drag-and-drop area */}
+      <div
+        className={`w-full h-64 border-dashed border-4 border-gray-300 rounded-xl flex flex-col items-center justify-center transition-all duration-300 ${
+          isOver ? 'bg-gray-200 scale-105 shadow-lg' : 'bg-white'
+        }`} 
+        onDrop={handleFileDrop}
+        onDragOver={(e) => e.preventDefault()}  
+        onDragEnter={handleDragEnter} 
+        onDragLeave={handleDragLeave} 
+        style={{
+          position: 'relative',  
+          zIndex: 1500,           
+        }}
+      >
+        <CloudUpload className="text-gray-600 text-4xl" />
+        <p className="text-gray-600 mt-4 text-lg">Drag & Drop a file here</p>
+      </div>
+      {file && <div>Selected file: {file.name}</div>}
+    </div>
       </div>
 
       {/* Right Half - Buttons Section */}
@@ -282,10 +328,10 @@ const BulkCreate = ({sprintList, email, projectId} :Props) => {
           onClick={() => document.getElementById("fileInput")?.click()}
           className="w-64 py-3 text-lg font-medium rounded-xl shadow-lg hover:bg-gray-100 transition duration-300"
           sx={{
-            textTransform: 'none', // Remove the uppercase text transform
-            boxShadow: 3, // Adds a subtle shadow effect
+            textTransform: 'none', 
+            boxShadow: 3, 
             '&:hover': {
-              boxShadow: 6, // Hover effect shadow
+              boxShadow: 6,
             }
           }}
         >
