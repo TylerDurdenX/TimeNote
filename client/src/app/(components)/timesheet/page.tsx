@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import { Button } from "@/components/ui/button"
 import {
@@ -8,8 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Tabs,
   TabsContent,
@@ -17,9 +17,14 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import Header from '@/components/Header'
+import TimesheetTable from './TimesheetTable'
+import { useSearchParams } from 'next/navigation'
 
 
 const page = () => {
+
+  const email = useSearchParams().get('email')
+
   return (
     <div>
         <div className="w-full mb-5">
@@ -32,35 +37,16 @@ const page = () => {
           />
         </div>
       </div>
-      <div className="flex justify-center items-center min-h-screen w-full">
-        <div className="w-full md:w-[100vh] h-[100vh]">
-        <Tabs defaultValue="account" className="w-[400px]">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="account">Account</TabsTrigger>
-        <TabsTrigger value="password">Password</TabsTrigger>
+      <div className="flex justify-center items-center h-full w-full">
+        <div className="w-full h-full">
+        <Tabs defaultValue="account" className="full">
+      <TabsList className="grid w-full grid-cols-3  w-[500px] ml-5">
+        <TabsTrigger value="account">My TimeSheet</TabsTrigger>
+        <TabsTrigger value="XX">Approve Timesheet</TabsTrigger>
+        <TabsTrigger value="password">User's Timesheet</TabsTrigger>
       </TabsList>
-      <TabsContent value="account">
-        <Card>
-          <CardHeader>
-            <CardTitle>Account</CardTitle>
-            <CardDescription>
-              Make changes to your account here. Click save when you're done.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="space-y-1">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" defaultValue="Pedro Duarte" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="username">Username</Label>
-              <Input id="username" defaultValue="@peduarte" />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button>Save changes</Button>
-          </CardFooter>
-        </Card>
+      <TabsContent value="account" className='w-full mr-5'>
+        <TimesheetTable email={email!}/>
       </TabsContent>
       <TabsContent value="password">
         <Card>
@@ -71,14 +57,7 @@ const page = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="space-y-1">
-              <Label htmlFor="current">Current password</Label>
-              <Input id="current" type="password" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="new">New password</Label>
-              <Input id="new" type="password" />
-            </div>
+            
           </CardContent>
           <CardFooter>
             <Button>Save password</Button>

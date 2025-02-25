@@ -79,7 +79,7 @@ const ProjectSectionHeader = ({
             isSmallText ? "text-lg" : "text-2xl"
           } font-semibold dark:text-white flex items-center`}
         >
-          {name} <SquarePen className="ml-2" />
+          {name}
         </h1>
       <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

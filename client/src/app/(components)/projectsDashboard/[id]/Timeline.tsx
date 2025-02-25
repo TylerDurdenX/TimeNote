@@ -4,6 +4,7 @@ import { DisplayOption, Gantt, ViewMode } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
 import { useGetProjectTasksQuery } from '@/store/api';
 import { useSearchParams } from 'next/navigation';
+import CircularLoading from '@/components/Sidebar/loading';
 
 type Props = {
   projectId: string;
@@ -23,7 +24,7 @@ const Timeline = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: 
     data: tasks,
     isLoading,
     error,
-  } = useGetProjectTasksQuery({ projectId, sprint, assignedTo, priority, isTaskOrSubTask, email: email! });
+  } = useGetProjectTasksQuery({ projectId, sprint, assignedTo, priority, isTaskOrSubTask, email: email! , page: 1, limit: 9999999999});
 
   const [displayOptions, setDisplayOptions] = useState<DisplayOption>({
     viewMode: ViewMode.Month,
@@ -31,11 +32,11 @@ const Timeline = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: 
   });
 
   const ganttTasks = useMemo(() => {
-    if (!tasks || tasks.length === 0) {
+    if (!tasks || tasks.tasks.length === 0) {
       return []; 
     }
 
-    return tasks
+    return tasks.tasks
       .filter(
         (task) =>
           task != null &&
@@ -54,9 +55,6 @@ const Timeline = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: 
       }));
   }, [tasks]);
 
-  if (isLoading) return <div>Loading tasks...</div>; 
-  if (error) return <div>An error occurred while fetching tasks</div>; 
-
   if (ganttTasks.length === 0) {
     return <div>No tasks available for the selected project.</div>;
   }
@@ -67,6 +65,9 @@ const Timeline = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: 
       viewMode: event.target.value as ViewMode,
     }));
   };
+
+  if (isLoading) return <div><CircularLoading/></div>; 
+  if (error) return <div>An error occurred while fetching tasks</div>; 
 
   return (
     <div className="px-4 xl:px-6">

@@ -43,6 +43,7 @@ model User{
   screenshot      Screenshots[]
   project       Project[]      @relation()
   autoReport       AutoReports[]      @relation()
+  timesheet         Timesheet[]         @relation("Timesheet")
   profilePicture  ProfilePicture? @relation(fields: [profilePictureId], references: [id])
 }
 
@@ -235,6 +236,17 @@ model UserProjects {
   project     Project  @relation(fields: [projectId], references: [id], name: "UserProjects")
 
   @@id([userId, projectId]) // Composite primary key for the many-to-many relation
+}
+
+model Timesheet {
+   id             Int       @id @default(autoincrement())
+   task         String
+  userId         Int
+  date      DateTime
+  username        String?
+
+  user            User    @relation(fields: [userId], references: [userId], name: "Timesheet")
+  @@unique([userId, date])
 }
 
 model Team {

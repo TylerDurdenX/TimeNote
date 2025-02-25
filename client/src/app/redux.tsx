@@ -24,6 +24,7 @@ import {
 } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+import storageSession from 'redux-persist/lib/storage/session';
 
 /* REDUX PERSISTENCE */
 const createNoopStorage = () => {
@@ -47,9 +48,9 @@ const storage =
 
 const persistConfig = {
   key: "root",
-  storage,
+  storage: storageSession,
   whitelist: ["global"],
-  blacklist: ["largeData", "temporaryState"],
+  blacklist: ["api.reducerPath"],
 };
 const rootReducer = combineReducers({
   global: globalReducer,

@@ -173,7 +173,7 @@ export const getProjects = catchAsync(async (req, res, next) => {
 });
 
 export const getProjectTasks = catchAsync(async (req, res, next) => {
-  const { id, sprint, assignedTo, priority , isTaskOrSubTask, email} = req.query;
+  const { id, sprint, assignedTo, priority , isTaskOrSubTask, email, page, limit} = req.query;
   try{
     const user = await prisma.user.findFirst({
       where: {
@@ -229,7 +229,11 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             },
             comments: true,
           },
+          skip: (page - 1) * limit,
+          take: parseInt(limit),
         });
+
+        const totalTasks = await prisma.task.count();
 
         const currentDateTime = new Date()
       
@@ -247,6 +251,10 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
               ...newAssignee
             } = task.assignee;
             task.assignee = newAssignee;
+
+            const messageCount = task.comments.length
+
+            task.comments = messageCount
 
             let hoursOverrun = 0
             let totalHours =0
@@ -271,8 +279,16 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             task.consumedHours = consumedHours
             task.hoursOverrun = hoursOverrun
           })
+
+          const skip = (page - 1) * limit;
+          const hasMore = skip + limit < totalTasks;
+
+          const result = {
+            tasks: tasks,
+            hasmore: hasMore
+          }
       
-        res.json(tasks);
+        res.json(result);
       }else{
         let whereCondition = {
           projectId: Number(id),
@@ -335,9 +351,22 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
                 },
                 comments: true
               }
-            }
-          },
+            },
+          }
         });
+
+        let totalTasks = 0
+
+        const totalTask = await prisma.task.findMany({
+          where: whereCondition, 
+          include: {
+            subTasks: true
+          }
+        });
+
+        totalTask.map((task) => {
+          totalTasks += task.subTasks.length
+        })
       
         const subTaskList = tasks.map(item => item.subTasks);
 
@@ -365,9 +394,20 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
               ...newAssignee
             } = subTask.assignee;
             subTask.assignee = newAssignee;
+
+            const messageCount = subTask.comments.length
+
+            subTask.comments = messageCount
         })
-      
-        res.json(filteredList);
+
+        const skip = (page - 1) * limit;
+        const hasMore = skip + limit < totalTasks;
+
+        const result = {
+          tasks: filteredList,
+          hasmore: hasMore
+        }
+        res.json(result);
       }
       
     }else{
@@ -1627,7 +1667,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
     console.error('Error occurred during task update:', error);
 
     // Respond with a proper error message
-    res.status(500).json({ message: `Error occurred: ${error.message}` });
+    
 
     // If you are using custom error handling middleware, you can propagate the error further
     return next(new AppError('Some error occurred', 500));
@@ -1901,7 +1941,7 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
   const { taskId, email } = req.query;
 
   try {
-
+    await prisma.$transaction(async (prisma) => {
     const task = await prisma.task.findFirst({
       where:{
         id: Number(taskId)
@@ -1915,6 +1955,10 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
         subTasks: true
       }
     })
+
+    if(task.inProgressStartTime!=null || task.inProgressStartTime!=undefined){
+      return next(new AppError("Please stop the progress time of the task before closing", 500));
+    }
 
     if (task.assignee.email !== email) {
       return next(new AppError("Cannot close Task assigned to other people", 500));
@@ -1939,11 +1983,64 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
           status: "Closed"
       }
     });
-    return next(new SuccessResponse("Task Closed Successfully", 200));
-  } catch (error) {
-    res.status(500).json({ message: `Error Occurred : ${error.message}` });
-  }
 
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0)); 
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+    const startOfDayIso = startOfDay.toISOString();
+    const endOfDayIso = endOfDay.toISOString();
+
+    const timesheetEntry = await prisma.timesheet.findFirst({
+      where:{
+        date: {
+          gte: startOfDay, 
+          lte: endOfDay,
+        }
+      }
+    })
+
+    const currentDateTime = new Date();
+    currentDateTime.setHours(0, 0, 0, 0);
+    const indianTimeISOString = currentDateTime.toISOString();
+    const consumedHours = Math.floor(Number(task.inProgressTimeinMinutes) / 60);
+    const user = await prisma.user.findFirst({
+      where: {
+        email: email
+      }, select: {
+        userId: true,
+        username: true
+      }
+    })
+
+    if(isEmpty(timesheetEntry)){
+      const newTimesheetEntry = await prisma.timesheet.create({
+        data: {
+          task : `${updatedTask.projectId}#${updatedTask.code}#Worked on Task : ${updatedTask.code}#100#${consumedHours}#NA`,
+          userId: user.userId,
+          username: user.username,
+          date: indianTimeISOString
+        }
+      })
+    }else{
+      let task = timesheetEntry.task
+      console.log(task)
+      task += `,${updatedTask.projectId}#${updatedTask.code}#Worked on Task : ${updatedTask.code}#100#${consumedHours}#NA,`
+      console.log(task)
+      const updatedTimesheetEntry = await prisma.timesheet.update({
+        where: {
+          id: timesheetEntry.id
+        },data: {
+          task: task
+        }
+      })
+    }
+
+    return next(new SuccessResponse("Task Closed Successfully", 200));
+  })
+  } catch (error) {
+    console.log(error)
+    return next(new AppError('Some Error Occurred',500))
+  }
 });
 
 export const getTaskHistory = catchAsync(async (req, res, next) => {

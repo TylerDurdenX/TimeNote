@@ -254,8 +254,22 @@ export interface Task {
 
     author?: User
     assignee?: User
-    comments?: Comment[]
+    comments?: number
     attachments?: Attachment[]
+}
+
+export interface GetProjectTasksResponse {
+    tasks: Task[],
+    hasmore: boolean
+}
+
+export interface TimesheetData {
+    projectId: string
+    taskCode: string
+    task: string
+    completionPercentage: string
+    consumedHours: string
+    approved: string
 }
 
 export interface SubTask {

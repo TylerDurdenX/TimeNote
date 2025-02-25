@@ -25,7 +25,6 @@ import {
   EllipsisVertical,
   History,
   MessageSquareMore,
-  Plus,
   PlusSquare,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -86,21 +85,22 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
   const userEmail = useSearchParams().get("email")
   localStorage.clear();
   localStorage.removeItem("persist:root");
+  const [page, setPage] = useState(1);
+  
 
   const {
     data: tasks,
     isLoading,
     error,
-    refetch
-  } = useGetProjectTasksQuery({ projectId: id , sprint, assignedTo, priority, isTaskOrSubTask, email: userEmail!},
+  } = useGetProjectTasksQuery({ projectId: id , sprint, assignedTo, priority, isTaskOrSubTask, email: userEmail!, page: page, limit: 12},
     {refetchOnMountOrArgChange: true}
   );
 
   useEffect(() => {
-    refetch();
-  }, [priority, isTaskOrSubTask, assignedTo, sprint]);
+    setPage(1)
+  }, [sprint, assignedTo, priority, isTaskOrSubTask])
 
-  const [updateTaskStatus, response] = useUpdateTaskStatusMutation();
+  const [updateTaskStatus] = useUpdateTaskStatusMutation();
 
   // Object.defineProperty(window, 'localStorage', {
   //   value: {
@@ -131,6 +131,14 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
     }
   };
 
+  const handleClick = () => {
+    if(tasks?.hasmore){
+      setPage(page +1)
+    }else{
+      toast.info('no more tasks to load')
+    }
+  };
+
   if (isLoading) return <div><CircularLoading/></div>;
   if (error) return <div>An error occurred while fetching tasks</div>;
 
@@ -141,7 +149,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
           <TaskColumn
             key={status}
             status={status}
-            tasks={tasks || []}
+            tasks={tasks?.tasks || []}
             moveTask={moveTask}
             id={id}
             email={email}
@@ -149,7 +157,20 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
             isTaskOrSubTask= {isTaskOrSubTask}
           />
         ))}
+        
       </div>
+      {tasks?.hasmore ? <>
+        <div className="flex items-center w-full my-4">
+      <hr className="flex-grow border-gray-300" />
+      <span
+        onClick={handleClick}
+        className="mx-4 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-300"
+      >
+        Load More
+      </span>
+      <hr className="flex-grow border-gray-300" />
+    </div>
+      </> : ""}
     </DndProvider>
   );
 };
@@ -251,8 +272,8 @@ const TaskColumn = ({
     }
   };
 
-  const { data, isLoading, error } = useGetProjectUsersQuery({ projectId: id }, {refetchOnMountOrArgChange: true});
-  const {data : sprintData, isLoading : sprintLoading, isError} = useGetSprintQuery({projectId: projectId }, {refetchOnMountOrArgChange: true})
+  const { data} = useGetProjectUsersQuery({ projectId: id }, {refetchOnMountOrArgChange: true});
+  const {data : sprintData} = useGetSprintQuery({projectId: projectId }, {refetchOnMountOrArgChange: true})
   
 
   return (
@@ -577,7 +598,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
     }
   };
 
-  const numberOfComments = (task.comments && task.comments.length) || 0;
+  const numberOfComments = task.comments;
 
   const PriorityTag = ({ priority }: { priority: TaskType["priority"] }) => {
     return (

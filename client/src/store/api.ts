@@ -7,6 +7,7 @@ import {
   CreateSprint,
   DownloadAttachment,
   DownloadProjectAttachment,
+  GetProjectTasksResponse,
   ListResponse,
   LiveStreamResponse,
   MentionedUser,
@@ -26,6 +27,7 @@ import {
   TaskComments,
   TaskFormData,
   TaskHistory,
+  TimesheetData,
   UpdateProjectData,
   UpdateSubTaskData,
   UpdateTaskData,
@@ -123,7 +125,8 @@ export const api = createApi({
     "AlertCount",
     "Alert",
     "Project",
-    "TaskActivity"
+    "TaskActivity",
+    "Timesheet"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -263,11 +266,11 @@ export const api = createApi({
       providesTags: ["ProjectsList"],
     }),
     getProjectTasks: build.query<
-    Task[],
-      { projectId: string, sprint: string, assignedTo: string, priority: string, isTaskOrSubTask: string, email: string}
+    GetProjectTasksResponse,
+      { projectId: string, sprint: string, assignedTo: string, priority: string, isTaskOrSubTask: string, email: string, page: number, limit: number,}
     >({
-      query: ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask, email}) => {
-        const url = `api/user/getProjectTasks?id=${projectId}&sprint=${sprint}&assignedTo=${assignedTo}&priority=${priority}&isTaskOrSubTask=${isTaskOrSubTask}&email=${email}`;
+      query: ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask, email, page, limit}) => {
+        const url = `api/user/getProjectTasks?id=${projectId}&sprint=${sprint}&assignedTo=${assignedTo}&priority=${priority}&isTaskOrSubTask=${isTaskOrSubTask}&email=${email}&page=${page}&limit=${limit}`;
         return url;
       },
       providesTags: ["Tasks"],
@@ -350,7 +353,6 @@ export const api = createApi({
     query: ({taskId, email})=> ({
         url: `api/user/updateTaskAssignee?taskId=${taskId}&email=${email}`,
         method: "PATCH",
-        body: {status},
     }), 
     invalidatesTags : ["Tasks", "Task","TaskHistory"]
 }),
@@ -458,6 +460,13 @@ getConfiguredReports: build.query<ConfiguredReports[], { email: string}>({
     return url;
   },
   providesTags : ["AutoReports"]
+}),
+getTimesheetData: build.query<TimesheetData[], { email: string}>({
+  query: ({ email,}) => {
+    const url = `api/user/getTimesheetData?email=${email}`;
+    return url;
+  },
+  providesTags : ["Timesheet"]
 }),
 getAlertsCount: build.query<AlertCount, { email: string}>({
   query: ({ email,}) => {
@@ -681,5 +690,6 @@ export const {
   useDeleteProjectAttachmentMutation,
   useDownloadProjectAttachmentMutation,
   useCreateBulkTasksMutation,
-  useGetTaskActivityQuery
+  useGetTaskActivityQuery,
+  useGetTimesheetDataQuery
 } = api;

@@ -225,7 +225,6 @@ const TaskPageFull = () => {
     const [subTaskAssignedUserId, setSubTaskAssignedUserId] = useState("");
     const [isEditableStatus, setIsEditableStatus] = useState(false);
     const [taskStatus, setTaskStatus] = useState(task?.status || "");
-    const [isStatusHovered, setIsStatusHovered] = useState(false);
     const [createSubTask, { isLoading: isLoadingCreateSubTask }] =
     useCreateSubTaskMutation();
     const [isOpen, setIsOpen] = useState(false);
@@ -613,30 +612,27 @@ useEffect(() => {
           </div>
 
           <div className="text-sm relative">
-            {/* Display editable content */}
             {isEditable ? (
               <input
                 type="text"
                 value={editedText}
-                onChange={(e) => setEditedText(Number(e.target.value))} // Update state as user types
-                onBlur={handleBlur} // Trigger onBlur event when user clicks outside
-                onKeyDown={handleKeyDown} // Trigger onBlur when Enter key is pressed
-                autoFocus // Automatically focus the input when it's rendered
-                className="border p-1 rounded w-24" // Style the input
+                onChange={(e) => setEditedText(Number(e.target.value))} 
+                onBlur={handleBlur} 
+                onKeyDown={handleKeyDown} 
+                autoFocus 
+                className="border p-1 rounded w-24" 
               />
             ) : (
               <div className="flex items-center">
-                {/* Display the text */}
                 <div
                   className="flex items-center"
-                  onMouseEnter={() => setIsHovered(true)} // Trigger hover enter
-                  onMouseLeave={() => setIsHovered(true)} // Trigger hover leave
+                  onMouseEnter={() => setIsHovered(true)} 
+                  onMouseLeave={() => setIsHovered(true)} 
                 >
                   <span className="cursor-pointer">
                     Estimated hours: {editedText}
                   </span>
 
-                  {/* Pencil icon that appears when hovering over the parent */}
                   <Pencil
                     size={16}
                     className={`ml-2 cursor-pointer ${
@@ -656,17 +652,15 @@ useEffect(() => {
           </div>
 
           <div className="text-sm relative">
-            {/* Assignee Editable Section */}
             {isAssigneeEditable ? (
               <select
                 value={assignee}
-                onChange={(e) => setAssignee(e.target.value)} // Update state when selecting an assignee
-                onBlur={handleAssigneeBlur} // Trigger onBlur event when user clicks outside
-                onKeyDown={handleKeyDown} // Trigger onBlur when Enter key is pressed
+                onChange={(e) => setAssignee(e.target.value)} 
+                onBlur={handleAssigneeBlur} 
+                onKeyDown={handleKeyDown} 
                 autoFocus
                 className="border p-1 rounded w-40"
               >
-                {/* Assuming 'users' is an array of possible assignees */}
                 {users?.map((user) => (
                   <option key={user.userId} value={user.username}>
                     {user.username}
@@ -675,15 +669,13 @@ useEffect(() => {
               </select>
             ) : (
               <div className="flex items-center">
-                {/* Display the text */}
                 <div
                   className="flex items-center"
                   onMouseEnter={() => setIsAssigneeHovered(true)}
-                  onMouseLeave={() => setIsAssigneeHovered(false)} // Trigger hover leave
+                  onMouseLeave={() => setIsAssigneeHovered(true)} 
                 >
                   <span className="cursor-pointer">Assignee: {assignee}</span>
 
-                  {/* Pencil icon that appears when hovering over the parent */}
                   <Pencil
                     size={16}
                     className={`ml-2 cursor-pointer ${
@@ -722,8 +714,6 @@ useEffect(() => {
                         <div className="flex items-center">
                           <div
                             className="flex items-center"
-                            // onMouseEnter={() => setIsStatusHovered(true)}
-                            // onMouseLeave={() => setIsStatusHovered(false)} 
                           >
                             <span className="cursor-pointer">Status: {taskStatus}</span>
           
@@ -740,13 +730,12 @@ useEffect(() => {
               className="flex flex-wrap items-center gap-2"
               ref={containerRef}
             >
-              {/* Render only the visible tags */}
               {taskTagsSplit
                 .slice(0, taskTagsSplit.length)
                 .map((tag, index) => (
                   <div
                     key={tag}
-                    ref={index === 0 ? tagRef : null} // Attach ref to the first tag for measuring width
+                    ref={index === 0 ? tagRef : null} 
                     className="rounded-full bg-blue-100 px-2 py-1 text-xs"
                   >
                     {tag}
@@ -1023,7 +1012,7 @@ useEffect(() => {
       </div>
       <div className="space-y-4">
       <Tabs defaultValue="alerts" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 w-[400px] h-[55px]">
+            <TabsList className="grid w-full grid-cols-2 w-[400px] h-[44px]">
               <TabsTrigger value="alerts" className="font-semibold text-lg">Task History</TabsTrigger>
               <TabsTrigger value="activity" className="font-semibold text-lg ">Activity</TabsTrigger>
             </TabsList>

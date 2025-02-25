@@ -213,7 +213,9 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
     assignedTo,
     priority,
     isTaskOrSubTask,
-    email: userEmail!
+    email: userEmail!,
+    page: 1,
+    limit: 9999999999
   },{refetchOnMountOrArgChange: true});
 
   const removeColumns = (data: any[], columnsToExclude: string[]) => {
@@ -237,7 +239,7 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
       "author",
       "comments",
     ];
-    const filteredData = removeColumns(tasks || [], columnsToExclude);
+    const filteredData = removeColumns(tasks?.tasks || [], columnsToExclude);
 
     const flattenedTasks = filteredData.map((task) => {
       return {
@@ -289,7 +291,7 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
         </button>
       </div>
       <DataGrid
-        rows={tasks || []}
+        rows={tasks?.tasks || []}
         columns={columns}
         className={dataGridClassNames}
         sx={dataGridSxStyles(isDarkMode)}

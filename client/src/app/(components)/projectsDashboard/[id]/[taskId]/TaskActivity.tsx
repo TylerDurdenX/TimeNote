@@ -1,3 +1,5 @@
+'use client'
+
 import CircularLoading from '@/components/Sidebar/loading';
 import { useGetTaskActivityQuery } from '@/store/api';
 import Link from 'next/link';
@@ -71,7 +73,7 @@ const TaskActivity = ({taskId} : Props) => {
 
   return (
     <div className="task-activity">
-      <h1>Task Activity</h1>
+      <h1>Activity - Logs</h1>
       <div className="activity-list">
         {Array.isArray(data) && data?.map((activity, index) => (
           <div key={index} className="activity-item border-b pb-4 flex justify-between items-center">

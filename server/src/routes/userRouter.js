@@ -17,6 +17,7 @@ import { addscreenshots, getScreenshots } from "../controller/LiveTracking/scree
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 import {createAutoReportConfig, deleteAutoReportConfig, getAutoReportConfig } from "../controller/reportsController/controller.js";
 import { deleteAlert, getAlerts } from "../controller/alertController/alertController.js";
+import { getTimesheetData } from "../controller/timesheetController/timesheetController.js";
 
 const router = express.Router();
 
@@ -87,6 +88,6 @@ router.delete("/deleteProjectAttachment", deleteProjectAttachment)
 router.get("/downloadProjectAttachment", downloadProjectAttachment)
 router.post("/createBulkTasks", createBulkTasks)
 router.get("/getTaskActivity", getTaskActivity)
-
+router.get("/getTimesheetData", getTimesheetData)
 
 export default router;

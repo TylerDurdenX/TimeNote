@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Bell, CalendarClock, Cast, ChartCandlestick, ChartNoAxesCombined, FileChartColumnIncreasing, FileClock, FilterX, LaptopMinimal, MapPin, ScreenShare, User, UsersRound } from 'lucide-react'
+import { Bell, CalendarClock, ChartCandlestick, ChartNoAxesCombined, FileChartColumnIncreasing, FileClock, FilterX, LaptopMinimal, MapPin, ScreenShare, User, UsersRound } from 'lucide-react'
 import { Button } from '@mui/material'
 import { DatePickerWithRange } from './DateRangePicker' 
 import { DateRange } from 'react-day-picker'
