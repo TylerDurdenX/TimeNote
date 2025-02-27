@@ -239,14 +239,19 @@ model UserProjects {
 }
 
 model Timesheet {
-   id             Int       @id @default(autoincrement())
-   task         String
+  id             Int       @id @default(autoincrement())
+  projectId       Int?
+  taskId      Int?
+  taskCode      String?
+  task         String
+  completionPercentage      String?
+  consumedHours       String
+  ApprovedFlag      String
   userId         Int
   date      DateTime
   username        String?
 
   user            User    @relation(fields: [userId], references: [userId], name: "Timesheet")
-  @@unique([userId, date])
 }
 
 model Team {

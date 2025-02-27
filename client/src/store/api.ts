@@ -11,6 +11,7 @@ import {
   ListResponse,
   LiveStreamResponse,
   MentionedUser,
+  PendingTimesheetResponse,
   PmUserResponse,
   ProjectFormData,
   ProjectHours,
@@ -28,6 +29,8 @@ import {
   TaskFormData,
   TaskHistory,
   TimesheetData,
+  timesheetEntry,
+  TimesheetResponse,
   UpdateProjectData,
   UpdateSubTaskData,
   UpdateTaskData,
@@ -126,7 +129,8 @@ export const api = createApi({
     "Alert",
     "Project",
     "TaskActivity",
-    "Timesheet"
+    "Timesheet",
+    "PendingTimesheet"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -334,6 +338,13 @@ export const api = createApi({
       }), 
       invalidatesTags : ["Tasks", "Task"]
   }),
+  updateTimesheetEntry: build.mutation<ApiResponse, {id: number, email: string, approveRejectFlag: boolean}>({
+    query: ({id,  email, approveRejectFlag})=> ({
+        url: `api/user/updateTimesheet?id=${id}&email=${email}&approveRejectFlag=${approveRejectFlag}`,
+        method: "PATCH",
+    }), 
+    invalidatesTags : ["PendingTimesheet"]
+}),
   updateProjectStatus: build.mutation<ApiResponse, {projectId: number, status: string, email: string}>({
     query: ({projectId, status, email})=> ({
         url: `api/user/updateProjectStatus?projectId=${projectId}&email=${email}`,
@@ -347,7 +358,7 @@ export const api = createApi({
         url: `api/user/closeCompletedTask?taskId=${taskId}&email=${email}`,
         method: "PATCH",
     }), 
-    invalidatesTags : ["Tasks"]
+    invalidatesTags : ["Tasks", "TaskActivity", "TaskHistory","Task"]
 }),
   updateTaskAssignee: build.mutation<Task, {taskId: number, email: string}>({
     query: ({taskId, email})=> ({
@@ -446,6 +457,14 @@ createBulkTasks: build.mutation<ApiResponse, TaskFormData[]>({
   }), 
   invalidatesTags : ["Tasks", "ProjectHours"]
 }),
+createTimesheetEntry: build.mutation<ApiResponse, timesheetEntry>({
+  query: (timesheetEntry)=> ({
+      url: "api/user/createTimesheetEntry",
+      method: "POST",
+      body: timesheetEntry,
+  }), 
+  invalidatesTags : ["Timesheet"]
+}),
 createAutoReport: build.mutation<ApiResponse, ReportConfig>({
   query: (reportConfig)=> ({
       url: "api/user/createReportsConfig",
@@ -461,12 +480,25 @@ getConfiguredReports: build.query<ConfiguredReports[], { email: string}>({
   },
   providesTags : ["AutoReports"]
 }),
-getTimesheetData: build.query<TimesheetData[], { email: string}>({
-  query: ({ email,}) => {
-    const url = `api/user/getTimesheetData?email=${email}`;
+getTimesheetData: build.query<TimesheetResponse, { email: string, date: string}>({
+  query: ({ email,date}) => {
+    const url = `api/user/getTimesheetData?email=${email}&date=${date}`;
     return url;
   },
   providesTags : ["Timesheet"]
+}),
+getPendingTimesheetData: build.query<PendingTimesheetResponse[], { email: string, date: string}>({
+  query: ({ email,date}) => {
+    const url = `api/user/getPendingTimesheetData?email=${email}&date=${date}`;
+    return url;
+  },
+  providesTags : ["PendingTimesheet"]
+}),
+getUsersTimesheetData: build.query<PendingTimesheetResponse[], { email: string, date: string}>({
+  query: ({ email,date}) => {
+    const url = `api/user/getUsersTimesheetData?email=${email}&date=${date}`;
+    return url;
+  },
 }),
 getAlertsCount: build.query<AlertCount, { email: string}>({
   query: ({ email,}) => {
@@ -691,5 +723,9 @@ export const {
   useDownloadProjectAttachmentMutation,
   useCreateBulkTasksMutation,
   useGetTaskActivityQuery,
-  useGetTimesheetDataQuery
+  useGetTimesheetDataQuery,
+  useCreateTimesheetEntryMutation,
+  useGetPendingTimesheetDataQuery,
+  useUpdateTimesheetEntryMutation,
+  useGetUsersTimesheetDataQuery
 } = api;

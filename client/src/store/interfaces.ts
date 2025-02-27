@@ -272,6 +272,25 @@ export interface TimesheetData {
     approved: string
 }
 
+export interface PendingTimesheetResponse {
+    id: number
+    task: TimesheetData
+    username: string
+}
+
+export interface TimesheetResponse {
+    timesheetDataList: TimesheetData[]
+    totalTime: string
+}
+
+export interface timesheetEntry {
+    task: string
+    completionPercentage: string
+    consumedHours: string
+    date: string
+    email: string
+}
+
 export interface SubTask {
     id: number,
     title: string,

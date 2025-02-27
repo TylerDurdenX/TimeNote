@@ -1,29 +1,34 @@
 'use client'
 
-import React from 'react'
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import Header from '@/components/Header'
-import TimesheetTable from './TimesheetTable'
+import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-
+import TimesheetHeader from './TimesheetHeader'
+import { useGetTimesheetDataQuery } from '@/store/api'
+import ApproveTimesheetTable from './ApproveTimesheetTable'
+import Header from '@/components/Header'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import TimesheetTable from './TimesheetTable'
+import UsersTimesheetTable from './UsersTimesheetTable'
 
 const page = () => {
 
   const email = useSearchParams().get('email')
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [refetchFlag, setRefetchFlag] = useState(0)
+  const [selectedTab, setSelectedTab] = useState("myTimesheet");
+
+    const { data, isLoading, error, refetch} = useGetTimesheetDataQuery(
+      { email: email!, date: selectedDate.toString()},
+      { refetchOnMountOrArgChange: true }
+    );
+
+    useEffect(() => {
+      refetch()
+    },[refetchFlag])
+
+    const handleTabClick = (value: string) => {
+      setSelectedTab(value);
+    };
 
   return (
     <div>
@@ -37,32 +42,25 @@ const page = () => {
           />
         </div>
       </div>
+      <div className="w-full flex items-center justify-center mt-5 mb-5">
+        <TimesheetHeader hasFilters={true} selectedDate={selectedDate} setSelectedDate={setSelectedDate} data={data!} myTimesheetPage = {selectedTab}/>
+      </div>
       <div className="flex justify-center items-center h-full w-full">
         <div className="w-full h-full">
-        <Tabs defaultValue="account" className="full">
+        <Tabs defaultValue="myTimesheet" className="full">
       <TabsList className="grid w-full grid-cols-3  w-[500px] ml-5">
-        <TabsTrigger value="account">My TimeSheet</TabsTrigger>
-        <TabsTrigger value="XX">Approve Timesheet</TabsTrigger>
-        <TabsTrigger value="password">User's Timesheet</TabsTrigger>
+        <TabsTrigger value="myTimesheet" onClick={() => handleTabClick("myTimesheet")}>My TimeSheet</TabsTrigger>
+        <TabsTrigger value="approveTimesheet" onClick={() => handleTabClick("approveTimesheet")}>Approve Timesheet</TabsTrigger>
+        <TabsTrigger value="userTimesheet" onClick={() => handleTabClick("userTimesheet")}>User's Timesheet</TabsTrigger>
       </TabsList>
-      <TabsContent value="account" className='w-full mr-5'>
-        <TimesheetTable email={email!}/>
+      <TabsContent value="myTimesheet" className='w-full mr-5'>
+        <TimesheetTable email={email!} selectedDate={selectedDate} data= {data!}/>
       </TabsContent>
-      <TabsContent value="password">
-        <Card>
-          <CardHeader>
-            <CardTitle>Password</CardTitle>
-            <CardDescription>
-              Change your password here. After saving, you'll be logged out.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            
-          </CardContent>
-          <CardFooter>
-            <Button>Save password</Button>
-          </CardFooter>
-        </Card>
+      <TabsContent value="approveTimesheet" className='w-full mr-5'>
+        <ApproveTimesheetTable email={email!} selectedDate={selectedDate} />
+      </TabsContent>
+      <TabsContent value="userTimesheet">
+      <UsersTimesheetTable email={email!} selectedDate={selectedDate} />
       </TabsContent>
     </Tabs>
         </div>

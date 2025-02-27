@@ -26,6 +26,16 @@ const AlertsPage = () => {
   };
 
   const [deleteAlert] = useDeleteTriggeredAlertsMutation()
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
   
   const handleDeleteConfirmation = async () => {
     if (selectedId !== null) {
@@ -103,6 +113,9 @@ const AlertsPage = () => {
         field: "triggeredDate",
         headerName: "Triggered Date",
         flex: 1, 
+        renderCell: (params) => {
+          return formatDate(params.value); 
+        },
         
       },
       {

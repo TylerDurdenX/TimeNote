@@ -6,29 +6,42 @@ import React, { useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { dataGridClassNames, } from "@/lib/utils";
 import { Button, DialogTitle } from "@mui/material";
-import { useGetProjectsQuery, useGetTimesheetDataQuery } from "@/store/api";
+import { useCreateTimesheetEntryMutation, useGetProjectsQuery, useGetTimesheetDataQuery } from "@/store/api";
 import Link from "next/link";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
-import { PlusSquare } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
+import { Clock9, PlusSquare } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Cancel, CheckCircle } from "@mui/icons-material";
-import TimesheetHeader from "./TimesheetHeader";
+import { TimesheetResponse } from "@/store/interfaces";
+import { Card } from "@/components/ui/card";
 
 type Props = {
   email: string;
+  selectedDate: Date
+  data: TimesheetResponse
 };
 
-const ProjectsTable = ({ email }: Props) => {
+const TimesheetTable = ({ email , selectedDate, data}: Props) => {
 
     const [isOpen, setIsOpen] = useState(false)
     const [task, setTask] = useState('')
     const [completionPercentage, setCompletionPercentage] = useState('')
     const [consumedHours, setConsumedHours] = useState('')
+    const [date, setDate] = useState('')
+
+    const [createTimesheetEntry, {isLoading}] = useCreateTimesheetEntryMutation()
+
+    function validateTimeFormat(time: string) {
+      const regex = /^([01]?[0-9]|2[0-3]):([0-5]?[0-9])$/;
+      return regex.test(time);
+    }
+
+    console.log(validateTimeFormat(consumedHours))
 
     const isFormValid = () => {
-        return task && completionPercentage && consumedHours
+        return task && date && validateTimeFormat(consumedHours)
     };
     
     const handleSubmit = async (event: React.FormEvent) => {
@@ -38,49 +51,59 @@ const ProjectsTable = ({ email }: Props) => {
           task: task,
           completionPercentage: completionPercentage,
           consumedHours: consumedHours,
+          date: date,
+          email: email
         };
         try {
-        //   const response = await createTask(formData);
-        //   setTask('')
-        //   setCompletionPercentage('')
-        //   setConsumedHours('')
+          const response = await createTimesheetEntry(formData);
+          setTask('')
+          setCompletionPercentage('')
+          setConsumedHours('')
+          setDate('')
     
-        //   // @ts-ignore
-        //   if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
-        //     // @ts-ignore
-        //     toast.error(response.error?.data.message)
-        //   }else{
-        //     // @ts-ignore
-        //     toast.success(response.data?.message);
-        //   }
-        //   setIsOpen(false);
+          // @ts-ignore
+          if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+            // @ts-ignore
+            toast.error(response.error?.data.message)
+          }else{
+            // @ts-ignore
+            toast.success(response.data?.message);
+          }
+          setIsOpen(false);
         } catch (err: any) {
           toast.error(err.data.message);
           console.error("Error creating role:", err.data.Message);
         }
       };
 
-
-  const { data, isLoading, error} = useGetTimesheetDataQuery(
-    { email: email },
-    { refetchOnMountOrArgChange: true }
-  );
-
 const columns: GridColDef[] = [
   {
     field: "task",
     headerName: "Task",
     flex: 3,
-    renderCell: (params) => (
-      <Link href={`project/${params.value}?email=${email}`} 
-      rel="noopener noreferrer"
-      style={{ color: 'blue' ,textDecoration: 'underline', fontWeight: 500}}
-      onClick={() => {
-        sessionStorage.setItem("projectId", params.row.id)
-      }}>
-        {params.value}
-      </Link>
-    ),
+    renderCell: (params) => {
+      const rowData = params.row;
+      const linkTo = rowData.projectId ? `timesheet/${rowData.projectId}/${rowData.taskCode}?email=${email}` : '';
+        return (
+      <Dialog>
+      <DialogTrigger asChild>
+        <button className="text-blue-600 underline font-medium text-lg hover:text-blue-700 transition-colors">
+          {params.value}
+        </button>
+      </DialogTrigger>
+
+      <DialogContent className="max-w-[50vw] max-h-[85vh] overflow-y-auto p-4 bg-gray-50 rounded-lg shadow-lg">
+        <DialogHeader>
+          <DialogDescription className="text-2xl font-semibold text-gray-800">Task Description</DialogDescription>
+        </DialogHeader>
+        <Card className="p-5 bg-white shadow-md rounded-lg mt-4 min-h-[150px] flex text-gray-600">
+          <div className="">{params.value}</div>
+        </Card>
+      </DialogContent>
+    </Dialog>
+        )
+      
+    } 
   },  
   {
     field: "completionPercentage",
@@ -93,15 +116,16 @@ const columns: GridColDef[] = [
     flex: 1
   },
   {
-    field: "approvalStatus",
+    field: "ApprovedFlag",
     headerName: "Approval Status",
     flex: 1,
     renderCell: (params) => {
         // You can access the value of the cell here using params.value
         if (params.value === 'NA') {
           return (<><CheckCircle style={{ color: 'green' }} /> Approved</>) ;
-        } else if (params.value === 'No') {
-          return (<><Cancel style={{ color: 'red' }} /> Pending</>);
+        } else if (params.value === 'NO') {
+          return (<><div className="flex items-center"><Clock9 style={{ color: 'red' }} /> <span className="ml-2">Pending for approval</span></div></>
+          );
         } else {
             return (<><CheckCircle style={{ color: 'green' }} /> Approved</>);
         }
@@ -112,23 +136,23 @@ const columns: GridColDef[] = [
   return (
     <>
     <div className="h-full w-full px-4 pb-8 xl:px-6">
-        <div className="w-full flex items-center justify-center">
-            <TimesheetHeader hasFilters={true} name ='Timesheet'/>
-        </div>
       <DataGrid
-        rows={data || []}
+        rows={data?.timesheetDataList || []}
         columns={columns}
         className={dataGridClassNames}
       />
-    </div>
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <button className="flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-500">
-              <PlusSquare className="h-5 w-5 mr-2 " />
-              Add Timesheet Entry
-            </button>
+            </div>
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                  <DialogTrigger asChild>
+                  <div className="flex items-center justify-center">
+          <button className="flex items-center justify-center rounded-md bg-blue-800 px-3 py-2 text-white hover:bg-blue-500">
+            <PlusSquare className="h-5 w-5 mr-2" />
+            Add Timesheet Entry
+          </button>
+        </div>
+
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] max-h-[27vw]">
+          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] h-[26vw]">
             <DialogHeader>
               <DialogTitle className="mb-2">Add Task in Timesheet</DialogTitle>
             </DialogHeader>
@@ -143,13 +167,21 @@ const columns: GridColDef[] = [
                 <form onSubmit={handleSubmit}>
                   <div className="grid gap-4 py-3">
                     <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                      <Label className="text-center col-span-2">Task</Label>
+                      <Label className="text-center col-span-2">Task Description</Label>
                       <Input
                         value={task}
                         onChange={(e) => setTask(e.target.value)}
                         className="col-span-6"
                         placeholder="Enter the task detail"
                         required
+                      />
+                      <Label className="text-center col-span-2">Task Date</Label>
+                      <Input
+                        value={date}
+                        type="date"
+                        placeholder="Enter consumed hours in the format HH:MM"
+                        onChange={(e) => setDate(e.target.value)}
+                        className="col-span-6"
                       />
                       <Label className="text-center col-span-2">Completion Percentage</Label>
                       <Input
@@ -161,25 +193,25 @@ const columns: GridColDef[] = [
                       <Label className="text-center col-span-2">Consumed Hours</Label>
                       <Input
                         value={consumedHours}
-                        placeholder="Enter a number"
+                        placeholder="Enter consumed hours in the format HH:MM"
                         onChange={(e) => setConsumedHours(e.target.value)}
                         className="col-span-6"
                       />
                     </div>
                   </div>
                   <DialogFooter>
-                    {/* <button
+                    <button
                       type="submit"
                       className={`flex w-200px mt-7 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
                                 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
-                                  !isFormValid() || isLoadingCreateSprint
+                                  !isFormValid() || isLoading
                                     ? "cursor-not-allowed opacity-50"
                                     : ""
                                 }`}
-                      disabled={!isFormValid() || isLoadingCreateSprint}
+                      disabled={!isFormValid() || isLoading}
                     >
-                      {isLoadingCreateSprint ? "Creating..." : "Create Sprint"}
-                    </button> */}
+                      {isLoading ? "Creating..." : "Send For Approval"}
+                    </button>
                   </DialogFooter>
                 </form>
               </div>
@@ -190,4 +222,4 @@ const columns: GridColDef[] = [
   );
 };
 
-export default ProjectsTable;
+export default TimesheetTable;

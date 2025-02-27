@@ -66,6 +66,7 @@ export const makeStore = () => {
       getDefault({
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+          ignoredPaths: ['api.queries.getTimesheetData'],
         },
       }).concat(api.middleware),
   });

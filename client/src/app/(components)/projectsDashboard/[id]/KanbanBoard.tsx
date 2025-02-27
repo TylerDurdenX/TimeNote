@@ -86,15 +86,34 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
   localStorage.clear();
   localStorage.removeItem("persist:root");
   const [page, setPage] = useState(1);
+  const [loadMore, setLoadMore] = useState(0)
+  const [tasks, setTasks] = useState<any[]>([]);
   
 
   const {
-    data: tasks,
+    data: tasksList,
     isLoading,
     error,
+    refetch
   } = useGetProjectTasksQuery({ projectId: id , sprint, assignedTo, priority, isTaskOrSubTask, email: userEmail!, page: page, limit: 12},
     {refetchOnMountOrArgChange: true}
   );
+
+  useEffect(() => {
+    if (tasksList) {
+      // Append the new tasks to the existing ones
+      setTasks((prevTasks) => {
+        const allTasks = [...prevTasks, ...tasksList.tasks];
+
+        // Remove duplicates based on 'id'
+        const uniqueTasks = allTasks.filter((task, index, self) =>
+          index === self.findIndex((t) => t.id === task.id)
+        );
+
+        return uniqueTasks;
+      });
+    }
+  }, [tasksList]);
 
   useEffect(() => {
     setPage(1)
@@ -132,7 +151,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
   };
 
   const handleClick = () => {
-    if(tasks?.hasmore){
+    if(tasksList?.hasmore){
       setPage(page +1)
     }else{
       toast.info('no more tasks to load')
@@ -149,7 +168,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
           <TaskColumn
             key={status}
             status={status}
-            tasks={tasks?.tasks || []}
+            tasks={tasks || []}
             moveTask={moveTask}
             id={id}
             email={email}
@@ -159,7 +178,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
         ))}
         
       </div>
-      {tasks?.hasmore ? <>
+      {tasksList?.hasmore ? <>
         <div className="flex items-center w-full my-4">
       <hr className="flex-grow border-gray-300" />
       <span
@@ -225,7 +244,7 @@ const TaskColumn = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const isFormValid = () => {
-    return taskName && taskDescription && startDate && dueDate && sprintId && taskPriority && taskPoints;
+    return taskName && taskDescription && startDate && dueDate && sprintId && taskPriority && taskPoints && assignedUserId;
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -551,7 +570,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
     try {
       const response = await updateTaskAssignee({ taskId, email });
       toast.success('Task Updated Successfully')
-      console.log(response)
+      
       // @ts-ignore
       if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
         // @ts-ignore

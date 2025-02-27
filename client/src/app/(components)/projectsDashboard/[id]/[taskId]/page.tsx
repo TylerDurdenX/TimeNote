@@ -375,19 +375,14 @@ useEffect(() => {
     try {
       const response = await updateTask(updateTaskData);
 
-      if (response.error) {
-        if ('data' in response.error) {
-          const errorData = response.error.data as { status: string; message: string }; // Type assertion
-      
-          if (errorData.status === 'Error' || errorData.status === 'Fail') {
-            toast.error(errorData.message);
-          }
-        } else {
-          toast.error('An unexpected error occurred');
-        }
-      } else {
-        toast.success(response.data?.message);
-      }
+      // @ts-ignore
+            if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+              // @ts-ignore
+              toast.error(response.error?.data.message)
+            }else{
+              // @ts-ignore
+              toast.success(response.data?.message);
+            }
 
       // if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
       //   toast.error(response.error?.data.message)
