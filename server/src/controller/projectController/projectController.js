@@ -304,7 +304,6 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             hasmore: hasMore
           }
       
-          console.log('retrun')
         res.json(result);
       }else{
         let whereCondition = {
@@ -424,13 +423,222 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
           tasks: filteredList,
           hasmore: hasMore
         }
-        console.log('retrun')
-
         res.json(result);
       }
       
     }else{
+      if(isTaskOrSubTask==='Task'){
+        let whereCondition = {
+          projectId: Number(id),
+        };
+      
+        if (!isEmpty(sprint)) {
+          whereCondition.sprintId = Number(sprint);
+        }
+      
+        
+        let assignedUserId = user.userId;
+        whereCondition.assignedUserId = assignedUserId; 
+        
+      
+        if (!isEmpty(priority)) {
+          whereCondition.priority = priority;
+        }
+      
+        const tasks = await prisma.task.findMany({
+          where: whereCondition,
+          include: {
+            author: {
+              select: {
+                username: true,
+              },
+            },
+            assignee: {
+              include: {
+                profilePicture: {
+                  select: {
+                    base64: true,
+                  },
+                },
+              },
+            },
+            comments: true,
+          },
+          skip: (page - 1) * limit,
+          take: parseInt(limit),
+        });
 
+        const totalTasks = await prisma.task.count({
+          where: whereCondition
+        });
+
+        const currentDateTime = new Date()
+      
+        tasks.map((task) => {
+          const assignee = task.assignee
+            const {
+              password,
+              designation,
+              phoneNumber,
+              reportsToId,
+              resetPasswordOTP,
+              otpExpires,
+              createdAt,
+              updatedAt,
+              ...newAssignee
+            } = task.assignee;
+            task.assignee = newAssignee;
+
+            const messageCount = task.comments.length
+
+            task.comments = messageCount
+
+            let hoursOverrun = 0
+            let totalHours =0
+            let consumedHours = 0
+
+            totalHours += task.points
+            if(task.inProgressStartTime === null || task.inProgressStartTime === undefined){
+              if(task.inProgressTimeinMinutes !== null || task.inProgressTimeinMinutes !== undefined){
+                consumedHours += Math.floor(Number(task.inProgressTimeinMinutes) / 60);
+              }
+            }else{
+              const differenceInMilliseconds = currentDateTime.getTime() - new Date(task.inProgressStartTime).getTime();
+              const differenceInMinutes = Math.floor(differenceInMilliseconds / (1000 * 60));
+              const progressTime = Number(task.inProgressTimeinMinutes || 0) + differenceInMinutes;
+              consumedHours += Math.floor(progressTime / 60);
+            }
+
+            if(consumedHours > totalHours){
+              hoursOverrun = Math.abs(consumedHours - totalHours)
+            }
+
+            task.consumedHours = consumedHours
+            task.hoursOverrun = hoursOverrun
+          })
+
+          const skip = (page - 1) * limit;
+          const hasMore = skip + limit < totalTasks;
+
+
+          const result = {
+            tasks: tasks,
+            hasmore: hasMore
+          }
+      
+        res.json(result);
+      }else{
+        let whereCondition = {
+          projectId: Number(id),
+        };
+      
+        if (!isEmpty(sprint)) {
+          whereCondition.sprintId = Number(sprint);
+        }
+        
+        let assignedUserId = user.userId;
+        whereCondition.assignedUserId = assignedUserId; 
+        
+      
+        if (!isEmpty(priority)) {
+          whereCondition.priority = priority;
+        }
+      
+        const tasks = await prisma.task.findMany({
+          where: whereCondition,
+          include: {
+            author: {
+              select: {
+                username: true,
+              },
+            },
+            assignee: {
+              include: {
+                profilePicture: {
+                  select: {
+                    base64: true,
+                  },
+                },
+              },
+            },
+            comments: true,
+            subTasks: {
+              include: {
+                assignee: {
+                  include: {
+                    profilePicture: {
+                      select: {
+                        base64: true
+                      }
+                    }
+                  }
+                },
+                author: {
+                  select: {
+                    username: true,
+                  },
+                },
+                comments: true
+              }
+            },
+          }
+        });
+
+        let totalTasks = 0
+
+        const totalTask = await prisma.task.findMany({
+          where: whereCondition, 
+          include: {
+            subTasks: true
+          }
+        });
+
+        totalTask.map((task) => {
+          totalTasks += task.subTasks.length
+        })
+      
+        const subTaskList = tasks.map(item => item.subTasks);
+
+        const flattenedList = subTaskList.filter(list => list.length > 0).flat();
+        let filteredList
+        if(assignedTo!=='X'){
+          filteredList = flattenedList.filter(item => item.assignee.email === email);
+        }else if(assignedTo!==''){
+          filteredList = flattenedList
+        }else{
+          filteredList = flattenedList
+        }
+
+        filteredList.map((subTask) => {
+          const assignee = subTask.assignee
+            const {
+              password,
+              designation,
+              phoneNumber,
+              reportsToId,
+              resetPasswordOTP,
+              otpExpires,
+              createdAt,
+              updatedAt,
+              ...newAssignee
+            } = subTask.assignee;
+            subTask.assignee = newAssignee;
+
+            const messageCount = subTask.comments.length
+
+            subTask.comments = messageCount
+        })
+
+        const skip = (page - 1) * limit;
+        const hasMore = skip + limit < totalTasks;
+
+        const result = {
+          tasks: filteredList,
+          hasmore: hasMore
+        }
+
+        res.json(result);
+      }
     }
   })
   } catch (error) {
@@ -1774,13 +1982,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
       }
     });
   } catch (error) {
-    // Log the error for debugging
     console.error('Error occurred during task update:', error);
-
-    // Respond with a proper error message
-    
-
-    // If you are using custom error handling middleware, you can propagate the error further
     return next(new AppError('Some error occurred', 500));
   }
 });

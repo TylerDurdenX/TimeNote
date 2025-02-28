@@ -22,6 +22,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import CircularLoading from "@/components/Sidebar/loading";
+import { Switch } from "@/components/ui/switch";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 type Props = {
   id: number;
@@ -52,6 +54,20 @@ const UserSettings = ({ id }: Props) => {
   );
   const [autoCompleteTeams, setAutoCompleteTeams] = React.useState<any[]>([]);
   const [autoCompleteRoles, setAutoCompleteRoles] = React.useState<any[]>([]);
+
+  const idleTimeoutDropdownValues = ["5 min","10 min", "15 min", "20 min", "30 min"]
+  const [selectedTimeout, setSelectedTimeout] = useState("5 min")
+
+  const handleTimeoutChange = (value: string) => {
+    setSelectedTimeout(value)
+  }
+
+  const [isSignoutEnabled, setIsSignoutEnabled] = useState(false); // Set initial state
+
+  const handleSignoutChange = () => {
+    setIsSignoutEnabled(!isSignoutEnabled); // Toggle state when switch changes
+  };
+
 
   const [dropdownData, setDropdownData] = useState<DropdownData>({
     objectList: [],
@@ -443,6 +459,107 @@ const UserSettings = ({ id }: Props) => {
                 <div className="col-span-8 flex justify-center">
                   {error && <div className="text-red-500 text-sm">{error}</div>}
                 </div>
+              </div>
+            </div>
+            
+          </div>
+          <div className="flex  w-full col-span-6">
+            <div className="w-1/6 flex justify-center items-center p-4">
+              <Label className="text-center">Idle Timeout</Label>
+            </div>
+
+            <div className="w-3/6 flex flex-col justify-center gap-4 p-4">
+              <div className="">
+              <div>
+                <FormControl variant="standard" className="w-[100%]">
+                  <InputLabel id="demo-simple-select-standard-label">Reports To</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-standard-label"
+                    id="demo-simple-select-standard"
+                    value={selectedTimeout} // Controlled select, value bound to user state
+                    onChange={(e) => {handleTimeoutChange(e.target.value)}}  // Handle change event to update state
+                    label="Reports To"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {idleTimeoutDropdownValues.map((item) => (
+                      <MenuItem key={item} value={item}>
+                        {item}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
+                <div className="flex justify-center">
+                  {error && <div className="text-red-500 text-sm">{error}</div>}
+                </div>
+              </div>
+            </div>
+            <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
+              <div className="">
+              <Label htmlFor="airplane-mode" className="mt-5">Allow Signout</Label>
+              </div>
+            </div>
+            <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
+              <div className="">
+
+              <Switch
+              className="ml-5"
+                id="airplane-mode"
+                checked={isSignoutEnabled}
+                onChange={handleSignoutChange} // Handle state change on switch toggle
+              />
+              </div>
+            </div>
+          </div>
+          <div className="flex  w-full col-span-6">
+            <div className="w-1/6 flex justify-center items-center p-4">
+              <Label className="text-center">Working Hours</Label>
+            </div>
+
+            <div className="w-3/6 flex flex-col justify-center gap-4 p-4">
+              <div className="">
+              <div>
+                <FormControl variant="standard" className="w-[100%]">
+                  <InputLabel id="demo-simple-select-standard-label">Working Hours</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-standard-label"
+                    id="demo-simple-select-standard"
+                    value={selectedTimeout} // Controlled select, value bound to user state
+                    onChange={(e) => {handleTimeoutChange(e.target.value)}}  // Handle change event to update state
+                    label="Reports To"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {idleTimeoutDropdownValues.map((item) => (
+                      <MenuItem key={item} value={item}>
+                        {item}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
+                <div className="flex justify-center">
+                  {error && <div className="text-red-500 text-sm">{error}</div>}
+                </div>
+              </div>
+            </div>
+            <div className="w-1/6 flex flex-col justify-center items-center gap-4 p-4">
+              <div className="">
+              <Label htmlFor="airplane-mode" className="mt-5">Allow Profile Picture Modification</Label>
+              </div>
+            </div>
+            <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
+              <div className="">
+
+              <Switch
+              className="ml-5"
+                id="airplane-mode"
+                checked={isSignoutEnabled}
+                onChange={handleSignoutChange} // Handle state change on switch toggle
+              />
               </div>
             </div>
           </div>

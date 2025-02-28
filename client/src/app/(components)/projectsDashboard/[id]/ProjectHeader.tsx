@@ -56,7 +56,7 @@ const ProjectHeader = ({
         <div className="w-full sm:w-[25%] h-8 p-1 bg-green-700 dark:bg-gray-800 rounded-lg flex flex-col items-center">
           <span className="font-semibold text-lg text-center text-white">Estimated Hours : {data?.totalHours}</span>
         </div>
-        <div className="w-full sm:w-[25%] h-8 p-1 bg-yellow-500 dark:bg-gray-800 rounded-lg flex flex-col items-center">
+        <div className="w-full sm:w-[25%] h-8 p-1 bg-[#3f51b5] dark:bg-gray-800 rounded-lg flex flex-col items-center">
           <span className="font-semibold text-lg text-center text-white">Total Consumed Hours : {data?.consumedHours}</span>
         </div>
 

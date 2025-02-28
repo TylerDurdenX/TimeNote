@@ -83,13 +83,10 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
 }: BoardProps) => {
 
   const userEmail = useSearchParams().get("email")
-  localStorage.clear();
-  localStorage.removeItem("persist:root");
   const [page, setPage] = useState(1);
-  const [loadMore, setLoadMore] = useState(0)
+  const [loadMoreCunt, setLoadMoreCount] = useState(0)
   const [tasks, setTasks] = useState<any[]>([]);
   
-
   const {
     data: tasksList,
     isLoading,
@@ -99,24 +96,32 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
     {refetchOnMountOrArgChange: true}
   );
 
+  const [hasMore, setHasMore] = useState(tasksList?.hasmore)
+
   useEffect(() => {
     if (tasksList) {
       // Append the new tasks to the existing ones
-      setTasks((prevTasks) => {
-        const allTasks = [...prevTasks, ...tasksList.tasks];
-
-        // Remove duplicates based on 'id'
-        const uniqueTasks = allTasks.filter((task, index, self) =>
-          index === self.findIndex((t) => t.id === task.id)
-        );
-
-        return uniqueTasks;
-      });
+      if(hasMore === true){
+        setTasks((prevTasks) => {
+          const allTasks = [...prevTasks, ...tasksList.tasks];
+  
+          // Remove duplicates based on 'id'
+          const uniqueTasks = allTasks.filter((task, index, self) =>
+            index === self.findIndex((t) => t.id === task.id)
+          );
+  
+          return uniqueTasks;
+        });
+      }else{
+        setTasks(tasksList.tasks)
+      }
+      
     }
   }, [tasksList]);
 
   useEffect(() => {
     setPage(1)
+    setHasMore(tasksList?.hasmore)
   }, [sprint, assignedTo, priority, isTaskOrSubTask])
 
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
@@ -135,6 +140,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
     try {
       if(isTaskOrSubTask === 'Task'){
       const response = await updateTaskStatus({ taskId, status: toStatus , email: email});
+      
        // @ts-ignore
       if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
                       // @ts-ignore
@@ -152,6 +158,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
 
   const handleClick = () => {
     if(tasksList?.hasmore){
+      setHasMore(tasksList?.hasmore)
       setPage(page +1)
     }else{
       toast.info('no more tasks to load')

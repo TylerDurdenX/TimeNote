@@ -44,6 +44,9 @@ import {
   UsersListResponse,
 } from "./interfaces";
 import { AxiosProgressEvent } from 'axios';
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 
 export interface Project {
@@ -103,10 +106,21 @@ interface CreateRolePayload {
 }
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-    credentials: "include",
-  }),
+  baseQuery: async (args, api, extraOptions) => {
+    // Perform the API request
+    const result = await fetchBaseQuery({
+      baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+      credentials: 'include',
+    })(args, api, extraOptions);
+
+    if (result.error?.status === 401) {
+      toast.error('Your session has expired. Please log in again.');
+      window.location.href = '/'
+      return result;
+    }
+
+    return result;
+  },
   reducerPath: "api",
   tagTypes: [
     "UserCount",

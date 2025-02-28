@@ -1,6 +1,6 @@
 import { getInitials } from "@/components/Sidebar/nav-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ApiResponse, useGetUsersListQuery } from "@/store/api";
+import {  useGetUsersListQuery } from "@/store/api";
 import {
   Box,
   Divider,
@@ -12,8 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+import React, {  useState } from "react";
 
 type Props = {
   onSelectUser: (id: number) => void;
@@ -38,8 +37,8 @@ const UserList = ({ onSelectUser }: Props) => {
         )
       : [];
       return (
-        <Paper className="p-2 h-[calc(100%-2rem)] flex flex-col justify-start items-center">
-          <Box className="flex-1 bg-white rounded-2xl flex flex-col w-full max-h-full">
+        <Paper className="p-2 flex flex-col items-center h-full">
+          <Box className="flex-1 bg-white rounded-2xl flex flex-col w-full">
             <Typography variant="h6" gutterBottom>
               Users List
             </Typography>
@@ -58,7 +57,7 @@ const UserList = ({ onSelectUser }: Props) => {
                 maxHeight: "calc(100vh - 11rem)", // Adjusting for 10 users, each approximately 60px in height
               }}
             >
-              <List>
+              <List className="overflow-hidden">
                 {filteredEmployees.map((employee) => (
                   <React.Fragment key={employee.userId}>
                     <button onClick={() => onSelectUser(employee.userId)}>
@@ -96,7 +95,7 @@ const UserList = ({ onSelectUser }: Props) => {
                 <Typography
                   variant="body1"
                   color="textSecondary"
-                  className="text-center mt-2 min-h-screen flex items-center justify-center"
+                  className="text-center mt-2 flex items-center justify-center"
                 >
                   No employees found.
                 </Typography>

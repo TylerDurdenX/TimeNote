@@ -4,7 +4,6 @@ import AppError from '../utils/appError.js'
 import {prisma} from "../server.js"
 
 const isAuthenticated = catchAsync(async (req, res, next) => {
-    console.log('Middleware called');
   
     try {
       // Get token from cookies
@@ -19,7 +18,6 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
         }, {});
   
       const token = cookies.token; // Access the token from cookies
-      console.log('Token:', token);
   
       if (!token) {
         return next(new AppError('You are not logged in. Please log in to access', 401));
@@ -37,7 +35,6 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
         }
       }
   
-      console.log(decoded)
       // Find the user from the database based on the decoded token info
       const currentUser = await prisma.user.findUnique({
         where: {
@@ -49,7 +46,6 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
         return next(new AppError('The user does not exist', 401));
       }
   
-      console.log('Decoded token:', decoded);
       req.user = currentUser;
       next();
   
