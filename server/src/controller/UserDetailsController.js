@@ -7,6 +7,8 @@ import {isEmpty, extractTitles} from "../utils/genericMethods.js"
 export const getUsersList = catchAsync(async (req, res, next) => {
   const { email } = req.query;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const user = await prisma.user.findFirst({
       where: {
         email: email,
@@ -34,8 +36,9 @@ export const getUsersList = catchAsync(async (req, res, next) => {
     } else {
       // Case to be handled in case of other users
     }
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error during getUsersList' + error);
     return next(new AppError("There was an error getting Users List", 400));
   }
 });
@@ -44,6 +47,8 @@ export const mapRolesToUser = catchAsync(async (req, res, next) => {
   const { email } = req.query;
 
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const user = await prisma.user.findFirst({
       where: {
         email: email,
@@ -58,7 +63,6 @@ export const mapRolesToUser = catchAsync(async (req, res, next) => {
       },
     });
 
-    try {
       await prisma.user.update({
         where: { email: email },
         data: {
@@ -71,18 +75,10 @@ export const mapRolesToUser = catchAsync(async (req, res, next) => {
         status: "success",
         message: `Roles updated for user : ${user.username}`,
       });
-    } catch (error) {
-      console.log(error);
-      return next(
-        new AppError(
-          "There was an error sending the email! Please try again later",
-          400
-        )
-      );
-    }
     return res.status(200).json(user.roles);
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error during mapRolesToUser' + error);
     return next(new AppError("There was an error getting authorities", 400));
   }
 });
@@ -90,6 +86,8 @@ export const mapRolesToUser = catchAsync(async (req, res, next) => {
 export const getUserDetails = catchAsync(async (req, res, next) => {
   const { id } = req.query;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const user = await prisma.user.findFirst({
       where: {
         userId: Number(id),
@@ -138,8 +136,9 @@ export const getUserDetails = catchAsync(async (req, res, next) => {
       ...newObj
     } = user;
     return res.status(200).json(newObj);
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error during getUserDetails' + error);
     return next(
       new AppError("There was an error fetching user details : " + error, 400)
     );
@@ -150,6 +149,8 @@ export const getListOfObjects = catchAsync(async (req, res, next) => {
   const { entityName } = req.query;
   console.log(entityName)
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     if (entityName === "Project") {
       const result = await prisma.$queryRaw`
   SELECT name AS title, 1 AS misc 
@@ -171,8 +172,9 @@ export const getListOfObjects = catchAsync(async (req, res, next) => {
        FROM "User"`;
       return res.status(200).json(result);
     }
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error during getListOfObjects' + error);
     return next(
       new AppError("There was an error fetching user details : " + error, 400)
     );
@@ -184,7 +186,6 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
   const {email} = req.query
   
   try {
-    // Using Prisma transaction to wrap the operations
     const result = await prisma.$transaction(async (prisma) => {
 
       
@@ -334,7 +335,7 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
 
     
   } catch (error) {
-    console.error('Transaction failed:', error);
+    console.error('Error during updateUserDetailsData:', error);
       return next(new AppError("There was an error updating user details", error));
   } finally {
     await prisma.$disconnect();
@@ -348,6 +349,8 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
   export const getUserHierarchyData = catchAsync(async (req, res, next) => {
     const { userId } = req.query;
     try {
+      const result = await prisma.$transaction(async (prisma) => {
+
       let userList = []
 
       let user = await prisma.user.findFirst({
@@ -445,8 +448,9 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
         }
       }
       return res.status(200).json(userList);
+    })
     } catch (error) {
-      console.error(error);
+      console.error('Error during getUserHierarchyData' + error);
       return next(
         new AppError("There was an error fetching user hierarchy Data : " + error, 400)
       );

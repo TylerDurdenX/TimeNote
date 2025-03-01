@@ -60,7 +60,6 @@ export function NavUser({
 
   const { isMobile } = useSidebar();
   const dispatch = useDispatch();
-  const router = useRouter();
   const LogOut = async () => {
     // setLoading(true);
 
@@ -71,7 +70,7 @@ export function NavUser({
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/logout`
       );
       dispatch(setAuthUser(null));
-      router.push("/");
+      window.location.href = '/'
       toast.success("Logged Out Successfuly");
     } catch (error: any) {
       toast.error(error.response.data.message);

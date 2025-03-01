@@ -5,6 +5,7 @@ import 'gantt-task-react/dist/index.css';
 import { useGetProjectTasksQuery } from '@/store/api';
 import { useSearchParams } from 'next/navigation';
 import CircularLoading from '@/components/Sidebar/loading';
+import { useTheme } from 'next-themes';
 
 type Props = {
   projectId: string;
@@ -19,7 +20,9 @@ type taskTypeItems = 'task' | 'milestone' | 'project';
 const Timeline = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: Props) => {
   const email = useSearchParams().get("email")
 
-  const isDarkMode = 1; 
+  const {theme} = useTheme()
+
+  let isDarkMode = theme==="dark"
   const {
     data: tasks,
     isLoading,

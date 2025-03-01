@@ -1,4 +1,4 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { configureStore, combineReducers, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import authSlice from "./authSlice";
 import { api } from "./api"; // Assuming api contains your RTK Query setup
 import {
@@ -46,6 +46,25 @@ const store = configureStore({
     }).concat(api.middleware), // Add the api middleware from RTK Query
 });
 
+// export interface initialStateTypes {
+//   isDarkMode: boolean
+// }
+
+// const initialState: initialStateTypes = {
+//   isDarkMode: false
+//   }
+  
+//   export const globalSlice = createSlice({
+//       name: "global",
+//       initialState,
+//       reducers:{
+          
+//           setIsDarkMode: (state, action:PayloadAction<boolean>) => {
+//               state.isDarkMode = action.payload
+//           }
+//       }
+//   })
+//   export const {setIsDarkMode,} = globalSlice.actions
 
 
 export type RootState = ReturnType<typeof store.getState>;

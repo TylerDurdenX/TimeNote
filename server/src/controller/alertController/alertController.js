@@ -23,7 +23,7 @@ export const getAlerts = catchAsync(async (req, res, next) => {
       res.json(alerts);
     })
     } catch (error) {
-      console.error(error);
+      console.error('Error during getAlerts' + error);
       return next(new AppError("There was an error fetching alerts", 400));
     }
   });
@@ -42,7 +42,7 @@ export const getAlerts = catchAsync(async (req, res, next) => {
       return next(new SuccessResponse("Record Deleted Successfully",200))
     })
     } catch (error) {
-      console.error(error);
+      console.error('Error during deleteAlert' + error);
       res.status(500).json({ message: `Error Occurred while deleting error: ${error.message}` });
     }
   });

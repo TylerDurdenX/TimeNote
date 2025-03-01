@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, FormEvent } from "react";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import axios from "axios";

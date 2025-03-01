@@ -12,6 +12,8 @@ import * as XLSX from "xlsx";
 import { Button } from "@mui/material";
 import { FileDown } from "lucide-react";
 import CircularLoading from "@/components/Sidebar/loading";
+import { useAppSelector } from "@/app/redux";
+import { useTheme } from "next-themes";
 
 type Props = {
   projectId: string;
@@ -263,8 +265,9 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
 
     XLSX.writeFile(workbook, "data-grid-export.xlsx");
   };
+  const {theme} = useTheme()
 
-  const isDarkMode = false;
+  let isDarkMode = theme==="dark"
 
   const getRowClassName = (params: GridRowParams) => {
     if (params.row.hoursOverrun > 0) {

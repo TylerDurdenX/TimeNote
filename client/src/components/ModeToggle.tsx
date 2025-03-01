@@ -16,6 +16,10 @@ import { SearchOutlined } from "@mui/icons-material"
 export function ModeToggle() {
   const { setTheme } = useTheme()
 
+  const handleClick = (value: string) => {
+    setTheme(value)
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -26,14 +30,11 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => handleClick("light")}>
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
+        <DropdownMenuItem onClick={() => handleClick("dark")}>
+          Dark (beta)
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -41,7 +41,7 @@ const Navbar = () => {
   )
 
   return (
-    <div className="flex justify-between bg-white px-4 h-auto dark:bg-gray-800">
+    <div className="flex justify-between bg-white px-4 h-auto dark:bg-black">
       
 
       <div className="flex items-center space-x-4 ml-auto">
@@ -68,7 +68,7 @@ const Navbar = () => {
 
         <div className="ml-2 mr-5 hidden min-h-[2em] w-[0.1rem] mt-2 bg-gray-200 md:inline-block"></div>
 
-        <ModeToggle />
+        <ModeToggle/>
 
         <div className="h-min w-min pr-6 rounded mt-1.5 p-2 hover:bg-gray-100">
           <SheetDemo />

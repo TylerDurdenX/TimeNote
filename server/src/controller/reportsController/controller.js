@@ -6,6 +6,8 @@ import SuccessResponse from "../../utils/SuccessResponse.js";
 export const createAutoReportConfig = catchAsync(async (req, res, next) => {
     const {email, projectTeam, reportDuration, time, period, reportName} = req.body
     try {
+      const result = await prisma.$transaction(async (prisma) => {
+
         const user = await prisma.user.findFirst({
             where:{
                 email: email
@@ -38,8 +40,9 @@ export const createAutoReportConfig = catchAsync(async (req, res, next) => {
             status: "success",
             message: "Configuration uploaded successfully"
           })
+        })
     } catch (error) {
-      console.error(error);
+      console.error('Error during createAutoReportConfig'+ error);
       return next(new AppError("There was an error uploading configuration", 400));
     }
   });
@@ -47,6 +50,7 @@ export const createAutoReportConfig = catchAsync(async (req, res, next) => {
 export const getAutoReportConfig = catchAsync(async (req, res, next) => {
   const { email } = req.query;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
 
     const user = await prisma.user.findFirst({
         where: {
@@ -60,7 +64,9 @@ export const getAutoReportConfig = catchAsync(async (req, res, next) => {
       }
     });
     res.json(autoReports);
+  })
   } catch (error) {
+    console.log('Error during getAutoReportConfig' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -68,14 +74,17 @@ export const getAutoReportConfig = catchAsync(async (req, res, next) => {
 export const deleteAutoReportConfig = catchAsync(async (req, res, next) => {
   const { reportId } = req.query;
   try {
-  
+    const result = await prisma.$transaction(async (prisma) => {
+
     const autoReports = await prisma.autoReports.delete({
       where: {
         id: Number(reportId)
       }
     });
     return next(new SuccessResponse("Record Deleted Successfully",200))
+  })
   } catch (error) {
+    console.log('Error during deleteAutoReportConfig' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });

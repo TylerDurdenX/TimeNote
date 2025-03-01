@@ -7,6 +7,8 @@ import SuccessResponse from "../../utils/SuccessResponse.js";
 export const createProject = catchAsync(async (req, res, next) => {
   const { title,clientName, description,projectCode, startDate, endDate, projectManager } = req.body;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const user = await prisma.user.findFirst({
       where: {
         username: projectManager,
@@ -28,9 +30,10 @@ export const createProject = catchAsync(async (req, res, next) => {
     res.status(200).json({
       status: "success",
       message: "Project created successfully",
-    });
+    })
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error during create Project' + error);
     return next(new AppError("There was an error creating Project", 400));
   }
 });
@@ -38,6 +41,8 @@ export const createProject = catchAsync(async (req, res, next) => {
 export const getProjects = catchAsync(async (req, res, next) => {
   const { email } = req.query;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const user = await prisma.user.findFirst({
       where: {
         email: email,
@@ -177,8 +182,9 @@ export const getProjects = catchAsync(async (req, res, next) => {
       }, []);
       return res.status(200).json(uniqueProjectList)
     }
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error during getProjects' + error);
     return next(new AppError("There was an error getting Projects List", 400));
   }
 });
@@ -642,7 +648,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
     }
   })
   } catch (error) {
-    console.error(error);
+    console.error('Error during getProjectTasks' + error);
     return next(new AppError("There was an error getting Tasks", 400));
   }
 });
@@ -651,6 +657,8 @@ export const getProjectUsers = catchAsync(async (req, res, next) => {
   const { id } = req.query;
   let resultList =[]
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const project = await prisma.project.findFirst({
       where: {
         id: Number(id),
@@ -680,8 +688,9 @@ export const getProjectUsers = catchAsync(async (req, res, next) => {
     res.status(200).json(resultList);
     }
     return next(new AppError("No User Found", 400));
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error during getProjectUsers' + error);
     return next(new AppError("There was an error getting Users in Project", 400));
   }
 });
@@ -689,6 +698,7 @@ export const getProjectUsers = catchAsync(async (req, res, next) => {
 export const createTask = catchAsync(async (req, res, next) => {
   const { title, description, status, priority, points, startDate, dueDate, tags, assignedUserId, authorUserId,sprintId, projectId } = req.body;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
 
     const authorUser = await prisma.user.findFirst({
       where:{
@@ -700,7 +710,6 @@ export const createTask = catchAsync(async (req, res, next) => {
     const endDate = new Date(dueDate); 
     const isoDueTime = endDate.toISOString();
 
-    const result = await prisma.$transaction(async (prisma) => {
 
       const project = await prisma.project.findFirst({
         where: {
@@ -768,8 +777,9 @@ export const createTask = catchAsync(async (req, res, next) => {
     return next(new AppError("Error creating task please try after some time", 400));
   })
   return next(new AppError("Error creating task please try after some time", 400));
+
   } catch (error) {
-    console.error(error);
+    console.error('Error during Create Task' + error);
     return next(new AppError("There was an error creating Task", 400));
   }
 });
@@ -787,6 +797,7 @@ function calculateHoursPassed(providedDateStr) {
 export const updateTaskProgress = catchAsync(async (req, res, next) => {
   const { taskId, progressStart } = req.query;
 
+  try{
   const result = await prisma.$transaction(async (prisma) => {
 
     const currentDateTime = new Date();
@@ -878,6 +889,10 @@ export const updateTaskProgress = catchAsync(async (req, res, next) => {
     return next(new SuccessResponse("Task updated Successfully",200))
   }
   })
+}catch(error){
+  console.log('Error during updateTaskProgress' + error)
+  return next(new AppError("Some Error Occurred",500))
+}
 })
 
 export const updateTaskStatus = catchAsync(async (req, res, next) => {
@@ -1091,7 +1106,7 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
   })
 
   } catch (error) {
-    console.log(error)
+    console.log('Error during updateTaskStatus' + error)
     return next(new AppError("Some Error Occurred", 500))
   }
   return next(new AppError("Some Error Occurred", 500))
@@ -1101,9 +1116,11 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
   const { taskId } = req.query;
   const { email } = req.query;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const currentDateTime = new Date();
     const currentTimeISOString = currentDateTime.toISOString();
-  const result = await prisma.$transaction(async (prisma) => {
+    const result = await prisma.$transaction(async (prisma) => {
     const user = await prisma.user.findFirst({
       where: {
         email: email
@@ -1329,10 +1346,10 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
   
       return next(new SuccessResponse("Task updated Successfully",200));
     }
-  
+    })
 })
 } catch (error) {
-  console.log(error)
+  console.log('Error during update Task Assignee' + error)
   return next(new AppError('Some Error occurred',500));
 }
 });
@@ -1341,6 +1358,8 @@ export const getTaskComments = catchAsync(async (req, res, next) => {
   const { taskId } = req.query;
   let resultList = []
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
       const task = await prisma.task.findFirst({
         where: {
           id: Number(taskId),
@@ -1363,8 +1382,9 @@ export const getTaskComments = catchAsync(async (req, res, next) => {
       }
       res.json(resultList);
     
-    
+    })
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
@@ -1374,6 +1394,8 @@ export const getSubTaskComments = catchAsync(async (req, res, next) => {
   const { subTaskId, } = req.query;
   let resultList = []
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
       const subTask = await prisma.subtask.findFirst({
         where: {
           id: Number(subTaskId),
@@ -1395,7 +1417,9 @@ export const getSubTaskComments = catchAsync(async (req, res, next) => {
         })
       }
       res.json(resultList);
+    })
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
@@ -1469,6 +1493,7 @@ export const addComment = catchAsync(async (req, res, next) => {
 export const addSubTaskComment = catchAsync(async (req, res, next) => {
   const { text, taskId, userEmail, commentTime } = req.body;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
 
     const user = await prisma.user.findFirst({
       where:{
@@ -1487,6 +1512,7 @@ export const addSubTaskComment = catchAsync(async (req, res, next) => {
     })
 
     res.json(comment);
+  })
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an error creating Task", 400));
@@ -1496,6 +1522,7 @@ export const addSubTaskComment = catchAsync(async (req, res, next) => {
 export const createSprint = catchAsync(async (req, res, next) => {
   const { title, description, startDate, endDate, email, projectId} = req.body;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
 
     const user = await prisma.user.findFirst({
       where:{
@@ -1531,6 +1558,7 @@ export const createSprint = catchAsync(async (req, res, next) => {
     }else{
       return next(new AppError("Only Project Manager can create New Sprint", 400));
     }
+  })
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an error creating Task", 400));
@@ -1540,6 +1568,8 @@ export const createSprint = catchAsync(async (req, res, next) => {
 export const getSprint = catchAsync(async (req, res, next) => {
   const { projectId} = req.query;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     let resultList =[]
     const sprintList = await prisma.sprint.findMany({
       where:{
@@ -1560,7 +1590,7 @@ export const getSprint = catchAsync(async (req, res, next) => {
 
 
     res.status(200).json(resultList)
-
+  })
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an getting Sprints", 400));
@@ -1569,6 +1599,7 @@ export const getSprint = catchAsync(async (req, res, next) => {
 
 export const getProjectManagers = catchAsync(async (req, res, next) => {
   try {
+    const result = await prisma.$transaction(async (prisma) => {
 
     let ProjectManagerList = []
 
@@ -1607,7 +1638,7 @@ export const getProjectManagers = catchAsync(async (req, res, next) => {
     });    
 
     res.status(200).json(ProjectManagerList)
-
+  })
   } catch (error) {
     console.error(error);
     return next(new AppError("There was an getting Project Manager Users", 400));
@@ -1618,6 +1649,8 @@ export const getTask = catchAsync(async (req, res, next) => {
   const { taskId } = req.query;
   let resultList = []
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const task = await prisma.task.findFirst({
       where: {
         id: Number(taskId),
@@ -1664,7 +1697,9 @@ export const getTask = catchAsync(async (req, res, next) => {
       })
     }
     res.json(task);
+  })
   } catch (error) {
+    console.log('Error during getTask' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
@@ -1991,6 +2026,7 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
   const { subTaskId,subTaskStatus, subTaskAssignee, subTaskDescription  } = req.body;
 
   try {
+    const result = await prisma.$transaction(async (prisma) => {
 
     const user = await prisma.user.findFirst({
       where:{
@@ -2033,7 +2069,9 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
     }
     });
     res.status(200).json({ message: `Task updated Successfully` });
+  })
   } catch (error) {
+    console.log('Error during updateSubTask' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
@@ -2076,7 +2114,7 @@ export const uploadAttachment = catchAsync(async (req, res, next) => {
       return next(new SuccessResponse("Attachment uploaded Successfully", 200));
     })
   } catch (error) {
-    console.error(error);
+    console.error('Error dusring upload attachment' +error);
     return next(new AppError("There was an error uploading Attachment", 400));
   }
 });
@@ -2084,6 +2122,7 @@ export const uploadAttachment = catchAsync(async (req, res, next) => {
 export const uploadSubTaskAttachment = catchAsync(async (req, res, next) => {
   const { fileBase64, fileName, subTaskId, uploadedBy,} = req.body;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
 
     const user = await prisma.user.findFirst({
       where:{
@@ -2101,9 +2140,9 @@ export const uploadSubTaskAttachment = catchAsync(async (req, res, next) => {
       })
       if(attachment)
       return next(new SuccessResponse("Attachment uploaded Successfully", 200));
-
+    })
   } catch (error) {
-    console.error(error);
+    console.error('Error during uploadSubTaskAttachment' + error);
     return next(new AppError("There was an error uploading Attachment", 400));
   }
 });
@@ -2111,6 +2150,8 @@ export const uploadSubTaskAttachment = catchAsync(async (req, res, next) => {
 export const deleteAttachment = catchAsync(async (req, res, next) => {
   const { taskId, isSubTask, email} = req.query;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     if(isSubTask === 'true'){
       const deletedAttachment = await prisma.attachment.deleteMany({
         where: {
@@ -2154,8 +2195,9 @@ export const deleteAttachment = catchAsync(async (req, res, next) => {
     }
       return next(new SuccessResponse("Attachment deleted Successfully", 200));
     }
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error dusring deleteAttachment'+error);
     return next(new AppError("There was an error deleting Attachment", 400));
   }
 });
@@ -2164,6 +2206,8 @@ export const downloadAttachment = catchAsync(async (req, res, next) => {
   const { taskId, isSubTask} = req.query;
   const isSubTaskBool = Boolean(isSubTask);
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     if(isSubTaskBool === true){
       const downloadAttachment = await prisma.attachment.findFirst({
         where: {
@@ -2181,8 +2225,9 @@ export const downloadAttachment = catchAsync(async (req, res, next) => {
       if(downloadAttachment)
       return res.status(200).json(downloadAttachment);
     }
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error during downloadAttachment'+error);
     return next(new AppError("There was an error downloading Attachment", 400));
   }
 });
@@ -2190,6 +2235,7 @@ export const downloadAttachment = catchAsync(async (req, res, next) => {
 export const createSubTask = catchAsync(async (req, res, next) => {
   const { title, taskId, status, startDate , sprintId, dueDate, description, authorUserId, assignedUserId} = req.body;
   try {
+    const result = await prisma.$transaction(async (prisma) => {
 
     const authorUser = await prisma.user.findFirst({
       where:{
@@ -2213,9 +2259,9 @@ export const createSubTask = catchAsync(async (req, res, next) => {
       }
     })
     return next(new SuccessResponse("SubTask Created Successfully", 200));
-
+  })
   } catch (error) {
-    console.error(error);
+    console.error('Error during createSubTask' + error);
     return next(new AppError("There was an error creating Task", 400));
   }
 });
@@ -2224,6 +2270,8 @@ export const getSubTask = catchAsync(async (req, res, next) => {
   const { subTaskId } = req.query;
   let resultList = []
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const subTask = await prisma.subtask.findFirst({
       where: {
         id: Number(subTaskId),
@@ -2244,7 +2292,9 @@ export const getSubTask = catchAsync(async (req, res, next) => {
       }
     });
     res.json(subTask);
+  })
   } catch (error) {
+    console.log('error during getSubTask' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
@@ -2392,7 +2442,7 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
     return next(new SuccessResponse("Task Closed Successfully", 200));
   })
   } catch (error) {
-    console.log(error)
+    console.log('Error dusring closeCompletedTask' + error)
     return next(new AppError('Some Error Occurred',500))
   }
 });
@@ -2400,9 +2450,9 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
 export const getTaskHistory = catchAsync(async (req, res, next) => {
   const { taskId } = req.query;
 
-  await prisma.$transaction(async (prisma) => {
-
   try {
+    const result = await prisma.$transaction(async (prisma) => {
+
     const task = await prisma.task.findFirst({
       where: {
         id: Number(taskId)
@@ -2472,11 +2522,11 @@ export const getTaskHistory = catchAsync(async (req, res, next) => {
     })
 
     return res.status(200).json(resultList)
-
+  })
   } catch (error) {
+    console.log('Error during getTaskHistory' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
-  })
   return next(new AppError("Some error occurred, please try after some time", 500))
 
 });
@@ -2536,6 +2586,7 @@ export const getProjectHoursEstimation = catchAsync(async (req, res, next) => {
       res.json(result);
     })
   } catch (error) {
+    console.log('Error during getProjectHoursEstimation' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
@@ -2562,7 +2613,7 @@ export const getMentionedUsers = catchAsync(async (req, res, next) => {
       res.json(userList);
     })
   } catch (error) {
-    console.log(error)
+    console.log('Error during getMentionedUsers' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
@@ -2597,7 +2648,7 @@ export const getUserData = catchAsync(async (req, res, next) => {
       res.json(user);
     })
   } catch (error) {
-    console.log(error)
+    console.log('Error during getUserData' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 
@@ -2641,7 +2692,7 @@ export const getProject = catchAsync(async (req, res, next) => {
       res.json(result);
     })
   } catch (error) {
-    console.log(error)
+    console.log('Error during getProject' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -2679,7 +2730,7 @@ export const updateProjectStatus = catchAsync(async (req, res, next) => {
       return next(new SuccessResponse('Project Updated Successfully',200))
     })
   } catch (error) {
-    console.log(error)
+    console.log('Error during updateProjectStatus' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -2724,7 +2775,7 @@ export const updateProject = catchAsync(async (req, res, next) => {
       return next(new SuccessResponse('Project Updated Successfully',200))
     })
   } catch (error) {
-    console.log(error)
+    console.log('Error during update Project' + error)
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -2765,7 +2816,7 @@ export const uploadProjectAttachment = catchAsync(async (req, res, next) => {
       return next(new SuccessResponse('Attachment Uploaded Successfully',200))
     })
   } catch (error) {
-    console.log(error)
+    console.log('Error during uploadProjectAttachment' + error)
     return next(new AppError('Error during file upload',200))
   }
 });
@@ -2799,7 +2850,7 @@ export const deleteProjectAttachment = catchAsync(async (req, res, next) => {
       return next(new SuccessResponse('Attachment Deleted Successfully',200))
     })
   } catch (error) {
-    console.log(error)
+    console.log('Error during deleteProjectAttachment' + error)
     return next(new AppError('Error during file deletion',200))
   }
 });
@@ -2823,7 +2874,7 @@ export const downloadProjectAttachment = catchAsync(async (req, res, next) => {
       return res.status(200).json(result)
     })
   } catch (error) {
-    console.log(error)
+    console.log('Error during downloadProjectAttachment' + error)
     return next(new AppError('Error during file deletion',200))
   }
 });
@@ -2851,7 +2902,7 @@ export const getTaskActivity = catchAsync(async (req, res, next) => {
       return res.status(200).json(resultList)
     })
   } catch (error) {
-    console.log(error)
+    console.log('Error during getTaskActivity' + error)
     return next(new AppError('Error during getting task activity',200))
   }
 });
@@ -2978,7 +3029,7 @@ export const createBulkTasks = catchAsync(async (req, res, next) => {
     }
      })
   } catch (error) {
-    console.log(error);
+    console.log('Error during createBulkTasks' + error);
     return next(new AppError('Unexpected error', 500));
   }
   

@@ -47,7 +47,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         return res.status(200).json(result)
       })
     } catch (error) {
-      console.log(error)
+      console.log('Error during getTimesheetData' + error)
       return next(new AppError('Error during getting Timesheet Entries',200))
     }
   });
@@ -64,44 +64,6 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
     return dateInIST.toISOString(); 
 }
 
-  function parsePendingData(inputString, mockId, username) {
-
-    if(inputString.includes(',')){
-      const result = [];
-    let id = 0
-      const objectsArray = inputString.split(',');
-      objectsArray.forEach(item => { 
-        id = id+1
-      const [projectId, taskCode, task, completionPercentage,consumedHours, approvalStatus] = item.split('#');
-  
-      result.push({
-        id: id,
-        projectId: projectId ? projectId.trim() : projectId,
-        taskCode: taskCode ? taskCode.trim(): taskCode,
-        task: task ? task.trim(): task,
-        completionPercentage: completionPercentage ? completionPercentage.trim(): completionPercentage,
-        consumedHours: consumedHours ? consumedHours.trim() : consumedHours,
-        approvalStatus: approvalStatus ? approvalStatus.trim(): approvalStatus
-      });
-    });
-    console.log(result)
-    return result;
-    }else{
-    const [projectId, taskCode, task, completionPercentage,consumedHours, approvalStatus] = inputString.split('#');
-    const result = {
-          id: mockId,
-          projectId: projectId ? projectId.trim() : projectId,
-          taskCode: taskCode ? taskCode.trim(): taskCode,
-          task: task ? task.trim(): task,
-          completionPercentage: completionPercentage ? completionPercentage.trim(): completionPercentage,
-          consumedHours: consumedHours ? consumedHours.trim() : consumedHours,
-          approvalStatus: approvalStatus ? approvalStatus.trim(): approvalStatus,
-          username: username
-    }
-  
-    return result;
-  }
-  }
 
   function updateTimesheetData(inputString,updatedEntry, approveRejectFlag) {
     let objectsString = inputString;
@@ -168,7 +130,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         return next(new SuccessResponse('Entry Created Successfully',200))
       })
     } catch (error) {
-      console.log(error)
+      console.log('Error during createTimesheetEntry' + error)
       return next(new AppError('Error during getting Timesheet Entries',200))
     }
   });
@@ -217,7 +179,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         return res.status(200).json(resultList)
       })
     } catch (error) {
-      console.log(error)
+      console.log('Error during getPendingTimesheetData' + error)
       return next(new AppError('Error during getting Pending Timesheet Entries',500))
     }
   });
@@ -329,7 +291,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
       })
     } catch (error) {
-      console.log(error)
+      console.log('Error during getUsersTimesheetData' + error)
       return next(new AppError('Error during getting Pending Timesheet Entries',500))
     }
   });
@@ -376,7 +338,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         }
       })
     } catch (error) {
-      console.log(error)
+      console.log('Error during updateTimesheet' + error)
       return next(new AppError('Error during getting Pending Timesheet Entries',500))
     }
   });
