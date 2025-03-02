@@ -109,10 +109,10 @@ const Comments = ({ taskId, email, taskCode }: Props) => {
   };
 
   return (
-    <div className="w-full mx-auto p-4 bg-white overflow-y-auto rounded-lg shadow-lg">
-      <div className="max-h-[55vw] overflow-y-auto space-y-4">
+    <div className="w-full mx-auto p-4 bg-white overflow-y-auto rounded-lg shadow-lg dark:bg-gray-800">
+      <div className="max-h-[55vw] overflow-y-auto space-y-4 dark:text-white">
         {data?.length === 0 ? (
-          <div className="text-center text-gray-500">
+          <div className="text-center text-gray-500 dark:text-white">
             <p>No comments yet</p>
           </div>
         ) : (
@@ -126,17 +126,17 @@ const Comments = ({ taskId, email, taskCode }: Props) => {
             const formattedCommentTime = `${formattedDate} ${formattedTime}`;
 
             return (
-              <div key={index} className="border-b pb-4 ">
+              <div key={index} className="border-b pb-4 dark:border-gray-200">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-lg">
                     {comment.username}
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-white">
                     {formattedCommentTime}
                   </span>
                 </div>
 
-                <p className="text-gray-800">
+                <p className="text-gray-800 dark:text-white">
                   {(() => {
                     const result = [];
                     let currentText = "";
@@ -157,8 +157,8 @@ const Comments = ({ taskId, email, taskCode }: Props) => {
                           <Link href={`/user?email=${email}`}>
                           <span
                             key={i}
+                            className="dark:text-white text-blue"
                             style={{
-                              color: "blue",
                               cursor: "pointer",
                               textDecoration: "underline",
                             }}
@@ -202,7 +202,7 @@ const Comments = ({ taskId, email, taskCode }: Props) => {
             value={newComment}
             onChange={handleChange}
             onBlur={handleBlur}
-            className="w-full p-2 border rounded-md shadow-sm resize-none"
+            className="w-full p-2 border rounded-md shadow-sm resize-none dark:bg-gray-800 dark:border-gray-300"
             placeholder="Add a comment..."
           />
 

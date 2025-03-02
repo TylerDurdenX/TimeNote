@@ -24,6 +24,7 @@ import {
 import CircularLoading from "@/components/Sidebar/loading";
 import { Switch } from "@/components/ui/switch";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Input } from "@/components/ui/input";
 
 type Props = {
   id: number;
@@ -43,40 +44,7 @@ const UserSettings = ({ id }: Props) => {
   );
   const [selectedReportsTo, setSelectedReportsTo] = useState("");
 
-  const [error, setError] = useState("");
-  const [internalState, setInternalState] = useState(id);
-  const [open, setOpen] = useState(false);
-  const [queriesLoaded, setQueriesLoaded] = useState(false);
-  const [dropdownSelectedUser, setDropdownSelectedUser] =
-    React.useState<string>("");
-  const [autoCompleteProjects, setAutoCompleteProjects] = React.useState<any[]>(
-    []
-  );
-  const [autoCompleteTeams, setAutoCompleteTeams] = React.useState<any[]>([]);
-  const [autoCompleteRoles, setAutoCompleteRoles] = React.useState<any[]>([]);
-
-  const idleTimeoutDropdownValues = ["5 min","10 min", "15 min", "20 min", "30 min"]
-  const [selectedTimeout, setSelectedTimeout] = useState("5 min")
-
-  const handleTimeoutChange = (value: string) => {
-    setSelectedTimeout(value)
-  }
-
-  const [isSignoutEnabled, setIsSignoutEnabled] = useState(false); // Set initial state
-
-  const handleSignoutChange = () => {
-    setIsSignoutEnabled(!isSignoutEnabled); // Toggle state when switch changes
-  };
-
-
-  const [dropdownData, setDropdownData] = useState<DropdownData>({
-    objectList: [],
-    isSuccessDropdown: false,
-  });
-  useEffect(() => {
-    setInternalState(id);
-  }, [id]);
-
+  
   const {
     data: dataUser,
     isLoading: isLoadingUser,
@@ -90,6 +58,48 @@ const UserSettings = ({ id }: Props) => {
       refetchOnMountOrArgChange: true,
     }
   );
+
+  const [error, setError] = useState("");
+  const [internalState, setInternalState] = useState(id);
+  const [open, setOpen] = useState(false);
+  const [queriesLoaded, setQueriesLoaded] = useState(false);
+  const [dropdownSelectedUser, setDropdownSelectedUser] =
+    React.useState<string>("");
+  const [autoCompleteProjects, setAutoCompleteProjects] = React.useState<any[]>(
+    []
+  );
+  const [autoCompleteTeams, setAutoCompleteTeams] = React.useState<any[]>([]);
+  const [autoCompleteRoles, setAutoCompleteRoles] = React.useState<any[]>([]);
+
+  const idleTimeoutDropdownValues = ["NA", "5 min","10 min", "15 min", "20 min", "30 min"]
+
+  const [selectedTimeout, setSelectedTimeout] = useState(dataUser?.idleTimeOut || "NA")
+  const [workingHours, setWorkingHours] = useState(dataUser?.workingHours || '')
+
+
+  const handleTimeoutChange = (value: string) => {
+    setSelectedTimeout(value)
+  }
+
+  const [isSignoutEnabled, setIsSignoutEnabled] = useState(dataUser?.allowSignout || false); // Set initial state
+  const [isProfilePicModificationEnabled, setIsProfilePicModificationEnabled] = useState(dataUser?.pictureModification || false)
+
+  const handlePPModificationChange = (checked: boolean) => {
+    setIsProfilePicModificationEnabled(checked); // Update the state with the new value of the switch
+  };
+
+  const handleToggle = (checked: boolean) => {
+    setIsSignoutEnabled(checked); // Update the state to match the switch's checked value
+  };
+
+
+  const [dropdownData, setDropdownData] = useState<DropdownData>({
+    objectList: [],
+    isSuccessDropdown: false,
+  });
+  useEffect(() => {
+    setInternalState(id);
+  }, [id]);
 
   const {
     data: ObjectData,
@@ -180,6 +190,10 @@ const UserSettings = ({ id }: Props) => {
         isSuccessDropdown,
       });
     }
+    setIsSignoutEnabled(dataUser?.allowSignout || false)
+    setIsProfilePicModificationEnabled(dataUser?.pictureModification || false)
+    setWorkingHours(dataUser?.workingHours || '')
+    setSelectedTimeout(dataUser?.idleTimeOut || 'NA')
   }, [dataUser]);
 
   useEffect(() => {
@@ -304,14 +318,19 @@ const UserSettings = ({ id }: Props) => {
 
     if (isLoading) return;
     try {
-      updateUserData({
+      const result = updateUserData({
         email: dataUser?.email!,
         reportingUsers: selectedReportingUsers,
         reportsTo: selectedReportsTo,
         projects: selectedProjects,
         teams: selectedTeams,
         roles: selectedRoles,
+        selectedTimeOut: selectedTimeout,
+        workingHours: workingHours,
+        isSignoutEnabled: isSignoutEnabled,
+        isProfilePicModificationEnabled: isProfilePicModificationEnabled
       });
+      console.log(result)
       toast.success("UserData Updated Successfully!");
       setOpen(false);
     } catch (error) {
@@ -472,13 +491,13 @@ const UserSettings = ({ id }: Props) => {
               <div className="">
               <div>
                 <FormControl variant="standard" className="w-[100%]">
-                  <InputLabel id="demo-simple-select-standard-label">Reports To</InputLabel>
+                  <InputLabel id="demo-simple-select-standard-label">Idle Timeout</InputLabel>
                   <Select
                     labelId="demo-simple-select-standard-label"
                     id="demo-simple-select-standard"
                     value={selectedTimeout} // Controlled select, value bound to user state
                     onChange={(e) => {handleTimeoutChange(e.target.value)}}  // Handle change event to update state
-                    label="Reports To"
+                    label="Idle Timeout"
                   >
                     <MenuItem value="">
                       <em>None</em>
@@ -508,7 +527,7 @@ const UserSettings = ({ id }: Props) => {
               className="ml-5"
                 id="airplane-mode"
                 checked={isSignoutEnabled}
-                onChange={handleSignoutChange} // Handle state change on switch toggle
+                onCheckedChange={handleToggle} 
               />
               </div>
             </div>
@@ -522,23 +541,11 @@ const UserSettings = ({ id }: Props) => {
               <div className="">
               <div>
                 <FormControl variant="standard" className="w-[100%]">
-                  <InputLabel id="demo-simple-select-standard-label">Working Hours</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-standard-label"
-                    id="demo-simple-select-standard"
-                    value={selectedTimeout} // Controlled select, value bound to user state
-                    onChange={(e) => {handleTimeoutChange(e.target.value)}}  // Handle change event to update state
-                    label="Reports To"
-                  >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    {idleTimeoutDropdownValues.map((item) => (
-                      <MenuItem key={item} value={item}>
-                        {item}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  <Input
+                                value={workingHours}
+                                onChange={(e) => setWorkingHours(e.target.value)}
+                                placeholder="9:30-18:30"
+                              />
                 </FormControl>
               </div>
                 <div className="flex justify-center">
@@ -557,8 +564,8 @@ const UserSettings = ({ id }: Props) => {
               <Switch
               className="ml-5"
                 id="airplane-mode"
-                checked={isSignoutEnabled}
-                onChange={handleSignoutChange} // Handle state change on switch toggle
+                checked={isProfilePicModificationEnabled}
+                onCheckedChange={handlePPModificationChange} 
               />
               </div>
             </div>

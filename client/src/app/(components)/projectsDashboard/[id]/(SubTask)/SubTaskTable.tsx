@@ -5,6 +5,7 @@ import { Button } from '@mui/material'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { SubTask } from '@/store/interfaces'
 import SubTaskPage from './SubTaskPage'
+import { useTheme } from 'next-themes'
 
 type Props = {
     subTasks: SubTask[]
@@ -129,7 +130,9 @@ const SubTaskTable = ({subTasks, email, projectId} :  Props) => {
         },
       ];
         
-  const isDarkMode = false
+      const {theme} = useTheme()
+
+      let isDarkMode = theme==="dark"
 
     return (
       <div className='h-540px e-full px-4 pb-8 xl:px-6'>

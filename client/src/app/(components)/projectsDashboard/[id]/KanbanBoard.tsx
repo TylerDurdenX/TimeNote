@@ -707,7 +707,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                     <div
                       key={tag}
                       ref={index === 0 ? tagRef : null} 
-                      className="rounded-full bg-blue-100 px-2 py-1 text-xs"
+                      className="rounded-full bg-blue-100 px-2 py-1 text-xs dark:text-black"
                     >
                       {tag}
                     </div>
@@ -800,11 +800,11 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
               
             </DialogContent>
           </Dialog>
-          <div className="text-xs text-gray-500 dark:text-neutral-500">
+          <div className="text-xs text-gray-500 dark:text-white">
             {formattedStartDate && <span>{formattedStartDate} - </span>}
             {formattedDueDate && <span>{formattedDueDate}</span>}
           </div>
-          <p className="text-sm text-gray-600 dark:text-neutral-500 line-clamp-5">
+          <p className="text-sm text-gray-600 dark:text-neutral-500 line-clamp-5 dark:text-white">
            {task.description}
           </p>
 
@@ -839,7 +839,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                 <Dialog>
                   <DialogTrigger asChild>
                     {isTaskOrSubTask === 'Task' ? <button>
-                      <History size={20} className="" />
+                      <History size={20} className="dark:text-white" />
                     </button> : ""}
                     
                   </DialogTrigger>
@@ -888,7 +888,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
               <Dialog>
                 <DialogTrigger asChild>
                   <button>
-                    <MessageSquareMore size={20} />
+                    <MessageSquareMore size={20} className="dark:text-white"/>
                   </button>
                 </DialogTrigger>
                 <DialogContent className="max-w-[40vw] overflow-y-auto max-h-[85vh]">
@@ -902,7 +902,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                   
                 </DialogContent>
               </Dialog>
-              <span className="ml-1 text-sm dark:text-neutral-400">
+              <span className="ml-1 text-sm dark:text-neutral-400 dark:text-white">
                 {numberOfComments}
               </span>
             </div>

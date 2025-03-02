@@ -2,6 +2,7 @@ import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 import { prisma } from "../server.js";
 import {isEmpty, extractTitles} from "../utils/genericMethods.js"
+import SuccessResponse from "../utils/SuccessResponse.js";
 
 //get list of users form the table
 export const getUsersList = catchAsync(async (req, res, next) => {
@@ -147,7 +148,6 @@ export const getUserDetails = catchAsync(async (req, res, next) => {
 
 export const getListOfObjects = catchAsync(async (req, res, next) => {
   const { entityName } = req.query;
-  console.log(entityName)
   try {
     const result = await prisma.$transaction(async (prisma) => {
 
@@ -182,12 +182,23 @@ export const getListOfObjects = catchAsync(async (req, res, next) => {
 });
 
 export const updateUserDetailsData = catchAsync(async (req, res, next) => {
-  const { reportsTo, projects, teams, roles} = req.body;
+  const { reportsTo, projects, teams, roles, selectedTimeOut, workingHours, isSignoutEnabled, isProfilePicModificationEnabled} = req.body;
   const {email} = req.query
   
   try {
     const result = await prisma.$transaction(async (prisma) => {
 
+      const userUpdate = await prisma.user.update({
+        where:{
+          email: email
+        },
+        data: {
+          idleTimeOut: selectedTimeOut,
+          workingHours: workingHours,
+          allowSignout: isSignoutEnabled,
+          pictureModification: isProfilePicModificationEnabled
+        }
+      })
       
       if(!isEmpty(projects)){
         const dbroject = await prisma.project.findMany({
@@ -264,22 +275,20 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
     if(!isEmpty(roles)){
       const dbRoles = await prisma.role.findMany({
         where:{
-          code: {
+          name: {
             in: extractTitles(roles),}
         }
       });
-      console.log(dbRoles)
       const currentRoles = await prisma.user.findUnique({
         where: { email: email },
         select: { roles: { select: { id: true } } },
       });
-      console.log(currentRoles)
       await prisma.user.update({
         where: { email: email },
         data: {
           roles: {
-            disconnect: currentRoles?.roles?.map(role => ({ id: role.id })) || [],
-            connect: dbRoles.map(role => ({ id: role.id })),
+            disconnect: currentRoles?.roles?.map(role => ({ id: role.id })),
+            connect: dbRoles.map((role) => ({ id: role.id })),
           },
         },
       });
@@ -330,8 +339,12 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
       });
     }
 
-      //return [project1, project2, project3]; // Return the result if needed
+
+    res.status(200).json({
+      status: "success",
+      message: `Details updated for user`,
     });
+  });
 
     
   } catch (error) {
@@ -340,10 +353,6 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
   } finally {
     await prisma.$disconnect();
   }
-  res.status(200).json({
-    status: "success",
-    message: `Details updated for user`,
-  });
 });
 
   export const getUserHierarchyData = catchAsync(async (req, res, next) => {

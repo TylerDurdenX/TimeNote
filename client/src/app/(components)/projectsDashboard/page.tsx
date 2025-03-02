@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 const page = () => {
 
   const userEmail = useSearchParams().get("email");
+  localStorage.removeItem("persist:root");
 
   return (
     <div className="w-full sm:flex-row space-y-0 aspect-auto">

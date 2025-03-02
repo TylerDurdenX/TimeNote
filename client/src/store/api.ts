@@ -655,15 +655,23 @@ getProjectManager: build.query<PmUserResponse[], {}>({
         projects: ListResponse[];
         teams: ListResponse[];
         roles: ListResponse[];
+        selectedTimeOut: string
+        workingHours: string
+        isSignoutEnabled: boolean
+        isProfilePicModificationEnabled: boolean
       }
     >({
-      query: ({ email, reportingUsers, reportsTo, projects, teams, roles }) => {
+      query: ({ email, reportingUsers, reportsTo, projects, teams, roles, selectedTimeOut, workingHours, isSignoutEnabled, isProfilePicModificationEnabled }) => {
         const requestBody = JSON.stringify({
           reportingUsers,
           reportsTo,
           projects,
           teams,
           roles,
+          selectedTimeOut,
+          workingHours,
+          isSignoutEnabled,
+          isProfilePicModificationEnabled
         });
         return {
           url: `api/user/updateUserSettingsData?email=${email}`,

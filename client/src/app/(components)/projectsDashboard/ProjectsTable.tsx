@@ -4,10 +4,11 @@ import Header from "@/components/Header";
 
 import React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { dataGridClassNames, } from "@/lib/utils";
+import { dataGridClassNames, dataGridSxStyles, } from "@/lib/utils";
 import { Button } from "@mui/material";
 import { useGetProjectsQuery } from "@/store/api";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 
 type Props = {
   email: string;
@@ -19,6 +20,10 @@ const ProjectsTable = ({ email }: Props) => {
     { refetchOnMountOrArgChange: true }
   );
 
+  const {theme} = useTheme()
+
+  let isDarkMode = theme==="dark"
+
 
 const columns: GridColDef[] = [
   {
@@ -28,7 +33,8 @@ const columns: GridColDef[] = [
     renderCell: (params) => (
       <Link href={`project/${params.value}?email=${email}`} 
       rel="noopener noreferrer"
-      style={{ color: 'blue' ,textDecoration: 'underline', fontWeight: 500}}
+      className="text-blue-500 dark:text-white underline font-medium"
+      style={{fontWeight: 500}}
       onClick={() => {
         sessionStorage.setItem("projectId", params.row.id)
       }}>
@@ -140,6 +146,7 @@ const columns: GridColDef[] = [
         rows={data || []}
         columns={columns}
         className={dataGridClassNames}
+        sx={dataGridSxStyles(isDarkMode)}
       />
     </div>
   );

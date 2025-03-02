@@ -55,8 +55,8 @@ const App: React.FC = () => {
     <div className="w-full h-screen items-center flex justify-center">
           <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[700px] h-[445px] bg-no-repeat bg-white text-white flex "/>
           <div className="absolute bottom-0 right-0 m-16 bg-[url('/circle.svg')] w-[320px] h-[280px] bg-white text-white flex justify-center items-center"/>
-          <div className="absolute top-0 left-0  w-[300px] h-[300px] bg-no-repeat bg-white text-white flex ">
-          <img src="/lynkLogo.jpg" alt="Description of Image" className=""></img>
+          <div className="absolute top-0 left-0  w-[400px] h-[350px] bg-no-repeat bg-white text-white flex ">
+          <img src="/lynklog.png" alt="Description of Image" className="w-180 h-180"></img>
           </div>
           <div className="absolute bottom-0 left-0 mb-2 ml-4 bg-no-repeat bg-white text-white flex "><h2 className="text-indigo-900">Lynk247 a product of Optimize Innovations</h2></div>
 

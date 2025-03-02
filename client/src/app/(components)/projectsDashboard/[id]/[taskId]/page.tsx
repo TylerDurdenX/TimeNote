@@ -17,7 +17,7 @@ import SubTaskTable from "../(SubTask)/SubTaskTable";
 import { useSearchParams } from "next/navigation";
 import TaskHistory from "../History";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import TaskActivity from "./TaskActivity";
 import CircularLoading from "@/components/Sidebar/loading";
 
@@ -530,7 +530,7 @@ useEffect(() => {
         <div className="flex space-x-4 ml-auto">
         <DropdownMenu>
               <DropdownMenuTrigger className="flex h-8 w-6 mt-1 flex-shrink-0 items-center justify-center dark:text-neutral-500">
-                <EllipsisVertical size={52} />
+                <EllipsisVertical size={52} className="dark:text-white"/>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
@@ -598,8 +598,8 @@ useEffect(() => {
             </span>
             <>
             <span className="text-gray-600 text-lg inline-flex items-center mr-5">
-            <Clock className="mr-2 " /> 
-            <div className="text-center text-lg font-semibold">
+            <Clock className="mr-2 dark:text-white" /> 
+            <div className="text-center text-lg font-semibold dark:text-white">
             Consumed time: {timeDiff}
             </div>
           </span>
@@ -731,7 +731,7 @@ useEffect(() => {
                   <div
                     key={tag}
                     ref={index === 0 ? tagRef : null} 
-                    className="rounded-full bg-blue-100 px-2 py-1 text-xs"
+                    className="rounded-full bg-blue-100 px-2 py-1 text-xs dark:text-black"
                   >
                     {tag}
                   </div>
