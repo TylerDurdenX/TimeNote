@@ -15,6 +15,9 @@ const ProjectPage = () => {
   const projectId = sessionStorage.getItem("projectId");
   const email = useSearchParams().get("email")
 
+  localStorage.removeItem('persist:root')
+  localStorage.removeItem('ally-supports-cache')
+
   const {
     data: project,
     isLoading,

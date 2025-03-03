@@ -39,6 +39,7 @@ const Navbar = () => {
   const {data: alertCountData} = useGetAlertsCountQuery({email: userEmail!}, 
     {refetchOnMountOrArgChange: true}
   )
+  sessionStorage.setItem("userRoles", alertCountData?.roles || "")
 
   return (
     <div className="flex justify-between bg-white px-4 h-auto dark:bg-black">
@@ -47,7 +48,7 @@ const Navbar = () => {
       <div className="flex items-center space-x-4 ml-auto">
       <div className="h-min w-min rounded p-2 mt-1.5">
       <Link href={`/alerts?email=${userEmail}`}>
-      <Badge color="error" badgeContent={Number(alertCountData)} max={9}>
+      <Badge color="error" badgeContent={Number(alertCountData?.count)} max={9}>
         <Bell />
       </Badge>
       </Link>

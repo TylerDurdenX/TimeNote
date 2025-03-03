@@ -26,6 +26,7 @@ type Props = {
 const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: Props) => {
   const userEmail = useSearchParams().get("email");
   localStorage.removeItem("persist:root");
+  localStorage.removeItem("ally-supports-cache");
 
   const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -280,7 +281,7 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
   if (error) return <div>An error occurred while fetching tasks</div>;
 
   return (
-    <div className="h-540px e-full px-4 pb-8 xl:px-6">
+    <div className="h-540px h-full px-4 pb-8 xl:px-6">
       <div className="pt-5 flex justify-between items-center mb-2">
         <Header name="Table" isSmallText />
 

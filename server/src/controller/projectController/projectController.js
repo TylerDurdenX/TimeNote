@@ -1706,7 +1706,7 @@ export const getTask = catchAsync(async (req, res, next) => {
 });
 
 export const updateTask = catchAsync(async (req, res, next) => {
-  const { taskId, taskPoints, assignee, taskDescription } = req.body;
+  const { taskId, taskPoints, assignee, taskDescription, editedConsumedHours, email } = req.body;
   
   try {
     await prisma.$transaction(async (prisma) => {
@@ -1731,6 +1731,57 @@ export const updateTask = catchAsync(async (req, res, next) => {
 
       if (!user || !taskToBeUpdated) {
         throw new Error('User or Task not found');
+      }
+
+      if(taskToBeUpdated.status === 'Closed'){
+        let timeInMinutes = 0
+        if(!isEmpty(editedConsumedHours)){
+          const [hours, minutes, seconds] = editedConsumedHours.split(':').map(Number);
+            timeInMinutes = hours*60 + minutes
+        }
+
+        if(taskToBeUpdated !== timeInMinutes){
+
+          const operationUser = await prisma.user.findFirst({
+            where: {
+              email: email
+            }
+          })
+  
+          const project = await prisma.project.findFirst({
+            where:{
+              id: Number(taskToBeUpdated.projectId)
+            }
+          })
+  
+          if(project.projectManager === operationUser.userId){
+            const updateTask = await prisma.task.update({
+              where: {
+                id: Number(taskToBeUpdated.id)
+              },
+              data: {
+                inProgressTimeinMinutes: String(timeInMinutes)
+              }
+            })
+            const currentDateTime = new Date();
+            const indianTimeISOString = currentDateTime.toISOString();
+        
+        if(updateTask){
+          const taskActivity = await prisma.taskActivity.create({
+            data: {
+              taskId: updateTask.id,
+              userId: operationUser.userId,
+              username: operationUser.username,
+              date: indianTimeISOString,
+              activity: ` Updated Consumed Hours`
+            }
+          })
+        }
+          }else{
+            throw new Error('Only Project Manager can change the consumed Hours')
+          }
+        }
+
       }
 
       if (taskToBeUpdated.assignedUserId === user.userId) {
@@ -1760,7 +1811,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
         const currentDateTime = new Date();
         const indianTimeISOString = currentDateTime.toISOString();
         
-        if(updatedTask){
+        if(updatedTask && !isEmpty(descriptionError)){
           const taskActivity = await prisma.taskActivity.create({
             data: {
               taskId: updatedTask.id,
@@ -2015,6 +2066,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
           return res.status(200).json({ message: 'Task updated successfully' });
         }
       }
+      return res.status(200).json({ message: 'Task updated successfully' });
+
     });
   } catch (error) {
     console.error('Error occurred during task update:', error);
@@ -2429,7 +2482,7 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
         taskId: updatedTask.id,
         taskCode: updatedTask.code,
         task : `Worked on Task : ${updatedTask.code}`,
-        completionPercentage: completionPercentage,
+        completionPercentage: String(completionPercentage),
         consumedHours: consumedHours,
         ApprovedFlag: "NA",
         userId: user.userId,

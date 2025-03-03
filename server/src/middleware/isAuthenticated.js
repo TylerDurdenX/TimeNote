@@ -45,6 +45,19 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
       if (!currentUser) {
         return next(new AppError('The user does not exist', 401));
       }
+
+      const newToken = jwt.sign(
+        { id: currentUser.userId }, // You can include more data if necessary
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN } // Set the expiry according to your preference
+      );
+  
+      // Update the cookie with the new token and expiration time
+      const cookieOptions = {
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+      };
+  
+      res.cookie('token', newToken, cookieOptions);
   
       req.user = currentUser;
       next();
@@ -54,5 +67,7 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
       return next(new AppError(err.message || 'An error occurred', 401));
     }
   });
+
+  
 
 export default isAuthenticated

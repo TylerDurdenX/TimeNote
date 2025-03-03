@@ -49,6 +49,9 @@ const TaskPageFull = () => {
     return `${day}/${month}/${year}`;
   };
 
+  localStorage.removeItem("persist:root");
+  localStorage.removeItem('ally-supports-cache')
+
   const PriorityTag = ({ priority }: { priority: TaskType["priority"] }) => {
     return (
       <div
@@ -195,8 +198,57 @@ const TaskPageFull = () => {
   ? task.tags.split(",").filter(tag => tag.trim() !== "") 
   : [];
 
+  const [isProgressStarted, setIsProgressStarted] = useState(task?.inProgressStartTime === null ? false : true);
+  const [timeDiff, setTimeDiff] = useState<string>("");
+
+  const targetTime = new Date(task?.inProgressStartTime!); 
+
+  const updateTime = () => {
+    const currentTime = new Date(); 
+    let diff = currentTime.getTime() - targetTime.getTime(); 
+
+    if(task?.inProgressTimeinMinutes !== null)
+      diff += Number(task?.inProgressTimeinMinutes!) * 60 * 1000;
+
+    const seconds = Math.floor(diff / 1000); 
+    const minutes = Math.floor(seconds / 60); 
+    const hours = Math.floor(minutes / 60); 
+    const remainingMinutes = minutes % 60; 
+    const remainingSeconds = seconds % 60; 
+
+    setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
+    setEditedConsumedHours(`${hours}:${remainingMinutes}:${remainingSeconds}`)
+    setInitialEditedConsumedHours(`${hours}:${remainingMinutes}:${remainingSeconds}`)
+  };
+
+  useEffect(() => {
+    if (!isProgressStarted && task?.inProgressTimeinMinutes!==null) {
+      const minutes = Number(task?.inProgressTimeinMinutes);
+      const hours = Math.floor(minutes / 60); 
+      const remainingMinutes = minutes % 60;
+      setTimeDiff(`${hours}:${remainingMinutes}:00`)
+      setEditedConsumedHours(`${hours}:${remainingMinutes}:00`)
+      setInitialEditedConsumedHours(`${hours}:${remainingMinutes}:00`)
+    };
+
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (isProgressStarted) {
+      intervalId = setInterval(updateTime, 1000); 
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isProgressStarted, task]);
+
   const [isEditable, setIsEditable] = useState(false);
+  const [isConsumedHoursEditable, setIsConsumedHoursEditable] = useState(false);
   const [editedText, setEditedText] = useState(task?.points); 
+  const [editedConsumedHours, setEditedConsumedHours] = useState('')
+  const [initialEditedConsumedHours, setInitialEditedConsumedHours] = useState('')
   const [isHovered, setIsHovered] = useState(true);
   const [isAssigneeEditable, setIsAssigneeEditable] = useState(false);
   const [isAssigneeHovered, setIsAssigneeHovered] = useState(true);
@@ -204,6 +256,8 @@ const TaskPageFull = () => {
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(true);
   const [description, setDescription] = useState(task?.description || "");
+  const roles = sessionStorage.getItem('userRoles') || ""
+  const [PMUser, setPMUser] = useState(roles.split(',').includes('PROJECT_MANAGER'))
 
   const [initialDescription, setInitialDescription] = useState(
     task?.description || ""
@@ -232,8 +286,6 @@ const TaskPageFull = () => {
     const [updateTaskAssignee] = useUpdateTaskAssigneeMutation();
     const [updateTaskStatus] = useUpdateTaskStatusMutation();
     const [updateTaskProgress] = useUpdateTaskProgressMutation();
-    const [isProgressStarted, setIsProgressStarted] = useState(task?.inProgressStartTime === null ? false : true);
-
     
     const assignTask =async (taskId: number, email: string) => {
       try {
@@ -312,7 +364,8 @@ useEffect(() => {
     description !== initialDescription ||
     assignee !== initialAssignee ||
     taskStatus!== initialStatus ||
-    editedText !== initialPoints;
+    editedText !== initialPoints || 
+    editedConsumedHours !== initialEditedConsumedHours
 
   setIsSaveButtonEnabled(isChanged); 
 }, [
@@ -323,12 +376,18 @@ useEffect(() => {
   initialDescription,
   initialAssignee,
   initialPoints,
-  initialStatus
+  initialStatus,
+  editedConsumedHours,
+  initialEditedConsumedHours
 ]);
 
   const handleEditClick = () => {
     setIsEditable(true);
   };
+
+  const handleEditConsumedHoursClick = () => {
+    setIsConsumedHoursEditable(true)
+  }
 
   const handleEditAssigneeClick = () => {
     setIsAssigneeEditable(true);
@@ -341,6 +400,7 @@ useEffect(() => {
   const handleBlur = () => {
     setIsEditable(false);
     setIsHovered(true);
+    setIsConsumedHoursEditable(false)
   };
 
   const handleAssigneeBlur = () => {
@@ -371,6 +431,8 @@ useEffect(() => {
       taskPoints: editedText,
       assignee: assignee,
       taskDescription: description,
+      editedConsumedHours: editedConsumedHours,
+      email: email!
     };
     try {
       const response = await updateTask(updateTaskData);
@@ -478,46 +540,6 @@ useEffect(() => {
 
   const taskStatusList = ["To Do", "Work In Progress", "Under Review", "Completed"];
 
-  const [timeDiff, setTimeDiff] = useState<string>("");
-
-  useEffect(() => {
-    if (!isProgressStarted && task?.inProgressTimeinMinutes!==null) {
-      const minutes = Number(task?.inProgressTimeinMinutes);
-      const hours = Math.floor(minutes / 60); 
-      const remainingMinutes = minutes % 60;
-      setTimeDiff(`${hours}:${remainingMinutes}:00`)
-    };
-
-    const targetTime = new Date(task?.inProgressStartTime!); 
-    let intervalId: NodeJS.Timeout | null = null;
-
-    const updateTime = () => {
-      const currentTime = new Date(); 
-      let diff = currentTime.getTime() - targetTime.getTime(); 
-
-      if(task?.inProgressTimeinMinutes !== null)
-        diff += Number(task?.inProgressTimeinMinutes!) * 60 * 1000;
-
-      const seconds = Math.floor(diff / 1000); 
-      const minutes = Math.floor(seconds / 60); 
-      const hours = Math.floor(minutes / 60); 
-      const remainingMinutes = minutes % 60; 
-      const remainingSeconds = seconds % 60; 
-
-      setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
-    };
-
-    if (isProgressStarted) {
-      intervalId = setInterval(updateTime, 1000); 
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isProgressStarted, task]);
-
    if (isLoading) return <div><CircularLoading/></div>;
 
 
@@ -528,7 +550,9 @@ useEffect(() => {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold">{task?.title} - {task?.code}</h1>
         <div className="flex space-x-4 ml-auto">
-        <DropdownMenu>
+        
+            {(task?.status! === "Closed") ? "" : <>
+              <DropdownMenu>
               <DropdownMenuTrigger className="flex h-8 w-6 mt-1 flex-shrink-0 items-center justify-center dark:text-neutral-500">
                 <EllipsisVertical size={52} className="dark:text-white"/>
               </DropdownMenuTrigger>
@@ -581,15 +605,15 @@ useEffect(() => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-        <button
+              <button
             onClick={toggleProgress}
             className="px-4 py-2 text-white rounded-lg bg-black hover:bg-gray-300 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 "
           >
             {isProgressStarted ? 'Pause Progress' : 'Start Progress'}
           </button>
+            </>}
         </div>
       </div>
-
 
         <div className="space-y-4 text-gray-600 dark:text-gray-400">
           <div className="text-sm flex justify-between items-center">
@@ -600,8 +624,44 @@ useEffect(() => {
             <span className="text-gray-600 text-lg inline-flex items-center mr-5">
             <Clock className="mr-2 dark:text-white" /> 
             <div className="text-center text-lg font-semibold dark:text-white">
-            Consumed time: {timeDiff}
+            {isConsumedHoursEditable ? (
+              <input
+                type="text"
+                value={editedConsumedHours}
+                onChange={(e) => setEditedConsumedHours(String(e.target.value))} 
+                autoFocus 
+                placeholder="00:00:00"
+                className="border p-1 rounded w-24" 
+                onBlur={handleBlur}
+              />
+            ) : (
+              <div className="flex items-center">
+                <div
+                  className="flex items-center"
+                >
+                  <span className="cursor-pointer">
+                  Consumed time: {editedConsumedHours } 
+                  </span>
+                </div>
+              </div>
+            )}
+            
+            
             </div>
+            {(task?.status! === "Closed") ? <>
+            {PMUser ? <>
+              <Pencil
+                    size={16}
+                    className={`ml-2 cursor-pointer ${
+                      isHovered ? "opacity-100" : "opacity-0"
+                    } transition-opacity`}
+                    onClick={handleEditConsumedHoursClick}
+                  />
+            </> : ""}
+            </>
+
+                   : ""}
+            
           </span>
           </>
           </div>

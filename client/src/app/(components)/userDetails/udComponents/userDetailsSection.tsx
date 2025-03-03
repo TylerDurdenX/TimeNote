@@ -11,6 +11,8 @@ const userDetailsSection = ({ id }: Props) => {
   const [activeTab, setActiveTab] = useState("User Settings");
   const [startingUserId, setStartingUserId] = useState(id);
 
+  localStorage.removeItem("persist:root");
+
   useEffect(() => {
     setStartingUserId(id)
   }, [id])

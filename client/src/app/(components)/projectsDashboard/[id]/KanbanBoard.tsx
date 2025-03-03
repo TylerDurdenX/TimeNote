@@ -165,6 +165,9 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
     }
   };
 
+  localStorage.removeItem("persist:root");
+  localStorage.removeItem("ally-supports-cache");
+
   if (isLoading) return <div><CircularLoading/></div>;
   if (error) return <div>An error occurred while fetching tasks</div>;
 
@@ -253,6 +256,10 @@ const TaskColumn = ({
   const isFormValid = () => {
     return taskName && taskDescription && startDate && dueDate && sprintId && taskPriority && taskPoints && assignedUserId;
   };
+
+  localStorage.removeItem("persist:root");
+  localStorage.removeItem("ally-supports-cache");
+
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

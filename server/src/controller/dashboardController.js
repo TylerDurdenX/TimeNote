@@ -106,7 +106,17 @@ export const getAlertCount = catchAsync(async (req, res, next) => {
         where: {
           email: email,
         },
+        include: {
+          roles: true
+        }
       });
+
+      console.log(user.roles)
+      let roleList = []
+
+      user.roles.map((role) => {
+        roleList.push(role.code)
+      })
 
       const alerts = await prisma.alert.findMany({
         where: {
@@ -114,7 +124,12 @@ export const getAlertCount = catchAsync(async (req, res, next) => {
         },
       });
 
-      res.json(alerts.length);
+      const result = {
+        count: alerts.length,
+        roles: roleList.toString()
+      }
+
+      res.json(result);
     });
   } catch (error) {
     console.error("Error during getAlertCount" + error);

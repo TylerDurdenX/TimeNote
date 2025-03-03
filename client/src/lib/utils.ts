@@ -35,16 +35,19 @@ export const dataGridSxStyles = (isDarkMode: boolean) => {
         color: `${isDarkMode ? "#a3a3a3" : "#000"}` // Pagination select icon color
       },
       // Target the cells (text and background color) and remove cell borders
-      "& .MuiDataGrid-cell": {
-        border: "none", // Remove cell borders
-        color: `${isDarkMode ? "#e5e7eb" : "#000"}`, // Cell text color
-        backgroundColor: `${isDarkMode ? "#1d1f21" : "#ffffff"}`, // Cell background color
-      },
+      // "& .MuiDataGrid-cell": {
+      //   border: "none", // Remove cell borders
+      //   color: `${isDarkMode ? "#e5e7eb" : "#000"}`, // Cell text color
+      //   backgroundColor: `${isDarkMode ? "#1d1f21" : "#ffffff"}`, // Cell background color
+      // },
       // Rows styling (specific for dark/light mode) and removing borders
-      "& .MuiDataGrid-row": {
-        backgroundColor: `${isDarkMode ? "#1d1f21" : "#ffffff"}`, // Row background color
-        borderBottom: "none", // Remove the border between rows
-      },
+      // "& .MuiDataGrid-row": {
+      //   if(){
+
+      //   },
+      //   backgroundColor: `${isDarkMode ? "#1d1f21" : "#ffffff"}`, // Row background color
+      //   borderBottom: "none", // Remove the border between rows
+      // },
       // Cells with specific borders (remove any borders in these cells as well)
       "& .MuiDataGrid-withBorderColor": {
         border: "none", // Remove any border color

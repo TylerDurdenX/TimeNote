@@ -44,7 +44,6 @@ const UserSettings = ({ id }: Props) => {
   );
   const [selectedReportsTo, setSelectedReportsTo] = useState("");
 
-  
   const {
     data: dataUser,
     isLoading: isLoadingUser,
@@ -119,6 +118,7 @@ const UserSettings = ({ id }: Props) => {
   useEffect(() => {
     // Force refetch every time the component is mounted
     refetch();
+    localStorage.removeItem("persist:root");
   }, [id]);
 
   const {
@@ -313,12 +313,12 @@ const UserSettings = ({ id }: Props) => {
   ]);
 
   const [updateUserData, { isLoading }] = useUpdateUserSettingsDataMutation();
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isLoading) return;
     try {
-      const result = updateUserData({
+      const result = await updateUserData({
         email: dataUser?.email!,
         reportingUsers: selectedReportingUsers,
         reportsTo: selectedReportsTo,
@@ -330,8 +330,7 @@ const UserSettings = ({ id }: Props) => {
         isSignoutEnabled: isSignoutEnabled,
         isProfilePicModificationEnabled: isProfilePicModificationEnabled
       });
-      console.log(result)
-      toast.success("UserData Updated Successfully!");
+      toast.success(result.data?.message);
       setOpen(false);
     } catch (error) {
       toast.error("Some Error occurred");

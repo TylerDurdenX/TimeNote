@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from "dotenv";
 import globalErrorHandler from './controller/errorController.js'
 import router from './routes/userRouter.js'
+import { authenticateThirdParty, generateToken } from './middleware/generateToken.js';
 
 const app = express()
 dotenv.config()
@@ -16,6 +17,9 @@ app.use(cors({
 app.use(express.json({ limit: '1mb' })) 
 
 app.use('/api/user', router)
+app.get('/generate-token', generateToken)
+app.post('/authenticate', authenticateThirdParty)
+
 app.get('/', (req,res) => {
     res.send("This is home")
 })

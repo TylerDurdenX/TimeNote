@@ -176,7 +176,8 @@ export enum Status {
     ToDo = "To Do",
     WorkInProgress = "Work In Progress",
     UnderReview= "UnderReview",
-    Completed= "Completed"
+    Completed= "Completed",
+    Closed = "Closed"
 }
 
 export enum Priority {
@@ -378,6 +379,7 @@ export interface AddComment {
 
 export interface AlertCount {
     count: number
+    roles: string
 }
 
 export interface Alert {
@@ -428,6 +430,8 @@ export interface UpdateTaskData {
     taskPoints: number | undefined
     assignee: string | undefined
     taskDescription: string
+    editedConsumedHours: string
+    email: string
 }
 
 export interface UpdateSubTaskData {

@@ -146,7 +146,7 @@ const TaskPage = ({ taskId, email, projectId }: Props) => {
 
   const deleteAttachment = (async() => {
     try {
-      const response = await deleteAttachmentQuery({taskId, isSubTask: false})
+      const response = await deleteAttachmentQuery({taskId, isSubTask: false, email: email})
       // @ts-ignore
       if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
               // @ts-ignore
@@ -470,12 +470,14 @@ useEffect(() => {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold">{task?.title} - {task?.code}</h1>
         <div className="flex space-x-4 ml-auto">
-        <button
+        {(task?.status! === "Closed") ? "" : <>
+          <button
             onClick={toggleProgress}
             className="px-4 py-2 text-white rounded-lg bg-black hover:bg-gray-300 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 "
           >
             {isProgressStarted ? 'Pause Progress' : 'Start Progress'}
           </button>
+            </>}
             <Link href={`/projectsDashboard/${projectId}/${task?.code}?email=${email}`}>
             <button className="px-4 py-2 text-gray-900 rounded-lg bg-gray-200 hover:bg-gray-300 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             onClick={() => {

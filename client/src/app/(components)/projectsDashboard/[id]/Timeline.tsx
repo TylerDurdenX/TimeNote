@@ -19,6 +19,8 @@ type taskTypeItems = 'task' | 'milestone' | 'project';
 
 const Timeline = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }: Props) => {
   const email = useSearchParams().get("email")
+  localStorage.removeItem("persist:root");
+  localStorage.removeItem("ally-supports-cache");
 
   const {theme} = useTheme()
 
