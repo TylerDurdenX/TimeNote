@@ -61,6 +61,16 @@ model Screenshots {
   user      User   @relation(fields: [userId], references: [userId])
 }
 
+model Attendance {
+    id       Int     @id @default(autoincrement()) 
+    userId    Int
+    punchInTime   DateTime?
+    punchOutTime    DateTime?
+    date      DateTime
+
+    @@unique([userId, date])
+}
+
 model ProfilePicture {
   id       Int     @id @default(autoincrement()) 
   base64   String  
@@ -338,8 +348,9 @@ model AutoReports {
 
 model Customer {
   id       Int     @id @default(autoincrement()) 
-  Cust_name   String  
+  Cust_name   String  @unique
   Allowed_User_Count String 
   Plan String
+  Field1  String?
 }
 

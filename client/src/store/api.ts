@@ -5,6 +5,7 @@ import {
   AlertCount,
   ConfiguredReports,
   CreateSprint,
+  CreateUserData,
   DownloadAttachment,
   DownloadProjectAttachment,
   GetProjectTasksResponse,
@@ -471,6 +472,14 @@ createBulkTasks: build.mutation<ApiResponse, TaskFormData[]>({
   }), 
   invalidatesTags : ["Tasks", "ProjectHours"]
 }),
+createUser: build.mutation<ApiResponse, CreateUserData>({
+  query: (user)=> ({
+      url: "api/user/signUp",
+      method: "POST",
+      body: user,
+  }), 
+  invalidatesTags : ["UsersList","UserCount"]
+}),
 createTimesheetEntry: build.mutation<ApiResponse, timesheetEntry>({
   query: (timesheetEntry)=> ({
       url: "api/user/createTimesheetEntry",
@@ -749,5 +758,6 @@ export const {
   useCreateTimesheetEntryMutation,
   useGetPendingTimesheetDataQuery,
   useUpdateTimesheetEntryMutation,
-  useGetUsersTimesheetDataQuery
+  useGetUsersTimesheetDataQuery,
+  useCreateUserMutation
 } = api;

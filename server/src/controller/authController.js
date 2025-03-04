@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken'
 import sendEmail from "../utils/email.js";
 import AppError from '../utils/appError.js'
 import bcrypt from 'bcryptjs'
+import { isEmpty } from "../utils/genericMethods.js";
 
 const signToken = (id) => {
   return jwt.sign({id}, process.env.JWT_SECRET, {
@@ -38,33 +39,76 @@ const createSendToken = (user, statusCode, res, message) => {
 }
 
 export const signup = catchAsync(async (req,res, next ) =>{
-    const {email, password, username, phoneNumber, designation} = req.body
-    const existingUser = await prisma.user.findMany({
-        where: {
-          email: email,
-        }
-      });
-    
-    if(existingUser.length>0) return next(new AppError("Email already exists", 500))
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    const newUser = await prisma.user.create({
-      data:{
-        email, password: hashedPassword, username, designation, phoneNumber 
-      }
-    })
-
+    const {email, password, username, phoneNumber, designation, base64Image} = req.body
     try{
-      createSendToken(newUser, 200, res, "Registered Successfully")
-    }catch(err){
-      await prisma.user.delete({
-        where: {
-          email: newUser.email,  
-        },
+      await prisma.$transaction(async (prisma) => {
+
+        const customerData = await prisma.customer.findFirst()
+        const userCount = await prisma.user.count()
+        if(Number(customerData.Allowed_User_Count) === userCount){
+          return next(new AppError("User Limit Reached", 500))
+        }
+
+        const existingUser = await prisma.user.findMany({
+          where: {
+          OR: [
+            { email: email },
+            { username: username }
+          ]
+        }
+        });
+      
+      if(existingUser.length>0) return next(new AppError("Email or Username already exists", 500))
+  
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      if(!isEmpty(base64Image)){
+        const profilePic = await prisma.profilePicture.create({
+          data: {
+            base64: base64Image,
+          }
+        })
+
+        const newUser = await prisma.user.create({
+          data:{
+            email, password: hashedPassword, username, designation, phoneNumber, profilePictureId: profilePic.id
+          }
+        })
+
+        try{
+          createSendToken(newUser, 200, res, "Registered Successfully")
+        }catch(err){
+          await prisma.user.delete({
+            where: {
+              email: newUser.email,  
+            },
+          })
+          console.log(err)
+          return next(new AppError("An error occurred while signing up. Please try again later", 500))
+        }
+      }else{
+        const newUser = await prisma.user.create({
+          data:{
+            email, password: hashedPassword, username, designation, phoneNumber
+          }
+        })
+
+        try{
+          createSendToken(newUser, 200, res, "Registered Successfully")
+        }catch(err){
+          await prisma.user.delete({
+            where: {
+              email: newUser.email,  
+            },
+          })
+          console.log(err)
+          return next(new AppError("An error occurred while signing up. Please try again later", 500))
+        }
+      }
       })
-      console.log(err)
-      return next(new AppError("An error occurred while signing up. Please try again later", 500))
+    }catch(error){
+      console.log(error)
+      return next(new AppError('Some Error Occurred',500))
     }
     
 } )

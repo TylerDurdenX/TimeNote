@@ -42,11 +42,11 @@ const Navbar = () => {
   sessionStorage.setItem("userRoles", alertCountData?.roles || "")
 
   return (
-    <div className="flex justify-between bg-white px-4 h-auto dark:bg-black">
+    <div className="flex justify-between bg-white px-4 h-full dark:bg-black">
       
 
       <div className="flex items-center space-x-4 ml-auto">
-      <div className="h-min w-min rounded p-2 mt-1.5">
+      <div className="h-min w-min rounded p-2 mt-1.2">
       <Link href={`/alerts?email=${userEmail}`}>
       <Badge color="error" badgeContent={Number(alertCountData?.count)} max={9}>
         <Bell />
@@ -59,19 +59,19 @@ const Navbar = () => {
           </Button>
         </div>
 
-        <div className="h-min w-min rounded p-2 mt-1.5">
+        <div className="h-min w-min rounded p-2 mt-1.2">
           <User className="h-6 w-6 cursor-pointer dark:text-white" />
         </div>
 
-        <div className="h-min rounded pr-10 mt-1.5">
+        <div className="h-min rounded pr-10 mt-1.2">
           <h2>{data?.availableUsers} / {data?.totalUsers}</h2>
         </div>
 
-        <div className="ml-2 mr-5 hidden min-h-[2em] w-[0.1rem] mt-2 bg-gray-200 md:inline-block"></div>
+        <div className="ml-2 mr-5 hidden min-h-[2em] w-[0.1rem] mt-1.3 bg-gray-200 md:inline-block"></div>
 
         <ModeToggle/>
 
-        <div className="h-min w-min pr-6 rounded mt-1.5 p-2 hover:bg-gray-100">
+        <div className="h-min w-min pr-6 rounded mt-1.2 p-2 hover:bg-gray-100">
           <SheetDemo />
         </div>
       </div>

@@ -18,9 +18,13 @@ import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTra
 import {createAutoReportConfig, deleteAutoReportConfig, getAutoReportConfig } from "../controller/reportsController/controller.js";
 import { deleteAlert, getAlerts } from "../controller/alertController/alertController.js";
 import { createTimesheetEntry, getPendingTimesheetData, getTimesheetData, getUsersTimesheetData, updateTimesheet } from "../controller/timesheetController/timesheetController.js";
-
+import { updateCustomerData } from "../middleware/customerController.js";
+import { authenticateThirdParty } from "../middleware/generateToken.js";
+import { updateAttendance } from "../controller/attendanceController/attendanceController.js";
+import { signInUser } from "../controller/thirdPartyController/thirdPartyController.js";
 const router = express.Router();
 
+router.post("/customerDataUpdate",authenticateThirdParty, updateCustomerData);
 router.post("/signUp", signup);
 router.post("resend-otp", resendOtp);
 router.post("/login", login);
@@ -93,6 +97,11 @@ router.post("/createTimesheetEntry",isAuthenticated, createTimesheetEntry)
 router.get("/getPendingTimesheetData",isAuthenticated, getPendingTimesheetData)
 router.patch("/updateTimesheet",isAuthenticated, updateTimesheet)
 router.get("/getUsersTimesheetData",isAuthenticated, getUsersTimesheetData)
+
+
+// Third party requests
+router.post("/updateAttendance",authenticateThirdParty, updateAttendance);
+router.post("/signInUser",authenticateThirdParty, signInUser);
 
 
 export default router;

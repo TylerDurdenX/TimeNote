@@ -22,7 +22,6 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                     date: getTodayDateInISO(new Date(date))
             }
         })         
-        console.log(timesheetDataList)
 
         let formattedTime = ''
         let totalMinutes = 0;
@@ -68,32 +67,20 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
   function updateTimesheetData(inputString,updatedEntry, approveRejectFlag) {
     let objectsString = inputString;
 
-    // New object with updated fields that you want to place in the list
     let newObject = updatedEntry
-    console.log('-----------')
-    console.log(updatedEntry)
 
-    // 1. Parse the comma-separated string into an array of objects
     let objectsArray = parseData(objectsString);
-    console.log(objectsArray)
 
-    // 2. Find the exact match for the object (whole object)
     let objectIndex = objectsArray.findIndex(obj => 
         obj.task === newObject.task && obj.consumedHours === newObject.consumedHours && obj.approvalStatus === newObject.approvalStatus
     );
-    console.log(objectIndex)
 
     if (objectIndex !== -1) {
-        // 3. Update the object manually (for example, updating the 'age' field)
-        objectsArray[objectIndex].approvalStatus = 'NA';  // Manually updating the age field
+        objectsArray[objectIndex].approvalStatus = 'NA'; 
     }
 
-    console.log(objectsArray)
-
-    // 4. Rebuild the comma-separated string
     let updatedObjectsString = objectsArray.map(obj => JSON.stringify(obj)).join(', ');
 
-    console.log(updatedObjectsString); // The updated comma-separated objects string
     return updatedObjectsString
   }
 
@@ -276,7 +263,6 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             }
         })
 
-        console.log(timesheetData)
         // let resultList = []
         // timesheetData.map((timesheet) => {
         //   if(timesheet.ApprovedFlag === "NO"){

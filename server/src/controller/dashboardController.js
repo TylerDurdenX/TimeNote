@@ -111,9 +111,7 @@ export const getAlertCount = catchAsync(async (req, res, next) => {
         }
       });
 
-      console.log(user.roles)
       let roleList = []
-
       user.roles.map((role) => {
         roleList.push(role.code)
       })

@@ -351,6 +351,15 @@ export interface TaskFormData {
     projectId: number
 };
 
+export interface CreateUserData {
+    username: string,
+    email: string,
+    designation: string,
+    password: string,
+    phoneNumber: string
+    base64Image: string | null
+}
+
 export interface SubTaskFormData{
     title: string
     description: string,

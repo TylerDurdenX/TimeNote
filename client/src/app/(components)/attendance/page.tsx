@@ -1,5 +1,6 @@
 import Header from '@/components/Header'
 import React from 'react'
+import { AttendancePC } from '../Dashboard/AttendancePC'
 
 type Props = {}
 
@@ -12,11 +13,16 @@ const page = (props: Props) => {
             name="Attendance"
             hasFilters={false}
             hasTeamFilter={false}
+            buttonName='Add User'
           />
         </div>
       </div>
       <div className="flex justify-center items-center min-h-screen w-full">
-        
+        <div className="p-4">
+                      <div>
+                        <AttendancePC/>
+                      </div>
+                    </div>
       </div>
     </div>
   )

@@ -50,7 +50,7 @@ export  const authenticateThirdParty = (req, res, next) => {
   
       // Attach the decoded user info to the request for further processing
       req.thirdParty = decoded;
-      res.status(200).json("success")
+      next()
     } catch (error) {
         console.log(error)
       return next(new AppError('Invalid or expired token', 401)); // Unauthorized
