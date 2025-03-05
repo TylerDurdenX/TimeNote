@@ -33,7 +33,8 @@ export const signInUser = catchAsync(async(req,res, next) => {
             return next(new AppError('Incorrect email or password', 400))
           }
 
-          const customerData = await prisma.customer.findFirst()        
+          const customerData = await prisma.customer.findFirst()  
+          console.log(customerData.Allowed_User_Count)      
           let result 
           if(user.profilePicture){
             result = {
@@ -43,8 +44,8 @@ export const signInUser = catchAsync(async(req,res, next) => {
                 stack: null,
                 username: user.username,
                 designation: user.designation,
-                base64: user.profilePicture.base64,
-                orgLogoBase64: customerData.base64 || ""
+                dpBase64: user.profilePicture.base64,
+                orgLogoBase64: customerData.logoBase64 || ''
             }
           }else{
             result = {
@@ -55,7 +56,7 @@ export const signInUser = catchAsync(async(req,res, next) => {
                 username: user.username,
                 designation: user.designation,
                 dpBase64: '',
-                orgLogoBase64: customerData.base64 || ""
+                orgLogoBase64: customerData.logoBase64 || ''
             }
           }
       
