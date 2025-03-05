@@ -21,11 +21,11 @@ import { createTimesheetEntry, getPendingTimesheetData, getTimesheetData, getUse
 import { updateCustomerData } from "../middleware/customerController.js";
 import { authenticateThirdParty } from "../middleware/generateToken.js";
 import { updateAttendance } from "../controller/attendanceController/attendanceController.js";
-import { signInUser } from "../controller/thirdPartyController/thirdPartyController.js";
+import { signInUser, signupTP } from "../controller/thirdPartyController/thirdPartyController.js";
 const router = express.Router();
 
 router.post("/customerDataUpdate",authenticateThirdParty, updateCustomerData);
-router.post("/signUp", signup);
+router.post("/signUp",isAuthenticated, signup);
 router.post("resend-otp", resendOtp);
 router.post("/login", login);
 router.post("/logout", logout);
@@ -102,6 +102,7 @@ router.get("/getUsersTimesheetData",isAuthenticated, getUsersTimesheetData)
 // Third party requests
 router.post("/updateAttendance",authenticateThirdParty, updateAttendance);
 router.post("/signInUser",authenticateThirdParty, signInUser);
+router.post("/signUpTP", authenticateThirdParty, signupTP )
 
 
 export default router;

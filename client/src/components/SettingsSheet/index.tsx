@@ -103,19 +103,19 @@ export function SheetDemo() {
     <Sheet>
       <SheetTrigger asChild>
         <button>
-          <Settings className="h-6 w-6  mt-2 cursor-pointer dark:text-white" />
+          <Settings className="h-6 w-6  mt-2 cursor-pointer dark:text-white"/>
         </button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Settings</SheetTitle>
           <SheetDescription>
-            Make changes to your profile here.
+            Make changes to your profile picture here.
           </SheetDescription>
         </SheetHeader>
         <div className="flex items-center mt-3 gap-5 border-y-[1.5px] border-gray-200 px-8 py-4 dark:border-gray-700">
           <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger>
+            {/* <PopoverTrigger> */}
               <button className="cursor-pointer">
                 <Avatar className="h-20 w-20 rounded-full justify-center items-center">
                   <AvatarImage
@@ -127,8 +127,8 @@ export function SheetDemo() {
                   </AvatarFallback>
                 </Avatar>
               </button>
-            </PopoverTrigger>
-            <PopoverContent className="flex flex-col p-2 rounded-lg shadow-lg bg-white min-w-[200px]">
+            {/* </PopoverTrigger> */}
+            <PopoverContent className="flex flex-col p-2 rounded-lg shadow-lg bg-white min-w-[200px]" style={{ zIndex: 1000 }}>
               <button
                 className="flex items-center justify-start w-full p-3 rounded-md hover:bg-gray-200 focus:outline-none transition duration-200"
                 onClick={() => document.getElementById("fileInput")?.click()}
@@ -137,13 +137,48 @@ export function SheetDemo() {
                   Change Profile Picture
                 </Typography>
               </button>
-              <AlertDialog>
+              
+            </PopoverContent>
+          </Popover>
+
+          {/* Hidden file input */}
+          <input
+            type="file"
+            id="fileInput"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageSelect}
+          />
+          <div>
+            <h3 className="font-bold text-md tracking-wide dark:text-gray-200">
+              {user.name}
+            </h3>
+            <div className="mt-1 flex items-start gap-2">
+              <p className="text-sx text-gray-500">{user.email}</p>
+            </div>
+          </div>
+        </div>
+        <div className="grid gap-4 py-1">
+        </div>
+        <div className="flex justify-center items-center h-20 rounded-lg">
+  <div className="flex gap-1"> {/* Side-by-side layout */}
+    {/* Update Picture Button */}
+    <button
+      className="w-44 bg-blue-800 text-white rounded-lg shadow-lg hover:bg-blue-600 transform transition duration-300 ease-in-out hover:scale-105 focus:outline-none"
+      onClick={() => document.getElementById("fileInput")?.click()}
+    >
+      Update Profile Picture
+    </button>
+
+    {/* Remove Picture Button */}
+    <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="flex items-center justify-start w-full p-3 rounded-md hover:bg-gray-200 focus:outline-none transition duration-200">
-                    <Typography className="text-primary">
-                      Remove Profile Picture
-                    </Typography>
-                  </button>
+                <button
+      className="w-44 py-3 bg-blue-800 text-white rounded-lg shadow-lg hover:bg-blue-600 transform transition duration-300 ease-in-out hover:scale-105 focus:outline-none"
+      
+    >
+      Remove Profile Picture
+    </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
@@ -166,30 +201,12 @@ export function SheetDemo() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </PopoverContent>
-          </Popover>
 
-          {/* Hidden file input */}
-          <input
-            type="file"
-            id="fileInput"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageSelect}
-          />
-          <div>
-            <h3 className="font-bold text-md tracking-wide dark:text-gray-200">
-              {user.name}
-            </h3>
-            <div className="mt-1 flex items-start gap-2">
-              <p className="text-sx text-gray-500">{user.email}</p>
-            </div>
-          </div>
-        </div>
-        <div className="grid gap-4 py-4">
-        </div>
-        <DialogDemo />
-        <CreateRole/>
+  </div>
+</div>
+
+        {/* <DialogDemo />
+        <CreateRole/> */}
         
       </SheetContent>
     </Sheet>

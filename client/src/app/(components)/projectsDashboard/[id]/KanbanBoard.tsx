@@ -333,7 +333,7 @@ const TaskColumn = ({
               {tasksCount}
             </span>
           </h3>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1  overflow-auto">
             {status === "To Do" ? (
               <>
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -351,16 +351,16 @@ const TaskColumn = ({
                     <DialogHeader>
                       <DialogTitle className="font-semibold text-lg">Create Task</DialogTitle>
                     </DialogHeader>
-                    <Tabs defaultValue="alerts" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 w-[400px] h-[46px]">
+                    <Tabs defaultValue="alerts" className="w-full  overflow-auto">
+            <TabsList className="grid w-full grid-cols-2 w-[400px] h-[46px]  overflow-auto">
               <TabsTrigger value="Manual" className="font-semibold text-lg">Create Manually</TabsTrigger>
               <TabsTrigger value="Upload" className="font-semibold text-lg ">Upload Excel</TabsTrigger>
             </TabsList>
             <div className="mt-2 mb-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
 
-            <TabsContent value="Manual" className="w-full">
+            <TabsContent value="Manual" className="w-full  overflow-auto">
               <div
-                      className="relative w-full h-full overflow-hidden"
+                      className="relative w-full h-full overflow-auto"
                       style={{
                         paddingTop: "42.575%",
                       }}
@@ -512,7 +512,7 @@ const TaskColumn = ({
                       </div>
                     </div>
             </TabsContent>
-            <TabsContent value="Upload">
+            <TabsContent value="Upload" className=" overflow-auto">
               <Card>
                 <CardHeader>
                   <CardDescription>Bulk Create Tasks</CardDescription>

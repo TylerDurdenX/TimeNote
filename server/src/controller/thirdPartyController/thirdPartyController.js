@@ -3,6 +3,8 @@ import SuccessResponse from "../../utils/SuccessResponse.js";
 import AppError from "../../utils/appError.js";
 import bcrypt from 'bcryptjs'
 import { prisma } from "../../server.js";
+import { isEmpty } from "../../utils/genericMethods.js";
+import { createSendToken } from "../authController.js";
 
 export const signInUser = catchAsync(async(req,res, next) => {
     const {email,password} = req.body
@@ -30,7 +32,8 @@ export const signInUser = catchAsync(async(req,res, next) => {
           if(!isPasswordValid){
             return next(new AppError('Incorrect email or password', 400))
           }
-        
+
+          const customerData = await prisma.customer.findFirst()        
           let result 
           if(user.profilePicture){
             result = {
@@ -40,7 +43,8 @@ export const signInUser = catchAsync(async(req,res, next) => {
                 stack: null,
                 username: user.username,
                 designation: user.designation,
-                base64: user.profilePicture.base64
+                base64: user.profilePicture.base64,
+                orgLogoBase64: customerData.base64 || ""
             }
           }else{
             result = {
@@ -50,7 +54,8 @@ export const signInUser = catchAsync(async(req,res, next) => {
                 stack: null,
                 username: user.username,
                 designation: user.designation,
-                base64: ''
+                dpBase64: '',
+                orgLogoBase64: customerData.base64 || ""
             }
           }
       
@@ -63,3 +68,74 @@ export const signInUser = catchAsync(async(req,res, next) => {
     }
   
   })
+
+
+  export const signupTP = catchAsync(async (req,res, next ) =>{
+    const {email, password, username, phoneNumber, designation, roles} = req.body
+    try{
+      await prisma.$transaction(async (prisma) => {
+
+        const customerData = await prisma.customer.findFirst()
+        const userCount = await prisma.user.count()
+        if(Number(customerData.Allowed_User_Count) === userCount){
+          return next(new AppError("User Limit Reached", 500))
+        }
+
+        const existingUser = await prisma.user.findMany({
+          where: {
+          OR: [
+            { email: email },
+            { username: username }
+          ]
+        }
+        });
+      
+      if(existingUser.length>0) return next(new AppError("Email or Username already exists", 500))
+  
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+        const newUser = await prisma.user.create({
+          data:{
+            email, password: hashedPassword, username, designation, phoneNumber
+          }
+        })
+
+        if(roles.length > 0){
+          const dbRoles = await prisma.role.findMany({
+            where: {
+              code: {
+                in: roles,
+              },
+            },
+          });
+  
+          await prisma.user.update({
+            where: { email: email },
+            data: {
+              roles: {
+                connect: dbRoles.map((role) => ({ id: role.id })),
+              },
+            },
+          });
+        }
+       
+
+        try{
+          createSendToken(newUser, 200, res, "Registered Successfully")
+        }catch(err){
+          await prisma.user.delete({
+            where: {
+              email: newUser.email,  
+            },
+          })
+          console.log(err)
+          return next(new AppError("An error occurred while signing up. Please try again later", 500))
+        }
+      
+      })
+    }catch(error){
+      console.log(error)
+      return next(new AppError('Some Error Occurred',500))
+    }
+    
+} )

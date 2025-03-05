@@ -344,30 +344,30 @@ useEffect(() => {
   const [updateTask, { isLoading: isLoadingUpdateTask }] =
       useUpdateTaskMutation();
 
-  const handleSaveChanges = async (event: React.FormEvent) => {
-    event.preventDefault();
+  // const handleSaveChanges = async (event: React.FormEvent) => {
+  //   event.preventDefault();
 
-    // Prepare the form data to submit
-    const updateTaskData = {
-      taskId: taskId,
-      taskPoints: editedText,
-      assignee: assignee,
-      taskDescription: description,
-    };
-    try {
-      const response = await updateTask(updateTaskData);
-      // @ts-ignore
-      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
-              // @ts-ignore
-              toast.error(response.error?.data.message)
-            }else{
-              toast.success(response.data?.message);
-            }
-    } catch (err: any) {
-      toast.error(err.data.message);
-      console.error("Error creating role:", err.data.Message);
-    }
-  };
+  //   // Prepare the form data to submit
+  //   const updateTaskData = {
+  //     taskId: taskId,
+  //     taskPoints: editedText,
+  //     assignee: assignee,
+  //     taskDescription: description,
+  //   };
+  //   try {
+  //     const response = await updateTask(updateTaskData);
+  //     // @ts-ignore
+  //     if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+  //             // @ts-ignore
+  //             toast.error(response.error?.data.message)
+  //           }else{
+  //             toast.success(response.data?.message);
+  //           }
+  //   } catch (err: any) {
+  //     toast.error(err.data.message);
+  //     console.error("Error creating role:", err.data.Message);
+  //   }
+  // };
 
 
   const toggleProgress = async () => {
@@ -522,7 +522,7 @@ useEffect(() => {
                 {/* Display the text */}
                 <div
                   className="flex items-center"
-                  onMouseEnter={() => setIsHovered(true)} // Trigger hover enter
+                  onMouseEnter={() => setIsHovered(false)} // Trigger hover enter
                   onMouseLeave={() => setIsHovered(false)} // Trigger hover leave
                 >
                   <span className="cursor-pointer">
@@ -571,7 +571,7 @@ useEffect(() => {
                 {/* Display the text */}
                 <div
                   className="flex items-center"
-                  onMouseEnter={() => setIsAssigneeHovered(true)}
+                  onMouseEnter={() => setIsAssigneeHovered(false)}
                   onMouseLeave={() => setIsAssigneeHovered(false)} // Trigger hover leave
                 >
                   <span className="cursor-pointer">Assignee: {assignee}</span>
@@ -625,7 +625,7 @@ useEffect(() => {
           ) : (
             <div
               className="flex items-center"
-              onMouseEnter={() => setIsDescriptionHovered(true)}
+              onMouseEnter={() => setIsDescriptionHovered(false)}
               onMouseLeave={() => setIsDescriptionHovered(false)}
             >
               <p className="text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -648,7 +648,7 @@ useEffect(() => {
         </div>
 
         <div className="flex justify-end">
-          <button
+          {/* <button
             onClick={handleSaveChanges}
             disabled={!isSaveButtonEnabled} 
             className={`mt-2 bg-gray-900 text-white py-2 px-4 rounded-md hover:bg-gray-700 ${
@@ -656,7 +656,7 @@ useEffect(() => {
             }`}
           >
             Save Changes
-          </button>
+          </button> */}
         </div>
       </div>
 

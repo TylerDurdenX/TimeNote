@@ -13,7 +13,7 @@ const signToken = (id) => {
   })
 }
 
-const createSendToken = (user, statusCode, res, message) => {
+export const createSendToken = (user, statusCode, res, message) => {
   const token = signToken(user.userId)
 
   const cookieOptions = {

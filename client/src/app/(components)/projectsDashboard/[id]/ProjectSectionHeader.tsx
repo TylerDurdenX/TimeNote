@@ -81,7 +81,7 @@ const ProjectSectionHeader = ({
         >
           {name}
         </h1>
-      <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
+      <div className="flex items-center space-x-4 mr-5 overflow-auto">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <button className="flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-500">
@@ -89,13 +89,13 @@ const ProjectSectionHeader = ({
               {buttonName}
             </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] max-h-[27vw]">
+          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] max-h-[29vw] overflow-auto">
             <DialogHeader>
               <DialogTitle className="mb-2">Create Sprint</DialogTitle>
             </DialogHeader>
 
             <div
-              className="relative w-full h-full overflow-hidden"
+              className="relative w-full h-full overflow-auto"
               style={{
                 paddingTop: "38.575%",
               }}

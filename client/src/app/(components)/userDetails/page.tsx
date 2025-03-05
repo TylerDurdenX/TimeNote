@@ -24,7 +24,7 @@ const Page = () => {
               name="User Details"
               hasFilters={false}
               hasTeamFilter={false}
-              
+              buttonName="Create User"
             />
           </div>
         </div>

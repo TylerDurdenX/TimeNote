@@ -174,6 +174,9 @@ const Header = ({
     }
   };
 
+  const roles = sessionStorage.getItem('userRoles') || ""
+  const [ADMINUser, setADMINUser] = useState(roles.split(',').includes('ADMIN'))
+
   return (
     <div className="flex relative w-full pl-5 h-[20px] mb-1 items-center justify-between">
       <h1 className={`${isSmallText ? 'text-lg' : 'text-2xl'} font-semibold dark:text-white flex items-center`}>
@@ -208,7 +211,7 @@ const Header = ({
           </Button>
         </div>
       )}
-      {(buttonName ! == null) ? <>
+      {(buttonName === "Create User" && ADMINUser) ? <>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <button className="flex items-center rounded-md bg-blue-800 px-3 py-2 text-white hover:bg-blue-500 mr-7">

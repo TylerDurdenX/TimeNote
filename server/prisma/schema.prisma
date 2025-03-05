@@ -352,5 +352,6 @@ model Customer {
   Allowed_User_Count String 
   Plan String
   Field1  String?
+  logoBase64  String?
 }
 

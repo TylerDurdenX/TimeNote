@@ -93,7 +93,7 @@ const Page = () => {
                         </div>
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[90vw] lg:max-w-[90vw]">
+                    <DialogContent className="sm:max-w-[90vw] lg:max-w-[90vw]  overflow-auto">
                       <DialogHeader>
                         <DialogTitle>{card.username}</DialogTitle>
                       </DialogHeader>

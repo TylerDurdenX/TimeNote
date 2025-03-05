@@ -95,7 +95,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
         <PresentationIcon className='mr-2' />
         {name} 
       </h1>
-      <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
+      <div className="flex items-center space-x-4 mr-5 overflow-auto">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <button className="flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-500">
@@ -103,7 +103,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
               {buttonName}
             </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] h-[28vw]">
+          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] h-[28vw] overflow-auto">
             <DialogHeader>
               <DialogTitle className="mb-2">Create Project</DialogTitle>
             </DialogHeader>

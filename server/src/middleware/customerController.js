@@ -4,7 +4,7 @@ import { prisma } from "../server.js";
 import SuccessResponse from "../utils/SuccessResponse.js";
 
   export const updateCustomerData = catchAsync(async (req, res, next) => {
-    const {customerName, allowedUserCount, plan} = req.body;
+    const {customerName, allowedUserCount, plan, base64} = req.body;
 
     try {
       await prisma.$transaction(async (prisma) => {
@@ -16,12 +16,14 @@ import SuccessResponse from "../utils/SuccessResponse.js";
             update:{
               Cust_name: customerName,
               Plan: plan,
-              Allowed_User_Count: String(allowedUserCount)
+              Allowed_User_Count: String(allowedUserCount),
+              logoBase64: base64
             },
             create: {
               Cust_name: customerName,
               Plan: plan,
               Allowed_User_Count: String(allowedUserCount),
+              logoBase64: base64
             }
           })
        
