@@ -58,35 +58,48 @@ export function SheetDemo() {
   const router = useRouter();
   const removeProfilePicture = async () => {
     try {
-      const res = await updateProfilePic({
+      const response = await updateProfilePic({
         email: userEmail!,
         base64: "",
-      }).unwrap();
-      console.log(res);
-      if (Number(res.status) === 401) {
-        dispatch(setAuthUser(null));
+      });
+      // if (Number(res.status) === 401) {
+      //   dispatch(setAuthUser(null));
 
-        router.push("/");
+      //   router.push("/");
 
-        toast.success("Session Timeout, Please log in again!");
-      }
-      toast.success("Profile Picture Removed Successfully!");
+      //   toast.success("Session Timeout, Please log in again!");
+      // }
+
+             // @ts-ignore
+            if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+               // @ts-ignore
+               toast.error(response.error?.data.message)
+             }else{
+               toast.success(response.data?.message);
+             }
     } catch (error) {
       toast.error("Some Error occurred");
       console.log(error);
     }
     setOpen(false);
   };
-  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; // Get the selected file
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         if (typeof reader.result === "string") {
           try {
-            updateProfilePic({ email: userEmail!, base64: reader.result! });
-            toast.success("Profile Picture Updated!");
-            setBase64Image(reader.result);
+            const response = await updateProfilePic({ email: userEmail!, base64: reader.result! });
+            // @ts-ignore
+            if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+              // @ts-ignore
+              toast.error(response.error?.data.message)
+            }else{
+              toast.success(response.data?.message);
+              setBase64Image(reader.result);
+              window.location.reload()
+            }
           } catch (err) {
             toast.error("Some Error occurred");
             console.log(err);
@@ -158,8 +171,6 @@ export function SheetDemo() {
             </div>
           </div>
         </div>
-        <div className="grid gap-4 py-1">
-        </div>
         <div className="flex justify-center items-center h-20 rounded-lg">
   <div className="flex gap-1"> {/* Side-by-side layout */}
     {/* Update Picture Button */}
@@ -167,17 +178,17 @@ export function SheetDemo() {
       className="w-44 bg-blue-800 text-white rounded-lg shadow-lg hover:bg-blue-600 transform transition duration-300 ease-in-out hover:scale-105 focus:outline-none"
       onClick={() => document.getElementById("fileInput")?.click()}
     >
-      Update Profile Picture
+      Update Picture
     </button>
 
     {/* Remove Picture Button */}
     <AlertDialog>
                 <AlertDialogTrigger asChild>
                 <button
-      className="w-44 py-3 bg-blue-800 text-white rounded-lg shadow-lg hover:bg-blue-600 transform transition duration-300 ease-in-out hover:scale-105 focus:outline-none"
+      className="w-44 py-2 bg-blue-800 text-white rounded-lg shadow-lg hover:bg-blue-600 transform transition duration-300 ease-in-out hover:scale-105 focus:outline-none"
       
     >
-      Remove Profile Picture
+      Remove Picture
     </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>

@@ -1,6 +1,7 @@
 import catchAsync from "../utils/catchAsync.js";
 import { prisma } from "../server.js";
 import AppError from "../utils/appError.js";
+import SuccessResponse from "../utils/SuccessResponse.js";
 
 export const getUser = catchAsync(async (req, res, next) => {
   const { email } = req.query;
@@ -53,31 +54,34 @@ export const updateUserProfilePicture = catchAsync(async (req, res, next) => {
         include: { profilePicture: true },
       });
 
-      if (user.profilePictureId === null) {
-        await prisma.profilePicture.create({
-          data: {
-            user: {
-              connect: { userId: user.userId }, // Nested object to connect to the existing user.
+      if(user.pictureModification === null){
+        return next(new AppError('User Not authorized to perform this action',500))
+      }else{
+      if(user.pictureModification === true){
+        if (user.profilePictureId === null) {
+          await prisma.profilePicture.create({
+            data: {
+              user: {
+                connect: { userId: user.userId }, 
+              },
+              base64: base64,
             },
-            base64: base64,
-          },
-        });
+          });
 
-        res.status(200).json({
-          status: "success",
-          message: `Profile picture updated for user : ${user.username}`,
-        });
-      } else {
-        await prisma.profilePicture.update({
-          where: { id: user.profilePicture.id },
-          data: { base64 },
-        });
+          return next(new SuccessResponse('Profile Picture updated successfully',200))
+        } else {
+          await prisma.profilePicture.update({
+            where: { id: user.profilePicture.id },
+            data: { base64 },
+          });
 
-        res.status(200).json({
-          status: "success",
-          message: `Profile picture updated for user : ${user.username}`,
-        });
+          return next(new SuccessResponse('Profile Picture updated successfully',200))
+        }
+      }else{
+        return next(new AppError('User Not authorized to perform this action',500))
       }
+    }
+      
     });
   } catch (error) {
     console.log("Error during updateUserProfilePicture" + error);

@@ -52,16 +52,15 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-screen items-center flex justify-center">
-          <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[700px] h-[445px] bg-no-repeat bg-white text-white flex "/>
-          <div className="absolute bottom-0 right-0 m-16 bg-[url('/circle.svg')] w-[320px] h-[280px] bg-white text-white flex justify-center items-center"/>
-          <div className="absolute top-0 left-0  w-[400px] h-[350px] bg-no-repeat bg-white text-white flex ">
+    <div className="w-full min-h-screen overflow-hidden sm:overflow-auto items-center flex justify-center">
+          <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[70vh] h-[45vh] bg-no-repeat bg-white flex "/>
+          <div className="absolute bottom-0 right-0  bg-[url('/circle.svg')] w-[38vh] h-[34vh] bg-white flex justify-center items-center overflow-hidden"/>
+          <div className="absolute top-0 left-0  w-[350px] h-[350px] bg-no-repeat bg-white text-white flex">
           <img src="/lynklog.png" alt="Description of Image" className="w-180 h-180"></img>
           </div>
           <div className="absolute bottom-0 left-0 mb-2 ml-4 bg-no-repeat bg-white text-white flex "><h2 className="text-indigo-900">Lynk247 a product of Optimize Innovations</h2></div>
 
-{/* <div className="flex w-full h-full max-w-[550px] max-h-[700px] bg-white shadow-[0px_10px_30px_rgba(0,0,0,0.1)] overflow-hidden justify-center items-center rounded-[20px] box-border bg-indigo-100"> */}
-<div className="w-[500px]  flex justify-center absolute top-0 mt-[190px] items-center p-5 bg-white box-border bg-indigo-100 oerflow-hidden">
+          <div className="w-[500px]  flex justify-center absolute top-0 mt-[190px] items-center p-5 bg-white box-border bg-indigo-100 oerflow-hidden">
           <div className="w-full max-w-[350px] text-center">
           <h1 className="mt-[20px] font-bold text-5xl text-indigo-700 font-nunito">Login</h1>
             <h1 className="mt-[20px] mb-[20px] text-xl">Welcome to <span className="text-indigo-900 text-2xl">Lynk24<span className="text-indigo-900 text-xl">7</span>!</span></h1>
@@ -120,7 +119,6 @@ const App: React.FC = () => {
               )}
             </form>
           </div>
-        {/* </div> */}
       </div>
       
     </div>
