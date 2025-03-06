@@ -51,6 +51,52 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
     }
   });
 
+  export const viewTimesheetData = catchAsync(async (req, res, next) => {
+    const { name, date} = req.query;
+    try {
+      await prisma.$transaction(async (prisma) => {
+
+        const user = await prisma.user.findFirst({
+          where: {
+            username: name
+          }
+        })
+  
+        const timesheetDataList = await prisma.timesheet.findMany({
+            where: {
+                    userId: user.userId,
+                    date: getTodayDateInISO(new Date(date))
+            }
+        })         
+        console.log(getTodayDateInISO(new Date(date)))
+        let formattedTime = ''
+        let totalMinutes = 0;
+
+        if(!isEmpty(timesheetDataList)){
+          timesheetDataList.map((timesheet) => {
+            const [hours, minutes] = timesheet.consumedHours.split(':').map(Number);
+            totalMinutes += hours * 60 + minutes;
+          })
+        }
+        
+        const totalHours = Math.floor(totalMinutes / 60); 
+        const remainingMinutes = totalMinutes % 60; 
+
+        formattedTime = `${totalHours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}`;
+
+        const result = {
+          timesheetDataList : timesheetDataList,
+          totalTime: formattedTime
+        }
+
+        return res.status(200).json(result)
+      })
+    } catch (error) {
+      console.log('Error during getTimesheetData' + error)
+      return next(new AppError('Error during getting Timesheet Entries',200))
+    }
+  });
+
   function getTodayDateInISO(date) {
     
     const year = date.getFullYear();
@@ -221,7 +267,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
               acc.push({
                 userId: current.userId,
                 username: current.username,
-                totalMinutes: currentMinutes
+                totalMinutes: currentMinutes,
               });
             }
             return acc;
@@ -233,7 +279,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
               id: index + 1,  // Use the index + 1 to generate unique ids for each user
               consumedHours: minutesToTime(user.totalMinutes),
               userId: user.userId,
-              username: user.username
+              username: user.username,
             };
           });
 

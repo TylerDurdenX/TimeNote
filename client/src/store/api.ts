@@ -3,6 +3,8 @@ import {
   AddComment,
   Alert,
   AlertCount,
+  AttendanceCardLCResponse,
+  AttendanceCardResponse,
   ConfiguredReports,
   CreateSprint,
   CreateUserData,
@@ -510,6 +512,24 @@ getTimesheetData: build.query<TimesheetResponse, { email: string, date: string}>
   },
   providesTags : ["Timesheet"]
 }),
+getAttendanceData: build.query<AttendanceCardResponse, { email: string, title: string}>({
+  query: ({ email,title}) => {
+    const url = `api/user/getAttendanceData?email=${email}&title=${title}`;
+    return url;
+  },
+}),
+getAttendanceLineChartData: build.query<AttendanceCardLCResponse[], { email: string, title: string}>({
+  query: ({ email,title}) => {
+    const url = `api/user/getAttendanceLCData?email=${email}&title=${title}`;
+    return url;
+  },
+}),
+viewTimesheetData: build.query<TimesheetResponse, { name: string, date: string}>({
+  query: ({ name,date}) => {
+    const url = `api/user/viewTimesheetData?name=${name}&date=${date}`;
+    return url;
+  },
+}),
 getPendingTimesheetData: build.query<PendingTimesheetResponse[], { email: string, date: string}>({
   query: ({ email,date}) => {
     const url = `api/user/getPendingTimesheetData?email=${email}&date=${date}`;
@@ -759,5 +779,8 @@ export const {
   useGetPendingTimesheetDataQuery,
   useUpdateTimesheetEntryMutation,
   useGetUsersTimesheetDataQuery,
-  useCreateUserMutation
+  useCreateUserMutation,
+  useViewTimesheetDataQuery,
+  useGetAttendanceDataQuery,
+  useGetAttendanceLineChartDataQuery
 } = api;

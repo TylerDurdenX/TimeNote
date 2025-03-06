@@ -69,7 +69,7 @@ const Navbar = () => {
 
         <div className="ml-2 mr-5 hidden min-h-[2em] w-[0.1rem] mt-1.3 bg-gray-200 md:inline-block"></div>
 
-        <ModeToggle/>
+        {/* <ModeToggle/> */}
 
         <div className="h-min w-min pr-6 rounded mt-1.2 p-2 hover:bg-gray-100">
           <SheetDemo />

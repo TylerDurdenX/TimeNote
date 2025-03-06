@@ -42,7 +42,8 @@ const App: React.FC = () => {
       const user = response.data.data.user;
       toast.success("Login Successful");
       dispatch(setAuthUser(user));
-      router.push(`/Dashboard?email=${encodeURIComponent(formData.email)}`);
+      //router.push(`/Dashboard?email=${encodeURIComponent(formData.email)}`);
+      router.push(`/attendance?email=${encodeURIComponent(formData.email)}`)
     } catch (error: any) {
       toast.error(error.response.data.message);
       console.log(error);

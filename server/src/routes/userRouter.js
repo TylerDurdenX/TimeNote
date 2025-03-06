@@ -17,10 +17,10 @@ import { addscreenshots, getScreenshots } from "../controller/LiveTracking/scree
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 import {createAutoReportConfig, deleteAutoReportConfig, getAutoReportConfig } from "../controller/reportsController/controller.js";
 import { deleteAlert, getAlerts } from "../controller/alertController/alertController.js";
-import { createTimesheetEntry, getPendingTimesheetData, getTimesheetData, getUsersTimesheetData, updateTimesheet } from "../controller/timesheetController/timesheetController.js";
+import { createTimesheetEntry, getPendingTimesheetData, getTimesheetData, getUsersTimesheetData, updateTimesheet, viewTimesheetData } from "../controller/timesheetController/timesheetController.js";
 import { updateCustomerData } from "../middleware/customerController.js";
 import { authenticateThirdParty } from "../middleware/generateToken.js";
-import { updateAttendance } from "../controller/attendanceController/attendanceController.js";
+import { getAttendanceData, getAttendanceLCData, updateAttendance } from "../controller/attendanceController/attendanceController.js";
 import { signInUser, signupTP } from "../controller/thirdPartyController/thirdPartyController.js";
 const router = express.Router();
 
@@ -92,11 +92,13 @@ router.get("/downloadProjectAttachment",isAuthenticated, downloadProjectAttachme
 router.post("/createBulkTasks",isAuthenticated, createBulkTasks)
 router.get("/getTaskActivity",isAuthenticated, getTaskActivity)
 router.get("/getTimesheetData",isAuthenticated, getTimesheetData)
+router.get("/viewTimesheetData",isAuthenticated, viewTimesheetData)
 router.post("/createTimesheetEntry",isAuthenticated, createTimesheetEntry)
 router.get("/getPendingTimesheetData",isAuthenticated, getPendingTimesheetData)
 router.patch("/updateTimesheet",isAuthenticated, updateTimesheet)
 router.get("/getUsersTimesheetData",isAuthenticated, getUsersTimesheetData)
-
+router.get("/getAttendanceData",isAuthenticated, getAttendanceData)
+router.get('/getAttendanceLCData', isAuthenticated, getAttendanceLCData)
 
 // Third party requests
 router.post("/updateAttendance",authenticateThirdParty, updateAttendance);

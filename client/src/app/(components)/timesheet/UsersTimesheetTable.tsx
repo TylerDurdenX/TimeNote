@@ -114,9 +114,9 @@ const columns: GridColDef[] = [
                   {formatDate(selectedDate.toString())} - {rowData.username}
                 </DialogTitle>
                 <DialogDescription className="text-gray-700">
-                  <TimesheetDataTable email={email} selectedDate={selectedDate} />
+                  <TimesheetDataTable email={email} selectedDate={selectedDate} name={rowData.username}/>
                 </DialogDescription>
-              </DialogHeader>
+              </DialogHeader> 
   
               <DialogFooter>
                 <Button

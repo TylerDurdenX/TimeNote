@@ -128,19 +128,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: `/attendance?email=${userEmail}`,
         icon: UsersRound,
       },
-      {
-        name: "Productivity",
-        url: `/productivity?email=${userEmail}`,
-        icon: ChartNoAxesCombined,
-      },
+      // {
+      //   name: "Productivity",
+      //   url: `/productivity?email=${userEmail}`,
+      //   icon: ChartNoAxesCombined,
+      // },
     ],
 
     items2: [
-      {
-        name: "Activity",
-        url: `/activity?email=${userEmail}`,
-        icon: ChartCandlestick,
-      },
+      // {
+      //   name: "Activity",
+      //   url: `/activity?email=${userEmail}`,
+      //   icon: ChartCandlestick,
+      // },
       {
         name: "User Details",
         url: `/userDetails?email=${userEmail}`,
@@ -151,11 +151,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: `/alerts?email=${userEmail}`,
         icon: Bell,
       },
-      {
-        name: "Reports",
-        url: `/reports?email=${userEmail}`,
-        icon: FileChartColumnIncreasing,
-      },
+      // {
+      //   name: "Reports",
+      //   url: `/reports?email=${userEmail}`,
+      //   icon: FileChartColumnIncreasing,
+      // },
       {
         name: "Timesheet",
         url: `/timesheet?email=${userEmail}`,
@@ -227,9 +227,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <TeamSwitcher teams={mockData.teams} />
         </SidebarHeader>
         <SidebarContent className="bg-[#001742]">
-          <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/>
-          <NavMain items={items} activeTab={activeTab} setActiveTab={setActiveTab}
-           isItem1Open = {item1Open}/>
+          {/* <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/> */}
+          {/* <NavMain items={items} activeTab={activeTab} setActiveTab={setActiveTab}
+           isItem1Open = {item1Open}/> */}
           <NavProjects projects={mockData.items1} activeTab={activeTab} setActiveTab={setActiveTab}/>
           <NavMain items={mockData.projects} activeTab={activeTab} setActiveTab={setActiveTab}
           isItem1Open = {item2Open} key={item2Open ? "open" : "closed"}/>

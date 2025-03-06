@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { dataGridClassNames, } from "@/lib/utils";
-import { useGetTimesheetDataQuery } from "@/store/api";
+import { useGetTimesheetDataQuery, useViewTimesheetDataQuery } from "@/store/api";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 import { Clock9, PlusSquare } from "lucide-react";
@@ -19,12 +19,13 @@ import { Card } from "@/components/ui/card";
 type Props = {
   email: string;
   selectedDate: Date
+  name: string
 };
 
-const TimesheetDataTable = ({ email , selectedDate}: Props) => {
+const TimesheetDataTable = ({ email , selectedDate, name}: Props) => {
 
-    const { data, isLoading, error, refetch} = useGetTimesheetDataQuery(
-          { email: email!, date: selectedDate.toString()},
+    const { data, isLoading, error, refetch} = useViewTimesheetDataQuery(
+          { name: name, date: selectedDate.toString()},
           { refetchOnMountOrArgChange: true }
         );
 

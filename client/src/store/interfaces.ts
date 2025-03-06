@@ -288,6 +288,16 @@ export interface TimesheetResponse {
     totalTime: string
 }
 
+export interface AttendanceCardResponse {
+    usersCount: number
+    totalUsersCount: number
+}
+
+export interface AttendanceCardLCResponse {
+    date: string
+    count: number
+}
+
 export interface timesheetEntry {
     task: string
     completionPercentage: string
