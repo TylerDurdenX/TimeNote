@@ -1,3 +1,4 @@
+import CircularLoading from "@/components/Sidebar/loading";
 import { getInitials } from "@/components/Sidebar/nav-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {  useGetUsersListQuery } from "@/store/api";
@@ -20,6 +21,11 @@ type Props = {
 
 const UserList = ({ onSelectUser }: Props) => {
   const userEmail = useSearchParams().get("email");
+
+  localStorage.removeItem("persist:root");
+  localStorage.removeItem("ally-supports-cache");
+
+  
   const { data, isLoading, error } = useGetUsersListQuery({
     email: userEmail!,
   },
@@ -38,7 +44,7 @@ const UserList = ({ onSelectUser }: Props) => {
       : [];
       return (
         <Paper className="p-2 flex flex-col items-center h-full">
-          <Box className="flex-1 bg-white rounded-2xl flex flex-col w-full">
+          {isLoading ? <><CircularLoading/></> : <Box className="flex-1 bg-white rounded-2xl flex flex-col w-full">
             <Typography variant="h6" gutterBottom>
               Users List
             </Typography>
@@ -102,7 +108,7 @@ const UserList = ({ onSelectUser }: Props) => {
               )}
 
             </Box>
-          </Box>
+          </Box> }
         </Paper>
       );
 };

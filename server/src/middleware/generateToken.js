@@ -6,19 +6,19 @@ import {prisma} from "../server.js"
 export const generateToken = catchAsync(async (req, res, next) => {
   
     try {
-        const { clientId } = req.body; 
+        const { clientid } = req.headers; 
 
-        if (!clientId) {
+        if (!clientid) {
           return res.status(400).json({ message: 'Client ID is required' });
         }
 
-        if(clientId !== process.env.CLIENT_SECRET){
+        if(clientid !== process.env.CLIENT_SECRET){
             return res.status(400).json({ message: 'Client ID is not valid' });
         }
 
         // Example payload for third-party service
         const payload = {
-          clientId,
+          clientid,
           role: 'third_party_service',  // Define roles based on your use case
         };
       

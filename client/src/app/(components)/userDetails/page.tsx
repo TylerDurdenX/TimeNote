@@ -15,6 +15,9 @@ const Page = () => {
     setUserId(id)
   };
 
+  localStorage.removeItem("persist:root");
+  localStorage.removeItem("ally-supports-cache");
+
   return (
     <>
       <div className="w-full flex flex-col h-full overflow-hidden">
