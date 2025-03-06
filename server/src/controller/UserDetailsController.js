@@ -7,6 +7,7 @@ import SuccessResponse from "../utils/SuccessResponse.js";
 //get list of users form the table
 export const getUsersList = catchAsync(async (req, res, next) => {
   const { email } = req.query;
+  console.log('req received for getting Users List')
   try {
     const result = await prisma.$transaction(async (prisma) => {
 
@@ -35,7 +36,23 @@ export const getUsersList = catchAsync(async (req, res, next) => {
         })
       );
     } else {
-      // Case to be handled in case of other users
+      return res.status(200).json(
+        await prisma.user.findMany({
+          where: {
+            reportsToId: user.userId
+          },
+          select: {
+            userId: true,
+            username: true,
+            designation: true,
+            profilePicture: {
+              select: {
+                base64: true,
+              },
+            },
+          },
+        })
+      );
     }
   })
   } catch (error) {

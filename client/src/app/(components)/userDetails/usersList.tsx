@@ -1,3 +1,5 @@
+'use client'
+
 import CircularLoading from "@/components/Sidebar/loading";
 import { getInitials } from "@/components/Sidebar/nav-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,9 +23,6 @@ type Props = {
 
 const UserList = ({ onSelectUser }: Props) => {
   const userEmail = useSearchParams().get("email");
-
-  localStorage.removeItem("persist:root");
-  localStorage.removeItem("ally-supports-cache");
 
   
   const { data, isLoading, error } = useGetUsersListQuery({
