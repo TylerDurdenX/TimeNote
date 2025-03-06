@@ -16,7 +16,7 @@ export const createRole = catchAsync(async (req, res, next) => {
       .status(400)
       .json({
         message:
-          "Invalid input. Please provide name, code, description, and two authorities.",
+          "Invalid input. Please provide name, code, description, and authorities.",
       });
   }
 

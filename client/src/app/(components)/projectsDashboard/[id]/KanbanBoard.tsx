@@ -86,6 +86,9 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
   const [page, setPage] = useState(1);
   const [loadMoreCunt, setLoadMoreCount] = useState(0)
   const [tasks, setTasks] = useState<any[]>([]);
+
+  localStorage.removeItem("persist:root");
+  localStorage.removeItem("ally-supports-cache");
   
   const {
     data: tasksList,
@@ -147,6 +150,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
                       toast.error(response.error?.data.message)
                     }else{
                       toast.success(response.data?.message);
+                      window.location.reload()
                     }
                   }else{
                     toast.error('Please open the subTask Page for updating SubTask status')
@@ -164,9 +168,6 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
       toast.info('no more tasks to load')
     }
   };
-
-  localStorage.removeItem("persist:root");
-  localStorage.removeItem("ally-supports-cache");
 
   if (isLoading) return <div><CircularLoading/></div>;
   if (error) return <div>An error occurred while fetching tasks</div>;
@@ -575,6 +576,9 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
   const formattedDueDate = task.dueDate
     ? format(new Date(task.dueDate), "P")
     : "";
+
+    localStorage.removeItem("persist:root");
+    localStorage.removeItem("ally-supports-cache");
 
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
   const [closeCompletedTask] = useCloseTaskMutation();

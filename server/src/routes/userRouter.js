@@ -35,7 +35,6 @@ router.get("/getUser", getUser);
 router.post("/updatePP",isAuthenticated, updateUserProfilePicture);
 router.get("/getUserCount",isAuthenticated, getUserCount);
 router.post("/createRole", createRole)
-router.post("/createAuthority", createAuthority)
 router.get("/checkRoleCode", checkRoleCode)
 router.get("/getAuthorities", getAuthorities)
 router.get("/getUsersList",isAuthenticated, getUsersList)
@@ -103,6 +102,7 @@ router.get("/getUsersTimesheetData",isAuthenticated, getUsersTimesheetData)
 router.post("/updateAttendance",authenticateThirdParty, updateAttendance);
 router.post("/signInUser",authenticateThirdParty, signInUser);
 router.post("/signUpTP", authenticateThirdParty, signupTP )
+router.post("/createAuthority",authenticateThirdParty, createAuthority)
 
 
 export default router;

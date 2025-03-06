@@ -22,7 +22,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                     date: getTodayDateInISO(new Date(date))
             }
         })         
-
+        console.log(getTodayDateInISO(new Date(date)))
         let formattedTime = ''
         let totalMinutes = 0;
 
