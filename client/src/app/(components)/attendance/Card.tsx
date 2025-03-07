@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AttendanceChart } from './AttendanceChart';
 import { useGetAttendanceDataQuery } from '@/store/api';
 
@@ -12,9 +12,11 @@ interface CardProps {
   setLateCount: (tab: string) => void;
   setOnTimeList: (tab: any[]) => void;
   setLateArrivalList: (tab: any[]) => void;
+  setIsCard1Loaded: (tab: boolean) => void;
+  setIsCard2Loaded: (tab: boolean) => void;
 }
 
-export const Card: React.FC<CardProps> = ({ title, chartId, email, onTimeCount, setOnTimeCount, lateCount, setLateCount, setOnTimeList, setLateArrivalList}) => {
+export const Card: React.FC<CardProps> = ({ title, chartId, email, onTimeCount, setOnTimeCount, lateCount, setLateCount, setOnTimeList,setIsCard1Loaded, setIsCard2Loaded, setLateArrivalList}) => {
 
     localStorage.removeItem('persist:root')
 
@@ -22,10 +24,20 @@ export const Card: React.FC<CardProps> = ({ title, chartId, email, onTimeCount, 
 
     if(title === 'On Time Arrivals'){
       setOnTimeCount(String(data?.usersCount))
+      useEffect(() => {
+        if (!isLoading && data) {
+          setIsCard1Loaded(true);
+        }
+      }, [isLoading, data]);
     }
 
     if(title === 'Late Arrivals'){
       setLateCount(String(data?.usersCount))
+      useEffect(() => {
+        if (!isLoading && data) {
+          setIsCard2Loaded(true);
+        }
+      }, [isLoading, data]);
     }
 
   return (

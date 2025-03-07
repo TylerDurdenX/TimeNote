@@ -5,6 +5,8 @@ import {
   AlertCount,
   AttendanceCardLCResponse,
   AttendanceCardResponse,
+  AttendanceUserPCResponse,
+  AttendanceUserTableResponse,
   ConfiguredReports,
   CreateSprint,
   CreateUserData,
@@ -518,6 +520,18 @@ getAttendanceData: build.query<AttendanceCardResponse, { email: string, title: s
     return url;
   },
 }),
+getUserAttendanceData: build.query<AttendanceUserPCResponse, { email: string}>({
+  query: ({ email}) => {
+    const url = `api/user/getUserAttendancePCData?email=${email}`;
+    return url;
+  },
+}),
+getUserAttendanceTableData: build.query<AttendanceUserTableResponse[], { email: string}>({
+  query: ({ email}) => {
+    const url = `api/user/getUserAttendanceTableData?email=${email}`;
+    return url;
+  },
+}),
 getAttendanceLineChartData: build.query<AttendanceCardLCResponse[], { email: string, title: string}>({
   query: ({ email,title}) => {
     const url = `api/user/getAttendanceLCData?email=${email}&title=${title}`;
@@ -782,5 +796,7 @@ export const {
   useCreateUserMutation,
   useViewTimesheetDataQuery,
   useGetAttendanceDataQuery,
-  useGetAttendanceLineChartDataQuery
+  useGetAttendanceLineChartDataQuery,
+  useGetUserAttendanceDataQuery,
+  useGetUserAttendanceTableDataQuery
 } = api;

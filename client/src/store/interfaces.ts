@@ -293,6 +293,18 @@ export interface AttendanceCardResponse {
     totalUsersCount: number
 }
 
+export interface AttendanceUserPCResponse {
+    onTimeCount: number
+    lateCount: number
+}
+
+export interface AttendanceUserTableResponse {
+    date: string
+    punchInTime: string,
+    punchOutTime: string,
+    duration: string
+}
+
 export interface AttendanceCardLCResponse {
     date: string
     count: number
