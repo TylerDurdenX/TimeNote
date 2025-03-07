@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { User, Moon, Search, Settings, Sun, AlertCircleIcon, Bell, MailIcon } from "lucide-react";
+import { User, Moon, Search, Settings, Sun, AlertCircleIcon, Bell, MailIcon, ArrowDownToLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApiResponse, useGetAlertsCountQuery, useGetUsersCountQuery } from "@/store/api";
 import { useTheme } from "next-themes";
@@ -54,8 +54,10 @@ const Navbar = () => {
       </Link>
         </div>
               <div className="h-min w-min rounded p-2">
-          <Button className="bg-indigo-600 text-white border-0 p-2.5 rounded-xl w-[120px] text-base cursor-pointer hover:bg-indigo-500">
-            Download
+          <Button className="bg-indigo-600 text-white border-0 p-2.5 rounded-xl w-[120px] text-base cursor-pointer hover:bg-indigo-500"
+          onClick={() => {window.location.href = 'https://lynk247bucket.s3.ap-south-1.amazonaws.com/Lynk247.exe';}}>
+            <ArrowDownToLine/>
+            Lynk 247 
           </Button>
         </div>
 
