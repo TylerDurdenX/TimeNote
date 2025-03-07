@@ -20,7 +20,7 @@ import { deleteAlert, getAlerts } from "../controller/alertController/alertContr
 import { createTimesheetEntry, getPendingTimesheetData, getTimesheetData, getUsersTimesheetData, updateTimesheet, viewTimesheetData } from "../controller/timesheetController/timesheetController.js";
 import { updateCustomerData } from "../middleware/customerController.js";
 import { authenticateThirdParty } from "../middleware/generateToken.js";
-import { getAttendanceData, getAttendanceLCData, getUserAttendanceData, getUserAttendanceTableData, updateAttendance } from "../controller/attendanceController/attendanceController.js";
+import { getAdminRole, getAttendanceData, getAttendanceLCData, getUserAttendanceData, getUserAttendanceTableData, updateAttendance } from "../controller/attendanceController/attendanceController.js";
 import { signInUser, signupTP } from "../controller/thirdPartyController/thirdPartyController.js";
 const router = express.Router();
 
@@ -101,6 +101,8 @@ router.get("/getAttendanceData",isAuthenticated, getAttendanceData)
 router.get('/getAttendanceLCData', isAuthenticated, getAttendanceLCData)
 router.get('/getUserAttendancePCData', getUserAttendanceData)
 router.get('/getUserAttendanceTableData', isAuthenticated, getUserAttendanceTableData)
+router.get('/getAdminRole', isAuthenticated, getAdminRole)
+
 
 // Third party requests
 router.post("/updateAttendance",authenticateThirdParty, updateAttendance);

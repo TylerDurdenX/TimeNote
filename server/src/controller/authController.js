@@ -49,16 +49,31 @@ export const signup = catchAsync(async (req,res, next ) =>{
           return next(new AppError("User Limit Reached", 500))
         }
 
+        const existingUserEmail = await prisma.user.findMany({
+          where:{
+            email: {
+              equals: email,
+              mode: 'insensitive',  // Case-insensitive comparison
+            }
+          }
+        })
+
         const existingUser = await prisma.user.findMany({
           where: {
-          OR: [
-            { email: email },
-            { username: username }
-          ]
-        }
+            AND: [
+              {
+                username: {
+                  equals: username,
+                },
+              },
+            ],
+          },
         });
+
       
-      if(existingUser.length>0) return next(new AppError("Email or Username already exists", 500))
+      if(existingUser.length>0) return next(new AppError("Username already exists", 500))
+      if(existingUserEmail.length>0) return next(new AppError("Email already exists", 500))
+
   
       const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -166,10 +181,14 @@ export const login = catchAsync(async(req,res, next) => {
 
   const user = await prisma.user.findFirst({
     where:{
-      email:email
+      email: {
+        equals: email,
+        mode: 'insensitive',  // Case-insensitive comparison
+      }
     }
   })
 
+  console.log(user)
   if(!user){
     return next(new AppError(`No user exists with the email id : ${email}`, 400))
   }

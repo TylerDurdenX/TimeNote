@@ -11,6 +11,7 @@ import { DualChart } from "./DualChart";
 import CircularLoading from "@/components/Sidebar/loading";
 import { AttendancePCUser } from "./AttendancePCUser";
 import AttendanceTable from "./AttendanceTable";
+import { useGetAdminRoleQuery } from "@/store/api";
 
 const App: React.FC = () => {
 
@@ -46,135 +47,143 @@ if (userRolesList !== undefined && userRolesList !== null && userRolesList !== '
   console.log('userRolesList is undefined or empty');
 }
 
-console.log(Admin);
+const userEmail = useSearchParams().get('email')
+
+const {data, isLoading} = useGetAdminRoleQuery({email: userEmail!}, {refetchOnMountOrArgChange: true})
 
 
-  return (<>{Admin ? 
-    <div className="w-full min-h-screen bg-gray-50">
-    {/* Header Section */}
-    <div className="w-full mb-5">
-      <div className="flex w-full text-gray-900">
-        <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
-          <Header
-            name="Attendance"
-            hasFilters={false}
-            hasTeamFilter={false}
-            buttonName="Add User"
-          />
-        </div>
-      </div>
-    </div>
-
-    <div className="flex gap-2 px-4 ">
-      <div className="w-1/2 p-4 overflow-hidden">
-        <Card
-          title="On Time Arrivals"
-          chartId="onTimeChart"
-          email={email!}
-          onTimeCount={onTimeCount}
-          setOnTimeCount={setonTimeCount}
-          lateCount={lateCount}
-          setLateCount={setLateCount}
-          setOnTimeList={setOnTimeList}
-          setLateArrivalList={setLateArrivalList}
-          setIsCard1Loaded={setIsCard1Loaded}
-          setIsCard2Loaded={setIsCard2Loaded}
-        />
-      </div>  
-      <div className="w-1/2 p-4 overflow-hidden justify-center">
-        <Card
-          title="Late Arrivals"
-          chartId="lateArrivalsChart"
-          email={email!}
-          onTimeCount={onTimeCount}
-          setOnTimeCount={setonTimeCount}
-          lateCount={lateCount}
-          setLateCount={setLateCount}
-          setOnTimeList={setOnTimeList}
-          setLateArrivalList={setLateArrivalList}
-          setIsCard1Loaded={setIsCard1Loaded}
-          setIsCard2Loaded={setIsCard2Loaded}
-        />
-      </div>
-    </div>
-    <div className="grid grid-rows-1 grid-cols-[35%_65%] ">
-      <div className="p-4">
-        <div>
-          {(isCard1Loaded && isCard2Loaded) ? <AttendancePC onTimeCount={onTimeCount} lateCount={lateCount}/> : <CircularLoading/>}
-        </div>
-      </div>
-      <div className="p-4">
-        <div>
-        {(isCard1Loaded && isCard2Loaded && (onTimeList?.length !== 0) && (lateArrivalList?.length !== 0)) ? <DualChart onTimeList={onTimeList!} lateArrivalList={lateArrivalList!}/> : <CircularLoading/>}
-        </div>
-      </div>
-    </div>
-  </div>
-  : <>
-  <div className="w-full min-h-screen bg-gray-50">
-    {/* Header Section */}
-    <div className="w-full mb-5">
-      <div className="flex w-full text-gray-900">
-        <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
-          <Header
-            name="Attendance"
-            hasFilters={false}
-            hasTeamFilter={false}
-            buttonName="Add User"
-          />
-        </div>
-      </div>
-    </div>
-
-    {/* <div className="flex gap-2 px-4 ">
-      <div className="w-1/2 p-4 overflow-hidden">
-        <Card
-          title="On Time Arrivals"
-          chartId="onTimeChart"
-          email={email!}
-          onTimeCount={onTimeCount}
-          setOnTimeCount={setonTimeCount}
-          lateCount={lateCount}
-          setLateCount={setLateCount}
-          setOnTimeList={setOnTimeList}
-          setLateArrivalList={setLateArrivalList}
-          setIsCard1Loaded={setIsCard1Loaded}
-          setIsCard2Loaded={setIsCard2Loaded}
-        />
-          </div>  
-      <div className="w-1/2 p-4 overflow-hidden justify-center">
-        <Card
-          title="Late Arrivals"
-          chartId="lateArrivalsChart"
-          email={email!}
-          onTimeCount={onTimeCount}
-          setOnTimeCount={setonTimeCount}
-          lateCount={lateCount}
-          setLateCount={setLateCount}
-          setOnTimeList={setOnTimeList}
-          setLateArrivalList={setLateArrivalList}
-          setIsCard1Loaded={setIsCard1Loaded}
-          setIsCard2Loaded={setIsCard2Loaded}
-        />
-      </div>
-    </div> */}
-    <div className="grid grid-rows-1 grid-cols-[35%_65%] ">
-      <div className="p-4">
-        <div>
-          <AttendancePCUser/>
-          {/* {(isCard1Loaded && isCard2Loaded) ? <AttendancePC onTimeCount={onTimeCount} lateCount={lateCount}/> : <CircularLoading/>} */}
-        </div>
-      </div>
-      <div className="p-4">
-        <div className="h-full overflow-hidden">
-          <AttendanceTable email={email!}/>
-        {/* {(isCard1Loaded && isCard2Loaded && (onTimeList?.length !== 0) && (lateArrivalList?.length !== 0)) ? <DualChart onTimeList={onTimeList!} lateArrivalList={lateArrivalList!}/> : <CircularLoading/>} */}
-        </div>
-      </div>
-    </div>
-  </div>
-  </>}
+  return (
+    <>
+  {isLoading ? <CircularLoading/> : <>
     
+    <>{data?.admin ? 
+      <div className="w-full min-h-screen ">
+      {/* Header Section */}
+      <div className="w-full mb-5">
+        <div className="flex w-full text-gray-900">
+          <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
+            <Header
+              name="Attendance"
+              hasFilters={false}
+              hasTeamFilter={false}
+              buttonName="Add User"
+            />
+          </div>
+        </div>
+      </div>
+  
+      <div className="flex gap-2 px-4 ">
+        <div className="w-1/2 p-4 overflow-hidden">
+          <Card
+            title="On Time Arrivals"
+            chartId="onTimeChart"
+            email={email!}
+            onTimeCount={onTimeCount}
+            setOnTimeCount={setonTimeCount}
+            lateCount={lateCount}
+            setLateCount={setLateCount}
+            setOnTimeList={setOnTimeList}
+            setLateArrivalList={setLateArrivalList}
+            setIsCard1Loaded={setIsCard1Loaded}
+            setIsCard2Loaded={setIsCard2Loaded}
+          />
+        </div>  
+        <div className="w-1/2 p-4 overflow-hidden justify-center">
+          <Card
+            title="Late Arrivals"
+            chartId="lateArrivalsChart"
+            email={email!}
+            onTimeCount={onTimeCount}
+            setOnTimeCount={setonTimeCount}
+            lateCount={lateCount}
+            setLateCount={setLateCount}
+            setOnTimeList={setOnTimeList}
+            setLateArrivalList={setLateArrivalList}
+            setIsCard1Loaded={setIsCard1Loaded}
+            setIsCard2Loaded={setIsCard2Loaded}
+          />
+        </div>
+      </div>
+      <div className="grid grid-rows-1 grid-cols-[35%_65%] ">
+        <div className="p-4">
+          <div>
+            {(isCard1Loaded && isCard2Loaded) ? <AttendancePC onTimeCount={onTimeCount} lateCount={lateCount}/> : <CircularLoading/>}
+          </div>
+        </div>
+        <div className="p-4">
+          <div>
+          {(isCard1Loaded && isCard2Loaded && (onTimeList?.length !== 0) && (lateArrivalList?.length !== 0)) ? <DualChart onTimeList={onTimeList!} lateArrivalList={lateArrivalList!}/> : <CircularLoading/>}
+          </div>
+        </div>
+      </div>
+    </div>
+    : <>
+    <div className="w-full min-h-screen bg-gray-50">
+      {/* Header Section */}
+      <div className="w-full mb-5">
+        <div className="flex w-full text-gray-900">
+          <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
+            <Header
+              name="Attendance"
+              hasFilters={false}
+              hasTeamFilter={false}
+              buttonName="Add User"
+            />
+          </div>
+        </div>
+      </div>
+  
+      {/* <div className="flex gap-2 px-4 ">
+        <div className="w-1/2 p-4 overflow-hidden">
+          <Card
+            title="On Time Arrivals"
+            chartId="onTimeChart"
+            email={email!}
+            onTimeCount={onTimeCount}
+            setOnTimeCount={setonTimeCount}
+            lateCount={lateCount}
+            setLateCount={setLateCount}
+            setOnTimeList={setOnTimeList}
+            setLateArrivalList={setLateArrivalList}
+            setIsCard1Loaded={setIsCard1Loaded}
+            setIsCard2Loaded={setIsCard2Loaded}
+          />
+            </div>  
+        <div className="w-1/2 p-4 overflow-hidden justify-center">
+          <Card
+            title="Late Arrivals"
+            chartId="lateArrivalsChart"
+            email={email!}
+            onTimeCount={onTimeCount}
+            setOnTimeCount={setonTimeCount}
+            lateCount={lateCount}
+            setLateCount={setLateCount}
+            setOnTimeList={setOnTimeList}
+            setLateArrivalList={setLateArrivalList}
+            setIsCard1Loaded={setIsCard1Loaded}
+            setIsCard2Loaded={setIsCard2Loaded}
+          />
+        </div>
+      </div> */}
+      <div className="grid grid-rows-1 grid-cols-[35%_65%] ">
+        <div className="p-4">
+          <div>
+            <AttendancePCUser/>
+            {/* {(isCard1Loaded && isCard2Loaded) ? <AttendancePC onTimeCount={onTimeCount} lateCount={lateCount}/> : <CircularLoading/>} */}
+          </div>
+        </div>
+        <div className="p-4">
+          <div className="h-full overflow-hidden">
+            <AttendanceTable email={email!}/>
+          {/* {(isCard1Loaded && isCard2Loaded && (onTimeList?.length !== 0) && (lateArrivalList?.length !== 0)) ? <DualChart onTimeList={onTimeList!} lateArrivalList={lateArrivalList!}/> : <CircularLoading/>} */}
+          </div>
+        </div>
+      </div>
+    </div>
+    </>}
+      
+      </>
+    </>}
     </>
   );
 };

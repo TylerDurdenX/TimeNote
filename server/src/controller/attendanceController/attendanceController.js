@@ -625,7 +625,6 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
           },
         });
 
-
         let finalResult = []
         let id = 1
 
@@ -636,7 +635,7 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
                 inTime = formatTime(attendance.punchInTime)
             }
 
-            if(!isEmpty(attendance.punchOutTime)){
+            if(attendance.punchOutTime){
                 outTime = formatTime(attendance.punchOutTime)
             }
             const result = {
@@ -656,6 +655,44 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
       console.error(error);
       return next(
         new AppError("Error during getting user attendance PC data", 500)
+      );
+    }
+  });
+
+  export const getAdminRole = catchAsync(async (req, res, next) => {
+    const { email } = req.query;
+  
+    try {
+      await prisma.$transaction(async (prisma) => {
+        const user = await prisma.user.findFirst({
+          where: {
+            email: email,
+          },include: {
+            roles: true
+          }
+        });
+
+        console.log(user.roles)
+
+        if(user.roles.some((role) => role.code === "ADMIN")){
+          const result = {
+            admin: true
+          }
+          return res.status(200).json(result);
+
+        }else{
+          const result = {
+            admin: false
+          }
+          return res.status(200).json(result);
+        }
+  
+  
+      });
+    } catch (error) {
+      console.error(error);
+      return next(
+        new AppError("Error during getting user Admin role", 500)
       );
     }
   });

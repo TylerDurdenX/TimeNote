@@ -4,7 +4,6 @@ import { prisma } from "../../server.js";
 import SuccessResponse from "../../utils/SuccessResponse.js";
 import { isEmpty } from "../../utils/genericMethods.js";
 
-
 export const getTimesheetData = catchAsync(async (req, res, next) => {
     const { email, date} = req.query;
     try {
@@ -22,7 +21,6 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                     date: getTodayDateInISO(new Date(date))
             }
         })         
-        console.log(getTodayDateInISO(new Date(date)))
         let formattedTime = ''
         let totalMinutes = 0;
 

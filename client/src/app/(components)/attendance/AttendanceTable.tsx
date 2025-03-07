@@ -50,7 +50,9 @@ const columns: GridColDef[] = [
 
   return (
     <div className="h-full w-full px-4 pb-8 xl:px-6">
-
+<div className="">
+        <Header name="Attendance Records" isSmallText />
+      </div>
       <DataGrid
         rows={data || []}
         columns={columns}

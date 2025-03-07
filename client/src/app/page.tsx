@@ -38,7 +38,8 @@ const App: React.FC = () => {
         formData,
         { withCredentials: true }
       );
-
+      setTimeout(() => {
+      }, 3000);
       const user = response.data.data.user;
       toast.success("Login Successful");
       dispatch(setAuthUser(user));

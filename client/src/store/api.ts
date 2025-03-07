@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AddComment,
+  AdminRoleResponse,
   Alert,
   AlertCount,
   AttendanceCardLCResponse,
@@ -683,6 +684,12 @@ getSubTask: build.query<SubTaskObject, { subTaskId: number}>({
   },
   providesTags : ["SubTask"]
 }),
+getAdminRole: build.query<AdminRoleResponse, { email: string}>({
+  query: ({ email,}) => {
+    const url = `api/user/getAdminRole?email=${email}`;
+    return url;
+  },
+}),
 getProjectManager: build.query<PmUserResponse[], {}>({
   query: () => {
     const url = `api/user/getPmUsers`;
@@ -798,5 +805,6 @@ export const {
   useGetAttendanceDataQuery,
   useGetAttendanceLineChartDataQuery,
   useGetUserAttendanceDataQuery,
-  useGetUserAttendanceTableDataQuery
+  useGetUserAttendanceTableDataQuery,
+  useGetAdminRoleQuery
 } = api;

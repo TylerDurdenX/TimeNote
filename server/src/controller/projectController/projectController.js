@@ -53,7 +53,7 @@ export const getProjects = catchAsync(async (req, res, next) => {
     });
 
 
-    if (user.roles.some((role) => role.code === "ADMIN")) {
+    if (user.roles.some((role) => role.code === "ADMIN") || user.roles.some((role) => role.code === "PROJECT_MANAGER")) {
       let resultList= [];
       const projects = await prisma.project.findMany({
         include: {

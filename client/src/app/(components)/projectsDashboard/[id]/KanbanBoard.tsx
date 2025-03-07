@@ -150,7 +150,6 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
                       toast.error(response.error?.data.message)
                     }else{
                       toast.success(response.data?.message);
-                      window.location.reload()
                     }
                   }else{
                     toast.error('Please open the subTask Page for updating SubTask status')

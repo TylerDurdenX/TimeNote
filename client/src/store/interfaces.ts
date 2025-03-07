@@ -347,6 +347,10 @@ export interface SubTaskObject {
     attachments?: Attachment[]
 }
 
+export interface AdminRoleResponse {
+    admin: boolean
+}
+
 export interface ProjectHours{
     totalHours: number
     consumedHours: number

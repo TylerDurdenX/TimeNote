@@ -98,7 +98,6 @@ export function SheetDemo() {
             }else{
               toast.success(response.data?.message);
               setBase64Image(reader.result);
-              window.location.reload()
             }
           } catch (err) {
             toast.error("Some Error occurred");

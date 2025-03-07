@@ -37,7 +37,7 @@ const TimesheetHeader = ({
   return (
     <div className="flex relative w-full pl-5 h-[20px] mb-1 items-center justify-between">
       <h1 className={`text-2xl font-semibold dark:text-white flex items-center`}>
-      Timesheet for   [{selectedDate.toDateString()}]
+      {selectedDate.toDateString()}
       </h1>
 
       {hasFilters && (

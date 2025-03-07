@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import { useGetUserAttendanceDataQuery } from "@/store/api"
 import { useSearchParams } from "next/navigation"
+import Header from "@/components/Header"
 
 const chartConfig = {
   visitors: {
@@ -87,6 +88,9 @@ export function AttendancePCUser() {
   const totalCount = data?.onTimeCount! + data?.lateCount!
 
   return (
+    <>
+    <div className="pt-6">
+          </div>
     <Card data-chart={id} className="flex flex-col h-[39vh] w-full">
   <ChartStyle id={id} config={chartConfig} />
   <CardHeader className="flex-row items-start space-y-0 pb-0">
@@ -199,6 +203,6 @@ export function AttendancePCUser() {
         </div>
       </CardFooter>
 </Card>
-
+</>
   )
 }

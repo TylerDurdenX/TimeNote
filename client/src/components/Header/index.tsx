@@ -212,20 +212,20 @@ const Header = ({
         </div>
       )}
       {(buttonName === "Create User" && ADMINUser) ? <>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={setIsOpen} >
           <DialogTrigger asChild>
             <button className="flex items-center rounded-md bg-blue-800 px-3 py-2 text-white hover:bg-blue-500 mr-7">
               <PlusSquare className="h-5 w-5 mr-2" />
               Add User
             </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] h-[33vw]">
+          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] h-[33vw] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="mb-2">Add User</DialogTitle>
             </DialogHeader>
 
             <div
-              className="relative w-full h-full overflow-hidden"
+              className="relative w-full h-full"
               style={{
                 paddingTop: "90.575%",
               }}>
