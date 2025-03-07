@@ -181,10 +181,7 @@ export const login = catchAsync(async(req,res, next) => {
 
   const user = await prisma.user.findFirst({
     where:{
-      email: {
-        equals: email,
-        mode: 'insensitive',  // Case-insensitive comparison
-      }
+      email: email
     }
   })
 
