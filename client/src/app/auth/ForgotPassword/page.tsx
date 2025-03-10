@@ -6,7 +6,7 @@ import { Ghost, Loader } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { toast } from "sonner";
+import { Toaster, toast } from "react-hot-toast";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -35,6 +35,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="w-[calc(100vw)] h-[calc(100vh)] flex  bg-no-repeat bg-top-right justify-center items-center bg-white p-[10px_7px] box-border relative">
+                <Toaster position="top-right"/>
       <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[700px] h-[445px] bg-no-repeat bg-white text-white flex "></div>
           <div className="absolute bottom-0 right-0 m-16 bg-[url('/circle.svg')] w-[300px] h-[280px] bg-white text-white flex justify-center items-center"></div>
           <div className="absolute top-0 left-0 m-12 bg-[url('/logo.svg')] w-[300px] h-[700px] bg-no-repeat bg-white text-white flex "></div>

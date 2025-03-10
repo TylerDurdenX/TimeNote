@@ -56,6 +56,7 @@ const App: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen overflow-hidden sm:overflow-auto items-center flex justify-center">
+                <Toaster position="top-right"/>
           <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[70vh] h-[45vh] bg-no-repeat bg-white flex "/>
           <div className="absolute bottom-0 right-0  bg-[url('/circle.svg')] w-[38vh] h-[34vh] bg-white flex bg-no-repeat justify-center items-center overflow-hidden"/>
           <div className="absolute top-0 left-0  w-[350px] h-[350px] bg-no-repeat bg-white text-white flex">

@@ -5,11 +5,11 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader } from "lucide-react";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
-import { toast } from "sonner";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setAuthUser } from "@/store/authSlice";
 import Link from "next/link";
+import { Toaster , toast} from "react-hot-toast";
 
 const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
@@ -99,6 +99,8 @@ const ResetPassword = () => {
   return (
     <div className="w-[calc(100vw-14px)] h-[calc(100vh-20px)] flex justify-center items-center bg-white p-[10px_7px] box-border relative">
       {/* <div className="flex w-full h-full max-w-[550px] max-h-[700px] bg-white shadow-[0px_10px_30px_rgba(0,0,0,0.1)] overflow-hidden justify-center items-center rounded-[20px] box-border bg-indigo-100"> */}
+      <Toaster position="top-right"/>
+      
       <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[700px] h-[445px] bg-no-repeat bg-white text-white flex "></div>
       <div className="absolute bottom-0 right-0 m-16 bg-[url('/circle.svg')] w-[300px] h-[280px] bg-white text-white flex justify-center items-center"></div>
       <div className="absolute top-0 left-0 m-12 bg-[url('/logo.svg')] w-[300px] h-[700px] bg-no-repeat bg-white text-white flex "></div>
