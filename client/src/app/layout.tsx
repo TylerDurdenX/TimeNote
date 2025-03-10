@@ -41,7 +41,6 @@ export default function RootLayout({
           > */}
           <ClientProvider>
             {children}
-            <Toaster position="top-right"/>
           </ClientProvider>
           {/* </ThemeProvider> */}
         

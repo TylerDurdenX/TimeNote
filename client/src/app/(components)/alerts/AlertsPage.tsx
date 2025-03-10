@@ -4,8 +4,8 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import React, { useState } from 'react'
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { toast } from "sonner";
 import { useDeleteTriggeredAlertsMutation, useGetAlertsQuery } from '@/store/api';
+import { Toaster, toast } from 'react-hot-toast';
 import { useSearchParams } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 
