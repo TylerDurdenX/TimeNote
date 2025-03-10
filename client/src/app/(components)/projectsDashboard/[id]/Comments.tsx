@@ -9,7 +9,7 @@ import {
 import { MentionedUser } from "@/store/interfaces";
 import Link from "next/link";
 import React, { useState } from "react";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 
 type Props = {
   email: string;

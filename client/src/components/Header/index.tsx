@@ -24,10 +24,10 @@ import { Bell, CalendarClock, ChartCandlestick, ChartNoAxesCombined, FileChartCo
 import { Button } from '@mui/material'
 import { DatePickerWithRange } from './DateRangePicker' 
 import { DateRange } from 'react-day-picker'
-import { toast } from 'sonner';
 import { useCreateUserMutation } from '@/store/api';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { getInitials } from '../Sidebar/nav-user';
+import { Toaster, toast } from 'react-hot-toast';
 
 type Props = {
   name: string
@@ -160,7 +160,7 @@ const Header = ({
                             // @ts-ignore
                             toast.error(response.error?.data.message)
                           }else{
-                            toast.success(response.data?.message);
+                            toast.success(response.data?.message!);
                           }
       setUsername("");
       setUserPassword("");
@@ -226,10 +226,8 @@ const Header = ({
 
             <div
               className="relative w-full h-full"
-              style={{
-                paddingTop: "90.575%",
-              }}>
-              <div className="absolute top-0 left-0 w-[calc(100%)] h-full">
+              >
+              <div className=" top-0 left-0 w-[calc(100%)] h-full">
                 <form onSubmit={handleSubmit}>
                   <div className="grid gap-4 py-3">
                   <div className="flex flex-col justify-center items-center">

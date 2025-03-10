@@ -15,7 +15,7 @@ import { useGetAdminRoleQuery } from "@/store/api";
 
 const App: React.FC = () => {
 
-  const email = useSearchParams().get('email')
+  const email = sessionStorage.getItem('email')
 
   const [onTimeCount, setonTimeCount] = useState('')
   const [lateCount, setLateCount] = useState('')
@@ -30,13 +30,11 @@ const App: React.FC = () => {
   let Admin: boolean = false;
 
 if (userRolesList !== undefined && userRolesList !== null && userRolesList !== '') {
-  console.log('userRolesList is defined and non-empty:', userRolesList);
 
   // Define the function to check if 'ADMIN' is in the list
   const containsValue = (csvString: string, value: string): boolean => {
     // Split the string by commas to get an array of values
     const valuesArray = csvString.split(',');
-    console.log('Array of roles:', valuesArray); // For debugging
     // Check if the value exists in the array
     return valuesArray.includes(value);
   };

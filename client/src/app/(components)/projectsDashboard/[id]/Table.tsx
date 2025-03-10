@@ -281,7 +281,7 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
   if (error) return <div>An error occurred while fetching tasks</div>;
 
   return (
-    <div className="h-540px h-full px-4 pb-8 xl:px-6">
+    <div className="h-full px-4 pb-8 xl:px-6">
       <div className="pt-5 flex justify-between items-center mb-2">
         <Header name="Table" isSmallText />
 
@@ -298,7 +298,7 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
         rows={tasks?.tasks || []}
         columns={columns}
         className={dataGridClassNames}
-        sx={dataGridSxStyles(isDarkMode)}
+        //sx={dataGridSxStyles(isDarkMode)}
         getRowClassName={getRowClassName}
       />
     </div>

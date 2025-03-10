@@ -185,7 +185,6 @@ export const login = catchAsync(async(req,res, next) => {
     }
   })
 
-  console.log(user)
   if(!user){
     return next(new AppError(`No user exists with the email id : ${email}`, 400))
   }

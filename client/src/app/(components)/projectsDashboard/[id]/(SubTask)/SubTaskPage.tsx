@@ -3,7 +3,7 @@
 import React, { useEffect,  useState } from "react";
 import {  Pencil, Download } from "lucide-react";
 import {  useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetSubTaskQuery, useUpdateSubTaskMutation, useUploadSubTaskAttachmentMutation } from "@/store/api";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import { Progress } from "@/components/ui/progress"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import SubTaskComment from "./SubTaskComments";
@@ -92,7 +92,7 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
                     // @ts-ignore
                     toast.error(response.error?.data.message)
                   }else{
-                    toast.success(response.data?.message);
+                    toast.success(response.data?.message!);
                   }
           } catch (err: any) {
             toast.error(err.data.message);
@@ -104,13 +104,13 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
 
   const deleteAttachment = (async() => {
     try {
-      const response = await deleteAttachmentQuery({taskId: subTaskId, isSubTask: true})
+      const response = await deleteAttachmentQuery({taskId: subTaskId, isSubTask: true, email: email})
       // @ts-ignore
       if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
               // @ts-ignore
               toast.error(response.error?.data.message)
             }else{
-              toast.success(response.data?.message);
+              toast.success(response.data?.message!);
             }
     } catch (err: any) {
       toast.error(err.data.message);
@@ -260,7 +260,7 @@ useEffect(() => {
                 // @ts-ignore
                 toast.error(response.error?.data.message)
               }else{
-                toast.success(response.data?.message);
+                toast.success(response.data?.message!);
               }
       } catch (err: any) {
         toast.error(err.data.message);

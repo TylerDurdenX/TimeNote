@@ -10,7 +10,7 @@ import {
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import { getAlertCount, getUser, getUserCount, updateUserProfilePicture } from "../controller/dashboardController.js";
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
-import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserDetailsData } from "../controller/UserDetailsController.js";
+import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserBasicDetailsData, updateUserDetailsData } from "../controller/UserDetailsController.js";
 import { createTeam } from "../controller/teamController/controller.js";
 import { addComment, addSubTaskComment, closeCompletedTask, createBulkTasks, createProject, createSprint, createSubTask, createTask, deleteAttachment, deleteProjectAttachment, downloadAttachment, downloadProjectAttachment, getMentionedUsers, getProject, getProjectHoursEstimation, getProjectManagers, getProjects, getProjectTasks, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskActivity, getTaskComments, getTaskHistory, getUserData, updateProject, updateProjectStatus, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadProjectAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
@@ -43,6 +43,7 @@ router.get("/getUserDetails",isAuthenticated, getUserDetails)
 router.get("/getList", getListOfObjects)
 router.post("/createTeam", createTeam)
 router.post("/updateUserSettingsData",isAuthenticated, updateUserDetailsData)
+router.post("/updateUserBasicSettingsData", isAuthenticated, updateUserBasicDetailsData)
 router.post("/createProject",isAuthenticated, createProject)
 router.get("/getUserHierarchyData",isAuthenticated, getUserHierarchyData)
 router.post("/saveScreenshot",isAuthenticated, addscreenshots)

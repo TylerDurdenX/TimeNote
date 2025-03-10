@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Sidebar/app-sidebar";
 import { Settings } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,8 +46,10 @@ export default function RootLayout({
       >
         <SidebarProvider>
           <AppSidebar/>
-          <SidebarTrigger children={children || ''}/>
+          <SidebarTrigger children={children}/>
           </SidebarProvider>
+          <Toaster position="top-right"/>
+          
           <main>
             
           </main>

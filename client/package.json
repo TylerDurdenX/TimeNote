@@ -12,6 +12,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.3.1",
+    "@mui/joy": "^5.0.0-beta.51",
     "@mui/material": "^6.3.1",
     "@mui/x-data-grid": "^7.26.0",
     "@nextui-org/calendar": "^2.2.9",
@@ -56,6 +57,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",
     "react-google-charts": "^5.2.1",
+    "react-hot-toast": "^2.5.2",
     "react-leaflet": "^5.0.0",
     "react-organizational-chart": "^2.2.1",
     "react-redux": "^9.2.0",
@@ -63,7 +65,6 @@
     "recharts": "^2.15.0",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
-    "sonner": "^1.7.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "xlsx": "^0.18.5"

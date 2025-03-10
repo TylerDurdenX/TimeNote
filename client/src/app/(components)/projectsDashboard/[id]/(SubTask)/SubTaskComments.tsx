@@ -5,7 +5,7 @@ import {
   useGetSubTaskCommentsQuery,
 } from "@/store/api";
 import React, { useState } from "react";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 
 type Props = {
   email: string;
@@ -15,7 +15,7 @@ type Props = {
 const SubTaskComment = ({ subTaskId, email }: Props) => {
   const [newComment, setNewComment] = useState("");
 
-  const [createTask, { isLoading: isLoadingAddComment }] =
+  const [addSubTaskComment, { isLoading: isLoadingAddComment }] =
     useAddSubTaskCommentMutation();
 
   const { data, isLoading, error, refetch } = useGetSubTaskCommentsQuery(
@@ -42,7 +42,7 @@ const SubTaskComment = ({ subTaskId, email }: Props) => {
       commentTime: indianTimeISOString,
     };
     try {
-      const response = createTask(formData);
+      const response = addSubTaskComment(formData);
       toast.success("Comment added Successfully");
       setNewComment("");
     } catch (err: any) {

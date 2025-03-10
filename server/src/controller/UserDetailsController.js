@@ -7,7 +7,6 @@ import SuccessResponse from "../utils/SuccessResponse.js";
 //get list of users form the table
 export const getUsersList = catchAsync(async (req, res, next) => {
   const { email } = req.query;
-  console.log('req received for getting Users List')
   try {
     const result = await prisma.$transaction(async (prisma) => {
 
@@ -197,6 +196,41 @@ export const getListOfObjects = catchAsync(async (req, res, next) => {
     );
   }
 });
+
+export const updateUserBasicDetailsData = catchAsync(async (req, res, next) => {
+  const { userId, email, username, designation, phone} = req.body;
+  
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+
+      const userUpdate = await prisma.user.update({
+        where:{
+          userId: userId
+        },
+        data: {
+          email: email,
+          username: username,
+          designation: designation,
+          phoneNumber: phone
+        }
+      })
+      
+
+    res.status(200).json({
+      status: "success",
+      message: `UserData Updated Successfully!`,
+    });
+  });
+
+    
+  } catch (error) {
+    console.log(error);
+      return next(new AppError("There was an error updating basic user details", error));
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
 
 export const updateUserDetailsData = catchAsync(async (req, res, next) => {
   const { reportsTo, projects, teams, roles, selectedTimeOut, workingHours, isSignoutEnabled, isProfilePicModificationEnabled} = req.body;

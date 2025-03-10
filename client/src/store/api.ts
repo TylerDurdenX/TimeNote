@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AddComment,
+  AddSubTaskComment,
   AdminRoleResponse,
   Alert,
   AlertCount,
@@ -50,7 +51,7 @@ import {
   UsersListResponse,
 } from "./interfaces";
 import { AxiosProgressEvent } from 'axios';
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import { useNavigate } from "react-router-dom";
 import { useRouter } from "next/router";
 
@@ -332,7 +333,7 @@ export const api = createApi({
     }),
     addSubTaskComment: build.mutation<
     ApiResponse[],
-      AddComment
+    AddSubTaskComment
     >({
       query: (comment) => ({
         url: "api/user/addSubTaskComment",
@@ -734,6 +735,35 @@ getProjectManager: build.query<PmUserResponse[], {}>({
       },
       invalidatesTags: ["UsersData"],
     }),
+    updateUserBasicSettingsData: build.mutation<
+      ApiResponse,
+      {
+        userId: number,
+        email: string;
+        username: string;
+        designation: string;
+        phone: string;
+      }
+    >({
+      query: ({ email, userId, username, designation, phone}) => {
+        const requestBody = JSON.stringify({
+          userId,
+          email,
+          username,
+          designation,
+          phone
+        });
+        return {
+          url: `api/user/updateUserBasicSettingsData?email=${email}`,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: requestBody,
+        };
+      },
+      invalidatesTags: ["UsersData"],
+    }),
   }),
 });
 
@@ -806,5 +836,6 @@ export const {
   useGetAttendanceLineChartDataQuery,
   useGetUserAttendanceDataQuery,
   useGetUserAttendanceTableDataQuery,
-  useGetAdminRoleQuery
+  useGetAdminRoleQuery,
+  useUpdateUserBasicSettingsDataMutation
 } = api;

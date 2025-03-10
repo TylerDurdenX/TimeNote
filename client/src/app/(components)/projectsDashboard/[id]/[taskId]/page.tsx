@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { PlusSquare, Pencil, Download, Maximize2, EllipsisVertical, Clock } from "lucide-react";
 import { SubTask, Task as TaskType } from "@/store/interfaces";
 import { useCloseTaskMutation, useCreateSubTaskMutation, useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetTaskQuery, useUpdateTaskAssigneeMutation, useUpdateTaskMutation, useUpdateTaskProgressMutation, useUpdateTaskStatusMutation, useUploadAttachmentMutation } from "@/store/api";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -131,7 +131,7 @@ const TaskPageFull = () => {
                     // @ts-ignore
                     toast.error(response.error?.data.message)
                   }else{
-                    toast.success(response.data?.message);
+                    toast.success(response.data?.message!);
                   }
           } catch (err: any) {
             toast.error(err.data.message);
@@ -149,7 +149,7 @@ const TaskPageFull = () => {
               // @ts-ignore
               toast.error(response.error?.data.message)
             }else{
-              toast.success(response.data?.message);
+              toast.success(response.data?.message!);
             }
     } catch (err: any) {
       toast.error(err.data.message);
@@ -515,7 +515,7 @@ useEffect(() => {
                         // @ts-ignore
                         toast.error(response.error?.data.message)
                       }else{
-                        toast.success(response.data?.message);
+                        toast.success(response.data?.message!);
                       }
       } catch (err) {
         toast.error("Some Error occurred, please try again later");
@@ -531,7 +531,7 @@ useEffect(() => {
                         toast.error(response.error?.data.message)
                         console.log('1')
                       }else{
-                        toast.success(response.data?.message);
+                        toast.success(response.data?.message!);
                       }
       } catch (err) {
         toast.error("Some Error occurred, please try again later");
@@ -942,18 +942,15 @@ useEffect(() => {
             Add Subtasks
           </button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[29vw]">
+                  <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[29vw] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="mb-1">Create SubTask</DialogTitle>
                     </DialogHeader>
 
                     <div
                       className="relative w-full h-full overflow-hidden"
-                      style={{
-                        paddingTop: "28.575%",
-                      }}
                       >
-                      <div className="absolute top-0 left-0 w-[calc(100%)] h-[calc(100%)]">
+                      <div className="top-0 left-0 w-[calc(100%)] h-[calc(100%)]">
                         <form onSubmit={handleSubmit}>
                           <div className="grid gap-4 py-1">
                             <div className="grid grid-cols-8 items-center gap-4 mr-1">

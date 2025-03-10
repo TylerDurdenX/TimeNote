@@ -2,7 +2,7 @@
 
 import { ChevronsUpDown, Sparkles } from "lucide-react";
 import axios from "axios";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

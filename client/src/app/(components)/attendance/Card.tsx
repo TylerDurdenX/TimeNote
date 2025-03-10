@@ -22,23 +22,27 @@ export const Card: React.FC<CardProps> = ({ title, chartId, email, onTimeCount, 
 
     const {data, isLoading} = useGetAttendanceDataQuery({email: email, title: title}, {refetchOnMountOrArgChange: true})
 
-    if(title === 'On Time Arrivals'){
+    useEffect(() => {
+      if(title === 'On Time Arrivals'){
       setOnTimeCount(String(data?.usersCount))
-      useEffect(() => {
-        if (!isLoading && data) {
-          setIsCard1Loaded(true);
-        }
-      }, [isLoading, data]);
-    }
+      }
+      if(title === 'Late Arrivals'){
+        setLateCount(String(data?.usersCount))
+      }
+    },[])
 
-    if(title === 'Late Arrivals'){
-      setLateCount(String(data?.usersCount))
       useEffect(() => {
         if (!isLoading && data) {
-          setIsCard2Loaded(true);
+          if(title === 'Late Arrivals'){
+            setIsCard2Loaded(true);
+          }
+          if(title === 'On Time Arrivals'){
+            setIsCard1Loaded(true);
+
+          }
         }
       }, [isLoading, data]);
-    }
+    
 
   return (
     <div className="w-full p-4 border rounded-lg shadow-md bg-white">
@@ -55,8 +59,8 @@ export const Card: React.FC<CardProps> = ({ title, chartId, email, onTimeCount, 
     <div className="col-span-7">
       <div className="h-48 bg-gray-200 rounded-md">
         {/* This can be replaced with your actual chart */}
-        <p className="text-center text-gray-600 "><AttendanceChart email = {email} title = {title} setOnTimeList={setOnTimeList}
-            setLateArrivalList={setLateArrivalList}/></p>
+        <p className="text-center text-gray-600 "/><AttendanceChart email = {email} title = {title} setOnTimeList={setOnTimeList}
+            setLateArrivalList={setLateArrivalList}/>
       </div>
     </div>
   </div>

@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PlusSquare, PresentationIcon } from "lucide-react";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -72,7 +72,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                             // @ts-ignore
                             toast.error(response.error?.data.message)
                           }else{
-                            toast.success(response.data?.message);
+                            toast.success(response.data?.message!);
                           }
       setTitle("");
       setDescription("");
@@ -139,12 +139,21 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                         className="col-span-7 shadow border"
                       />
                        <Label className="text-center ">Project Code</Label>
-                      <Input
-                        value={projectCode}
-                        onChange={(e) => setProjectCode(e.target.value)}
-                        className="col-span-7"
-                        required
-                      />
+                       <Input
+                          value={projectCode}
+                          onChange={(e) => {
+                            const newValue = e.target.value;
+
+                            // Check if the new value contains '/'
+                            if (newValue.includes('/')) {
+                              toast.error('/ not allowed');
+                            } else {
+                              setProjectCode(newValue); // Set the new value if no '/' is present
+                            }
+                          }}
+                          className="col-span-7"
+                          required
+                        />
                       <Label className="text-center">Start Date</Label>
                       <Input
                         type="date"

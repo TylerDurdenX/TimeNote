@@ -1,9 +1,7 @@
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -27,7 +25,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "../ui/button";
 import { Settings } from "lucide-react";
 import { DialogDemo } from "./ProductivitySettings";
 import { useGetUserQuery, useUpdateProfilePictureMutation } from "@/store/api";
@@ -35,7 +32,7 @@ import { useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { getInitials } from "../Sidebar/nav-user";
 import { useState } from "react";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import { CreateRole } from "./RoleSettings";
 import { Typography } from "@mui/material";
 import { useDispatch } from "react-redux";
@@ -57,31 +54,25 @@ export function SheetDemo() {
   const dispatch = useDispatch();
   const router = useRouter();
   const removeProfilePicture = async () => {
+    console.log('111')
     try {
       const response = await updateProfilePic({
         email: userEmail!,
         base64: "",
       });
-      // if (Number(res.status) === 401) {
-      //   dispatch(setAuthUser(null));
-
-      //   router.push("/");
-
-      //   toast.success("Session Timeout, Please log in again!");
-      // }
 
              // @ts-ignore
             if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
                // @ts-ignore
                toast.error(response.error?.data.message)
              }else{
-               toast.success(response.data?.message);
+               toast.success(response.data?.message!);
              }
     } catch (error) {
       toast.error("Some Error occurred");
       console.log(error);
     }
-    setOpen(false);
+    // setOpen(false);
   };
   const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; // Get the selected file
@@ -96,7 +87,7 @@ export function SheetDemo() {
               // @ts-ignore
               toast.error(response.error?.data.message)
             }else{
-              toast.success(response.data?.message);
+              toast.success(response.data?.message!);
               setBase64Image(reader.result);
             }
           } catch (err) {

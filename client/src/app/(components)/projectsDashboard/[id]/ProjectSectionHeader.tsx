@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import { Input } from "@/components/ui/input"; 
 import { Label } from "@/components/ui/label";
 import { FilePenLine, PlusSquare, SquarePen } from "lucide-react";
@@ -59,7 +59,7 @@ const ProjectSectionHeader = ({
         // @ts-ignore
         toast.error(response.error?.data.message)
       }else{
-        toast.success(response.data?.message);
+        toast.success(response.data?.message!);
       }
       setTitle('')
       setDescription('')

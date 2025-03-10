@@ -9,7 +9,7 @@ import { SheetDemo } from "@/components/SettingsSheet";
 import { useDispatch } from "react-redux";
 import { setAuthUser } from "@/store/authSlice";
 import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import Badge from '@mui/material/Badge';
 import Link from "next/link";
 

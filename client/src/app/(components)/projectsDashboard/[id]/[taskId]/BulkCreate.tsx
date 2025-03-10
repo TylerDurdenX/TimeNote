@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { CloudUpload, Download } from "@mui/icons-material"; 
 import { Box, Button } from "@mui/material"; 
 import { SprintResponse, TaskFormData } from "@/store/interfaces";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import ExcelJS from 'exceljs';
 import { useCreateBulkTasksMutation } from "@/store/api";
 
@@ -235,7 +235,7 @@ const BulkCreate = ({sprintList, email, projectId, setIsOpen} :Props) => {
                     // @ts-ignore
                     toast.error(response.error?.data.message)
                   }else{
-                    toast.success(response.data?.message);
+                    toast.success(response.data?.message!);
                   }
           } catch (err: any) {
             toast.error(err.data.message);

@@ -202,7 +202,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
         roles: true
       }
     })
-    if(user.roles.some((role) => role.code === "ADMIN")){
+    if(user.roles.some((role) => role.code === "ADMIN") || user.roles.some((role) => role.code === "PROJECT_MANAGER")  ){
       if(isTaskOrSubTask==='Task'){
         let whereCondition = {
           projectId: Number(id),
@@ -1349,7 +1349,7 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
     })
 })
 } catch (error) {
-  console.log('Error during update Task Assignee' + error)
+  console.log(error)
   return next(new AppError('Some Error occurred',500));
 }
 });
@@ -2740,7 +2740,8 @@ export const getProject = catchAsync(async (req, res, next) => {
         dueDate: project.endDate,
         status: project.status,
         projectManager: project.user.username,
-        projectAttachments: projectAttachmentList
+        projectAttachments: projectAttachmentList,
+        projectCode: project.code
       };
       res.json(result);
     })
@@ -2789,7 +2790,7 @@ export const updateProjectStatus = catchAsync(async (req, res, next) => {
 });
 
 export const updateProject = catchAsync(async (req, res, next) => {
-  const {email, projectId,projectManager,clientName,projectDescription} = req.body
+  const {email, projectId,projectManager,clientName,projectDescription, projectCode} = req.body
   try {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
@@ -2821,7 +2822,8 @@ export const updateProject = catchAsync(async (req, res, next) => {
         data: {
           projectManager: projectManagerUser.userId,
           clientName: clientName,
-          description: projectDescription
+          description: projectDescription,
+          code: projectCode
         }
       })
       

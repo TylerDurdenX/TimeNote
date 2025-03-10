@@ -3,7 +3,7 @@
 import React, { useEffect,  useState } from "react";
 import { Pencil, Download, EllipsisVertical,} from "lucide-react";
 import { useCreateSubTaskMutation, useDeleteAttachmentMutation, useDeleteProjectAttachmentMutation, useDownloadAttachmentMutation, useDownloadProjectAttachmentMutation, useGetProjectManagerQuery, useGetProjectQuery, useUpdateProjectMutation,  useUpdateProjectStatusMutation, useUploadProjectAttachmentMutation } from "@/store/api";
-import { toast } from "sonner";
+import { Toaster, toast } from 'react-hot-toast';
 import { Progress } from "@/components/ui/progress"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useSearchParams } from "next/navigation";
@@ -89,7 +89,7 @@ const ProjectPage = () => {
                     // @ts-ignore
                     toast.error(response.error?.data.message)
                   }else{
-                    toast.success(response.data?.message);
+                    toast.success(response.data?.message!);
                   }
           } catch (err: any) {
             toast.error(err.data.message);
@@ -107,7 +107,7 @@ const ProjectPage = () => {
               // @ts-ignore
               toast.error(response.error?.data.message)
             }else{
-              toast.success(response.data?.message);
+              toast.success(response.data?.message!);
             }
     } catch (err: any) {
       toast.error(err.data.message);
@@ -257,7 +257,7 @@ const handleEditClick = () => {
                           // @ts-ignore
                           toast.error(response.error?.data.message)
                         }else{
-                          toast.success(response.data?.message);
+                          toast.success(response.data?.message!);
                         }
         } catch (err) {
           toast.error("Some Error occurred, please try again later");

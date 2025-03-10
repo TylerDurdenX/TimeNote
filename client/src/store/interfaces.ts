@@ -412,6 +412,13 @@ export interface AddComment {
     taskCode: string
 }
 
+export interface AddSubTaskComment {
+    text: string
+    taskId: number
+    userEmail: string
+    commentTime: string
+}
+
 export interface AlertCount {
     count: number
     roles: string

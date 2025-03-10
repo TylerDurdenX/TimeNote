@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Task as TaskType } from "@/store/interfaces";
+import { Toaster, toast } from 'react-hot-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,10 +37,9 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DialogTitle } from "@mui/material";
+import { DialogTitle, SnackbarOrigin } from "@mui/material";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -138,18 +138,18 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
   //   },
   //   writable: false
   // });
+  
 
   const moveTask = async(taskId: number, toStatus: string) => {
     try {
       if(isTaskOrSubTask === 'Task'){
       const response = await updateTaskStatus({ taskId, status: toStatus , email: email});
-      
        // @ts-ignore
       if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
                       // @ts-ignore
                       toast.error(response.error?.data.message)
                     }else{
-                      toast.success(response.data?.message);
+                      toast.success(response.data?.message!);
                     }
                   }else{
                     toast.error('Please open the subTask Page for updating SubTask status')
@@ -164,7 +164,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
       setHasMore(tasksList?.hasmore)
       setPage(page +1)
     }else{
-      toast.info('no more tasks to load')
+      toast.error('no more tasks to load')
     }
   };
 
@@ -603,7 +603,6 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
 
   const moveTaskFromDropdown = async(taskId: number, toStatus: string) => {
     try {
-
         const response = await updateTaskStatus({ taskId, status: toStatus , email: email});
         // @ts-ignore
        if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
@@ -611,7 +610,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                        toast.error(response.error?.data.message)
                        console.log('1')
                      }else{
-                       toast.success(response.data?.message);
+                       toast.success(response.data?.message!);
                      }
       
     } catch (err) {
@@ -627,7 +626,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                       // @ts-ignore
                       toast.error(response.error?.data.message)
                     }else{
-                      toast.success(response.data?.message);
+                      toast.success(response.data?.message!);
                     }
     } catch (err) {
       toast.error("Some Error occurred, please try again later");
