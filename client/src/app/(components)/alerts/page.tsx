@@ -16,8 +16,6 @@ import { Button } from "@/components/ui/button";
 
 const page = () => {
 
-  // This will now print true or false based on the check
-
 
   return (
     <>

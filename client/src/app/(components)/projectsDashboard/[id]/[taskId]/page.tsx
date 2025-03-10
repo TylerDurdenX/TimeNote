@@ -464,6 +464,7 @@ useEffect(() => {
       try {
         const response = await updateTaskProgress({
           taskId: Number(task?.id),
+          email: email!,
           progressStart: true
         });
         if (response.error) {
@@ -486,6 +487,7 @@ useEffect(() => {
       try {
         const response = await updateTaskProgress({
           taskId: Number(task?.id),
+          email: email!,
           progressStart: false
         });
         if (response.error) {

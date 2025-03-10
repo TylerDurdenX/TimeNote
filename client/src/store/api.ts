@@ -388,9 +388,9 @@ export const api = createApi({
     }), 
     invalidatesTags : ["Tasks", "Task","TaskHistory"]
 }),
-updateTaskProgress: build.mutation<ApiResponse, {taskId: number, progressStart: boolean}>({
-  query: ({taskId, progressStart})=> ({
-      url: `api/user/startTaskProgress?taskId=${taskId}&progressStart=${progressStart}`,
+updateTaskProgress: build.mutation<ApiResponse, {taskId: number,email: string,  progressStart: boolean}>({
+  query: ({taskId,email, progressStart})=> ({
+      url: `api/user/startTaskProgress?taskId=${taskId}&progressStart=${progressStart}&email=${email}`,
       method: "PATCH",
   }), 
   invalidatesTags : ["Task","ProjectHours", "TaskActivity"]

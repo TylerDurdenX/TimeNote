@@ -191,7 +191,7 @@ export const getProjects = catchAsync(async (req, res, next) => {
 
 export const getProjectTasks = catchAsync(async (req, res, next) => {
   const { id, sprint, assignedTo, priority , isTaskOrSubTask, email, page, limit} = req.query;
-  console.log('received')
+
   try{
     await prisma.$transaction(async (prisma) => {
     const user = await prisma.user.findFirst({
@@ -202,7 +202,9 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
         roles: true
       }
     })
-    if(user.roles.some((role) => role.code === "ADMIN") || user.roles.some((role) => role.code === "PROJECT_MANAGER")  ){
+    // if(user.roles.some((role) => role.code === "ADMIN") || user.roles.some((role) => role.code === "PROJECT_MANAGER")  ){ 
+      if(true){ 
+
       if(isTaskOrSubTask==='Task'){
         let whereCondition = {
           projectId: Number(id),
@@ -795,13 +797,19 @@ function calculateHoursPassed(providedDateStr) {
 }
 
 export const updateTaskProgress = catchAsync(async (req, res, next) => {
-  const { taskId, progressStart } = req.query;
+  const { taskId, progressStart, email } = req.query;
 
   try{
   const result = await prisma.$transaction(async (prisma) => {
 
     const currentDateTime = new Date();
     const indianTimeISOString = currentDateTime.toISOString();
+
+    const operationUser = await prisma.user.findFirst({
+      where: {
+        email: email
+      }
+    })
 
     if(progressStart === 'true'){
 
@@ -831,8 +839,8 @@ export const updateTaskProgress = catchAsync(async (req, res, next) => {
         const taskActivity = await prisma.taskActivity.create({
           data: {
             taskId: task.id,
-            userId: task.assignee.userId,
-            username: task.assignee.username,
+            userId: operationUser.userId,
+            username: operationUser.username,
             date: indianTimeISOString,
             activity: ` Started Task Progress`
           }
@@ -878,8 +886,8 @@ export const updateTaskProgress = catchAsync(async (req, res, next) => {
       const taskActivity = await prisma.taskActivity.create({
         data: {
           taskId: task.id,
-          userId: task.assignee.userId,
-          username: task.assignee.username,
+          userId: operationUser.userId,
+          username: operationUser.username,
           date: indianTimeISOString,
           activity: ` Paused Task Progress`
         }
@@ -922,7 +930,7 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
     })
 
     if(task.assignee.email !== email){
-      return next(new AppError(`Cannot update Task assigned to other people`, 500))
+      return next(new AppError(`Cannot move Tasks assigned to other people`, 500))
     }
 
     if(task.status === 'To Do' && ( status === 'Under Review' || status === 'Completed' || status === 'To Do')){
@@ -1716,6 +1724,12 @@ export const updateTask = catchAsync(async (req, res, next) => {
         },
       });
 
+      const operationUser = await prisma.user.findFirst({
+        where: {
+          email: email
+        }
+      })
+
       const taskToBeUpdated = await prisma.task.findFirst({
         where: {
           id: taskId,
@@ -1741,12 +1755,6 @@ export const updateTask = catchAsync(async (req, res, next) => {
         }
 
         if(taskToBeUpdated !== timeInMinutes){
-
-          const operationUser = await prisma.user.findFirst({
-            where: {
-              email: email
-            }
-          })
   
           const project = await prisma.project.findFirst({
             where:{
@@ -1857,8 +1865,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
           const taskActivity = await prisma.taskActivity.create({
             data: {
               taskId: updatedTask.id,
-              userId: taskToBeUpdated.assignee.userId,
-              username: taskToBeUpdated.assignee.username,
+              userId: operationUser.userId,
+              username: operationUser.username,
               date: currentTimeISOString,
               activity: ` ${descriptionError}`
             }
@@ -1869,8 +1877,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
           const taskActivity = await prisma.taskActivity.create({
             data: {
               taskId: updatedTask.id,
-              userId: taskToBeUpdated.assignee.userId,
-              username: taskToBeUpdated.assignee.username,
+              userId: operationUser.userId,
+              username: operationUser.username,
               date: currentTimeISOString,
               activity: ` Assigned the task to : [${user.username}]`
             }
@@ -1979,8 +1987,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
             const taskActivity = await prisma.taskActivity.create({
               data: {
                 taskId: updatedTask.id,
-                userId: taskToBeUpdated.assignee.userId,
-                username: taskToBeUpdated.assignee.username,
+                userId: operationUser.userId,
+                username: operationUser.username,
                 date: currentTimeISOString,
                 activity: ` ${descriptionError}`
               }
@@ -1991,8 +1999,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
             const taskActivity = await prisma.taskActivity.create({
               data: {
                 taskId: updatedTask.id,
-                userId: taskToBeUpdated.assignee.userId,
-                username: taskToBeUpdated.assignee.username,
+                userId: operationUser.userId,
+                username: operationUser.username,
                 date: currentTimeISOString,
                 activity: ` Assigned the task to : [${user.username}]`
               }
@@ -2066,8 +2074,6 @@ export const updateTask = catchAsync(async (req, res, next) => {
           return res.status(200).json({ message: 'Task updated successfully' });
         }
       }
-      return res.status(200).json({ message: 'Task updated successfully' });
-
     });
   } catch (error) {
     console.error('Error occurred during task update:', error);

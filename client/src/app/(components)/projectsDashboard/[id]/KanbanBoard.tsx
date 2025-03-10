@@ -120,7 +120,7 @@ const BoardView = ({ id, email , priority, assignedTo, sprint, projectId,
       }
       
     }
-  }, [tasksList]);
+  }, [tasksList, priority, assignedTo, sprint, isTaskOrSubTask]);
 
   useEffect(() => {
     setPage(1)
