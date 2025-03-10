@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { toast } from "sonner";
+import { Toaster , toast} from "react-hot-toast";
 import {
   Select,
   SelectContent,

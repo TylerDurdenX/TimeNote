@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useCheckRoleCodeQuery, useCreateRoleMutation } from "@/store/api";
 import { useState } from "react";
 import Tags from "../AutoCompleteTags";
-import {toast} from "sonner";
+import { Toaster , toast} from "react-hot-toast";
 
 export function CreateRole() {
   const [name, setName] = useState("");

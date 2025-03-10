@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Clock9, PlusSquare } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { Toaster , toast} from "react-hot-toast";
 import { Cancel, CheckCircle } from "@mui/icons-material";
 import { TimesheetResponse } from "@/store/interfaces";
 import { Card } from "@/components/ui/card";

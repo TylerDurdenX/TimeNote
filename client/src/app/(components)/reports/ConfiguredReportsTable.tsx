@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { dataGridClassNames,} from "@/lib/utils";
 import { Trash2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { toast } from "sonner";
+import { Toaster , toast} from "react-hot-toast";
 import { useDeleteConfigReportsMutation, useGetConfiguredReportsQuery } from '@/store/api';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
