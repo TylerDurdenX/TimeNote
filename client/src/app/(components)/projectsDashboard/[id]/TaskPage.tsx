@@ -373,17 +373,16 @@ useEffect(() => {
   const toggleProgress = async () => {
       const newState = !isProgressStarted;
       if (newState) {
-        console.log('Progress started');
         try {
           const response = await updateTaskProgress({
             taskId: Number(task?.id),
-            progressStart: true
+            progressStart: true,
+            email: email
           });
           if (response.error) {
             if ('data' in response.error) {
               const errorData = response.error.data as {message: string }; 
                 toast.error(errorData.message);
-              
             } else {
               toast.error('An unexpected error occurred');
             }
@@ -395,11 +394,11 @@ useEffect(() => {
           console.error('Error updating task progress:', error);
         }
       } else {
-        console.log('Progress stopped');
         try {
           const response = await updateTaskProgress({
             taskId: Number(task?.id),
-            progressStart: false
+            progressStart: false,
+            email: email
           });
           if (response.error) {
             if ('data' in response.error) {

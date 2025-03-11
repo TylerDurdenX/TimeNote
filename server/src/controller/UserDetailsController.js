@@ -34,7 +34,92 @@ export const getUsersList = catchAsync(async (req, res, next) => {
           },
         })
       );
-    } else {
+    } else if(user.roles.some((role) => role.code === "PROJECT_MANAGER")){
+        const projects = await prisma.project.findMany({
+          where: {
+            projectManager: user.userId
+          }
+        })
+
+        if(!isEmpty(projects)){
+
+          let projectIdList = []
+
+          projects.map((project) => {
+            projectIdList.push(project.id)
+          })
+
+          console.log(projectIdList)
+
+        const usersList = await prisma.user.findMany({
+          where: {
+            projects: {
+              some:{
+                id: {
+                  in: 
+                    projectIdList
+                  
+                }
+              }
+            }
+          }, select: {
+            userId: true,
+            username: true,
+            designation: true,
+            profilePicture: {
+              select: {
+                base64: true,
+              },
+            },
+          }
+        })
+
+        const reportingUsersList = await prisma.user.findMany({
+          where: {
+            reportsToId: user.userId
+          },
+          select: {
+            userId: true,
+            username: true,
+            designation: true,
+            profilePicture: {
+              select: {
+                base64: true,
+              },
+            },
+          },
+        })
+
+        const mergedList = [
+          ...new Map(
+            [...usersList, ...reportingUsersList].map(item => [item.userId, item])
+          ).values()
+        ];
+
+        const updatedUsersList = mergedList.filter(userlist => userlist.userId !== user.userId);
+
+        return res.status(200).json(updatedUsersList)
+      } else{
+        return res.status(200).json(
+          await prisma.user.findMany({
+            where: {
+              reportsToId: user.userId
+            },
+            select: {
+              userId: true,
+              username: true,
+              designation: true,
+              profilePicture: {
+                select: {
+                  base64: true,
+                },
+              },
+            },
+          })
+        );
+      }
+
+      }else{
       return res.status(200).json(
         await prisma.user.findMany({
           where: {
@@ -53,6 +138,7 @@ export const getUsersList = catchAsync(async (req, res, next) => {
         })
       );
     }
+    
   })
   } catch (error) {
     console.error('Error during getUsersList' + error);

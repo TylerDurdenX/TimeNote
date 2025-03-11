@@ -898,7 +898,7 @@ export const updateTaskProgress = catchAsync(async (req, res, next) => {
   }
   })
 }catch(error){
-  console.log('Error during updateTaskProgress' + error)
+  console.log(error)
   return next(new AppError("Some Error Occurred",500))
 }
 })
