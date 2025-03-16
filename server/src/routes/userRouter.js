@@ -17,7 +17,7 @@ import { addscreenshots, getScreenshots } from "../controller/LiveTracking/scree
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 import {createAutoReportConfig, deleteAutoReportConfig, getAutoReportConfig } from "../controller/reportsController/controller.js";
 import { deleteAlert, getAlerts } from "../controller/alertController/alertController.js";
-import { createTimesheetEntry, getPendingTimesheetData, getTimesheetData, getUsersTimesheetData, updateTimesheet, viewTimesheetData } from "../controller/timesheetController/timesheetController.js";
+import { createTimesheetEntry, getPendingTimesheetData, getTimesheetData, getUsersTimesheetData, updateTimesheet, updateTimesheetRecords, viewTimesheetData } from "../controller/timesheetController/timesheetController.js";
 import { updateCustomerData } from "../middleware/customerController.js";
 import { authenticateThirdParty } from "../middleware/generateToken.js";
 import { getAdminRole, getAttendanceData, getAttendanceLCData, getUserAttendanceData, getUserAttendanceTableData, updateAttendance } from "../controller/attendanceController/attendanceController.js";
@@ -107,6 +107,7 @@ router.get('/getAdminRole', isAuthenticated, getAdminRole)
 
 // Third party requests
 router.post("/updateAttendance",authenticateThirdParty, updateAttendance);
+router.post("/updateTimesheetRecords",authenticateThirdParty, updateTimesheetRecords);
 router.post("/signInUser",authenticateThirdParty, signInUser);
 router.post("/signUpTP", authenticateThirdParty, signupTP )
 router.post("/createAuthority",authenticateThirdParty, createAuthority)

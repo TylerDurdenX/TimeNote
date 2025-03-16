@@ -1807,13 +1807,13 @@ export const updateTask = catchAsync(async (req, res, next) => {
         let descriptionError =""
 
         if(taskToBeUpdated.description != updatedTask.description && taskToBeUpdated.points != updatedTask.points){
-          descriptionError = "updated Task Description and Task Points"
+          descriptionError = "Updated Task Description and Task Points"
         }else
         if(taskToBeUpdated.description != updatedTask.description){
-          descriptionError = "updated Task Description"
+          descriptionError = "Updated Task Description"
         }else
         if(taskToBeUpdated.points != updatedTask.points){
-          descriptionError = "updated Task Points"
+          descriptionError = "Updated Estimated Hours"
         }
 
         const currentDateTime = new Date();
@@ -1849,13 +1849,13 @@ export const updateTask = catchAsync(async (req, res, next) => {
         let descriptionError =""
 
         if(taskToBeUpdated.description !== updatedTask.description && taskToBeUpdated.points !== updatedTask.points){
-          descriptionError = "updated Task Description and Task Points"
+          descriptionError = "Updated Task Description and Task Points"
         }else
         if(taskToBeUpdated.description !== updatedTask.description){
-          descriptionError = "updated Task Description"
+          descriptionError = "Updated Task Description"
         }else
         if(taskToBeUpdated.points !== updatedTask.points){
-          descriptionError = "updated Task Points"
+          descriptionError = "Updated Estimated Hours"
         }
 
         const currentDateTime = new Date();
@@ -1973,13 +1973,13 @@ export const updateTask = catchAsync(async (req, res, next) => {
           let descriptionError =""
 
           if(taskToBeUpdated.description !== updatedTask.description && taskToBeUpdated.points !== updatedTask.points){
-            descriptionError = "updated Task Description and Task Points"
+            descriptionError = "Updated Task Description and Task Points"
           }else
           if(taskToBeUpdated.description !== updatedTask.description){
-            descriptionError = "updated Task Description"
+            descriptionError = "Updated Task Description"
           }else
           if(taskToBeUpdated.points !== updatedTask.points){
-            descriptionError = "updated Task Points"
+            descriptionError = "Updated Estimated Hours"
           }
           const currentTimeISOString = currentDateTime.toISOString();
   

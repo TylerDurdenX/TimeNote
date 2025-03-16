@@ -372,3 +372,103 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
       return next(new AppError('Error during getting Pending Timesheet Entries',500))
     }
   });
+
+  export const updateTimesheetRecords = catchAsync(async (req, res, next) => {
+    const { email,taskCompletion} = req.body;
+    try {
+      // await prisma.$transaction(async (prisma) => {
+
+        const user = await prisma.user.findFirst({
+          where:{
+            email: email
+          }
+        })
+
+        let approveFlag = "NO"
+        if(isEmpty(user.reportsToId)){
+          approveFlag = "NA"
+        }else{
+          approveFlag = "NO"
+        }
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);  // Set to midnight to start from the beginning of today
+
+        // Get the end of the day (just before midnight)
+        const endOfDay = new Date(startOfDay);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        taskCompletion.map( async (task) => {
+
+          const taskActivityList = await prisma.taskActivity.findMany({
+            where: {
+              AND:[{
+                taskId: Number(task.taskId)
+              },
+            {
+              userId: user.userId
+            },
+            {
+              date:{
+                gte: startOfDay, 
+                lte: endOfDay
+              }
+            }
+            ]
+             
+            }
+          })
+
+          let consumedHours = 0
+
+          const filteredEntries = taskActivityList.filter(entry => entry.activity === ' Started Task Progress' || entry.activity === ' Paused Task Progress');
+
+          // Variable to accumulate total time difference in milliseconds
+          let totalTimeDifference = 0;
+
+          for (let i = 0; i < filteredEntries.length; i += 2) {
+            const start = filteredEntries[i];
+            const end = filteredEntries[i + 1];
+          
+            // Ensure we have both a start and end
+            if (start.activity === ' Started Task Progress' && end.activity === ' Paused Task Progress') {
+              const timeDifference = end.date - start.date; // Difference in milliseconds
+              totalTimeDifference += timeDifference; // Add the difference to the total
+            }
+          }
+
+          if (totalTimeDifference) {
+            
+            // Convert milliseconds to hours, minutes, and seconds
+            const hours = Math.floor(totalTimeDifference / (1000 * 60 * 60));
+            const minutes = Math.floor((totalTimeDifference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((totalTimeDifference % (1000 * 60)) / 1000);
+
+            const formattedMinutes = minutes.toString().padStart(2, '0');
+          
+            consumedHours = `${hours}:${formattedMinutes}`;
+          }
+
+
+          const newTimesheetEntry = await prisma.timesheet.create({
+            data: {
+              task : task.Comment,
+              consumedHours: String(consumedHours),
+              ApprovedFlag: approveFlag,
+              userId: user.userId,
+              username: user.username,
+              completionPercentage: task.Completed,
+              taskCode: task.taskCode,
+              taskId: Number(task.taskId),
+              date: getTodayDateInISO(new Date())
+            }
+          }) 
+        })
+
+        return next(new SuccessResponse('Timesheet Records Updated Successfully',200))
+      // })
+    } catch (error) {
+      console.log(error)
+      return next(new AppError('Error during updateTimesheetRecords',200))
+    }
+  });

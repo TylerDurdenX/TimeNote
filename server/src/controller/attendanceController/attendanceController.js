@@ -32,6 +32,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
           },
         });
       } else {
+
         const attendance = await prisma.attendance.update({
           where: {
             userId_date: {
@@ -43,6 +44,44 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
             punchOutTime: punchOutTime,
           },
         });
+
+        const pendingTasks = await prisma.task.findMany({
+          where: {
+            assignedUserId: user.userId
+          }
+        })
+
+        let pendingTaskList = []
+
+        pendingTasks.map((task) => {
+          if((task.status === 'Work In Progress') || (task.status === 'Under Review') || (task.status === 'Completed') ){
+            const pendingTaskEntry = {
+              taskname: task.title,
+              taskCode:task.code,
+              taskDescription: task.description,
+              taskId: task.id
+            }
+            pendingTaskList.push(pendingTaskEntry)
+          }
+        })
+
+        if(!isEmpty(pendingTaskList)){
+          const result = {
+            status: "Success",
+            error: null,
+            message: "Tasks",
+            stack: pendingTaskList,
+          }
+
+          res.status(200).json(result)
+        }else{
+          const result = {
+            status: "Success",
+            error: null,
+            message: "Record Updated successfully",
+            stack: null,
+          }
+        }
       }
       return next(new SuccessResponse("Record Updated successfully", 200));
     });
