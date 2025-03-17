@@ -260,6 +260,7 @@ model Timesheet {
   task         String
   completionPercentage      String?
   consumedHours       String
+  approvedHours       String?
   ApprovedFlag      String
   userId         Int
   date      DateTime

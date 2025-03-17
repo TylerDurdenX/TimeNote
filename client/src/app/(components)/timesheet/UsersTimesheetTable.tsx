@@ -63,7 +63,11 @@ const columns: GridColDef[] = [
     headerName: "Logged Hours",
     flex: 1
   },
-  
+  {
+    field: "approvedHours",
+    headerName: "Approved Hours",
+    flex: 1
+  },
   {
     field: "date",
     headerName: "Date",

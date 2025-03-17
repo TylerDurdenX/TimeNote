@@ -160,6 +160,7 @@ const ProjectPage = () => {
 
   const [isHovered, setIsHovered] = useState(true);
   const [isEditable, setIsEditable] = useState(false);
+  const [isDateEditable, setIsDateEditable] = useState(false);
   const [clientName, setClientName] = useState(project?.clientName); 
   const [isPMEditable, setIsPMEditable] = useState(false);
   const [isAssigneeHovered, setIsAssigneeHovered] = useState(true);
@@ -167,9 +168,17 @@ const ProjectPage = () => {
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(true);
   const [description, setDescription] = useState(project?.projectDescription);
+  const [startDate, setStartDate] = useState(project?.startDate!);
+  const [dueDate, setDueDate] = useState(project?.dueDate!);
 
   const [initialDescription, setInitialDescription] = useState(
     project?.projectDescription
+  );
+  const [initialStartDate, setInitialStartDate] = useState(
+    project?.startDate!
+  );
+  const [initialDueDate, setInitialDueDate] = useState(
+    project?.dueDate!
   );
   const [initialPM, setInitialPM] = useState(
     project?.projectManager || ""
@@ -192,8 +201,12 @@ useEffect(() => {
     setDescription(project?.projectDescription);
     setPM(project?.projectManager);
     setInitialPM(project?.projectManager);
+    setStartDate(project?.startDate)
+    setDueDate(project?.dueDate)
     setClientName(project.clientName)
     setInitialClientName(project.clientName)
+    setInitialStartDate(project?.startDate)
+    setInitialDueDate(project?.dueDate)
     setProjectStatus(project.status)
     setIsSaveButtonEnabled(false);
   }
@@ -203,12 +216,18 @@ useEffect(() => {
   const isChanged =
     description !== initialDescription ||
     PM !== initialPM ||
-    clientName !== initialClientName
+    clientName !== initialClientName ||
+    startDate !==initialStartDate || 
+    dueDate !== initialDueDate
 
   setIsSaveButtonEnabled(isChanged); 
 }, [
   description,
   PM,
+  startDate,
+  dueDate,
+  initialStartDate,
+  initialDueDate,
   initialDescription,
   initialPM,
   clientName,
@@ -217,6 +236,10 @@ useEffect(() => {
 
 const handleEditClick = () => {
   setIsEditable(true);
+};
+
+const handleDateEditClick = () => {
+  setIsDateEditable(true);
 };
 
   const handleEditPMClick = () => {
@@ -231,6 +254,7 @@ const handleEditClick = () => {
     setIsPMEditable(false);
     setIsEditable(false)
     setIsHovered(true);
+    setIsDateEditable(false)
   };
 
   const handlePMBlur = () => {
@@ -274,6 +298,8 @@ const handleEditClick = () => {
       projectManager: PM!,
       clientName: clientName!,
       projectDescription: description!,
+      startDate: startDate,
+      dueDate: dueDate
     };
     try {
       const response = await updateProject(updateProjectData);
@@ -357,9 +383,45 @@ const handleEditClick = () => {
 
         <div className="space-y-4 text-gray-600 dark:text-gray-400">
           <div className="text-sm flex justify-between items-center">
-            <span>
-              {formatDate(project?.startDate!)} - {formatDate(project?.dueDate!)}
-            </span>
+          {isDateEditable ? (
+                <div className="flex gap-4">  {/* Use flex and gap to space inputs */}
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)} // Update state as user types
+                    onBlur={handleBlur} // Trigger onBlur event when user clicks outside
+                    onKeyDown={handleKeyDown} // Trigger onBlur when Enter key is pressed
+                    className="border p-1 rounded w-30" // Style the input
+                  />
+                  -
+                  <input
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)} // Update state as user types
+                    onBlur={handleBlur} // Trigger onBlur event when user clicks outside
+                    onKeyDown={handleKeyDown} // Trigger onBlur when Enter key is pressed
+                    className="border p-1 rounded w-30" // Style the input
+                  />
+                </div>
+              ) : (
+              <div className="flex items-center">
+                {/* Display the text */}
+                <div className="flex items-center">
+                  <span className="cursor-pointer">
+                  {formatDate(startDate)} - {formatDate(dueDate)}
+                  </span>
+
+                  {/* Pencil icon that appears when hovering over the parent */}
+                  <Pencil
+                    size={16}
+                    className={`ml-2 cursor-pointer ${
+                      isHovered ? "opacity-100" : "opacity-0"
+                    } transition-opacity`}
+                    onClick={handleDateEditClick}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="text-sm relative">

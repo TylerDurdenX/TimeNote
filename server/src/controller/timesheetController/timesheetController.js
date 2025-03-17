@@ -26,7 +26,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
         if(!isEmpty(timesheetDataList)){
           timesheetDataList.map((timesheet) => {
-            const [hours, minutes] = timesheet.consumedHours.split(':').map(Number);
+            const [hours, minutes] = timesheet.approvedHours.split(':').map(Number);
             totalMinutes += hours * 60 + minutes;
           })
         }
@@ -106,7 +106,6 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
     const dateInIST = new Date(formattedDate + "T00:00:00+05:30");
     return dateInIST.toISOString(); 
 }
-
 
   function updateTimesheetData(inputString,updatedEntry, approveRejectFlag) {
     let objectsString = inputString;
@@ -239,8 +238,12 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
 
           const timeToMinutes = (time) => {
-            const [hours, minutes] = time.split(':').map(Number);
-            return hours * 60 + minutes;
+            if(time){
+              const [hours, minutes] = time.split(':').map(Number);
+              return hours * 60 + minutes;
+            }else{
+              return 0
+            }
           };
           
           // Helper function to convert total minutes back to "HH:MM" format
@@ -256,16 +259,19 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
           
             // Convert current consumedHours to minutes
             const currentMinutes = timeToMinutes(current.consumedHours);
+            const currentApprovedMinutes = timeToMinutes(current.approvedHours);
           
             if (existingUser) {
               // If the user already exists, add the consumedHours
               existingUser.totalMinutes += currentMinutes;
+              existingUser.totalApprovedMinutes += currentApprovedMinutes
             } else {
               // If the user doesn't exist, create a new entry
               acc.push({
                 userId: current.userId,
                 username: current.username,
                 totalMinutes: currentMinutes,
+                totalApprovedMinutes: currentApprovedMinutes
               });
             }
             return acc;
@@ -276,6 +282,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             return {
               id: index + 1,  // Use the index + 1 to generate unique ids for each user
               consumedHours: minutesToTime(user.totalMinutes),
+              approvedHours: minutesToTime(user.totalApprovedMinutes),
               userId: user.userId,
               username: user.username,
             };
@@ -321,14 +328,14 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
       })
     } catch (error) {
-      console.log('Error during getUsersTimesheetData' + error)
+      console.log(error)
       return next(new AppError('Error during getting Pending Timesheet Entries',500))
     }
   });
 
 
   export const updateTimesheet = catchAsync(async (req, res, next) => {
-    const {id, approveRejectFlag,email} = req.query;
+    const {id, approveRejectFlag,approvedHours, email} = req.query;
 
     try {
       await prisma.$transaction(async (prisma) => {
@@ -340,7 +347,8 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
               id: Number(id)
             },
             data:{
-              ApprovedFlag: "NA"
+              ApprovedFlag: "NA",
+              approvedHours: String(approvedHours)
             }
           })
           return next(new SuccessResponse("Record Approved successfully",200))
@@ -392,9 +400,8 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         }
 
         const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);  // Set to midnight to start from the beginning of today
+        startOfDay.setHours(0, 0, 0, 0);  
 
-        // Get the end of the day (just before midnight)
         const endOfDay = new Date(startOfDay);
         endOfDay.setHours(23, 59, 59, 999);
 
@@ -423,23 +430,20 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
           const filteredEntries = taskActivityList.filter(entry => entry.activity === ' Started Task Progress' || entry.activity === ' Paused Task Progress');
 
-          // Variable to accumulate total time difference in milliseconds
           let totalTimeDifference = 0;
 
           for (let i = 0; i < filteredEntries.length; i += 2) {
             const start = filteredEntries[i];
             const end = filteredEntries[i + 1];
           
-            // Ensure we have both a start and end
             if (start.activity === ' Started Task Progress' && end.activity === ' Paused Task Progress') {
-              const timeDifference = end.date - start.date; // Difference in milliseconds
-              totalTimeDifference += timeDifference; // Add the difference to the total
+              const timeDifference = end.date - start.date; 
+              totalTimeDifference += timeDifference; 
             }
           }
 
           if (totalTimeDifference) {
             
-            // Convert milliseconds to hours, minutes, and seconds
             const hours = Math.floor(totalTimeDifference / (1000 * 60 * 60));
             const minutes = Math.floor((totalTimeDifference % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((totalTimeDifference % (1000 * 60)) / 1000);
@@ -447,8 +451,9 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             const formattedMinutes = minutes.toString().padStart(2, '0');
           
             consumedHours = `${hours}:${formattedMinutes}`;
+          }else{
+            consumedHours = '0:00'
           }
-
 
           const newTimesheetEntry = await prisma.timesheet.create({
             data: {

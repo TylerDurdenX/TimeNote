@@ -1605,6 +1605,51 @@ export const getSprint = catchAsync(async (req, res, next) => {
   }
 });
 
+export const getProjectSprint = catchAsync(async (req, res, next) => {
+  const { sprintId} = req.query;
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+
+    
+    const sprint = await prisma.sprint.findFirst({
+      where:{
+        id: Number(sprintId)
+      }
+    })
+
+    res.status(200).json(sprint)
+  })
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an getting Sprint Data", 400));
+  }
+});
+
+export const updateProjectSprint = catchAsync(async (req, res, next) => {
+  const { title, description, startDate, endDate, sprintId} = req.body;
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+
+    
+    const sprint = await prisma.sprint.update({
+      where:{
+        id: Number(sprintId)
+      },
+      data:{
+        title: title,
+        description: description,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate)
+      }
+    })
+    return next(new SuccessResponse('Sprint Updated Successfully',200))
+  })
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("There was an getting Sprint Data", 400));
+  }
+});
+
 export const getProjectManagers = catchAsync(async (req, res, next) => {
   try {
     const result = await prisma.$transaction(async (prisma) => {
@@ -2796,7 +2841,7 @@ export const updateProjectStatus = catchAsync(async (req, res, next) => {
 });
 
 export const updateProject = catchAsync(async (req, res, next) => {
-  const {email, projectId,projectManager,clientName,projectDescription, projectCode} = req.body
+  const {email, projectId,projectManager,clientName,projectDescription, projectCode, startDate, dueDate} = req.body
   try {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
@@ -2829,15 +2874,16 @@ export const updateProject = catchAsync(async (req, res, next) => {
           projectManager: projectManagerUser.userId,
           clientName: clientName,
           description: projectDescription,
-          code: projectCode
+          startDate: startDate,
+          endDate: dueDate
         }
       })
       
       return next(new SuccessResponse('Project Updated Successfully',200))
     })
   } catch (error) {
-    console.log('Error during update Project' + error)
-    res.status(500).json({ message: `Error Occurred : ${error.message}` });
+    console.log(error)
+    return next(new AppError('Some Error Occurred',500))
   }
 });
 

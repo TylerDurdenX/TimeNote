@@ -30,8 +30,11 @@ const TimesheetHeader = ({
     }
   };
 
+  const todayWithMidnightTime = new Date();
+  todayWithMidnightTime.setHours(0, 0, 0, 0); // Set the time to 00:00:00
+
   useEffect(() => {
-    setSelectedDate(new Date());
+    setSelectedDate(new Date(todayWithMidnightTime));
   }, []);
 
   return (

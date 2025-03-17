@@ -27,6 +27,7 @@ import {
   ProjectUsers,
   ReportConfig,
   ScreenshotResponse,
+  SprintData,
   SprintResponse,
   SubTaskFormData,
   SubTaskObject,
@@ -39,6 +40,7 @@ import {
   timesheetEntry,
   TimesheetResponse,
   UpdateProjectData,
+  UpdateSprintObject,
   UpdateSubTaskData,
   UpdateTaskData,
   UploadAttachment,
@@ -359,9 +361,9 @@ export const api = createApi({
       }), 
       invalidatesTags : ["Tasks", "Task"]
   }),
-  updateTimesheetEntry: build.mutation<ApiResponse, {id: number, email: string, approveRejectFlag: boolean}>({
-    query: ({id,  email, approveRejectFlag})=> ({
-        url: `api/user/updateTimesheet?id=${id}&email=${email}&approveRejectFlag=${approveRejectFlag}`,
+  updateTimesheetEntry: build.mutation<ApiResponse, {id: number, email: string,approvedHours: string, approveRejectFlag: boolean}>({
+    query: ({id,  email, approveRejectFlag, approvedHours})=> ({
+        url: `api/user/updateTimesheet?id=${id}&email=${email}&approveRejectFlag=${approveRejectFlag}&approvedHours=${approvedHours}`,
         method: "PATCH",
     }), 
     invalidatesTags : ["PendingTimesheet"]
@@ -625,6 +627,20 @@ getProjectHoursEstimation: build.query<ProjectHours, { projectId: number}>({
   },
   providesTags : ["ProjectHours"]
 }),
+getProjectSprint: build.query<SprintData, { sprintId: number}>({
+  query: ({ sprintId,}) => {
+    const url = `api/user/getProjectSprint?sprintId=${sprintId}`;
+    return url;
+  },
+}),
+updateProjectSprint: build.mutation<ApiResponse, UpdateSprintObject>({
+  query: (updateSprintObject)=> ({
+      url: "api/user/updateProjectSprint",
+      method: "POST",
+      body: updateSprintObject,
+  }), 
+  invalidatesTags : ["Tasks","SprintCount"]
+}),
 getMentionedUsers: build.query<MentionedUser[], { name: string}>({
   query: ({ name,}) => {
     const url = `api/user/getMentionedUsers?name=${name}`;
@@ -837,5 +853,7 @@ export const {
   useGetUserAttendanceDataQuery,
   useGetUserAttendanceTableDataQuery,
   useGetAdminRoleQuery,
-  useUpdateUserBasicSettingsDataMutation
+  useUpdateUserBasicSettingsDataMutation,
+  useGetProjectSprintQuery,
+  useUpdateProjectSprintMutation
 } = api;

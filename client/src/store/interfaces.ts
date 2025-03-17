@@ -122,6 +122,8 @@ export interface UpdateProjectData{
     projectManager: string
     clientName: string
     projectDescription: string
+    startDate: string
+    dueDate: string
 }
 
 export interface ProjectListResponse{
@@ -357,6 +359,13 @@ export interface ProjectHours{
     hoursOverrun: number
 }
 
+export interface SprintData {
+    title :          string
+  description:     string
+  startDate:       string
+  endDate:         string
+}
+
 export interface ProjectUsers{
     userId: number
     username: string
@@ -465,6 +474,14 @@ export interface MentionedUser {
 export interface PmUserResponse{
     userId: number
     username: string
+}
+
+export interface UpdateSprintObject{
+    title: string
+    description: string
+    startDate: string
+    endDate: string
+    sprintId: number
 }
 
 export interface UpdateTaskData {

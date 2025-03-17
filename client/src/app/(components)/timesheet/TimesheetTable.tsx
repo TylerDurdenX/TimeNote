@@ -38,8 +38,6 @@ const TimesheetTable = ({ email , selectedDate, data}: Props) => {
       return regex.test(time);
     }
 
-    console.log(validateTimeFormat(consumedHours))
-
     const isFormValid = () => {
         return task && date && validateTimeFormat(consumedHours)
     };
@@ -80,7 +78,7 @@ const columns: GridColDef[] = [
   {
     field: "task",
     headerName: "Task",
-    flex: 3,
+    flex: 2.5,
     renderCell: (params) => {
       const rowData = params.row;
       const linkTo = rowData.projectId ? `timesheet/${rowData.projectId}/${rowData.taskCode}?email=${email}` : '';
@@ -113,6 +111,11 @@ const columns: GridColDef[] = [
   {
     field: "consumedHours",
     headerName: "Consumed Hours",
+    flex: 1
+  },
+  {
+    field: "approvedHours",
+    headerName: "Approved Hours",
     flex: 1
   },
   {

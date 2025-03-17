@@ -38,7 +38,7 @@ const columns: GridColDef[] = [
   {
     field: "task",
     headerName: "Task",
-    flex: 3,
+    flex: 2.5,
     renderCell: (params) => {
       const rowData = params.row;
       const linkTo = rowData.projectId ? `timesheet/${rowData.projectId}/${rowData.taskCode}?email=${email}` : '';
@@ -66,12 +66,17 @@ const columns: GridColDef[] = [
   {
     field: "completionPercentage",
     headerName: "Completion Percentage",
-    flex: 1.5
+    flex: 1.2
   },
   {
     field: "consumedHours",
     headerName: "Consumed Hours",
-    flex: 1
+    flex: 0.8
+  },
+  {
+    field: "approvedHours",
+    headerName: "Approved Hours",
+    flex: 0.8
   },
   {
     field: "ApprovedFlag",

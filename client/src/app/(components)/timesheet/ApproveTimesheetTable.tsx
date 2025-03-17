@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { dataGridClassNames, } from "@/lib/utils";
-import { Button, DialogTitle } from "@mui/material";
+import { Button, DialogTitle, Input, TextField } from "@mui/material";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 import { Clock9} from "lucide-react";
 import { Toaster, toast } from 'react-hot-toast';
@@ -28,12 +28,33 @@ const ApproveTimesheetTable = ({ email , selectedDate}: Props) => {
         { email: email!, date: selectedDate.toString()},
         { refetchOnMountOrArgChange: true }
       );
-      
 
-      async function handleApprove (id: number) {
-        console.log(id)
+      function validateTimeFormat(time: string) {
+        const regex = /^([01]?[0-9]|2[0-3]):([0-5]?[0-9])$/;
+        return regex.test(time);
+      }
+
+      const formatTime = (input: string): string => {
+        if (/^\d+$/.test(input)) {
+          return `${input}:00`;
+        }
+      
+        const timePattern = /^\d{1,2}:[0-5][0-9]$/;
+        if (timePattern.test(input)) {
+          return input;
+        }
+        return input;
+      };
+
+      async function handleApprove (id: number, hours: string) {
+        const approvedHours = formatTime(hours)
+
+        if(!validateTimeFormat(approvedHours)){
+          toast.error('Approved Hours not Valid')
+        }
+        console.log(approvedHours)
         try {
-            const response = await updateTimesheet({id:id, email: email! , approveRejectFlag: true, })
+            const response = await updateTimesheet({id:id, email: email!, approvedHours: approvedHours , approveRejectFlag: true, })
 
             // @ts-ignore
             if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
@@ -67,7 +88,7 @@ const ApproveTimesheetTable = ({ email , selectedDate}: Props) => {
       const handleDeleteConfirmation = async () => {
         if (selectedId !== null) {
           try {
-            const response = await updateTimesheet({id:Number(selectedId), email: email! , approveRejectFlag: false, })
+            const response = await updateTimesheet({id:Number(selectedId), email: email! ,approvedHours: "", approveRejectFlag: false, })
 
             // @ts-ignore
             if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
@@ -90,7 +111,7 @@ const columns: GridColDef[] = [
   {
     field: "task",
     headerName: "Task",
-    flex: 2.5,
+    flex: 2,
     renderCell: (params) => (
         <Dialog>
       <DialogTrigger asChild>
@@ -113,7 +134,7 @@ const columns: GridColDef[] = [
   {
     field: "username",
     headerName: "User",
-    flex: 1.5
+    flex: 1
   },
   {
     field: "completionPercentage",
@@ -123,7 +144,7 @@ const columns: GridColDef[] = [
   {
     field: "date",
     headerName: "Date",
-    flex: 1.5,
+    flex: 1,
     renderCell: (params) => {
       return formatDate(params.value); 
     },
@@ -134,11 +155,31 @@ const columns: GridColDef[] = [
     flex: 1
   },
   {
+    field: "approvedHours",
+    headerName: "Approved Hours",
+    flex: 1,
+    editable: true,
+    renderCell: (params) => {
+      return (
+        <Input
+          value={params.value} // Display the current cell value
+          className=" mb-3 bg-white"
+          placeholder="0:00"
+          onChange={(event) => {
+            // Update the value directly on the cell change
+            const newValue = event.target.value;
+            params.api.setEditCellValue({ ...params, value: newValue });
+          }}
+          
+        />
+      );
+    },
+  },
+  {
     field: "ApprovedFlag",
     headerName: "Approval Status",
     flex: 1.5,
     renderCell: (params) => {
-        // You can access the value of the cell here using params.value
         if (params.value === 'NA') {
           return (<><CheckCircle style={{ color: 'green' }} /> Approved</>) ;
         } else if (params.value === 'NO') {
@@ -161,7 +202,7 @@ const columns: GridColDef[] = [
             variant="contained"
             color="success"
             size="small"
-            onClick={() => handleApprove(params.row.id)}
+            onClick={() => handleApprove(params.row.id, params.row.approvedHours)}
             startIcon={<CheckCircle />}
             sx={{
               backgroundColor: '#4caf50', // Green color

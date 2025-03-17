@@ -10,7 +10,7 @@ import {
 import { Toaster, toast } from 'react-hot-toast';
 import { Input } from "@/components/ui/input"; 
 import { Label } from "@/components/ui/label";
-import { FilePenLine, PlusSquare, SquarePen } from "lucide-react";
+import { ChevronLeft, FilePenLine, PlusSquare, SquarePen } from "lucide-react";
 import { useCreateSprintMutation } from "@/store/api";
 
 type Props = {
@@ -74,11 +74,15 @@ const ProjectSectionHeader = ({
 
   return (
     <div className="flex relative w-full pl-4 h-[20px] mb-1 items-center justify-between">
+
       <h1
           className={`${
             isSmallText ? "text-lg" : "text-2xl"
           } font-semibold dark:text-white flex items-center`}
         >
+          <button onClick={() => window.history.back()}>
+          <ChevronLeft className="mr-5"/>
+          </button>
           {name}
         </h1>
       <div className="flex items-center space-x-4 mr-5 overflow-auto">
@@ -89,7 +93,7 @@ const ProjectSectionHeader = ({
               {buttonName}
             </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[42vw] lg:max-w-[42vw] max-h-[29vw] overflow-auto">
+          <DialogContent className="sm:max-w-[45vw] lg:max-w-[45vw] max-h-[29vw] overflow-auto">
             <DialogHeader>
               <DialogTitle className="mb-2">Create Sprint</DialogTitle>
             </DialogHeader>
@@ -104,27 +108,27 @@ const ProjectSectionHeader = ({
                 <form onSubmit={handleSubmit}>
                   <div className="grid gap-4 py-3">
                     <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                      <Label className="text-center">Sprint Title</Label>
+                      <Label className="text-center">Sprint Title<span className="text-red-500 ml-1">*</span></Label>
                       <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className="col-span-7"
                         required
                       />
-                      <Label className="text-center">Description</Label>
+                      <Label className="text-center">Description<span className="text-red-500 ml-1">*</span></Label>
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         className="col-span-7 shadow border"
                       />
-                      <Label className="text-center">Start Date</Label>
+                      <Label className="text-center">Start Date<span className="text-red-500 ml-1">*</span></Label>
                       <Input
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
                         className="col-span-3"
                       />
-                      <Label className="text-center">End Date</Label>
+                      <Label className="text-center">End Date<span className="text-red-500 ml-1">*</span></Label>
                       <Input
                         type="date"
                         value={endDate}
