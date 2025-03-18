@@ -64,6 +64,7 @@ model Screenshots {
 model Attendance {
     id       Int     @id @default(autoincrement()) 
     userId    Int
+    username    String?
     punchInTime   DateTime?
     punchOutTime    DateTime?
     date      DateTime

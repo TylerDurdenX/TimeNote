@@ -482,6 +482,8 @@ export interface UpdateSprintObject{
     startDate: string
     endDate: string
     sprintId: number
+    email: string
+    projectName: string
 }
 
 export interface UpdateTaskData {
@@ -490,6 +492,8 @@ export interface UpdateTaskData {
     assignee: string | undefined
     taskDescription: string
     editedConsumedHours: string
+    startDate: string,
+    dueDate: string
     email: string
 }
 

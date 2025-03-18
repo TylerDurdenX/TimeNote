@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect,  useState } from "react";
-import { Pencil, Download, EllipsisVertical,} from "lucide-react";
+import { Pencil, Download, EllipsisVertical, ChevronLeft,} from "lucide-react";
 import { useCreateSubTaskMutation, useDeleteAttachmentMutation, useDeleteProjectAttachmentMutation, useDownloadAttachmentMutation, useDownloadProjectAttachmentMutation, useGetProjectManagerQuery, useGetProjectQuery, useUpdateProjectMutation,  useUpdateProjectStatusMutation, useUploadProjectAttachmentMutation } from "@/store/api";
 import { Toaster, toast } from 'react-hot-toast';
 import { Progress } from "@/components/ui/progress"
@@ -335,6 +335,9 @@ const handleDateEditClick = () => {
       {/* Task Title and Description */}
       <div className="space-y-4">
       <div className="flex justify-between items-center">
+        <button onClick={() => window.history.back()}>
+                  <ChevronLeft className="mr-5"/>
+                  </button>
         <h1 className="text-3xl font-semibold">{project?.projectName} - {project?.projectCode}</h1>
         <div className="flex space-x-4 ml-auto">
         <DropdownMenu>

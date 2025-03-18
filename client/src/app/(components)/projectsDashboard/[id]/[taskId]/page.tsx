@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from "react";
-import { PlusSquare, Pencil, Download, Maximize2, EllipsisVertical, Clock } from "lucide-react";
+import { PlusSquare, Pencil, Download, Maximize2, EllipsisVertical, Clock, ChevronLeft } from "lucide-react";
 import { SubTask, Task as TaskType } from "@/store/interfaces";
 import { useCloseTaskMutation, useCreateSubTaskMutation, useDeleteAttachmentMutation, useDownloadAttachmentMutation, useGetProjectUsersQuery, useGetTaskQuery, useUpdateTaskAssigneeMutation, useUpdateTaskMutation, useUpdateTaskProgressMutation, useUpdateTaskStatusMutation, useUploadAttachmentMutation } from "@/store/api";
 import { Toaster, toast } from 'react-hot-toast';
@@ -279,6 +279,15 @@ const TaskPageFull = () => {
     const [subTaskAssignedUserId, setSubTaskAssignedUserId] = useState("");
     const [isEditableStatus, setIsEditableStatus] = useState(false);
     const [taskStatus, setTaskStatus] = useState(task?.status || "");
+    const [isDateEditable, setIsDateEditable] = useState(false);
+    const [startDate, setStartDate] = useState(task?.startDate);
+    const [dueDate, setDueDate] = useState(task?.dueDate);
+    const [initialStartDate, setInitialStartDate] = useState(
+      task?.startDate
+    );
+    const [initialDueDate, setInitialDueDate] = useState(
+      task?.dueDate
+    );
     const [createSubTask, { isLoading: isLoadingCreateSubTask }] =
     useCreateSubTaskMutation();
     const [isOpen, setIsOpen] = useState(false);
@@ -350,6 +359,12 @@ useEffect(() => {
     setEditedText(task?.points)
     setInitialAssignee(task?.assignee?.username || "");
     setInitialDescription(task.description || "");
+    const formattedStartDate = new Date(task.startDate!).toISOString().split('T')[0];
+    setStartDate(formattedStartDate);
+    const formattedDueDate = new Date(task.dueDate!).toISOString().split('T')[0];
+    setDueDate(formattedDueDate);
+    setInitialDueDate(task.dueDate || "");
+    setInitialStartDate(task.startDate || "");
     setInitialPoints(task.points || "");
     setSubTasks(task?.subTasks || [])
     setInitialStatus(task?.status || "")
@@ -365,7 +380,9 @@ useEffect(() => {
     assignee !== initialAssignee ||
     taskStatus!== initialStatus ||
     editedText !== initialPoints || 
-    editedConsumedHours !== initialEditedConsumedHours
+    editedConsumedHours !== initialEditedConsumedHours ||
+    startDate !== initialStartDate ||
+    dueDate !== initialDueDate
 
   setIsSaveButtonEnabled(isChanged); 
 }, [
@@ -373,6 +390,10 @@ useEffect(() => {
   assignee,
   editedText,
   taskStatus,
+  startDate,
+  dueDate,
+  initialStartDate,
+  initialDueDate,
   initialDescription,
   initialAssignee,
   initialPoints,
@@ -393,6 +414,10 @@ useEffect(() => {
     setIsAssigneeEditable(true);
   };
 
+  const handleDateEditClick = () => {
+    setIsDateEditable(true);
+  };
+
   const handleEditDescriptionClick = () => {
     setIsDescriptionEditable(true);
   };
@@ -401,6 +426,7 @@ useEffect(() => {
     setIsEditable(false);
     setIsHovered(true);
     setIsConsumedHoursEditable(false)
+    setIsDateEditable(false)
   };
 
   const handleAssigneeBlur = () => {
@@ -432,6 +458,8 @@ useEffect(() => {
       assignee: assignee,
       taskDescription: description,
       editedConsumedHours: editedConsumedHours,
+      startDate: startDate!,
+      dueDate: dueDate!,
       email: email!
     };
     try {
@@ -550,6 +578,9 @@ useEffect(() => {
       {/* Task Title and Description */}
       <div className="space-y-4">
       <div className="flex justify-between items-center">
+        <button onClick={() => window.history.back()}>
+                  <ChevronLeft className="mr-5"/>
+                  </button>
         <h1 className="text-3xl font-semibold">{task?.title} - {task?.code}</h1>
         <div className="flex space-x-4 ml-auto">
         
@@ -619,9 +650,45 @@ useEffect(() => {
 
         <div className="space-y-4 text-gray-600 dark:text-gray-400">
           <div className="text-sm flex justify-between items-center">
-            <span>
-              {formatDate(task?.startDate!)} - {formatDate(task?.dueDate!)}
-            </span>
+            {isDateEditable ? (
+                            <div className="flex gap-4">  {/* Use flex and gap to space inputs */}
+                              <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)} // Update state as user types
+                                onBlur={handleBlur} // Trigger onBlur event when user clicks outside
+                                onKeyDown={handleKeyDown} // Trigger onBlur when Enter key is pressed
+                                className="border p-1 rounded w-30" // Style the input
+                              />
+                              -
+                              <input
+                                type="date"
+                                value={dueDate}
+                                onChange={(e) => setDueDate(e.target.value)} // Update state as user types
+                                onBlur={handleBlur} // Trigger onBlur event when user clicks outside
+                                onKeyDown={handleKeyDown} // Trigger onBlur when Enter key is pressed
+                                className="border p-1 rounded w-30" // Style the input
+                              />
+                            </div>
+                          ) : (
+                          <div className="flex items-center">
+                            {/* Display the text */}
+                            <div className="flex items-center">
+                            <span>
+                              {formatDate(startDate!)} - {formatDate(dueDate!)}
+                            </span>
+            
+                              {/* Pencil icon that appears when hovering over the parent */}
+                              <Pencil
+                                size={16}
+                                className={`ml-2 cursor-pointer ${
+                                  isHovered ? "opacity-100" : "opacity-0"
+                                } transition-opacity`}
+                                onClick={handleDateEditClick}
+                              />
+                            </div>
+                          </div>
+                        )}
             <>
             <span className="text-gray-600 text-lg inline-flex items-center mr-5">
             <Clock className="mr-2 dark:text-white" /> 

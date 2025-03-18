@@ -27,6 +27,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
         const attendance = await prisma.attendance.create({
           data: {
             userId: user.userId,
+            username: user.username,
             punchInTime: punchInTime,
             date: indianTimeISOString,
           },
@@ -641,7 +642,7 @@ const formatDate = (date) => {
   };
 
 export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
-    const { email } = req.query;
+    const { email, adminFlag } = req.query;
   
     try {
       await prisma.$transaction(async (prisma) => {
@@ -650,45 +651,103 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
             email: email,
           },
         });
-  
-        const startOfCurrentMonth = startOfMonth(new Date());
-        const endOfCurrentMonth = endOfMonth(new Date());
-  
-        const attendanceRecords = await prisma.attendance.findMany({
-          where: {
-            date: {
-              gte: startOfCurrentMonth, 
-              lte: endOfCurrentMonth,
+
+        if(adminFlag === 'true'){
+          let idList =[]
+
+          const userIdList = await prisma.user.findMany({
+            where: {
+              reportsToId: user.userId
             },
-            userId: user.userId
-          },
-        });
-
-        let finalResult = []
-        let id = 1
-
-        attendanceRecords.map((attendance) => {
-            let inTime = 'NA'
-            let outTime = 'NA'
-            if(attendance.punchInTime){
-                inTime = formatTime(attendance.punchInTime)
+            select: {
+              userId: true
             }
+          })
 
-            if(attendance.punchOutTime){
-                outTime = formatTime(attendance.punchOutTime)
+          userIdList.map((user) => {
+            idList.push(user.userId)
+          })
+ 
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const isoDate = today.toISOString();
+          const attendanceRecords = await prisma.attendance.findMany({
+            where: {
+              date: isoDate,
+              userId: {
+                in: idList
+              },
             }
-            const result = {
-                id: id,
-                date: formatDate(attendance.date),
-                punchInTime: inTime,
-                punchOutTime: outTime,
-                duration: getTimeDifference(inTime, outTime)
-            }
-            id= id+ 1
-            finalResult.push(result)
-        })
+          });
+
+          let finalResult = []
+          let id = 1
   
-        return res.status(200).json(finalResult);
+          attendanceRecords.map((attendance) => {
+              let inTime = 'NA'
+              let outTime = 'NA'
+              if(attendance.punchInTime){
+                  inTime = formatTime(attendance.punchInTime)
+              }
+  
+              if(attendance.punchOutTime){
+                  outTime = formatTime(attendance.punchOutTime)
+              }
+              const result = {
+                  id: id,
+                  date: formatDate(attendance.date),
+                  punchInTime: inTime,
+                  punchOutTime: outTime,
+                  username: attendance.username,
+                  duration: getTimeDifference(inTime, outTime)
+              }
+              id= id+ 1
+              finalResult.push(result)
+          })
+    
+          return res.status(200).json(finalResult);
+
+        }else{
+          const startOfCurrentMonth = startOfMonth(new Date());
+          const endOfCurrentMonth = endOfMonth(new Date());
+    
+          const attendanceRecords = await prisma.attendance.findMany({
+            where: {
+              date: {
+                gte: startOfCurrentMonth, 
+                lte: endOfCurrentMonth,
+              },
+              userId: user.userId
+            },
+          });
+  
+          let finalResult = []
+          let id = 1
+  
+          attendanceRecords.map((attendance) => {
+              let inTime = 'NA'
+              let outTime = 'NA'
+              if(attendance.punchInTime){
+                  inTime = formatTime(attendance.punchInTime)
+              }
+  
+              if(attendance.punchOutTime){
+                  outTime = formatTime(attendance.punchOutTime)
+              }
+              const result = {
+                  id: id,
+                  date: formatDate(attendance.date),
+                  punchInTime: inTime,
+                  punchOutTime: outTime,
+                  duration: getTimeDifference(inTime, outTime)
+              }
+              id= id+ 1
+              finalResult.push(result)
+          })
+    
+          return res.status(200).json(finalResult);
+        }
+  
       });
     } catch (error) {
       console.error(error);

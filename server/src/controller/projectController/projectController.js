@@ -1609,7 +1609,6 @@ export const getProjectSprint = catchAsync(async (req, res, next) => {
   const { sprintId} = req.query;
   try {
     const result = await prisma.$transaction(async (prisma) => {
-
     
     const sprint = await prisma.sprint.findFirst({
       where:{
@@ -1626,9 +1625,25 @@ export const getProjectSprint = catchAsync(async (req, res, next) => {
 });
 
 export const updateProjectSprint = catchAsync(async (req, res, next) => {
-  const { title, description, startDate, endDate, sprintId} = req.body;
+  const { title, description, startDate, endDate, sprintId, email, projectName} = req.body;
   try {
     const result = await prisma.$transaction(async (prisma) => {
+
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email
+        }
+      })
+
+      const project = await prisma.project.findFirst({
+        where: {
+          name : projectName
+        }
+      })
+
+      if(project.projectManager !== user.userId){
+        return next(new AppError('Only Project Mananger can edit Sprint Details',500))
+      }
 
     
     const sprint = await prisma.sprint.update({
@@ -1759,7 +1774,7 @@ export const getTask = catchAsync(async (req, res, next) => {
 });
 
 export const updateTask = catchAsync(async (req, res, next) => {
-  const { taskId, taskPoints, assignee, taskDescription, editedConsumedHours, email } = req.body;
+  const { taskId, taskPoints, assignee, taskDescription, editedConsumedHours,startDate, dueDate, email } = req.body;
   
   try {
     await prisma.$transaction(async (prisma) => {
@@ -1846,6 +1861,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
           data: {
             description: taskDescription,
             points: taskPoints,
+            startDate: new Date(startDate),
+            dueDate: new Date(dueDate)
           },
         });
 
@@ -1859,6 +1876,19 @@ export const updateTask = catchAsync(async (req, res, next) => {
         }else
         if(taskToBeUpdated.points != updatedTask.points){
           descriptionError = "Updated Estimated Hours"
+        }
+
+        const TtbuStartDate = String(taskToBeUpdated.startDate)
+        const TtbuDueDate = String(taskToBeUpdated.dueDate)
+        const utStartDate = String(updatedTask.startDate)
+        const utDueDate = String(updatedTask.dueDate)
+        let dateActivity = ''
+        if (TtbuStartDate !== utStartDate && TtbuDueDate != utDueDate){
+          dateActivity = 'Updated Task Start and Due Date'
+        }else if (TtbuStartDate !== utStartDate){
+          dateActivity = 'Updated Task Start Date'
+        }else if(TtbuDueDate !== utDueDate){
+          dateActivity = 'Updated Task Due Date'
         }
 
         const currentDateTime = new Date();
@@ -1876,6 +1906,18 @@ export const updateTask = catchAsync(async (req, res, next) => {
           })
         }
 
+        if(!isEmpty(dateActivity)){
+          const taskActivity = await prisma.taskActivity.create({
+            data: {
+              taskId: updatedTask.id,
+              userId: taskToBeUpdated.assignee.userId,
+              username: taskToBeUpdated.assignee.username,
+              date: indianTimeISOString,
+              activity: ` ${dateActivity}`
+            }
+          })
+        }
+
         return res.status(200).json({ message: 'Task updated successfully' });
       } else {
         // Handle case when task is not in progress
@@ -1888,6 +1930,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
               description: taskDescription,
               points: taskPoints,
               assignedUserId: user.userId,
+              startDate: new Date(startDate),
+              dueDate: new Date(dueDate)
             },
           });
 
@@ -1901,6 +1945,19 @@ export const updateTask = catchAsync(async (req, res, next) => {
         }else
         if(taskToBeUpdated.points !== updatedTask.points){
           descriptionError = "Updated Estimated Hours"
+        }
+
+        const TtbuStartDate = String(taskToBeUpdated.startDate)
+        const TtbuDueDate = String(taskToBeUpdated.dueDate)
+        const utStartDate = String(updatedTask.startDate)
+        const utDueDate = String(updatedTask.dueDate)
+        let dateActivity = ''
+        if (TtbuStartDate !== utStartDate && TtbuDueDate != utDueDate){
+          dateActivity = 'Updated Task Start and Due Date'
+        }else if (TtbuStartDate !== utStartDate){
+          dateActivity = 'Updated Task Start Date'
+        }else if(TtbuDueDate !== utDueDate){
+          dateActivity = 'Updated Task Due Date'
         }
 
         const currentDateTime = new Date();
@@ -1926,6 +1983,18 @@ export const updateTask = catchAsync(async (req, res, next) => {
               username: operationUser.username,
               date: currentTimeISOString,
               activity: ` Assigned the task to : [${user.username}]`
+            }
+          })
+        }
+
+        if(!isEmpty(dateActivity)){
+          const taskActivity = await prisma.taskActivity.create({
+            data: {
+              taskId: updatedTask.id,
+              userId: taskToBeUpdated.assignee.userId,
+              username: taskToBeUpdated.assignee.username,
+              date: indianTimeISOString,
+              activity: ` ${dateActivity}`
             }
           })
         }

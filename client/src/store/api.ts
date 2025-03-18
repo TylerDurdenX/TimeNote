@@ -530,9 +530,9 @@ getUserAttendanceData: build.query<AttendanceUserPCResponse, { email: string}>({
     return url;
   },
 }),
-getUserAttendanceTableData: build.query<AttendanceUserTableResponse[], { email: string}>({
-  query: ({ email}) => {
-    const url = `api/user/getUserAttendanceTableData?email=${email}`;
+getUserAttendanceTableData: build.query<AttendanceUserTableResponse[], { email: string, adminFlag: boolean}>({
+  query: ({ email, adminFlag}) => {
+    const url = `api/user/getUserAttendanceTableData?email=${email}&adminFlag=${adminFlag}`;
     return url;
   },
 }),

@@ -114,6 +114,12 @@ const {data, isLoading} = useGetAdminRoleQuery({email: userEmail!}, {refetchOnMo
           </div>
         </div>
       </div>
+      <div className="p-4">
+          <div className="h-full w-full overflow-hidden">
+            <AttendanceTable email={email!} adminFlag={true}/>
+          {/* {(isCard1Loaded && isCard2Loaded && (onTimeList?.length !== 0) && (lateArrivalList?.length !== 0)) ? <DualChart onTimeList={onTimeList!} lateArrivalList={lateArrivalList!}/> : <CircularLoading/>} */}
+          </div>
+        </div>
     </div>
     : <>
     <div className="w-full min-h-screen bg-gray-50">
@@ -172,7 +178,7 @@ const {data, isLoading} = useGetAdminRoleQuery({email: userEmail!}, {refetchOnMo
         </div>
         <div className="p-4">
           <div className="h-full overflow-hidden">
-            <AttendanceTable email={email!}/>
+            <AttendanceTable email={email!} adminFlag={false}/>
           {/* {(isCard1Loaded && isCard2Loaded && (onTimeList?.length !== 0) && (lateArrivalList?.length !== 0)) ? <DualChart onTimeList={onTimeList!} lateArrivalList={lateArrivalList!}/> : <CircularLoading/>} */}
           </div>
         </div>

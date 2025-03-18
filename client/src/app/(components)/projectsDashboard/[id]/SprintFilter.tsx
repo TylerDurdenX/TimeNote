@@ -51,6 +51,9 @@ export function SprintFilter({ sprint, setSprint, projectId }: Props) {
     return title && description && startDate && endDate;
   };
 
+  const userEmail = sessionStorage.getItem('email')
+  const projectName = sessionStorage.getItem('projectName')
+
   const { data, isLoading, isError } = useGetSprintQuery({
     projectId: projectId,
   });
@@ -64,11 +67,13 @@ export function SprintFilter({ sprint, setSprint, projectId }: Props) {
       startDate: startDate!,
       endDate: endDate!,
       sprintId: Number(sprintId)!,
+      email: userEmail!,
+      projectName: projectName!
     };
     try {
       const response = await updateSprint(formData);
       // @ts-ignore
-      if(response.error?.data.status === 'Fail'){
+      if(response.error?.data.status === 'Fail' || response.error?.data.status === 'Error'){
         // @ts-ignore
         toast.error(response.error?.data.message)
       }else{
@@ -151,7 +156,7 @@ export function SprintFilter({ sprint, setSprint, projectId }: Props) {
                   onClick={(e) => e.stopPropagation()} // Prevent event propagation from DialogContent
                 >
                   <DialogHeader>
-                    <DialogTitle className="mb-2">Create Sprint</DialogTitle>
+                    <DialogTitle className="mb-2">Update Sprint</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-3">
