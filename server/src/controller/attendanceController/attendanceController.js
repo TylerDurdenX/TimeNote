@@ -24,16 +24,26 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
       const indianTimeISOString = currentDateTime.toISOString();
 
       if (!isEmpty(punchInTime)) {
-        const attendance = await prisma.attendance.create({
-          data: {
+        const createdAttendance = await prisma.attendance.findFirst({
+          where:{
             userId: user.userId,
-            username: user.username,
-            punchInTime: punchInTime,
-            date: indianTimeISOString,
-          },
-        });
+            date: indianTimeISOString
+          }
+        })
+        if(isEmpty(createdAttendance)){
+          const attendance = await prisma.attendance.create({
+            data: {
+              userId: user.userId,
+              username: user.username,
+              punchInTime: punchInTime,
+              date: indianTimeISOString,
+            },
+          });
+          return next(new SuccessResponse("Record Updated successfully", 200));
+        }else{
+          return next(new AppError('User Already Punched in',500))
+        }
       } else {
-
         const attendance = await prisma.attendance.update({
           where: {
             userId_date: {
@@ -83,8 +93,10 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
             stack: null,
           }
         }
+
+        return next(new SuccessResponse("Record Updated successfully", 200));
+
       }
-      return next(new SuccessResponse("Record Updated successfully", 200));
     });
   } catch (error) {
     console.log(error);
