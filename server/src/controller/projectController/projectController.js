@@ -1898,8 +1898,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
           const taskActivity = await prisma.taskActivity.create({
             data: {
               taskId: updatedTask.id,
-              userId: taskToBeUpdated.assignee.userId,
-              username: taskToBeUpdated.assignee.username,
+              userId: operationUser.userId,
+              username: operationUser.username,
               date: indianTimeISOString,
               activity: ` ${descriptionError}`
             }
@@ -1910,8 +1910,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
           const taskActivity = await prisma.taskActivity.create({
             data: {
               taskId: updatedTask.id,
-              userId: taskToBeUpdated.assignee.userId,
-              username: taskToBeUpdated.assignee.username,
+              userId: operationUser.userId,
+              username: operationUser.username,
               date: indianTimeISOString,
               activity: ` ${dateActivity}`
             }
@@ -1991,8 +1991,8 @@ export const updateTask = catchAsync(async (req, res, next) => {
           const taskActivity = await prisma.taskActivity.create({
             data: {
               taskId: updatedTask.id,
-              userId: taskToBeUpdated.assignee.userId,
-              username: taskToBeUpdated.assignee.username,
+              userId: operationUser.userId,
+              username: operationUser.username,
               date: indianTimeISOString,
               activity: ` ${dateActivity}`
             }

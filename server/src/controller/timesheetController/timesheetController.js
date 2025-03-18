@@ -26,8 +26,10 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
         if(!isEmpty(timesheetDataList)){
           timesheetDataList.map((timesheet) => {
-            const [hours, minutes] = timesheet.approvedHours.split(':').map(Number);
-            totalMinutes += hours * 60 + minutes;
+            if(!isEmpty(timesheet.approvedHours)){
+              const [hours, minutes] = timesheet.approvedHours.split(':').map(Number);
+              totalMinutes += hours * 60 + minutes;
+            }
           })
         }
         
@@ -44,7 +46,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         return res.status(200).json(result)
       })
     } catch (error) {
-      console.log('Error during getTimesheetData' + error)
+      console.log(error)
       return next(new AppError('Error during getting Timesheet Entries',200))
     }
   });
