@@ -1,28 +1,24 @@
 'use client'
 
-import Header from "@/components/Header";
-
 import React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { dataGridClassNames, } from "@/lib/utils";
-import { useGetTimesheetDataQuery, useViewTimesheetDataQuery } from "@/store/api";
-import Link from "next/link";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
-import { Clock9, PlusSquare } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Toaster , toast} from "react-hot-toast";
-import { Cancel, CheckCircle } from "@mui/icons-material";
-import { TimesheetResponse } from "@/store/interfaces";
+import { useViewTimesheetDataQuery } from "@/store/api";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
+import { Clock9 } from "lucide-react";
+import { CheckCircle } from "@mui/icons-material";
 import { Card } from "@/components/ui/card";
+import { Button } from "@mui/material";
+import Link from "next/link";
 
 type Props = {
   email: string;
   selectedDate: Date
   name: string
+  dialogFlag: boolean
 };
 
-const TimesheetDataTable = ({ email , selectedDate, name}: Props) => {
+const TimesheetDataTable = ({ email , selectedDate, name, dialogFlag}: Props) => {
 
     const { data, isLoading, error, refetch} = useViewTimesheetDataQuery(
           { name: name, date: selectedDate.toString()},
@@ -38,7 +34,7 @@ const columns: GridColDef[] = [
   {
     field: "task",
     headerName: "Task",
-    flex: 2.5,
+    flex: 1.5,
     renderCell: (params) => {
       const rowData = params.row;
       const linkTo = rowData.projectId ? `timesheet/${rowData.projectId}/${rowData.taskCode}?email=${email}` : '';
@@ -66,17 +62,17 @@ const columns: GridColDef[] = [
   {
     field: "completionPercentage",
     headerName: "Completion Percentage",
-    flex: 1.2
+    flex: 0.6
   },
   {
     field: "consumedHours",
     headerName: "Consumed Hours",
-    flex: 0.8
+    flex: 0.6
   },
   {
     field: "approvedHours",
     headerName: "Approved Hours",
-    flex: 0.8
+    flex: 0.6
   },
   {
     field: "ApprovedFlag",
@@ -84,16 +80,60 @@ const columns: GridColDef[] = [
     flex: 1,
     renderCell: (params) => {
         // You can access the value of the cell here using params.value
-        if (params.value === 'NA') {
-          return (<><CheckCircle style={{ color: 'green' }} /> Approved</>) ;
-        } else if (params.value === 'NO') {
-          return (<><div className="flex items-center"><Clock9 style={{ color: 'red' }} /> <span className="ml-2">Pending for approval</span></div></>
-          );
-        } else {
-            return (<><CheckCircle style={{ color: 'green' }} /> Approved</>);
-        }
+          if (params.value === 'NA') {
+            return (<><CheckCircle style={{ color: 'green' }} /> Approved</>) ;
+          } else if (params.value === 'NO') {
+            return (<><div className="flex items-center"><Clock9 style={{ color: 'red' }} /> <span className="ml-2">Pending for approval</span></div></>
+            );
+          } else {
+              return (<><CheckCircle style={{ color: 'green' }} /> Approved</>);
+          }
+        
+        
       },
   },
+  {
+    field: 'actions',
+    headerName: 'Actions',
+    flex: 0.8,
+    renderCell: (params) => {
+      const rowData = params.row;
+      if(params.row.taskId !== null){
+      return (
+        <div
+          style={{
+            display: 'flex',
+            gap: '15px',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          className=" w-full"
+        >
+          <Link href={`/task/${params.row.taskId}?email=${email}`} >
+              <Button
+                variant="contained"
+                className="mb-5"
+                color="primary"
+                size="small"
+                onClick={() => sessionStorage.setItem('taskId',String(params.row.taskId))} // Passing the current row's data
+                sx={{
+                  backgroundColor: '#3f51b5', // Blue color
+                  '&:hover': { backgroundColor: '#2c387e' },
+                  borderRadius: '8px',
+                }}
+              >
+                View Task
+              </Button>
+              </Link>
+        </div>
+      );
+    }else{
+      return(
+        ""
+      )
+    }
+    },
+  }
 ]
 
   return (

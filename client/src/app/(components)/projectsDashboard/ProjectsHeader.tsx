@@ -109,7 +109,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
             </DialogHeader>
 
             <div
-              className="relative w-full h-full overflow-hidden"
+              className="relative w-full h-full overflow-auto"
               style={{
                 paddingTop: "60.575%",
               }}
@@ -118,7 +118,7 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                 <form onSubmit={handleSubmit}>
                   <div className="grid gap-4 py-3">
                     <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                      <Label className="text-center ">Project Name</Label>
+                      <Label className="text-center ">Project Name<span className="text-red-500 ml-1">*</span></Label>
                       <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
@@ -132,13 +132,13 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                         className="col-span-7"
                         required
                       />
-                      <Label className="text-center">Project Description</Label>
+                      <Label className="text-center">Project Description<span className="text-red-500 ml-1">*</span></Label>
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         className="col-span-7 shadow border"
                       />
-                       <Label className="text-center ">Project Code</Label>
+                       <Label className="text-center ">Project Code<span className="text-red-500 ml-1">*</span></Label>
                        <Input
                           value={projectCode}
                           onChange={(e) => {
@@ -154,21 +154,21 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                           className="col-span-7"
                           required
                         />
-                      <Label className="text-center">Start Date</Label>
+                      <Label className="text-center">Start Date<span className="text-red-500 ml-1">*</span></Label>
                       <Input
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
                         className="col-span-3"
                       />
-                      <Label className="text-center">End Date</Label>
+                      <Label className="text-center">End Date<span className="text-red-500 ml-1">*</span></Label>
                       <Input
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
                         className="col-span-3"
                       />
-                      <Label className="text-center">Project Manager</Label>
+                      <Label className="text-center">Project Manager<span className="text-red-500 ml-1">*</span></Label>
                       <Select
                         value={projectManager}
                         onValueChange={(value) => setProjectManager(value)}

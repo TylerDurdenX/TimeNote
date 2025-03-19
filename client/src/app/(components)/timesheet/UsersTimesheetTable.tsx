@@ -112,13 +112,13 @@ const columns: GridColDef[] = [
             </DialogTrigger>
   
             {/* Dialog Content */}
-            <DialogContent className="max-w-[65vw] mt-5 mb-5 overflow-y-auto"> {/* Set width to 70% of viewport height */}
+            <DialogContent className="max-w-[65vw] max-h-[80vw] mt-5 mb-5 overflow-y-auto"> {/* Set width to 70% of viewport height */}
               <DialogHeader>
                 <DialogTitle>
                   {formatDate(selectedDate.toString())} - {rowData.username}
                 </DialogTitle>
-                <DialogDescription className="text-gray-700">
-                  <TimesheetDataTable email={email} selectedDate={selectedDate} name={rowData.username}/>
+                <DialogDescription className="text-gray-700 overflow-y-auto">
+                  <TimesheetDataTable email={email} selectedDate={selectedDate} name={rowData.username} dialogFlag={true}/>
                 </DialogDescription>
               </DialogHeader> 
   

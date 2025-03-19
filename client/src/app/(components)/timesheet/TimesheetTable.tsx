@@ -161,16 +161,16 @@ const columns: GridColDef[] = [
             </DialogHeader>
 
             <div
-              className="relative w-full h-full overflow-hidden"
-              style={{
-                paddingTop: "38.575%",
-              }}
+              className="relative w-full h-full overflow-auto"
+              // style={{
+              //   paddingTop: "20.575%",
+              // }}
             >
-              <div className="absolute top-0 left-0 w-[calc(100%)] h-full">
+              <div className="top-0 left-0 w-[calc(100%)] h-full">
                 <form onSubmit={handleSubmit}>
                   <div className="grid gap-4 py-3">
                     <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                      <Label className="text-center col-span-2">Task Description</Label>
+                      <Label className="text-center col-span-2">Task Description<span className="text-red-500 ml-1">*</span></Label>
                       <Input
                         value={task}
                         onChange={(e) => setTask(e.target.value)}
@@ -178,7 +178,7 @@ const columns: GridColDef[] = [
                         placeholder="Enter the task detail"
                         required
                       />
-                      <Label className="text-center col-span-2">Task Date</Label>
+                      <Label className="text-center col-span-2">Task Date<span className="text-red-500 ml-1">*</span></Label>
                       <Input
                         value={date}
                         type="date"
@@ -193,7 +193,7 @@ const columns: GridColDef[] = [
                         onChange={(e) => setCompletionPercentage(e.target.value)}
                         className="col-span-6"
                       />
-                      <Label className="text-center col-span-2">Consumed Hours</Label>
+                      <Label className="text-center col-span-2">Consumed Hours<span className="text-red-500 ml-1">*</span></Label>
                       <Input
                         value={consumedHours}
                         placeholder="Enter consumed hours in the format HH:MM"

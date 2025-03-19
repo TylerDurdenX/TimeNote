@@ -114,10 +114,9 @@ const {data, isLoading} = useGetAdminRoleQuery({email: userEmail!}, {refetchOnMo
           </div>
         </div>
       </div>
-      <div className="p-4">
+      <div className="p-4 min-h-[300px]">
           <div className="h-full w-full overflow-hidden">
             <AttendanceTable email={email!} adminFlag={true}/>
-          {/* {(isCard1Loaded && isCard2Loaded && (onTimeList?.length !== 0) && (lateArrivalList?.length !== 0)) ? <DualChart onTimeList={onTimeList!} lateArrivalList={lateArrivalList!}/> : <CircularLoading/>} */}
           </div>
         </div>
     </div>

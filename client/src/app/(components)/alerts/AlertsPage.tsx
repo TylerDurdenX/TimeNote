@@ -8,6 +8,8 @@ import { useDeleteTriggeredAlertsMutation, useGetAlertsQuery } from '@/store/api
 import { Toaster, toast } from 'react-hot-toast';
 import { useSearchParams } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
+import { Typography } from '@mui/material';
+import Link from 'next/link';
 
 const AlertsPage = () => {
 
@@ -24,6 +26,8 @@ const AlertsPage = () => {
     setSelectedId(id); 
     setOpen(true); 
   };
+
+  const email = useSearchParams().get('email')
 
   const [deleteAlert] = useDeleteTriggeredAlertsMutation()
 
@@ -69,7 +73,36 @@ const AlertsPage = () => {
     {
       field: "description",
       headerName: "Description",
-      flex: 2, 
+      flex: 2,
+      renderCell: (params) => {
+        const value = params.value || "";
+        const parts = value.split(":");
+    
+        // Ensure there's text after ':'
+        if (parts.length > 1) {
+          const beforeText = parts[0] + ":";
+          const linkText = parts.slice(1).join(":").trim(); // Handles multiple colons
+          const match = linkText.match(/0000(\d+)/);
+          const extracted = match ? match[1] : "";
+          const href = `/task/${extracted}?email=${email}`; // Define your route
+    
+          return (
+            <Typography variant="body2" component="span">
+          {beforeText}{" "}
+          <Link href={href} passHref>
+            <Typography
+              variant="body2"
+              onClick={() => {sessionStorage.setItem('taskId',String(extracted))}}
+              component="span"
+              sx={{ color: "blue", cursor: "pointer", textDecoration: "underline" }}
+            >
+              {linkText}
+            </Typography>
+          </Link>
+        </Typography>
+          );
+        }
+      }
     },
     {
       field: "status",

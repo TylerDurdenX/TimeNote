@@ -144,10 +144,19 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
         if(isEmpty(user.reportsToId)){
           approveFlag = "NA"
+          const newTimesheetEntry = await prisma.timesheet.create({
+            data: {
+              task : task,
+              consumedHours: consumedHours,
+              approvedHours: consumedHours,
+              ApprovedFlag: approveFlag,
+              userId: user.userId,
+              username: user.username,
+              date: getTodayDateInISO(new Date(date))
+            }
+          })
         }else{
           approveFlag = "NO"
-        }
-
           const newTimesheetEntry = await prisma.timesheet.create({
             data: {
               task : task,
@@ -158,6 +167,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
               date: getTodayDateInISO(new Date(date))
             }
           })
+        }
         
         return next(new SuccessResponse('Entry Created Successfully',200))
       })
