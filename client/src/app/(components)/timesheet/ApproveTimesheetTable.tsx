@@ -3,13 +3,12 @@
 import React, { useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { dataGridClassNames, } from "@/lib/utils";
-import { Button, DialogTitle, Input, TextField } from "@mui/material";
+import { Button,Input } from "@mui/material";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 import { Clock9} from "lucide-react";
-import { Toaster, toast } from 'react-hot-toast';
+import {  toast } from 'react-hot-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Cancel, CheckCircle } from "@mui/icons-material";
-import { TimesheetResponse } from "@/store/interfaces";
 import { Card } from "@/components/ui/card";
 import { useGetPendingTimesheetDataQuery, useUpdateTimesheetEntryMutation } from "@/store/api";
 
@@ -51,23 +50,25 @@ const ApproveTimesheetTable = ({ email , selectedDate}: Props) => {
 
         if(!validateTimeFormat(approvedHours)){
           toast.error('Approved Hours not Valid')
-        }
-        console.log(approvedHours)
-        try {
-            const response = await updateTimesheet({id:id, email: email!, approvedHours: approvedHours , approveRejectFlag: true, })
-
-            // @ts-ignore
-            if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+        }else{
+          console.log(approvedHours)
+          try {
+              const response = await updateTimesheet({id:id, email: email!, approvedHours: approvedHours , approveRejectFlag: true, })
+  
               // @ts-ignore
-              toast.error(response.error?.data.message)
-            }else{
-              // @ts-ignore
-              toast.success(response.data?.message);
+              if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
+                // @ts-ignore
+                toast.error(response.error?.data.message)
+              }else{
+                // @ts-ignore
+                toast.success(response.data?.message);
+              }
+            } catch (err: any) {
+              toast.error(err.data.message);
+              console.error("Error Approving Timesheet record:", err.data.Message);
             }
-          } catch (err: any) {
-            toast.error(err.data.message);
-            console.error("Error Approving Timesheet record:", err.data.Message);
-          }
+        }
+       
 
       }
       

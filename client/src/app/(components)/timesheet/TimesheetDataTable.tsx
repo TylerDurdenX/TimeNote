@@ -138,7 +138,7 @@ const columns: GridColDef[] = [
 
   return (
     <>
-    <div className="h-full w-full px-4 pb-8 xl:px-6">
+    <div className="h-full w-full px-4 pb-8 xl:px-6 max-h-[70vh]">
       <DataGrid
         rows={data?.timesheetDataList || []}
         columns={columns}
