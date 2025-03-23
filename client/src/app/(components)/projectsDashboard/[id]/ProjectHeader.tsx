@@ -1,5 +1,5 @@
-import { Clock, FilterX, Grid3X3, Table } from "lucide-react";
-import React from "react";
+import { BookUser, Calendar, Clock, FilterX, Grid3X3, Table } from "lucide-react";
+import React, { useEffect } from "react";
 import { TaskSelectionFilter } from "./TaskSelectionFilter";
 import { Button } from "@mui/material";
 import { HeaderFilter } from "./HeaderFilter";
@@ -40,6 +40,10 @@ const ProjectHeader = ({
 
   const projectName = sessionStorage.getItem("projectName");
 
+  useEffect(() => {
+    sessionStorage.setItem('activeTab', activeTab)
+  },[activeTab])
+
   const {data} = useGetProjectHoursEstimationQuery({projectId}, {refetchOnMountOrArgChange: true})
 
   return (
@@ -65,8 +69,8 @@ const ProjectHeader = ({
         </div>
       </div>
 
-      <div className="flex flex-wrap-reverse mt-2 gap-2 border-y border-gray-200 pb-[4px] pt-1 dark:border-stroke-dark sm:items-center">
-        <div className="flex flex-1 items-center gap-2 md:gap-4">
+      <div className="flex flex-wrap-reverse mt-2 gap-1 border-y border-gray-200 pb-[4px] pt-1 dark:border-stroke-dark sm:items-center">
+        <div className="flex flex-1 items-center gap-1 md:gap-4">
           <TabButton
             name="Kanban Board"
             icon={<Grid3X3 className="h-5 w-5" />}
@@ -85,6 +89,18 @@ const ProjectHeader = ({
             setActiveTab={setActiveTab}
             activeTab={activeTab}
           />
+          <TabButton
+            name="Calendar"
+            icon={<Calendar className="h-5 w-5" />}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
+          />
+          {/* <TabButton
+            name="User Workload"
+            icon={<BookUser className="h-5 w-5" />}
+            setActiveTab={setActiveTab}
+            activeTab={activeTab}
+          /> */}
         </div>
         <div className="flex items-center gap-2">
           <SubTaskFilter

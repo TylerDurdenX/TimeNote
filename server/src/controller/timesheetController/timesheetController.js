@@ -467,8 +467,15 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             consumedHours = '0:00'
           }
 
-          const newTimesheetEntry = await prisma.timesheet.create({
-            data: {
+          const timesheetEntry = await prisma.timesheet.update({
+            where:{
+              date:{
+                gte: startOfDay, 
+                lte: endOfDay
+              },
+              taskId:Number(task.taskId),
+            },
+            data:{
               task : task.Comment,
               consumedHours: String(consumedHours),
               ApprovedFlag: approveFlag,
@@ -476,10 +483,24 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
               username: user.username,
               completionPercentage: task.Completed,
               taskCode: task.taskCode,
-              taskId: Number(task.taskId),
-              date: getTodayDateInISO(new Date())
             }
           }) 
+
+          if(isEmpty(timesheetEntry)){
+            const newTimesheetEntry = await prisma.timesheet.create({
+              data: {
+                task : task.Comment,
+                consumedHours: String(consumedHours),
+                ApprovedFlag: approveFlag,
+                userId: user.userId,
+                username: user.username,
+                completionPercentage: task.Completed,
+                taskCode: task.taskCode,
+                taskId: Number(task.taskId),
+                date: getTodayDateInISO(new Date())
+              }
+            }) 
+          }
         })
 
         return next(new SuccessResponse('Timesheet Records Updated Successfully',200))

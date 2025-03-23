@@ -8,6 +8,8 @@ import {
 import { AppSidebar } from "@/components/Sidebar/app-sidebar";
 import { Settings } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

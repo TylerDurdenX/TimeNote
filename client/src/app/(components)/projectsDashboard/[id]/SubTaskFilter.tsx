@@ -44,7 +44,7 @@ export function SubTaskFilter({isTaskOrSubTask, setIsTaskOrSubTask, email, setPr
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[150px] justify-between"
+          className="w-[130px] justify-between"
         >
         {isTaskOrSubTask
             ? frameworks.find((framework) => framework.value === isTaskOrSubTask)?.label
@@ -52,7 +52,7 @@ export function SubTaskFilter({isTaskOrSubTask, setIsTaskOrSubTask, email, setPr
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[150px] p-0">
+      <PopoverContent className="w-[130px] p-0">
         <Command>
           <CommandList>
             <CommandGroup>

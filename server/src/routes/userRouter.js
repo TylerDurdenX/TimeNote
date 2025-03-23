@@ -11,8 +11,8 @@ import isAuthenticated from "../middleware/isAuthenticated.js";
 import { getAlertCount, getUser, getUserCount, updateUserProfilePicture } from "../controller/dashboardController.js";
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserBasicDetailsData, updateUserDetailsData } from "../controller/UserDetailsController.js";
-import { createTeam } from "../controller/teamController/controller.js";
-import { addComment, addSubTaskComment, closeCompletedTask, createBulkTasks, createProject, createSprint, createSubTask, createTask, deleteAttachment, deleteProjectAttachment, downloadAttachment, downloadProjectAttachment, getMentionedUsers, getProject, getProjectHoursEstimation, getProjectManagers, getProjects, getProjectSprint, getProjectTasks, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskActivity, getTaskComments, getTaskHistory, getUserData, updateProject, updateProjectSprint, updateProjectStatus, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadProjectAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
+import { createTeam, getTeamLeads, getTeamsList } from "../controller/teamController/controller.js";
+import { addComment, addSubTaskComment, closeCompletedTask, createBulkTasks, createProject, createSprint, createSubTask, createTask, deleteAttachment, deleteProjectAttachment, downloadAttachment, downloadProjectAttachment, getMentionedUsers, getProject, getProjectHoursEstimation, getProjectManagers, getProjects, getProjectSprint, getProjectTasks, getProjectTasksCalendar, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskActivity, getTaskComments, getTaskHistory, getUserData, updateProject, updateProjectSprint, updateProjectStatus, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadProjectAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
 import {createAutoReportConfig, deleteAutoReportConfig, getAutoReportConfig } from "../controller/reportsController/controller.js";
@@ -20,7 +20,7 @@ import { deleteAlert, getAlerts } from "../controller/alertController/alertContr
 import { createTimesheetEntry, getPendingTimesheetData, getTimesheetData, getUsersTimesheetData, updateTimesheet, updateTimesheetRecords, viewTimesheetData } from "../controller/timesheetController/timesheetController.js";
 import { updateCustomerData } from "../middleware/customerController.js";
 import { authenticateThirdParty } from "../middleware/generateToken.js";
-import { getAdminRole, getAttendanceData, getAttendanceLCData, getUserAttendanceData, getUserAttendanceTableData, updateAttendance } from "../controller/attendanceController/attendanceController.js";
+import { getAdminRole, getAttendanceData, getAttendanceLCData, getBreakData, getUserAttendanceData, getUserAttendanceTableData, updateAttendance } from "../controller/attendanceController/attendanceController.js";
 import { signInUser, signupTP } from "../controller/thirdPartyController/thirdPartyController.js";
 const router = express.Router();
 
@@ -42,6 +42,8 @@ router.post("/mapRolesToUser", mapRolesToUser)
 router.get("/getUserDetails",isAuthenticated, getUserDetails)
 router.get("/getList", getListOfObjects)
 router.post("/createTeam", createTeam)
+router.get('/getTeamsList',getTeamsList)
+router.get('/getTeamLeads', getTeamLeads)
 router.post("/updateUserSettingsData",isAuthenticated, updateUserDetailsData)
 router.post("/updateUserBasicSettingsData", isAuthenticated, updateUserBasicDetailsData)
 router.post("/createProject",isAuthenticated, createProject)
@@ -52,6 +54,7 @@ router.get("/getUsersListFilter", getUsersForUserFilter)
 router.get("/getLiveStreamUsers", getLiveStreamUsers)
 router.get("/getProjects",isAuthenticated, getProjects)
 router.get("/getProjectTasks",isAuthenticated, getProjectTasks)
+router.get("/getProjectTasksCalendar",isAuthenticated, getProjectTasksCalendar)
 router.get("/getProjectUsers",isAuthenticated, getProjectUsers)
 router.post("/createTask",isAuthenticated, createTask)
 router.patch("/updateTaskStatus",isAuthenticated, updateTaskStatus)
@@ -112,6 +115,7 @@ router.post("/updateTimesheetRecords",authenticateThirdParty, updateTimesheetRec
 router.post("/signInUser",authenticateThirdParty, signInUser);
 router.post("/signUpTP", authenticateThirdParty, signupTP )
 router.post("/createAuthority",authenticateThirdParty, createAuthority)
+router.get('/takeBreak',authenticateThirdParty, getBreakData)
 
 
 export default router;

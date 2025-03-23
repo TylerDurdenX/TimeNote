@@ -14,6 +14,7 @@ import {
   CreateUserData,
   DownloadAttachment,
   DownloadProjectAttachment,
+  GetProjectTasksCalendarResponse,
   GetProjectTasksResponse,
   ListResponse,
   LiveStreamResponse,
@@ -36,6 +37,9 @@ import {
   TaskComments,
   TaskFormData,
   TaskHistory,
+  TeamLeadResponse,
+  TeamRequest,
+  Teams,
   TimesheetData,
   timesheetEntry,
   TimesheetResponse,
@@ -302,6 +306,16 @@ export const api = createApi({
       },
       providesTags: ["Tasks"],
     }),
+    getProjectTasksCalendar: build.query<
+    GetProjectTasksCalendarResponse[],
+      { projectId: string, sprint: string, assignedTo: string, priority: string, isTaskOrSubTask: string, email: string, page: number, limit: number,}
+    >({
+      query: ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask, email, page, limit}) => {
+        const url = `api/user/getProjectTasksCalendar?id=${projectId}&sprint=${sprint}&assignedTo=${assignedTo}&priority=${priority}&isTaskOrSubTask=${isTaskOrSubTask}&email=${email}&page=${page}&limit=${limit}`;
+        return url;
+      },
+      providesTags: ["Tasks"],
+    }),
     getTaskComments: build.query<
     TaskComments[],
       { taskId: number, email: string}
@@ -311,6 +325,15 @@ export const api = createApi({
         return url;
       },
       providesTags: ["Comment"],
+    }),
+    getTeams: build.query<
+    Teams[],
+      {email: string}
+    >({
+      query: ({email,}) => {
+        const url = `api/user/getTeamsList?&email=${email}`;
+        return url;
+      },
     }),
     getSubTaskComments: build.query<
     TaskComments[],
@@ -472,6 +495,13 @@ uploadSubTaskAttachment: build.mutation<ApiResponse, UploadSubTaskAttachment>({
     }), 
     invalidatesTags : ["Tasks"]
 }),
+createTeam: build.mutation<ApiResponse, TeamRequest>({
+  query: (teamReq)=> ({
+      url: "api/user/createTeam",
+      method: "POST",
+      body: teamReq,
+  }), 
+}),
 createBulkTasks: build.mutation<ApiResponse, TaskFormData[]>({
   query: (tasks)=> ({
       url: "api/user/createBulkTasks",
@@ -619,6 +649,12 @@ getSprint: build.query<SprintResponse[], { projectId: string}>({
     return url;
   },
   providesTags : ["SprintCount"]
+}),
+getTeamLeads: build.query<TeamLeadResponse[], { email: string}>({
+  query: ({ email,}) => {
+    const url = `api/user/getTeamLeads?email=${email}`;
+    return url;
+  },
 }),
 getProjectHoursEstimation: build.query<ProjectHours, { projectId: number}>({
   query: ({ projectId,}) => {
@@ -855,5 +891,9 @@ export const {
   useGetAdminRoleQuery,
   useUpdateUserBasicSettingsDataMutation,
   useGetProjectSprintQuery,
-  useUpdateProjectSprintMutation
+  useUpdateProjectSprintMutation,
+  useGetProjectTasksCalendarQuery,
+  useCreateTeamMutation,
+  useGetTeamsQuery,
+  useGetTeamLeadsQuery
 } = api;

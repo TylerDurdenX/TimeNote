@@ -6,10 +6,12 @@ import KanbanBoard from './KanbanBoard'
 import Timeline from './Timeline'
 import TableView from './Table'
 import CircularLoading from '@/components/Sidebar/loading'
+import MyCalendar from './CalendarView'
+import UserWorkload from './UserWorkload'
 
 const Project = () => {
 
-  const [activeTab, setActiveTab] = useState("Kanban Board")
+  const [activeTab, setActiveTab] = useState(sessionStorage.getItem('activeTab') || "Kanban Board")
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false)
 
   const [idFromUrl, setIdFromUrl] = useState<string | null>(null)
@@ -48,9 +50,16 @@ const Project = () => {
         projectId= {idFromUrl!} isTaskOrSubTask={isTaskOrSubTask} setIsTaskOrSubTask={setIsTaskOrSubTask}/>
         )}
          {activeTab==="Timeline" && (
-        <Timeline projectId={idFromUrl!} sprint= {sprint} assignedTo={assignedTo} priority={priority} isTaskOrSubTask={isTaskOrSubTask}/>
-        )} {activeTab==="Table" && (
+        <Timeline projectId={idFromUrl!} sprint= {sprint} email={email!} assignedTo={assignedTo} priority={priority} isTaskOrSubTask={isTaskOrSubTask}/>
+        )} 
+        {activeTab==="Table" && (
           <TableView projectId={idFromUrl!} sprint= {sprint} assignedTo={assignedTo} priority={priority} isTaskOrSubTask={isTaskOrSubTask}/>
+          )}
+          {activeTab==="Calendar" && (
+          <MyCalendar projectId={idFromUrl!} sprint= {sprint} email={email!} assignedTo={assignedTo} priority={priority} isTaskOrSubTask={isTaskOrSubTask}/>
+          )}
+          {activeTab==="User Workload" && (
+          <UserWorkload projectId={idFromUrl!} sprint= {sprint} email={email!} assignedTo={assignedTo} priority={priority} isTaskOrSubTask={isTaskOrSubTask}/>
           )}
     </div>
   )

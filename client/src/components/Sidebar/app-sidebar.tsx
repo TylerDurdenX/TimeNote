@@ -22,6 +22,9 @@ import {
   PresentationIcon,
   CalendarClock,
   FileClock,
+  BookUser,
+  Users,
+  Coffee,
 } from "lucide-react";
 
 import { NavMain } from "@/components/Sidebar/nav-main";
@@ -160,7 +163,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         name: "Timesheet",
         url: `/timesheet?email=${userEmail}`,
         icon: FileClock
-      }
+      },
+      // {
+      //   name: "Teams",
+      //   url: `/teams?email=${userEmail}`,
+      //   icon: Users
+      // },
+      // {
+      //   name: "Breaks",
+      //   url: `/breaks?email=${userEmail}`,
+      //   icon: Coffee
+      // },
     ],
   };
 

@@ -3,6 +3,7 @@ import catchAsync from "../../utils/catchAsync.js";
 import { prisma } from "../../server.js";
 import { isEmpty } from "../../utils/genericMethods.js";
 import SuccessResponse from "../../utils/SuccessResponse.js";
+import { parseISO } from "date-fns";
 
 export const createProject = catchAsync(async (req, res, next) => {
   const { title,clientName, description,projectCode, startDate, endDate, projectManager } = req.body;
@@ -651,6 +652,185 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
   })
   } catch (error) {
     console.error('Error during getProjectTasks' + error);
+    return next(new AppError("There was an error getting Tasks", 400));
+  }
+});
+
+export const getProjectTasksCalendar = catchAsync(async (req, res, next) => {
+  const { id, sprint, assignedTo, priority , isTaskOrSubTask, email, page, limit} = req.query;
+
+  try{
+    await prisma.$transaction(async (prisma) => {
+
+    // if(user.roles.some((role) => role.code === "ADMIN") || user.roles.some((role) => role.code === "PROJECT_MANAGER")  ){ 
+      if(true){ 
+
+      if(isTaskOrSubTask==='Task'){
+        let whereCondition = {
+          projectId: Number(id),
+        };
+      
+        if (!isEmpty(sprint)) {
+          whereCondition.sprintId = Number(sprint);
+        }
+      
+        let assignedUserId;
+        if (!isEmpty(assignedTo)) {
+          const user = await prisma.user.findFirst({
+            where: {
+              email: assignedTo,
+            },
+          });
+          if (user) {
+            assignedUserId = user.userId;
+            whereCondition.assignedUserId = assignedUserId; 
+          }
+        }
+      
+        if (!isEmpty(priority)) {
+          whereCondition.priority = priority;
+        }
+      
+        const tasks = await prisma.task.findMany({
+          where: whereCondition,
+          include: {
+            assignee: {
+              select: {
+                username: true,
+                email: true
+              }
+            },
+          },
+          skip: (page - 1) * limit,
+          take: parseInt(limit),
+        });
+
+        const totalTasks = await prisma.task.count({
+          where: whereCondition
+        });
+
+        const currentDateTime = new Date()
+      
+        tasks.map((task) => {
+          const assignee = task.assignee
+            const {
+              password,
+              designation,
+              phoneNumber,
+              reportsToId,
+              resetPasswordOTP,
+              otpExpires,
+              createdAt,
+              updatedAt,
+              ...newAssignee
+            } = task.assignee;
+            task.assignee = newAssignee;
+
+            task.startDate = new Date(task.startDate)
+            task.dueDate = new Date(task.dueDate)
+
+          })
+
+      
+        res.json(tasks);
+      }else{
+        let whereCondition = {
+          projectId: Number(id),
+        };
+      
+        if (!isEmpty(sprint)) {
+          whereCondition.sprintId = Number(sprint);
+        }
+      
+        let assignedUserId;
+        if (!isEmpty(assignedTo)) {
+          const user = await prisma.user.findFirst({
+            where: {
+              email: assignedTo,
+            },
+          });
+          if (user) {
+            assignedUserId = user.userId;
+            whereCondition.assignedUserId = assignedUserId; 
+          }
+        }
+      
+        if (!isEmpty(priority)) {
+          whereCondition.priority = priority;
+        }
+      
+        const tasks = await prisma.task.findMany({
+          where: whereCondition,
+          include: {
+            assignee: {
+              select:{
+                username: true,
+                email: true
+              }
+            },
+            subTasks: {
+              include: {
+                assignee: {
+                  select: {
+                    username: true,
+                    email: true
+                  }
+                },
+              }
+            },
+          }
+        });
+
+        let totalTasks = 0
+
+        const totalTask = await prisma.task.findMany({
+          where: whereCondition, 
+          include: {
+            subTasks: true
+          }
+        });
+
+        totalTask.map((task) => {
+          totalTasks += task.subTasks.length
+        })
+      
+        const subTaskList = tasks.map(item => item.subTasks);
+
+        const flattenedList = subTaskList.filter(list => list.length > 0).flat();
+        let filteredList
+        if(assignedTo!=='X'){
+          filteredList = flattenedList.filter(item => item.assignee.email === email);
+        }else if(assignedTo!==''){
+          filteredList = flattenedList
+        }else{
+          filteredList = flattenedList
+        }
+
+        filteredList.map((subTask) => {
+          const assignee = subTask.assignee
+            const {
+              password,
+              designation,
+              phoneNumber,
+              reportsToId,
+              resetPasswordOTP,
+              otpExpires,
+              createdAt,
+              updatedAt,
+              ...newAssignee
+            } = subTask.assignee;
+            subTask.assignee = newAssignee;
+
+            subTask.startDate = new Date(subTask.startDate)
+            subTask.dueDate = new Date(subTask.dueDate)
+        })
+
+        res.json(filteredList);
+      }
+    }
+  })
+  } catch (error) {
+    console.log(error);
     return next(new AppError("There was an error getting Tasks", 400));
   }
 });

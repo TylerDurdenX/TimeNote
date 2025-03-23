@@ -46,7 +46,7 @@ export function TaskSelectionFilter({ assignedTo, setAssignedTo, email }: Props)
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[180px] justify-between"
+          className="w-[150px] justify-between"
         >
           {assignedTo
             ? frameworks.find((framework) => framework.value === assignedTo)?.label
@@ -54,7 +54,7 @@ export function TaskSelectionFilter({ assignedTo, setAssignedTo, email }: Props)
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[180px] p-0">
+      <PopoverContent className="w-[150px] p-0">
         <Command>
           <CommandList>
             <CommandGroup>

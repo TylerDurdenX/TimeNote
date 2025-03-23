@@ -270,6 +270,25 @@ export interface GetProjectTasksResponse {
     hasmore: boolean
 }
 
+export interface GetProjectTasksCalendarResponse {
+    id: number
+    code: string
+    title: string
+    description: string
+    status: string
+    priority: string
+    points: number
+    projectId: number
+    assignee: Assignee
+    startDate: Date
+    dueDate: Date
+}
+
+export interface Assignee {
+    username: string
+    email: string
+}
+
 export interface TimesheetData {
     projectId: string
     taskCode: string
@@ -386,6 +405,14 @@ export interface TaskFormData {
     projectId: number
 };
 
+export interface TeamRequest {
+    name : string
+    description: string
+    teamLeadName: string
+    teamLeadEmail:string
+    email: string
+}
+
 export interface CreateUserData {
     username: string,
     email: string,
@@ -411,6 +438,11 @@ export interface TaskComments{
     text: string
     username: string
     commentTime: string
+}
+
+export interface Teams {
+    name : string,
+    description: string
 }
 
 export interface AddComment {
@@ -454,6 +486,11 @@ export interface CreateSprint {
 export interface SprintResponse{
     id: number,
     title: string
+}
+
+export interface TeamLeadResponse {
+    name: string
+    email: string
 }
 
 export interface ProjectFormData{

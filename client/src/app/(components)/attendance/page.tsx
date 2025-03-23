@@ -114,7 +114,7 @@ const {data, isLoading} = useGetAdminRoleQuery({email: userEmail!}, {refetchOnMo
           </div>
         </div>
       </div>
-      <div className="p-4 min-h-[300px]">
+      <div className="p-4 ">
           <div className="h-full w-full overflow-hidden">
             <AttendanceTable email={email!} adminFlag={true}/>
           </div>

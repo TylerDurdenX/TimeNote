@@ -41,7 +41,9 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
           });
           return next(new SuccessResponse("Record Updated successfully", 200));
         }else{
-          return next(new AppError('User Already Punched in',500))
+          return next(new SuccessResponse("Record Updated successfully", 200));
+
+          //return next(new AppError('User Already Punched in',500))
         }
       } else {
         const attendance = await prisma.attendance.update({
@@ -803,6 +805,42 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
       console.error(error);
       return next(
         new AppError("Error during getting user Admin role", 500)
+      );
+    }
+  });
+
+  export const getBreakData = catchAsync(async (req, res, next) => {
+    const { email } = req.query;
+  
+    try {
+      await prisma.$transaction(async (prisma) => {
+        
+        return res.status(200).json({
+          "breaks": [
+              {
+                  "breakName": "Lunch",
+                  "breakCode": "LUNCH",
+                  "breakDuration": "45"
+              },
+              {
+                  "breakName": "Tea",
+                  "breakCode": "Tea",
+                  "breakDuration": "15"
+              },
+              {
+                  "breakName": "Custom Break",
+                  "breakCode": "CUSTOM_BREAK",
+                  "breakDuration": "00"
+              }
+          ]
+      });
+
+       
+      });
+    } catch (error) {
+      console.error(error);
+      return next(
+        new AppError("Error during getting user attendance PC data", 500)
       );
     }
   });
