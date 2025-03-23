@@ -417,6 +417,9 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         const endOfDay = new Date(startOfDay);
         endOfDay.setHours(23, 59, 59, 999);
 
+        const todatDate = new Date()
+        todatDate.setHours(0,0,0,0)
+
         taskCompletion.map( async (task) => {
 
           const taskActivityList = await prisma.taskActivity.findMany({
@@ -467,31 +470,25 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             consumedHours = '0:00'
           }
 
-          const timesheetEntry = await prisma.timesheet.update({
-            where:{
+
+          const newConfig = await prisma.timesheet.upsert({
+            where: {
               taskId_date: {
-                date:{
-                  gte: startOfDay, 
-                  lte: endOfDay
-                },
                 taskId:Number(task.taskId),
+                date:todatDate,
               }
             },
-            data:{
+            update: {
               task : task.Comment,
-              consumedHours: String(consumedHours),
-              ApprovedFlag: approveFlag,
-              userId: user.userId,
-              username: user.username,
-              completionPercentage: task.Completed,
-              taskCode: task.taskCode,
-            }
-          }) 
-
-          if(isEmpty(timesheetEntry)){
-            const newTimesheetEntry = await prisma.timesheet.create({
-              data: {
-                task : task.Comment,
+                consumedHours: String(consumedHours),
+                ApprovedFlag: approveFlag,
+                userId: user.userId,
+                username: user.username,
+                completionPercentage: task.Completed,
+                taskCode: task.taskCode,
+            },
+            create: {
+              task : task.Comment,
                 consumedHours: String(consumedHours),
                 ApprovedFlag: approveFlag,
                 userId: user.userId,
@@ -500,9 +497,8 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                 taskCode: task.taskCode,
                 taskId: Number(task.taskId),
                 date: getTodayDateInISO(new Date())
-              }
-            }) 
-          }
+            },
+          });
         })
 
         return next(new SuccessResponse('Timesheet Records Updated Successfully',200))
