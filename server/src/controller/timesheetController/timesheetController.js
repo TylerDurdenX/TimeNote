@@ -469,11 +469,13 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
           const timesheetEntry = await prisma.timesheet.update({
             where:{
-              date:{
-                gte: startOfDay, 
-                lte: endOfDay
-              },
-              taskId:Number(task.taskId),
+              taskId_date: {
+                date:{
+                  gte: startOfDay, 
+                  lte: endOfDay
+                },
+                taskId:Number(task.taskId),
+              }
             },
             data:{
               task : task.Comment,
