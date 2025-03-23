@@ -417,8 +417,8 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         const endOfDay = new Date(startOfDay);
         endOfDay.setHours(23, 59, 59, 999);
 
-        const todatDate = new Date()
-        todatDate.setHours(0,0,0,0)
+        const todayDate = new Date()
+        todayDate.setHours(0,0,0,0)
 
         taskCompletion.map( async (task) => {
 
@@ -475,7 +475,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             where: {
               taskId_date: {
                 taskId:Number(task.taskId),
-                date:todatDate,
+                date:todayDate,
               }
             },
             update: {
@@ -488,7 +488,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                 taskCode: task.taskCode,
             },
             create: {
-              task : task.Comment,
+                task : task.Comment,
                 consumedHours: String(consumedHours),
                 ApprovedFlag: approveFlag,
                 userId: user.userId,
@@ -496,7 +496,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                 completionPercentage: task.Completed,
                 taskCode: task.taskCode,
                 taskId: Number(task.taskId),
-                date: getTodayDateInISO(new Date())
+                date: todayDate
             },
           });
         })

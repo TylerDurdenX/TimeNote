@@ -21,13 +21,12 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
 
       const currentDateTime = new Date();
       currentDateTime.setHours(0, 0, 0, 0);
-      const indianTimeISOString = currentDateTime.toISOString();
 
       if (!isEmpty(punchInTime)) {
         const createdAttendance = await prisma.attendance.findFirst({
           where:{
             userId: user.userId,
-            date: indianTimeISOString
+            date: currentDateTime
           }
         })
         if(isEmpty(createdAttendance)){
@@ -36,7 +35,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
               userId: user.userId,
               username: user.username,
               punchInTime: punchInTime,
-              date: indianTimeISOString,
+              date: currentDateTime,
             },
           });
           return next(new SuccessResponse("Record Updated successfully", 200));
@@ -50,7 +49,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
           where: {
             userId_date: {
               userId: user.userId,
-              date: indianTimeISOString,
+              date: currentDateTime,
             },
           },
           data: {
