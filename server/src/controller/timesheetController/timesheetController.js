@@ -419,6 +419,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
         const todayDate = new Date()
         todayDate.setHours(0,0,0,0)
+        const indianTimeISOString = todayDate.toISOString();
 
         taskCompletion.map( async (task) => {
 
@@ -475,7 +476,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             where: {
               taskId_date: {
                 taskId:Number(task.taskId),
-                date:todayDate,
+                date:indianTimeISOString,
               }
             },
             update: {
@@ -496,7 +497,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                 completionPercentage: task.Completed,
                 taskCode: task.taskCode,
                 taskId: Number(task.taskId),
-                date: todayDate
+                date: indianTimeISOString
             },
           });
         })
