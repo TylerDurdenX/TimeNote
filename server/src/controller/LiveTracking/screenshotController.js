@@ -9,7 +9,6 @@ export const addscreenshots = catchAsync(async (req, res, next) => {
         const user = await prisma.user.findUnique({
             where: { email: email },
           });
-          console.log(user.username)
       const newScreenshot = await prisma.screenshots.create({
             data:{
               username : user.username,

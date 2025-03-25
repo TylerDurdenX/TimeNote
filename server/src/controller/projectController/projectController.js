@@ -15,7 +15,6 @@ export const createProject = catchAsync(async (req, res, next) => {
         username: projectManager,
       },
     });
-    console.log(user.email)
     const newProject = await prisma.project.create({
       data: {
         name : title,
@@ -121,7 +120,6 @@ export const getProjects = catchAsync(async (req, res, next) => {
 
 
       projects.map((project) => {
-        console.log(project.users)
         project.users.map((user) => {
           if(user.email === email){
             projectList.push(project)
@@ -2757,7 +2755,6 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
         startTime =""
       }
     })
-    console.log(consumedMinutes)
     const hours = Math.floor(consumedMinutes / 60);
     const minutes = Math.floor(consumedMinutes % 60);
     const formattedMinutes = String(minutes).padStart(2, '0');

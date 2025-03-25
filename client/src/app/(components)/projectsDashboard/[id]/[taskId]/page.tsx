@@ -488,7 +488,6 @@ useEffect(() => {
   const toggleProgress = async () => {
     const newState = !isProgressStarted;
     if (newState) {
-      console.log('Progress started');
       try {
         const response = await updateTaskProgress({
           taskId: Number(task?.id),
@@ -511,7 +510,6 @@ useEffect(() => {
         console.error('Error updating task progress:', error);
       }
     } else {
-      console.log('Progress stopped');
       try {
         const response = await updateTaskProgress({
           taskId: Number(task?.id),
@@ -559,7 +557,6 @@ useEffect(() => {
         if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
                         // @ts-ignore
                         toast.error(response.error?.data.message)
-                        console.log('1')
                       }else{
                         toast.success(response.data?.message!);
                       }

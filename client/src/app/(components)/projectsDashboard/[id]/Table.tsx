@@ -14,6 +14,7 @@ import { FileDown } from "lucide-react";
 import CircularLoading from "@/components/Sidebar/loading";
 import { useAppSelector } from "@/app/redux";
 import { useTheme } from "next-themes";
+import { Card } from "@/components/ui/card";
 
 type Props = {
   projectId: string;
@@ -294,6 +295,7 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
           <span className="ml-2">Export to Excel</span>
         </button>
       </div>
+      <Card>
       <DataGrid
         rows={tasks?.tasks || []}
         columns={columns}
@@ -301,6 +303,8 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
         //sx={dataGridSxStyles(isDarkMode)}
         getRowClassName={getRowClassName}
       />
+      </Card>
+      
     </div>
   );
 };

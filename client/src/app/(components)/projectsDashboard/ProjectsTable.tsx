@@ -9,6 +9,7 @@ import { Button } from "@mui/material";
 import { useGetProjectsQuery } from "@/store/api";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import { Card } from "@/components/ui/card";
 
 type Props = {
   email: string;
@@ -142,12 +143,14 @@ const columns: GridColDef[] = [
       <div className="pt-5">
         <Header name="Table" isSmallText />
       </div>
+      <Card>
       <DataGrid
         rows={data || []}
         columns={columns}
         className={dataGridClassNames}
         sx={dataGridSxStyles(isDarkMode)}
       />
+      </Card>
     </div>
   );
 };

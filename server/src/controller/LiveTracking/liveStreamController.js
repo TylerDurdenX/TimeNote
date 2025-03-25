@@ -35,7 +35,6 @@ export const getUsersForUserFilter = catchAsync(async (req, res, next) => {
 
   export const getLiveStreamUsers = catchAsync(async (req, res, next) => {
     const { email, username } = req.query;
-    console.log(isEmpty(username))
     try {
       const user = await prisma.user.findFirst({
         where: {

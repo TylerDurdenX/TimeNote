@@ -9,6 +9,9 @@ import {
   AttendanceCardResponse,
   AttendanceUserPCResponse,
   AttendanceUserTableResponse,
+  BreakRequest,
+  Breaks,
+  BreaksForTeams,
   ConfiguredReports,
   CreateSprint,
   CreateUserData,
@@ -16,6 +19,7 @@ import {
   DownloadProjectAttachment,
   GetProjectTasksCalendarResponse,
   GetProjectTasksResponse,
+  ListReq,
   ListResponse,
   LiveStreamResponse,
   MentionedUser,
@@ -23,6 +27,7 @@ import {
   PmUserResponse,
   ProjectFormData,
   ProjectHours,
+  ProjectListForTeamResponse,
   ProjectListResponse,
   ProjectResponse,
   ProjectUsers,
@@ -43,6 +48,7 @@ import {
   TimesheetData,
   timesheetEntry,
   TimesheetResponse,
+  UpdateBreakObj,
   UpdateProjectData,
   UpdateSprintObject,
   UpdateSubTaskData,
@@ -157,7 +163,8 @@ export const api = createApi({
     "Project",
     "TaskActivity",
     "Timesheet",
-    "PendingTimesheet"
+    "PendingTimesheet",
+    "Breaks"
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -296,6 +303,33 @@ export const api = createApi({
       },
       providesTags: ["ProjectsList"],
     }),
+    getProjectForTeams: build.query<
+    ProjectListForTeamResponse[],
+      { email: string}
+    >({
+      query: ({ email,}) => {
+        const url = `api/user/getProjectsForTeam?email=${email}`;
+        return url;
+      },
+    }),
+    getSelectedProjectForTeams: build.query<
+    ProjectListForTeamResponse[],
+      { teamId: number}
+    >({
+      query: ({ teamId,}) => {
+        const url = `api/user/getSelectedProjectsForTeam?teamId=${teamId}`;
+        return url;
+      },
+    }),
+    getSelectedBreakTypeForTeams: build.query<
+    BreaksForTeams[],
+      { teamId: number}
+    >({
+      query: ({ teamId,}) => {
+        const url = `api/user/getSelectedBreaksForTeam?teamId=${teamId}`;
+        return url;
+      },
+    }),
     getProjectTasks: build.query<
     GetProjectTasksResponse,
       { projectId: string, sprint: string, assignedTo: string, priority: string, isTaskOrSubTask: string, email: string, page: number, limit: number,}
@@ -332,6 +366,25 @@ export const api = createApi({
     >({
       query: ({email,}) => {
         const url = `api/user/getTeamsList?&email=${email}`;
+        return url;
+      },
+    }),
+    getBreaks: build.query<
+    Breaks[],
+      {email: string}
+    >({
+      query: ({email,}) => {
+        const url = `api/user/getBreaksList?&email=${email}`;
+        return url;
+      },
+      providesTags: ["Breaks"]
+    }),
+    getBreaksForTeams: build.query<
+    BreaksForTeams[],
+      {email: string}
+    >({
+      query: ({email,}) => {
+        const url = `api/user/getBreaksListForTeams?&email=${email}`;
         return url;
       },
     }),
@@ -502,6 +555,13 @@ createTeam: build.mutation<ApiResponse, TeamRequest>({
       body: teamReq,
   }), 
 }),
+createBreak: build.mutation<ApiResponse, BreakRequest>({
+  query: (breakReq)=> ({
+      url: "api/user/createBreak",
+      method: "POST",
+      body: breakReq,
+  }), 
+}),
 createBulkTasks: build.mutation<ApiResponse, TaskFormData[]>({
   query: (tasks)=> ({
       url: "api/user/createBulkTasks",
@@ -619,6 +679,13 @@ deleteTriggeredAlerts: build.mutation<ApiResponse, { alertId: number}>({
 }), 
   invalidatesTags : ["Alert", "AlertCount"]
 }),
+deleteBreak: build.mutation<ApiResponse, { breakId: number}>({
+  query: ({breakId})=> ({
+    url: `api/user/deleteBreak?breakId=${breakId}`,
+    method: "DELETE",
+}), 
+  invalidatesTags : ["Breaks"]
+}),
 createSubTask: build.mutation<ApiResponse, SubTaskFormData>({
   query: (task)=> ({
       url: "api/user/createSubTask",
@@ -676,6 +743,14 @@ updateProjectSprint: build.mutation<ApiResponse, UpdateSprintObject>({
       body: updateSprintObject,
   }), 
   invalidatesTags : ["Tasks","SprintCount"]
+}),
+updateBreakDetails: build.mutation<ApiResponse, UpdateBreakObj>({
+  query: (updateBreakObject)=> ({
+      url: "api/user/updateBreakObj",
+      method: "POST",
+      body: updateBreakObject,
+  }), 
+  invalidatesTags : ["Breaks"]
 }),
 getMentionedUsers: build.query<MentionedUser[], { name: string}>({
   query: ({ name,}) => {
@@ -749,6 +824,30 @@ getProjectManager: build.query<PmUserResponse[], {}>({
     return url;
   },
 }),
+updateTeamsConfigurationData: build.mutation<
+      ApiResponse,
+      {
+        email: string;
+        teamId: number
+        projects: ListReq[];
+        breaks: ListReq[];
+      }
+    >({
+      query: ({ email,teamId,  projects, breaks }) => {
+        const requestBody = JSON.stringify({
+          projects,
+          breaks
+        });
+        return {
+          url: `api/user/updateTeamsConfigurationData?email=${email}&teamId=${teamId}`,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: requestBody,
+        };
+      },
+    }),
     updateUserSettingsData: build.mutation<
       ApiResponse,
       {
@@ -895,5 +994,14 @@ export const {
   useGetProjectTasksCalendarQuery,
   useCreateTeamMutation,
   useGetTeamsQuery,
-  useGetTeamLeadsQuery
+  useGetTeamLeadsQuery,
+  useCreateBreakMutation,
+  useDeleteBreakMutation,
+  useGetBreaksQuery,
+  useUpdateBreakDetailsMutation,
+  useGetProjectForTeamsQuery,
+  useGetBreaksForTeamsQuery,
+  useUpdateTeamsConfigurationDataMutation,
+  useGetSelectedBreakTypeForTeamsQuery,
+  useGetSelectedProjectForTeamsQuery
 } = api;

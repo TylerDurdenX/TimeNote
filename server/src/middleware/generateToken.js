@@ -23,7 +23,7 @@ export const generateToken = catchAsync(async (req, res, next) => {
         };
       
         // Sign and generate the token
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2m' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.AUTH_TOKEN_EXPIRY });
       
         return res.json({ token });
   

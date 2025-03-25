@@ -163,7 +163,6 @@ const BulkCreate = ({sprintList, email, projectId, setIsOpen} :Props) => {
                   rowIsValid = false;
                   errors.push(`Row ${rowIndex} - Start Date cannot be empty.`);
                 }else{
-                  console.log(cell.text)
                   rowTaskData.startDate = cell.value!.toString()
                 }
               }
@@ -172,7 +171,6 @@ const BulkCreate = ({sprintList, email, projectId, setIsOpen} :Props) => {
                   rowIsValid = false;
                   errors.push(`Row ${rowIndex} - Due Date cannot be empty.`);
                 }else{
-                  console.log(cell.text)
                   rowTaskData.dueDate = cell.value!.toString()
                 }
               }
@@ -199,11 +197,9 @@ const BulkCreate = ({sprintList, email, projectId, setIsOpen} :Props) => {
                   }
               }
             });
-            console.log(rowTaskData)
             tasksList.push(rowTaskData)
           });
           setTaskList(tasksList)
-          console.log(tasksList)
           if (errors.length > 0) {
             setError(errors.join(' ')); // Set the validation errors
 

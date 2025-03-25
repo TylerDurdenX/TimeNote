@@ -334,7 +334,6 @@ const UserSettings = ({ id }: Props) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('2')
 
     if (isLoading) return;
     
@@ -368,7 +367,6 @@ const UserSettings = ({ id }: Props) => {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('1')
     if (isLoading) return;
     try {
       const response = await updateUserBasicData({

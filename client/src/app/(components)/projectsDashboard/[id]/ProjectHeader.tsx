@@ -89,12 +89,12 @@ const ProjectHeader = ({
             setActiveTab={setActiveTab}
             activeTab={activeTab}
           />
-          {/* <TabButton
+          <TabButton
             name="Calendar"
             icon={<Calendar className="h-5 w-5" />}
             setActiveTab={setActiveTab}
             activeTab={activeTab}
-          /> */}
+          />
           {/* <TabButton
             name="User Workload"
             icon={<BookUser className="h-5 w-5" />}

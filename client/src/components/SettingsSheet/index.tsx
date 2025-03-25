@@ -54,7 +54,6 @@ export function SheetDemo() {
   const dispatch = useDispatch();
   const router = useRouter();
   const removeProfilePicture = async () => {
-    console.log('111')
     try {
       const response = await updateProfilePic({
         email: userEmail!,

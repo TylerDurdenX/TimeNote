@@ -50,7 +50,6 @@ const localizer = momentLocalizer(moment);
     };
 
     const handleViewChange = (view: View) => {
-        console.log('Current view:', view);
         setCurrentView(view);
       };
 
@@ -78,7 +77,6 @@ const localizer = momentLocalizer(moment);
         }
         resultList.push(Result)
       })
-      console.log(resultList)
 
       const handleEventClick = (event: any) => {
         // Log the event that was clicked

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Bell, CalendarClock, ChartCandlestick, ChartNoAxesCombined, FileChartColumnIncreasing, FileClock, FilterX, LaptopMinimal, MapPin, PlusSquare, ScreenShare, User, User2, UsersRound } from 'lucide-react'
+import { Bell, CalendarClock, ChartCandlestick, ChartNoAxesCombined, Coffee, FileChartColumnIncreasing, FileClock, FilterX, LaptopMinimal, MapPin, PlusSquare, ScreenShare, User, User2, Users, UsersRound } from 'lucide-react'
 import { Button } from '@mui/material'
 import { DatePickerWithRange } from './DateRangePicker' 
 import { DateRange } from 'react-day-picker'
@@ -83,6 +83,12 @@ const Header = ({
     case 'Alerts':
       icon = <Bell className='mr-2'/>;  
       break;
+    case 'Teams':
+        icon = <Users className='mr-2'/>;  
+        break;
+    case 'Breaks':
+        icon = <Coffee className='mr-2'/>;  
+        break;
     case 'Reports':
       icon = <FileChartColumnIncreasing className='mr-2'/>;  
       break;

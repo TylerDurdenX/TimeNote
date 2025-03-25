@@ -670,16 +670,12 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
           let idList =[]
 
           const userIdList = await prisma.user.findMany({
-            where: {
-              reportsToId: user.userId
-            },
+            // where: {
+            //   reportsToId: user.userId
+            // },
             select: {
               userId: true
             }
-          })
-
-          userIdList.map((user) => {
-            idList.push(user.userId)
           })
  
           const today = new Date();
@@ -689,7 +685,7 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
             where: {
               date: isoDate,
               userId: {
-                in: idList
+                in: userIdList
               },
             }
           });
@@ -784,8 +780,6 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
           }
         });
 
-        console.log(user.roles)
-
         if(user.roles.some((role) => role.code === "ADMIN")){
           const result = {
             admin: true
@@ -814,27 +808,73 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
   
     try {
       await prisma.$transaction(async (prisma) => {
-        
-        return res.status(200).json({
-          "breaks": [
-              {
-                  "breakName": "Lunch",
-                  "breakCode": "LUNCH",
-                  "breakDuration": "45"
-              },
-              {
-                  "breakName": "Tea",
-                  "breakCode": "Tea",
-                  "breakDuration": "15"
-              },
-              {
-                  "breakName": "Custom Break",
-                  "breakCode": "CUSTOM_BREAK",
-                  "breakDuration": "00"
-              }
-          ]
-      });
 
+        const user = await prisma.user.findFirst({
+          where:{
+            email:email
+          },include:{
+            teams: true
+          }
+        })
+
+        let teamsList = []
+
+        user.teams.map((team) => {
+          teamsList.push(team.name)
+        })
+
+        console.log(teamsList)
+
+        const breakTypeList = await prisma.team.findMany({
+          where:{
+            name: {
+              in: teamsList
+            }
+          },include:{
+            breakTypes: {
+              select:{
+                id: true,
+                breakName: true,
+                breakCode: true,
+                breakDescription: true,
+                breakTimeInMinutes: true
+              }
+            }
+          }
+        })
+
+        let resultList = []
+
+        const customObj =  {
+          "breakName": "Custom Break",
+          "breakCode": "CUSTOM_BREAK",
+          "breakDuration": "00"
+      }
+
+      resultList.push(customObj)
+
+        breakTypeList.map((breakType) => {
+          breakType.breakTypes.map((breakObj) => {
+            const result = {
+              breakName: breakObj.breakName,
+              breakCode: breakObj.breakCode,
+              breakDuration: breakObj.breakTimeInMinutes
+            }
+            resultList.push(result)
+          })
+        })
+
+        const uniqueObjects = resultList.filter((value, index, self) => 
+          index === self.findIndex((t) => (
+            t.breakCode === value.breakCode
+          ))
+        );
+
+        const breaks = {
+          breaks : uniqueObjects
+        }
+
+        return res.status(200).json(breaks);
        
       });
     } catch (error) {

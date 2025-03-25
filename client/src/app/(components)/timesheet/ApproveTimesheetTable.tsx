@@ -51,7 +51,6 @@ const ApproveTimesheetTable = ({ email , selectedDate}: Props) => {
         if(!validateTimeFormat(approvedHours)){
           toast.error('Approved Hours not Valid')
         }else{
-          console.log(approvedHours)
           try {
               const response = await updateTimesheet({id:id, email: email!, approvedHours: approvedHours , approveRejectFlag: true, })
   

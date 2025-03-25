@@ -164,16 +164,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: `/timesheet?email=${userEmail}`,
         icon: FileClock
       },
-      // {
-      //   name: "Teams",
-      //   url: `/teams?email=${userEmail}`,
-      //   icon: Users
-      // },
-      // {
-      //   name: "Breaks",
-      //   url: `/breaks?email=${userEmail}`,
-      //   icon: Coffee
-      // },
+      {
+        name: "Teams",
+        url: `/teams?email=${userEmail}`,
+        icon: Users
+      },
+      {
+        name: "Breaks",
+        url: `/breaks?email=${userEmail}`,
+        icon: Coffee
+      },
     ],
   };
 

@@ -23,7 +23,6 @@ const Navbar = () => {
   useEffect(() => {
     if (error) {
       console.log(error)
-      console.log('new')
       const apiError = error as ApiResponse;
 
       if (Number(apiError.status) === 401) {

@@ -80,7 +80,7 @@ const page = () => {
       <div className="w-full mb-5">
       <div className="flex w-full text-gray-900">
         <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
-          <Header name="Alerts" hasFilters={false} hasTeamFilter={false} />
+          <Header name="Teams" hasFilters={false} hasTeamFilter={false} />
         </div>
       </div>
       <div className="flex gap-4 px-4 w-full h-full  box-border overflow-x-hidden">

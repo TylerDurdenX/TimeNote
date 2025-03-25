@@ -49,8 +49,6 @@ export const getUsersList = catchAsync(async (req, res, next) => {
             projectIdList.push(project.id)
           })
 
-          console.log(projectIdList)
-
         const usersList = await prisma.user.findMany({
           where: {
             projects: {
@@ -307,8 +305,6 @@ export const updateUserBasicDetailsData = catchAsync(async (req, res, next) => {
       message: `UserData Updated Successfully!`,
     });
   });
-
-    
   } catch (error) {
     console.log(error);
       return next(new AppError("There was an error updating basic user details", error));
@@ -338,7 +334,7 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
       })
       
       if(!isEmpty(projects)){
-        const dbroject = await prisma.project.findMany({
+        const dbProject = await prisma.project.findMany({
           where:{
             name: {
               in: extractTitles(projects),}
@@ -354,7 +350,7 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
           data: {
             projects: {
               disconnect: currentProjects?.projects.map(project => ({ id: project.id })),
-              connect: dbroject.map((project) => ({ id: project.id })),
+              connect: dbProject.map((project) => ({ id: project.id })),
             },
           },
         });

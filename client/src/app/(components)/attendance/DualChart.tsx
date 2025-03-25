@@ -52,7 +52,6 @@ export function DualChart({onTimeList, lateArrivalList} : Props) {
           lateArrival: entry2.count
         };
       });
-      console.log(combinedList)
 
   return (
     <Card className="h-[39vh]">

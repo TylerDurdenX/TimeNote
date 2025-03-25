@@ -59,6 +59,11 @@ export interface ListResponse {
     misc: string;
 }
 
+export interface ListReq {
+    id: number
+    title: string
+}
+
 export interface UserHierarchy {
     userId: number;
     username: string;
@@ -136,6 +141,11 @@ export interface ProjectListResponse{
     clientName: string
     projectManager: string
     completionStatus: number
+}
+
+export interface ProjectListForTeamResponse {
+    id: number
+    title: string
 }
 
 export interface TaskHistory{
@@ -413,6 +423,14 @@ export interface TeamRequest {
     email: string
 }
 
+export interface BreakRequest {
+    email: string
+    breakName : string
+    breakDescription: string
+    breakCode : string
+    breakTimeInMinutes : string
+}
+
 export interface CreateUserData {
     username: string,
     email: string,
@@ -438,6 +456,19 @@ export interface TaskComments{
     text: string
     username: string
     commentTime: string
+}
+
+export interface Breaks {
+    id: number
+    breakName: string
+    breakCode: string
+    breakDescription: string
+    breakTimeInMinutes: string
+}
+
+export interface BreaksForTeams {
+    id: number
+    title: string
 }
 
 export interface Teams {
@@ -521,6 +552,14 @@ export interface UpdateSprintObject{
     sprintId: number
     email: string
     projectName: string
+}
+
+export interface UpdateBreakObj {
+    email: string
+    breakId: number
+    breakName: string
+    breakDescription: string
+    breakTimeInMinutes: string
 }
 
 export interface UpdateTaskData {

@@ -58,7 +58,6 @@ const ScreenshotsLP = ({from, to, setReRenderPage} : Props) => {
     newPage: number
   ) => {
     setPage(newPage);
-    console.log(`Page changed to: ${newPage}`); // You can replace this with your desired action
   };
 
   const [zoomLevel, setZoomLevel] = useState(1);

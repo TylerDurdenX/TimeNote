@@ -608,7 +608,6 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
        if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
                        // @ts-ignore
                        toast.error(response.error?.data.message)
-                       console.log('1')
                      }else{
                        toast.success(response.data?.message!);
                      }

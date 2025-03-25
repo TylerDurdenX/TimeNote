@@ -57,7 +57,6 @@ const localizer = momentLocalizer(moment);
     };
 
     const handleViewChange = (view: View) => {
-        console.log('Current view:', view);
         setCurrentView(view);
       };
 
@@ -85,7 +84,6 @@ const localizer = momentLocalizer(moment);
         }
         resultList.push(Result)
       })
-      console.log(resultList)
 
       const handleEventClick = (event: any) => {
         // Log the event that was clicked
@@ -161,7 +159,7 @@ const localizer = momentLocalizer(moment);
         const { bgColor, textColor } = getStatusColors(event.status);
 
         let href = ''
-
+        sessionStorage.removeItem('taskId')
         if(email !== event.assignee.email){
           sessionStorage.setItem('taskId', event.id)
           href = `/task/${event.id}?email=${email}`

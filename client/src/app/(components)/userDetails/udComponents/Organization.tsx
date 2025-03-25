@@ -32,7 +32,6 @@ export default function HierarchyPage({ startingUserId, setStartingUserId}: Hier
 
 
   useEffect(() => {
-    console.log('useEffect triggered');
     if (!data || data.length === 0) return;
   
     // Find the current user based on the startingUserId

@@ -1,109 +1,108 @@
-import * as React from "react";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import Stack from "@mui/material/Stack";
-import { Popper } from "@mui/material";
-import { useGetAuthoritiesQuery } from "@/store/api";
+import * as React from 'react';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import { Popper } from '@mui/material';
+import {  useGetSelectedBreakTypeForTeamsQuery, useGetSelectedProjectForTeamsQuery } from '@/store/api';
+import { BreaksForTeams, ProjectListForTeamResponse } from '@/store/interfaces';
 
-interface AuthoritiesFormProps {
+type Props = {
+  projectFlag: boolean
+  userEmail: string
+  teamId: number
+  selectedList: ProjectListForTeamResponse[] | BreaksForTeams[] 
+  projectsList? : ProjectListForTeamResponse[]
+  breaksList?: BreaksForTeams[]
   setSelectedProjects: React.Dispatch<React.SetStateAction<any[]>>;
-  overrideFlag: boolean;
-  label: string;
+  setSelectedBreaks: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
-export default function Tags({
-  setSelectedProjects,
-  overrideFlag,
-  label,
-}: AuthoritiesFormProps) {
-  const { data, isLoading, error } = useGetAuthoritiesQuery();
+export default function LimitTags({projectFlag,teamId,selectedList, userEmail, projectsList, breaksList, setSelectedBreaks, setSelectedProjects} : Props) {
 
-  const authoritiesList =
-    data?.map((authority) => ({
-      name: authority.name,
-      code: authority.code,
-    })) || [];
+  const [value, setValue] = React.useState<any[]>(selectedList);
 
-  const [selectedAuthoritiesState, setSelectedAuthoritiesState] =
-    React.useState<any[]>([]);
-  const [authoritiesListLocal, setAuthoritiesListLocal] =
-    React.useState<any[]>(authoritiesList);
+  const {data: selectedProjects} = useGetSelectedProjectForTeamsQuery({teamId: teamId}, {refetchOnMountOrArgChange: true})
+  const {data: selectedBreaks} = useGetSelectedBreakTypeForTeamsQuery({teamId: teamId}, {refetchOnMountOrArgChange: true})
 
-  const handleAuthorityChange = (_event: any, newValue: any[]) => {
-    setSelectedAuthoritiesState(newValue);
-    setSelectedProjects(newValue);
+  console.log('autoComplete', teamId)
+
+  React.useEffect(() => {
+    if(projectFlag == true){
+      setValue(selectedProjects || [])
+    }else{
+      setValue(selectedBreaks || [])
+    }
+  }, [selectedProjects,selectedBreaks])
+
+  const handleProjectFieldChange = (_event: any, newValue: any[]) => {
+    setValue(newValue); 
+    setSelectedProjects(newValue); 
   };
 
-  const availableOptions = authoritiesListLocal.filter(
-    (authority) =>
-      !selectedAuthoritiesState.some(
-        (selected) => selected.code === authority.code
-      )
-  );
+  const handleBreaksFieldChange = (_event: any, newValue: any[]) => {
+    setValue(newValue); 
+    setSelectedBreaks(newValue); 
+  };
 
   return (
-    <Stack
-      spacing={3}
-      sx={{ width: 520, zIndex: 1500 }}
-      style={{ cursor: "pointer" }}
-    >
-      {overrideFlag ? (
+    <div className='w-full'>
+      {projectFlag ? <>
         <Autocomplete
-          multiple
-          id="tags-outlined"
-          options={authoritiesListLocal}
-          getOptionLabel={(option) => option.name}
-          value={selectedAuthoritiesState} 
-          isOptionEqualToValue={(option, value) => option.code === value.code}
-          onChange={handleAuthorityChange}
-          PopperComponent={(props) => (
-            <Popper
-              {...props}
-              style={{
-                zIndex: 1500,
-                pointerEvents: "auto",
-                width: "30%",
-              }}
+              multiple
+              id="tags-outlined"
+              options={projectsList!}
+              getOptionLabel={(option) => option.title}
+              value={value} 
+              isOptionEqualToValue={(option, value) => option.title === value.title}
+              onChange={handleProjectFieldChange}
+              PopperComponent={(props) => (
+                <Popper
+                  {...props}
+                  style={{
+                    zIndex: 1500,
+                    pointerEvents: "auto",
+                    width: "55%",
+                  }}
+                />
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="standard"
+                   label={'Projects'}
+                  // placeholder={label}
+                />
+              )}
             />
-          )}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              label={label}
-              placeholder={label}
+      </> : <>
+      <Autocomplete
+              multiple
+              id="tags-outlined"
+              options={breaksList!}
+              getOptionLabel={(option) => option.title}
+              value={value} 
+              isOptionEqualToValue={(option, value) => option.title === value.title}
+              onChange={handleBreaksFieldChange}
+              PopperComponent={(props) => (
+                <Popper
+                  {...props}
+                  style={{
+                    zIndex: 1500,
+                    pointerEvents: "auto",
+                    width: "55%",
+                  }}
+                />
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="standard"
+                  label={'Breaks'}
+                  // placeholder={label}
+                />
+              )}
             />
-          )}
-        />
-      ) : (
-        <Autocomplete
-          multiple
-          id="tags-outlined"
-          options={authoritiesListLocal}
-          getOptionLabel={(option) => option.name}
-          value={selectedAuthoritiesState} // Controlled value to track selected items
-          isOptionEqualToValue={(option, value) => option.code === value.code}
-          onChange={handleAuthorityChange}
-          PopperComponent={(props) => (
-            <Popper
-              {...props}
-              style={{
-                zIndex: 0,
-                pointerEvents: "auto",
-                width: "30%",
-              }}
-            />
-          )}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              label={label}
-              placeholder={label}
-            />
-          )}
-        />
-      )}
-    </Stack>
+      </>}
+    
+            </div>
   );
 }

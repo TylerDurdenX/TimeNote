@@ -56,7 +56,6 @@ const ResetPassword = () => {
     } finally {
       setLoading(false);
     }
-    console.log("Resend OTP triggered!");
     setRemainingTime(30); // Reset the timer back to 30 seconds
     setIsButtonDisabled(true);
   };

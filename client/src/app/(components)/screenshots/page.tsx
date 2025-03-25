@@ -20,7 +20,6 @@ const Page = () => {
   const handleSelectUser = (id: number) => {
     setIsUserSelected(true);
     setUserId(id);
-    console.log("user selected");
   };
 
   const [fromDate, setFromDate] = useState<string>("2000-01-01T00:00:00Z");

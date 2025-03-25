@@ -11,7 +11,7 @@ import isAuthenticated from "../middleware/isAuthenticated.js";
 import { getAlertCount, getUser, getUserCount, updateUserProfilePicture } from "../controller/dashboardController.js";
 import { checkRoleCode, createAuthority, createRole, getAuthorities } from "../controller/settingsController.js";
 import { getListOfObjects, getUserDetails, getUserHierarchyData, getUsersList, mapRolesToUser, updateUserBasicDetailsData, updateUserDetailsData } from "../controller/UserDetailsController.js";
-import { createTeam, getTeamLeads, getTeamsList } from "../controller/teamController/controller.js";
+import { createTeam, getBreaksForTeam, getProjectsForTeam, getSelectedBreaksForTeam, getSelectedProjectsForTeam, getTeamLeads, getTeamsList, updateTeamsConfigurationData } from "../controller/teamController/controller.js";
 import { addComment, addSubTaskComment, closeCompletedTask, createBulkTasks, createProject, createSprint, createSubTask, createTask, deleteAttachment, deleteProjectAttachment, downloadAttachment, downloadProjectAttachment, getMentionedUsers, getProject, getProjectHoursEstimation, getProjectManagers, getProjects, getProjectSprint, getProjectTasks, getProjectTasksCalendar, getProjectUsers, getSprint, getSubTask, getSubTaskComments, getTask, getTaskActivity, getTaskComments, getTaskHistory, getUserData, updateProject, updateProjectSprint, updateProjectStatus, updateSubTask, updateTask, updateTaskAssignee, updateTaskProgress, updateTaskStatus, uploadAttachment, uploadProjectAttachment, uploadSubTaskAttachment } from "../controller/projectController/projectController.js";
 import { addscreenshots, getScreenshots } from "../controller/LiveTracking/screenshotController.js";
 import { getLiveStreamUsers, getUsersForUserFilter } from "../controller/LiveTracking/liveStreamController.js";
@@ -20,8 +20,9 @@ import { deleteAlert, getAlerts } from "../controller/alertController/alertContr
 import { createTimesheetEntry, getPendingTimesheetData, getTimesheetData, getUsersTimesheetData, updateTimesheet, updateTimesheetRecords, viewTimesheetData } from "../controller/timesheetController/timesheetController.js";
 import { updateCustomerData } from "../middleware/customerController.js";
 import { authenticateThirdParty } from "../middleware/generateToken.js";
-import { getAdminRole, getAttendanceData, getAttendanceLCData, getBreakData, getUserAttendanceData, getUserAttendanceTableData, updateAttendance } from "../controller/attendanceController/attendanceController.js";
+import { getAdminRole, getAttendanceData, getAttendanceLCData, getBreakData, getUserAttendanceData, getUserAttendanceTableData, updateAttendance} from "../controller/attendanceController/attendanceController.js";
 import { signInUser, signupTP } from "../controller/thirdPartyController/thirdPartyController.js";
+import { createBreak, deleteBreak, getBreaksList, updateBreak, updateBreakTime } from "../controller/breakController/breakCOntroller.js";
 const router = express.Router();
 
 router.post("/customerDataUpdate",authenticateThirdParty, updateCustomerData);
@@ -108,6 +109,15 @@ router.get('/getUserAttendanceTableData', isAuthenticated, getUserAttendanceTabl
 router.get('/getAdminRole', isAuthenticated, getAdminRole)
 router.get('/getProjectSprint', isAuthenticated, getProjectSprint)
 router.post('/updateProjectSprint',isAuthenticated, updateProjectSprint)
+router.post('/createBreak',isAuthenticated, createBreak)
+router.delete('/deleteBreak',isAuthenticated, deleteBreak)
+router.get('/getBreaksList', isAuthenticated, getBreaksList)
+router.post('/updateBreakObj',isAuthenticated, updateBreak)
+router.get('/getProjectsForTeam',isAuthenticated, getProjectsForTeam)
+router.get('/getBreaksListForTeams',isAuthenticated, getBreaksForTeam)
+router.post('/updateTeamsConfigurationData', isAuthenticated, updateTeamsConfigurationData)
+router.get('/getSelectedProjectsForTeam',isAuthenticated, getSelectedProjectsForTeam)
+router.get('/getSelectedBreaksForTeam',isAuthenticated, getSelectedBreaksForTeam)
 
 // Third party requests
 router.post("/updateAttendance",authenticateThirdParty, updateAttendance);
@@ -116,6 +126,7 @@ router.post("/signInUser",authenticateThirdParty, signInUser);
 router.post("/signUpTP", authenticateThirdParty, signupTP )
 router.post("/createAuthority",authenticateThirdParty, createAuthority)
 router.get('/takeBreak',authenticateThirdParty, getBreakData)
+router.post('/updateBreakTime',authenticateThirdParty, updateBreakTime)
 
 
 export default router;
