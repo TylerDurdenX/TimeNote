@@ -420,6 +420,8 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         const todayDate = new Date()
         todayDate.setHours(0,0,0,0)
         const indianTimeISOString = todayDate.toISOString();
+        console.log(todayDate)
+        console.log(indianTimeISOString)
 
         taskCompletion.map( async (task) => {
 
@@ -471,12 +473,11 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             consumedHours = '0:00'
           }
 
-
           const newConfig = await prisma.timesheet.upsert({
             where: {
               taskId_date: {
                 taskId:Number(task.taskId),
-                date:indianTimeISOString,
+                date:getTodayDateInISO(new Date(todayDate)),
               }
             },
             update: {
@@ -497,7 +498,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                 completionPercentage: task.Completed,
                 taskCode: task.taskCode,
                 taskId: Number(task.taskId),
-                date: indianTimeISOString
+                date: getTodayDateInISO(new Date(todayDate))
             },
           });
           console.log(newConfig)
