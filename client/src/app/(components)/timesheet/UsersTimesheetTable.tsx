@@ -30,9 +30,11 @@ const UsersTimesheetTable = ({ email , selectedDate}: Props) => {
 
       const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
+  const [rowDataUserName, setRowDataUserName] = useState('')
 
   const handleViewDetails = (row: RowData) => {
     setSelectedRow(row);
+    setRowDataUserName(row.username)
     setOpen(true); 
   };
 
@@ -92,10 +94,8 @@ const columns: GridColDef[] = [
           }}
           className=" w-full"
         >
-          <Dialog open={open} onOpenChange={setOpen}>
-            <div className="my-3 flex justify-center items-center">
-            <DialogTrigger asChild>
-              <Button
+                      <div className="my-3 flex justify-center items-center">
+          <Button
                 variant="contained"
                 className="mb-5"
                 color="primary"
@@ -109,16 +109,28 @@ const columns: GridColDef[] = [
               >
                 View Details
               </Button>
-            </DialogTrigger>
+              </div>
+        </div>
+      );
+    },
+  }
+  
+]
+
+  return (
+    <>
+    <Dialog open={open} onOpenChange={setOpen}>
+            <div className="my-3 flex justify-center items-center">
+            
   
             {/* Dialog Content */}
             <DialogContent className="max-w-[65vw] max-h-[80vw] mt-5 mb-5 overflow-y-auto"> {/* Set width to 70% of viewport height */}
               <DialogHeader>
                 <DialogTitle>
-                  {formatDate(selectedDate.toString())} - {rowData.username}
+                  {formatDate(selectedDate.toString())} - {rowDataUserName}
                 </DialogTitle>
                 <DialogDescription className="text-gray-700 overflow-y-auto">
-                  <TimesheetDataTable email={email} selectedDate={selectedDate} name={rowData.username} dialogFlag={true}/>
+                  <TimesheetDataTable email={email} selectedDate={selectedDate} name={rowDataUserName} dialogFlag={true}/>
                 </DialogDescription>
               </DialogHeader> 
   
@@ -138,15 +150,6 @@ const columns: GridColDef[] = [
             </DialogContent>
             </div>
           </Dialog>
-        </div>
-      );
-    },
-  }
-  
-]
-
-  return (
-    <>
     <div className="h-full w-full px-4 pb-8 xl:px-6">
         
       <DataGrid
