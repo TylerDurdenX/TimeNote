@@ -87,7 +87,8 @@ const localizer = momentLocalizer(moment);
 
       const handleEventClick = (event: any) => {
         // Log the event that was clicked
-        console.log('Event clicked:', event);
+        console.log('Event clicked:', event.id);
+        sessionStorage.setItem('taskId',event.id )
       };
 
       const eventPropGetter = (event: any) => {
@@ -159,12 +160,9 @@ const localizer = momentLocalizer(moment);
         const { bgColor, textColor } = getStatusColors(event.status);
 
         let href = ''
-        sessionStorage.removeItem('taskId')
         if(email !== event.assignee.email){
-          sessionStorage.setItem('taskId', event.id)
-          href = `/task/${event.id}?email=${email}`
+          href = `/task/${sessionStorage.getItem('taskId')}?email=${email}`
         }else{
-          sessionStorage.setItem('taskId', event.id)
           href = `/projectsDashboard/${event.projectId}/${event.code}?email=${email}`
         }
     
@@ -234,13 +232,6 @@ const localizer = momentLocalizer(moment);
                 <div className="grid grid-cols-5 items-center gap-4">
                   <Label htmlFor="maxWidth" className='col-span-2'>Assignee</Label>
                   <Label htmlFor="maxWidth" className='col-span-3 h-5 items-center justify-center mt-2'>{event.assignee.username}</Label>
-                    {/* <Input
-                      id="maxWidth"
-                      defaultValue={event.assignee.username}
-                      className="col-span-2 h-8"
-                      readOnly = {true}
-
-                    /> */}
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                   <Label htmlFor="height" className='col-span-2'>Estimated Hours</Label>
@@ -249,13 +240,6 @@ const localizer = momentLocalizer(moment);
                 <div className="grid grid-cols-5 items-center gap-2">
                   <Label htmlFor="maxHeight" className='col-span-2'>Priority</Label>
                   <Label htmlFor="maxWidth" className='col-span-3 h-4 items-center justify-center mt-1'>{event.priority}</Label>
-
-                  {/* <Input
-                    id="maxHeight"
-                    defaultValue={event.priority}
-                    readOnly= {true}
-                    className="col-span-2 h-8"
-                  /> */}
                 </div>
               </div>
             </div>

@@ -500,6 +500,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                 date: indianTimeISOString
             },
           });
+          console.log(newConfig)
         })
 
         return next(new SuccessResponse('Timesheet Records Updated Successfully',200))

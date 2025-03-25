@@ -4,24 +4,35 @@ import React, { useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { dataGridClassNames, } from "@/lib/utils";
 import { Button,Input } from "@mui/material";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription,  DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 import { Clock9} from "lucide-react";
 import {  toast } from 'react-hot-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Cancel, CheckCircle } from "@mui/icons-material";
 import { Card } from "@/components/ui/card";
 import { useGetPendingTimesheetDataQuery, useUpdateTimesheetEntryMutation } from "@/store/api";
+import Link from "next/link";
 
 type Props = {
   email: string;
   selectedDate: Date
 };
 
+interface RowData {
+  id: number;
+  consumedHours: string;
+  userId: number;
+  username: string;
+  projectId?: number; 
+}
+
 const ApproveTimesheetTable = ({ email , selectedDate}: Props) => {
 
       const [open, setOpen] = useState(false);
+      const [isViewOpen, setIsViewOpen] = useState(false)
       const [updateTimesheet] = useUpdateTimesheetEntryMutation()
       const [selectedId, setSelectedId] = useState(0)
+      const [rowDataUserName, setRowDataUserName] = useState('')
 
       const { data: pendingTimesheetEntry, isLoading, error} = useGetPendingTimesheetDataQuery(
         { email: email!, date: selectedDate.toString()},
@@ -32,6 +43,15 @@ const ApproveTimesheetTable = ({ email , selectedDate}: Props) => {
         const regex = /^([01]?[0-9]|2[0-3]):([0-5]?[0-9])$/;
         return regex.test(time);
       }
+
+      const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
+      
+        const handleViewDetails = (row: RowData) => {
+          console.log(row.id)
+          setSelectedRow(row);
+          setRowDataUserName(row.username)
+          setIsViewOpen(true); 
+        };
 
       const formatTime = (input: string): string => {
         if (/^\d+$/.test(input)) {
@@ -139,12 +159,12 @@ const columns: GridColDef[] = [
   {
     field: "completionPercentage",
     headerName: "Completion Percentage",
-    flex: 1.5
+    flex: 1.3
   },
   {
     field: "date",
     headerName: "Date",
-    flex: 1,
+    flex: 0.7,
     renderCell: (params) => {
       return formatDate(params.value); 
     },
@@ -178,7 +198,7 @@ const columns: GridColDef[] = [
   {
     field: "ApprovedFlag",
     headerName: "Approval Status",
-    flex: 1.5,
+    flex: 1.4,
     renderCell: (params) => {
         if (params.value === 'NA') {
           return (<><CheckCircle style={{ color: 'green' }} /> Approved</>) ;
@@ -258,6 +278,47 @@ const columns: GridColDef[] = [
       );
     },
   },
+    {
+      field: '',
+      headerName: 'View Task',
+      flex: 1,
+      renderCell: (params) => {
+        if(params.row.taskId !== null){
+              return (
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '15px',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                  className=" w-full"
+                >
+                  <Link href={`/task/${params.row.taskId}?email=${email}`} >
+                      <Button
+                        variant="contained"
+                        className="mb-5"
+                        color="primary"
+                        size="small"
+                        onClick={() => sessionStorage.setItem('taskId',String(params.row.taskId))} // Passing the current row's data
+                        sx={{
+                          backgroundColor: '#3f51b5', // Blue color
+                          '&:hover': { backgroundColor: '#2c387e' },
+                          borderRadius: '8px',
+                        }}
+                      >
+                        View Task
+                      </Button>
+                      </Link>
+                </div>
+              );
+            }else{
+              return(
+                ""
+              )
+            }
+          }
+    }
 ]
 
   return (

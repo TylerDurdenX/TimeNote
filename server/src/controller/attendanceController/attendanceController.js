@@ -670,12 +670,13 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
           let idList =[]
 
           const userIdList = await prisma.user.findMany({
-            // where: {
-            //   reportsToId: user.userId
-            // },
             select: {
               userId: true
             }
+          })
+
+          userIdList.map((user) => {
+            idList.push(user.userId)
           })
  
           const today = new Date();
@@ -685,7 +686,7 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
             where: {
               date: isoDate,
               userId: {
-                in: userIdList
+                in: idList
               },
             }
           });

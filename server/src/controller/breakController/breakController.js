@@ -171,17 +171,38 @@ export const createBreak = catchAsync(async (req, res, next) => {
 
           resultBreakId = breakTaken.id
         }else{
+
+          const breakTime = await prisma.breaks.findFirst({
+            where:{
+              id: Number(breakId)
+            },select:{
+              startTime: true
+            }
+          })
+
+          const startDate = new Date(breakTime.startTime);
+          const endDate = new Date(endTime);
+
+          // Calculate the difference in milliseconds
+          const differenceInMilliseconds = endDate - startDate;
+
+          // Convert milliseconds to seconds
+          const differenceInSeconds = differenceInMilliseconds / 1000;
+
+          const breakTimeInMinutes = String(Math.floor(differenceInSeconds / 60))
+          const remainingSeconds = breakTimeInMinutes % 60;
+
           const breakTaken = await prisma.breaks.update({
             where:{
               id: Number(breakId)
             },
             data:{
               endTime: endTime,
-              breakTimeInMinutes: breakTime
+              breakTimeInMinutes: `${breakTimeInMinutes}:${remainingSeconds}`
             }
           })
+          resultBreakId = breakTaken.id
         }
-        resultBreakId = breakTaken.id
         }else{
           if(!isEmpty(startTime)){
             const breakTaken = await prisma.breaks.create({
@@ -214,13 +235,9 @@ export const createBreak = catchAsync(async (req, res, next) => {
 
             // Convert milliseconds to seconds
             const differenceInSeconds = differenceInMilliseconds / 1000;
-            console.log("Difference in milliseconds:", differenceInMilliseconds);
-            console.log("Difference in seconds:", differenceInSeconds);
-
+ 
             const breakTimeInMinutes = String(Math.floor(differenceInSeconds / 60))
             const remainingSeconds = breakTimeInMinutes % 60;
-            console.log(breakTimeInMinutes)
-            console.log(remainingSeconds)
             const breakTaken = await prisma.breaks.update({
               where:{
                 id: Number(breakId)
