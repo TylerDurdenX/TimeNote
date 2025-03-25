@@ -3,6 +3,7 @@ import catchAsync from "../../utils/catchAsync.js";
 import { prisma } from "../../server.js";
 import SuccessResponse from "../../utils/SuccessResponse.js";
 import { isEmpty } from "../../utils/genericMethods.js";
+import moment from 'moment-timezone';
 
 export const getTimesheetData = catchAsync(async (req, res, next) => {
     const { email, date} = req.query;
@@ -417,13 +418,11 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         const endOfDay = new Date(startOfDay);
         endOfDay.setHours(23, 59, 59, 999);
 
-        const todayDate = new Date()
-        todayDate.setHours(0,0,0,0)
-        const indianOffset = 5.5 * 60;  // IST is UTC+5:30
-        todayDate.setMinutes(todayDate.getMinutes() + indianOffset);
-        const indianTimeISOString = todayDate.toISOString();
-        console.log(todayDate)
-        console.log(indianTimeISOString)
+        const todayDate = moment().tz('Asia/Kolkata').startOf('day');  // Adjust to IST and set to midnight
+        const indianTimeISOString = todayDate.toISOString();  // Convert to UTC ISO string
+
+        console.log(todayDate.format());  // Date in IST
+        console.log(indianTimeISOString);
 
         taskCompletion.map( async (task) => {
 
@@ -479,7 +478,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             where: {
               taskId_date: {
                 taskId:Number(task.taskId),
-                date:getTodayDateInISO(new Date(todayDate)),
+                date:indianTimeISOString,
               }
             },
             update: {
@@ -500,7 +499,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                 completionPercentage: task.Completed,
                 taskCode: task.taskCode,
                 taskId: Number(task.taskId),
-                date: getTodayDateInISO(new Date(todayDate))
+                date: indianTimeISOString
             },
           });
           console.log(newConfig)
