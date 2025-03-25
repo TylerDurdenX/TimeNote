@@ -134,6 +134,47 @@ const columns: GridColDef[] = [
         }
       },
   },
+  {
+        field: 'actions',
+        headerName: 'View Task',
+        flex: 1,
+        renderCell: (params) => {
+          if(params.row.taskId !== null){
+                return (
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '15px',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                    className=" w-full"
+                  >
+                    <Link href={`/task/${params.row.taskId}?email=${email}`} >
+                        <Button
+                          variant="contained"
+                          className="mb-5"
+                          color="primary"
+                          size="small"
+                          onClick={() => sessionStorage.setItem('taskId',String(params.row.taskId))} // Passing the current row's data
+                          sx={{
+                            backgroundColor: '#3f51b5', // Blue color
+                            '&:hover': { backgroundColor: '#2c387e' },
+                            borderRadius: '8px',
+                          }}
+                        >
+                          View Task
+                        </Button>
+                        </Link>
+                  </div>
+                );
+              }else{
+                return(
+                  ""
+                )
+              }
+            }
+      }
 ]
 
   return (

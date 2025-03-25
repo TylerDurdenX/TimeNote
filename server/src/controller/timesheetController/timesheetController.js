@@ -419,6 +419,8 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
 
         const todayDate = new Date()
         todayDate.setHours(0,0,0,0)
+        const indianOffset = 5.5 * 60;  // IST is UTC+5:30
+        todayDate.setMinutes(todayDate.getMinutes() + indianOffset);
         const indianTimeISOString = todayDate.toISOString();
         console.log(todayDate)
         console.log(indianTimeISOString)

@@ -279,7 +279,7 @@ const columns: GridColDef[] = [
     },
   },
     {
-      field: '',
+      field: 'action2',
       headerName: 'View Task',
       flex: 1,
       renderCell: (params) => {
