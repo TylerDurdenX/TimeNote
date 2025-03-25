@@ -22,7 +22,7 @@ import { updateCustomerData } from "../middleware/customerController.js";
 import { authenticateThirdParty } from "../middleware/generateToken.js";
 import { getAdminRole, getAttendanceData, getAttendanceLCData, getBreakData, getUserAttendanceData, getUserAttendanceTableData, updateAttendance} from "../controller/attendanceController/attendanceController.js";
 import { signInUser, signupTP } from "../controller/thirdPartyController/thirdPartyController.js";
-import { createBreak, deleteBreak, getBreaksList, updateBreak, updateBreakTime } from "../controller/breakController/breakCOntroller.js";
+import { createBreak, deleteBreak, getBreaksList, updateBreak, updateBreakTime } from "../controller/breakController/breakController.js";
 const router = express.Router();
 
 router.post("/customerDataUpdate",authenticateThirdParty, updateCustomerData);
