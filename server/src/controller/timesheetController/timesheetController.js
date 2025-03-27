@@ -418,11 +418,8 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         const endOfDay = new Date(startOfDay);
         endOfDay.setHours(23, 59, 59, 999);
 
-        const todayDate = moment().tz('Asia/Kolkata').startOf('day');  // Adjust to IST and set to midnight
-        const indianTimeISOString = todayDate.toISOString();  // Convert to UTC ISO string
-
-        console.log(todayDate.format());  // Date in IST
-        console.log(indianTimeISOString);
+        const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+        const indianTimeISOString = todayDate.toISOString();
 
         taskCompletion.map( async (task) => {
 

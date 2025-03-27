@@ -4,6 +4,7 @@ import AppError from "../../utils/appError.js";
 import { isEmpty } from "../../utils/genericMethods.js";
 import { prisma } from "../../server.js";
 import { startOfMonth, endOfMonth } from "date-fns";
+import moment from 'moment-timezone';
 
 export const updateAttendance = catchAsync(async (req, res, next) => {
   const { punchInTime, punchOutTime, email } = req.body;
@@ -21,7 +22,8 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
 
       const currentDateTime = new Date();
       currentDateTime.setHours(0, 0, 0, 0);
-      const indianTimeISOString = currentDateTime.toISOString();
+      const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+      const indianTimeISOString = todayDate.toISOString();
 
       if (!isEmpty(punchInTime)) {
         const createdAttendance = await prisma.attendance.findFirst({
@@ -125,7 +127,8 @@ export const getAttendanceData = catchAsync(async (req, res, next) => {
 
         const currentDateTime = new Date();
         currentDateTime.setHours(0, 0, 0, 0);
-        const indianTimeISOString = currentDateTime.toISOString();
+        const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+        const indianTimeISOString = todayDate.toISOString();
 
         const attendanceRecords = await prisma.attendance.findMany({
           where: {
@@ -475,7 +478,8 @@ export const getUserAttendanceData = catchAsync(async (req, res, next) => {
 
       const currentDateTime = new Date();
       currentDateTime.setHours(0, 0, 0, 0);
-      const indianTimeISOString = currentDateTime.toISOString();
+      const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+      const indianTimeISOString = todayDate.toISOString();
 
       let onTimeCount = 0;
       let lateCount = 0;

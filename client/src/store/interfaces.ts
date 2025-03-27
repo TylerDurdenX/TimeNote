@@ -266,6 +266,7 @@ export interface Task {
     authorUserId? : number
     assignedUserId? : number
     inProgressStartTime: string
+    inProgressTime: string
     inProgressTimeinMinutes: string
     subTasks: SubTask[]
 

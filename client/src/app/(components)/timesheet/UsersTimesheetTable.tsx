@@ -24,11 +24,11 @@ interface RowData {
     userId: number;
     username: string;
     projectId?: number; 
-  }
+}
 
 const UsersTimesheetTable = ({ email , selectedDate}: Props) => {
 
-      const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [rowDataUserName, setRowDataUserName] = useState('')
 

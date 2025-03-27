@@ -203,22 +203,55 @@ const TaskPageFull = () => {
 
   const targetTime = new Date(task?.inProgressStartTime!); 
 
+  let targetTimeLocal = new Date();
+  let count = 0
+
   const updateTime = () => {
-    const currentTime = new Date(); 
-    let diff = currentTime.getTime() - targetTime.getTime(); 
-
-    if(task?.inProgressTimeinMinutes !== null)
-      diff += Number(task?.inProgressTimeinMinutes!) * 60 * 1000;
-
-    const seconds = Math.floor(diff / 1000); 
-    const minutes = Math.floor(seconds / 60); 
-    const hours = Math.floor(minutes / 60); 
-    const remainingMinutes = minutes % 60; 
-    const remainingSeconds = seconds % 60; 
-
-    setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
-    setEditedConsumedHours(`${hours}:${remainingMinutes}:${remainingSeconds}`)
-    setInitialEditedConsumedHours(`${hours}:${remainingMinutes}:${remainingSeconds}`)
+    if(isProgressStarted === true && task?.inProgressStartTime!==null){
+      console.log('1')
+      const currentTime = new Date(); 
+      let diff = currentTime.getTime() - targetTime.getTime(); 
+  
+      if(task?.inProgressTimeinMinutes !== null)
+        diff += Number(task?.inProgressTimeinMinutes!) * 60 * 1000;
+  
+      const seconds = Math.floor(diff / 1000); 
+      const minutes = Math.floor(seconds / 60); 
+      const hours = Math.floor(minutes / 60); 
+      const remainingMinutes = minutes % 60; 
+      const remainingSeconds = seconds % 60; 
+  
+      setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
+      setEditedConsumedHours(`${hours}:${remainingMinutes}:${remainingSeconds}`)  
+      setInitialEditedConsumedHours(`${hours}:${remainingMinutes}:${remainingSeconds}`)
+    }else{
+      if(count === 0){
+        const minutes = Number(task?.inProgressTimeinMinutes);
+        const hours = Math.floor(minutes / 60); 
+        const remainingMinutes = minutes % 60;
+        setTimeDiff(`${hours}:${remainingMinutes}:00`)
+        setEditedConsumedHours(`${hours}:${remainingMinutes}:00`)
+        setInitialEditedConsumedHours(`${hours}:${remainingMinutes}:00`)
+        targetTimeLocal = new Date()
+        count = 1
+      }else{
+      const currentTime = new Date(); 
+      let diff = currentTime.getTime() - targetTimeLocal!.getTime(); 
+  
+      if(task?.inProgressTimeinMinutes !== null)
+        diff += Number(task?.inProgressTimeinMinutes!) * 60 * 1000;
+  
+      const seconds = Math.floor(diff / 1000); 
+      const minutes = Math.floor(seconds / 60); 
+      const hours = Math.floor(minutes / 60); 
+      const remainingMinutes = minutes % 60; 
+      const remainingSeconds = seconds % 60; 
+  
+      setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
+      setEditedConsumedHours(`${hours}:${remainingMinutes}:${remainingSeconds}`)  
+      setInitialEditedConsumedHours(`${hours}:${remainingMinutes}:${remainingSeconds}`)
+      }
+    }
   };
 
   useEffect(() => {
@@ -247,7 +280,7 @@ const TaskPageFull = () => {
   const [isEditable, setIsEditable] = useState(false);
   const [isConsumedHoursEditable, setIsConsumedHoursEditable] = useState(false);
   const [editedText, setEditedText] = useState(task?.points); 
-  const [editedConsumedHours, setEditedConsumedHours] = useState('')
+  const [editedConsumedHours, setEditedConsumedHours] = useState(task?.inProgressTime!)
   const [initialEditedConsumedHours, setInitialEditedConsumedHours] = useState('')
   const [isHovered, setIsHovered] = useState(true);
   const [isAssigneeEditable, setIsAssigneeEditable] = useState(false);
@@ -473,12 +506,6 @@ useEffect(() => {
               // @ts-ignore
               toast.success(response.data?.message);
             }
-
-      // if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
-      //   toast.error(response.error?.data.message)
-      // }else{
-      //   toast.success(response.data?.message);
-      // }
     } catch (err: any) {
       toast.error(err.data.message);
       console.error("Error creating role:", err.data.Message);
@@ -487,6 +514,7 @@ useEffect(() => {
 
   const toggleProgress = async () => {
     const newState = !isProgressStarted;
+    console.log(editedConsumedHours)
     if (newState) {
       try {
         const response = await updateTaskProgress({
