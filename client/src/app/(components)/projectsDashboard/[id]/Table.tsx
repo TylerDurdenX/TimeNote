@@ -304,7 +304,6 @@ const TableView = ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask }:
         getRowClassName={getRowClassName}
       />
       </Card>
-      
     </div>
   );
 };

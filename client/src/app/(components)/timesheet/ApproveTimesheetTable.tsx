@@ -130,8 +130,8 @@ const ApproveTimesheetTable = ({ email , selectedDate}: Props) => {
 const columns: GridColDef[] = [
   {
     field: "task",
-    headerName: "Task",
-    flex: 2,
+    headerName: "Comments",
+    flex: 1.5,
     renderCell: (params) => (
         <Dialog>
       <DialogTrigger asChild>
@@ -152,6 +152,16 @@ const columns: GridColDef[] = [
     ),
   },  
   {
+    field: "taskName",
+    headerName: "TaskName",
+    flex: 0.6
+  },
+  {
+    field: "projectName",
+    headerName: "Project Name",
+    flex: 0.6
+  }, 
+  {
     field: "username",
     headerName: "User",
     flex: 1
@@ -159,7 +169,7 @@ const columns: GridColDef[] = [
   {
     field: "completionPercentage",
     headerName: "Completion Percentage",
-    flex: 1.3
+    flex: 1
   },
   {
     field: "date",

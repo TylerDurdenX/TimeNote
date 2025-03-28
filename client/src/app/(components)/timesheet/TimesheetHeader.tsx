@@ -11,8 +11,8 @@ type Props = {
   hasFilters?: boolean
   selectedDate: Date
   setSelectedDate: React.Dispatch<React.SetStateAction<Date>>
-  data: TimesheetResponse
-  myTimesheetPage: string
+  data?: TimesheetResponse
+  myTimesheetPage?: string
 }
 
 const TimesheetHeader = ({

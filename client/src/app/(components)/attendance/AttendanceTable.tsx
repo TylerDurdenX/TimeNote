@@ -1,14 +1,14 @@
 'use client'
 
-import Header from "@/components/Header";
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { dataGridClassNames, dataGridSxStyles, } from "@/lib/utils";
 import { useGetUserAttendanceTableDataQuery } from "@/store/api";
 import { useTheme } from "next-themes";
 import { Button } from "@mui/material";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import BreakTable from "./BreakTable";
+import TimesheetHeader from "../timesheet/TimesheetHeader";
 
 type Props = {
   email: string;
@@ -17,6 +17,7 @@ type Props = {
 
 interface RowData {
   id: number;
+  date: string
   consumedHours: string;
   userId: number;
   username: string;
@@ -25,8 +26,10 @@ interface RowData {
 
 const AttendanceTable = ({ email, adminFlag }: Props) => {
 
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
   const { data, isLoading, error} = useGetUserAttendanceTableDataQuery(
-    { email: email, adminFlag: adminFlag },{refetchOnMountOrArgChange: true}
+    { email: email, adminFlag: adminFlag, date: selectedDate.toString() },{refetchOnMountOrArgChange: true}
   );
 
   const {theme} = useTheme()
@@ -34,9 +37,11 @@ const AttendanceTable = ({ email, adminFlag }: Props) => {
   let isDarkMode = theme==="dark"
 
   const [open, setOpen] = useState(false);
+  const [rowDataUserId, setRowDataUserId] = useState(0)
   const [rowDataUserName, setRowDataUserName] = useState('')
 
   const handleViewDetails = (row: RowData) => {
+    setRowDataUserId(row.userId)
     setRowDataUserName(row.username)
     setOpen(true); 
   };
@@ -65,52 +70,52 @@ const columns: GridColDef[] = [
     headerName: "Working Time",
     flex: 1
   },
-  // {
-  //   field: "activeTime",
-  //   headerName: "Active Time",
-  //   flex: 1
-  // },
-  // {
-  //   field: "totalIdleTime",
-  //   headerName: "Idle/Break Time",
-  //   flex: 1
-  // },
-  // {
-  //     field: 'actions',
-  //     headerName: 'Actions',
-  //     flex: 1,
-  //     renderCell: (params) => {
-  //       const rowData = params.row;
-  //       return (
-  //         <div
-  //           style={{
-  //             display: 'flex',
-  //             gap: '15px',
-  //             justifyContent: 'center',
-  //             alignItems: 'center',
-  //           }}
-  //           className=" w-full"
-  //         >
-  //         <div className="my-3 flex justify-center items-center">
-  //           <Button
-  //                 variant="contained"
-  //                 className="mb-5"
-  //                 color="primary"
-  //                 size="small"
-  //                 onClick={() => handleViewDetails(params.row)} // Passing the current row's data
-  //                 sx={{
-  //                   backgroundColor: '#3f51b5', // Blue color
-  //                   '&:hover': { backgroundColor: '#2c387e' },
-  //                   borderRadius: '8px',
-  //                 }}
-  //               >
-  //                 View Details
-  //               </Button>
-  //               </div>
-  //         </div>
-  //       );
-  //     },
-  //   }
+  {
+    field: "activeTime",
+    headerName: "Active Time",
+    flex: 1
+  },
+  {
+    field: "totalIdleTime",
+    headerName: "Idle/Break Time",
+    flex: 1
+  },
+  {
+      field: 'actions',
+      headerName: 'Break Details',
+      flex: 1,
+      renderCell: (params) => {
+        const rowData = params.row;
+        return (
+          <div
+            style={{
+              display: 'flex',
+              gap: '15px',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            className=" w-full"
+          >
+          <div className="my-3 flex justify-center items-center">
+            <Button
+                  variant="contained"
+                  className="mb-5"
+                  color="primary"
+                  size="small"
+                  onClick={() => handleViewDetails(params.row)}
+                  sx={{
+                    backgroundColor: '#3f51b5', 
+                    '&:hover': { backgroundColor: '#2c387e' },
+                    borderRadius: '8px',
+                  }}
+                >
+                  View Details
+                </Button>
+                </div>
+          </div>
+        );
+      },
+    }
 ]
 
 const [paginationModel, setPaginationModel] = React.useState({
@@ -133,9 +138,10 @@ const handlePaginationChange = (model: { page: number; pageSize: number }) => {
                     <DialogHeader>
                       <DialogTitle>
                         {/* {formatDate(selectedDate.toString())} - {rowDataUserName} */}
+                        {rowDataUserName}
                       </DialogTitle>
                       <DialogDescription className="text-gray-700 overflow-y-auto">
-                        {/* <TimesheetDataTable email={email} selectedDate={selectedDate} name={rowDataUserName} dialogFlag={true}/> */}
+                        <BreakTable email={email} selectedDate={selectedDate} name={rowDataUserName} userId={rowDataUserId}/>
                       </DialogDescription>
                     </DialogHeader> 
         
@@ -155,9 +161,9 @@ const handlePaginationChange = (model: { page: number; pageSize: number }) => {
                   </DialogContent>
                   </div>
                 </Dialog>
-<div className="">
-        <Header name="Attendance Records" isSmallText />
-      </div>
+<div className="mb-7">
+<TimesheetHeader hasFilters={true} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+</div>
         <DataGrid
           rows={data || []}
           columns={columns}

@@ -10,6 +10,7 @@ import {
   AttendanceUserPCResponse,
   AttendanceUserTableResponse,
   BreakRequest,
+  BreakResponse,
   Breaks,
   BreaksForTeams,
   ConfiguredReports,
@@ -620,9 +621,9 @@ getUserAttendanceData: build.query<AttendanceUserPCResponse, { email: string}>({
     return url;
   },
 }),
-getUserAttendanceTableData: build.query<AttendanceUserTableResponse[], { email: string, adminFlag: boolean}>({
-  query: ({ email, adminFlag}) => {
-    const url = `api/user/getUserAttendanceTableData?email=${email}&adminFlag=${adminFlag}`;
+getUserAttendanceTableData: build.query<AttendanceUserTableResponse[], { email: string, adminFlag: boolean, date: string}>({
+  query: ({ email, adminFlag, date}) => {
+    const url = `api/user/getUserAttendanceTableData?email=${email}&adminFlag=${adminFlag}&date=${date}`;
     return url;
   },
 }),
@@ -635,6 +636,12 @@ getAttendanceLineChartData: build.query<AttendanceCardLCResponse[], { email: str
 viewTimesheetData: build.query<TimesheetResponse, { name: string, date: string}>({
   query: ({ name,date}) => {
     const url = `api/user/viewTimesheetData?name=${name}&date=${date}`;
+    return url;
+  },
+}),
+viewBreakData: build.query<BreakResponse[], { userId: number, date: string}>({
+  query: ({ userId,date}) => {
+    const url = `api/user/viewBreaksheetData?userId=${userId}&date=${date}`;
     return url;
   },
 }),
@@ -1003,5 +1010,6 @@ export const {
   useGetBreaksForTeamsQuery,
   useUpdateTeamsConfigurationDataMutation,
   useGetSelectedBreakTypeForTeamsQuery,
-  useGetSelectedProjectForTeamsQuery
+  useGetSelectedProjectForTeamsQuery,
+  useViewBreakDataQuery
 } = api;

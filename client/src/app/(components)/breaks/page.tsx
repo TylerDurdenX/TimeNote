@@ -42,6 +42,19 @@ const page = () => {
           toast.error('Invalid character! Only letters, numbers, and underscores are allowed.');
         }
       };
+
+      const handleChangeBreakTime = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        const regex = /^[0-9]*$/; // Only alphanumeric characters and underscore
+        
+        // Check if the value matches the regex
+        if (regex.test(value)) {
+          setBreakTimeInMinutes(value); // Update the state only if valid
+        } else {
+          // Show a toast message when an invalid character is entered
+          toast.error('Invalid character! Only numbers are allowed.');
+        }
+      };
     
       const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -128,7 +141,7 @@ const page = () => {
                        <Label className="text-center">Break Duration<span className="text-red-500 ml-1">*</span></Label>
                        <Input
                          value={breakTimeInMinutes}
-                         onChange={(e) => setBreakTimeInMinutes(e.target.value)}
+                         onChange={handleChangeBreakTime}
                          className="col-span-7"
                          placeholder='Please enter duration in minutes'
                          required

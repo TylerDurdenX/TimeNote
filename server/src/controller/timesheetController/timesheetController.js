@@ -421,7 +421,7 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
         const todayDate = moment().tz('Asia/Kolkata').startOf('day');
         const indianTimeISOString = todayDate.toISOString();
 
-        taskCompletion.map( async (task) => {
+        await Promise.all(taskCompletion.map( async (task) => {
 
           const taskActivityList = await prisma.taskActivity.findMany({
             where: {
@@ -439,6 +439,18 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
             }
             ]
              
+            }
+          })
+
+          const taskObj = await prisma.task.findFirst({
+            where:{
+              id: Number(task.taskId)
+            },include:{
+              project:{
+                select:{
+                  name: true
+                }
+              }
             }
           })
 
@@ -496,11 +508,12 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
                 completionPercentage: task.Completed,
                 taskCode: task.taskCode,
                 taskId: Number(task.taskId),
+                taskName: taskObj.title,
+                projectName: taskObj.project.name,
                 date: indianTimeISOString
             },
           });
-          console.log(newConfig)
-        })
+        }))
 
         return next(new SuccessResponse('Timesheet Records Updated Successfully',200))
       // })

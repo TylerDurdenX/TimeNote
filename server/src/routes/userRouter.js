@@ -22,7 +22,7 @@ import { updateCustomerData } from "../middleware/customerController.js";
 import { authenticateThirdParty } from "../middleware/generateToken.js";
 import { getAdminRole, getAttendanceData, getAttendanceLCData, getBreakData, getUserAttendanceData, getUserAttendanceTableData, updateAttendance} from "../controller/attendanceController/attendanceController.js";
 import { signInUser, signupTP } from "../controller/thirdPartyController/thirdPartyController.js";
-import { createBreak, deleteBreak, getBreaksList, updateBreak, updateBreakTime } from "../controller/breakController/breakController.js";
+import { createBreak, deleteBreak, getBreaksData, getBreaksList, updateBreak, updateBreakTime } from "../controller/breakController/breakController.js";
 const router = express.Router();
 
 router.post("/customerDataUpdate",authenticateThirdParty, updateCustomerData);
@@ -118,6 +118,7 @@ router.get('/getBreaksListForTeams',isAuthenticated, getBreaksForTeam)
 router.post('/updateTeamsConfigurationData', isAuthenticated, updateTeamsConfigurationData)
 router.get('/getSelectedProjectsForTeam',isAuthenticated, getSelectedProjectsForTeam)
 router.get('/getSelectedBreaksForTeam',isAuthenticated, getSelectedBreaksForTeam)
+router.get('/viewBreaksheetData' , isAuthenticated, getBreaksData)
 
 // Third party requests
 router.post("/updateAttendance",authenticateThirdParty, updateAttendance);

@@ -611,7 +611,7 @@ export const getUserAttendanceData = catchAsync(async (req, res, next) => {
   }
 });
 
-const formatDate = (date) => {
+export const formatDate = (date) => {
     // Get day, month, and year from the Date object
     const day = String(date.getDate()).padStart(2, '0'); // Add leading zero if day < 10
     const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is zero-based, so we add 1
@@ -621,7 +621,7 @@ const formatDate = (date) => {
     return `${day}/${month}/${year}`;
   };
 
-  const formatTime = (date) => {
+  export const formatTime = (date) => {
     // Get hours, minutes, and seconds from the Date object
     const hours = String(date.getHours()).padStart(2, '0'); // Ensure two-digit format for hours
     const minutes = String(date.getMinutes()).padStart(2, '0'); // Ensure two-digit format for minutes
@@ -659,8 +659,65 @@ const formatDate = (date) => {
     return secondsToTime(durationInSeconds);
   };
 
+  function timeDifference(time1, time2) {
+    // Helper function to parse time string into seconds
+    const parseTime = (time) => {
+        const [hours, minutes, seconds] = time.split(':').map(Number);
+        return hours * 3600 + minutes * 60 + seconds;
+    };
+
+    // Convert times to seconds
+    const time1InSeconds = parseTime(time1);
+    const time2InSeconds = parseTime(time2);
+
+    // Calculate the difference in seconds
+    let diffInSeconds = time1InSeconds - time2InSeconds;
+
+    // Handle negative difference (if time2 > time1, add 24 hours)
+    if (diffInSeconds < 0) {
+        diffInSeconds += 24 * 3600; // Add 24 hours in seconds
+    }
+
+    // Convert the difference back to hours, minutes, seconds
+    const hours = Math.floor(diffInSeconds / 3600);
+    diffInSeconds %= 3600;
+    const minutes = Math.floor(diffInSeconds / 60);
+    const seconds = diffInSeconds % 60;
+
+    // Format the result as hh:mm:ss
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+  function convertToSeconds(time) {
+    const [minutes, seconds] = time.split(':').map(Number); // Split and convert to integers
+    return minutes * 60 + seconds; // Return total seconds
+  }
+  
+  // Function to convert total seconds into hh:mm:ss format
+  function convertToHHMMSS(seconds) {
+    const hours = Math.floor(seconds / 3600); // Calculate hours
+    const minutes = Math.floor((seconds % 3600) / 60); // Calculate minutes
+    const remainingSeconds = seconds % 60; // Calculate remaining seconds
+    
+    // Format as hh:mm:ss
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+  
+  // Function to sum times in mm:ss format
+  function addTimes(timeList) {
+    let totalSeconds = 0;
+  
+    // Convert each time to seconds and accumulate the total
+    timeList.forEach(time => {
+      totalSeconds += convertToSeconds(time);
+    });
+  
+    // Convert total seconds back to hh:mm:ss
+    return convertToHHMMSS(totalSeconds);
+  }
+
 export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
-    const { email, adminFlag } = req.query;
+    const { email, adminFlag, date } = req.query;
   
     try {
       await prisma.$transaction(async (prisma) => {
@@ -683,7 +740,7 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
             idList.push(user.userId)
           })
  
-          const today = new Date();
+          const today = new Date(date);
           today.setHours(0, 0, 0, 0);
           const isoDate = today.toISOString();
           const attendanceRecords = await prisma.attendance.findMany({
@@ -692,6 +749,8 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
               userId: {
                 in: idList
               },
+            },include:{
+              breaks: true
             }
           });
 
@@ -699,6 +758,10 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
           let id = 1
   
           attendanceRecords.map((attendance) => {
+            let breakTimeList = [] 
+            attendance.breaks.forEach((breakTaken) => {
+              breakTimeList.push(breakTaken.breakTimeInMinutes);
+            })
               let inTime = 'NA'
               let outTime = 'NA'
               if(attendance.punchInTime){
@@ -708,13 +771,18 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
               if(attendance.punchOutTime){
                   outTime = formatTime(attendance.punchOutTime)
               }
+              const duration = getTimeDifference(inTime, outTime)
+              const breakTime = addTimes(breakTimeList)
               const result = {
                   id: id,
+                  userId: attendance.userId,
                   date: formatDate(attendance.date),
                   punchInTime: inTime,
                   punchOutTime: outTime,
                   username: attendance.username,
-                  duration: getTimeDifference(inTime, outTime)
+                  duration: duration,
+                  totalIdleTime: breakTime,
+                  activeTime: timeDifference(duration, breakTime)
               }
               id= id+ 1
               finalResult.push(result)

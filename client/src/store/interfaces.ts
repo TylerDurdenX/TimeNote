@@ -320,6 +320,16 @@ export interface TimesheetResponse {
     totalTime: string
 }
 
+export interface BreakResponse {
+    id: number
+    breakType: string
+    breakStartTime: string
+    breakEndTime : string
+    breakTimeInMinutes: string
+    breakTimeConfigured: string
+    breakTimeOverrun: string
+}
+
 export interface AttendanceCardResponse {
     usersCount: number
     totalUsersCount: number
@@ -332,9 +342,12 @@ export interface AttendanceUserPCResponse {
 
 export interface AttendanceUserTableResponse {
     date: string
+    userId: number
     punchInTime: string,
     punchOutTime: string,
-    duration: string
+    duration: string,
+    totalIdleTime: string
+    activeTime: string
 }
 
 export interface AttendanceCardLCResponse {

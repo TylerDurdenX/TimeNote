@@ -28,6 +28,7 @@ const page = () => {
 
     const handleTabClick = (value: string) => {
       setSelectedTab(value);
+      sessionStorage.setItem('timesheetSelectedTab',value)
     };
 
   return (
@@ -47,7 +48,7 @@ const page = () => {
       </div>
       <div className="flex justify-center items-center h-full w-full">
         <div className="w-full h-full">
-        <Tabs defaultValue="myTimesheet" className="full">
+        <Tabs defaultValue={sessionStorage.getItem('timesheetSelectedTab') || "myTimesheet"} className="full">
       <TabsList className="grid w-full grid-cols-3  w-[500px] ml-5">
         <TabsTrigger value="myTimesheet" onClick={() => handleTabClick("myTimesheet")}>My TimeSheet</TabsTrigger>
         <TabsTrigger value="approveTimesheet" onClick={() => handleTabClick("approveTimesheet")}>Approve Timesheet</TabsTrigger>

@@ -33,8 +33,8 @@ const TimesheetDataTable = ({ email , selectedDate, name, dialogFlag}: Props) =>
 const columns: GridColDef[] = [
   {
     field: "task",
-    headerName: "Task",
-    flex: 1.5,
+    headerName: "Comment",
+    flex: 1.2,
     renderCell: (params) => {
       const rowData = params.row;
       const linkTo = rowData.projectId ? `timesheet/${rowData.projectId}/${rowData.taskCode}?email=${email}` : '';
@@ -58,6 +58,16 @@ const columns: GridColDef[] = [
         )
       
     } 
+  },
+  {
+    field: "taskName",
+    headerName: "TaskName",
+    flex: 0.6
+  },
+  {
+    field: "projectName",
+    headerName: "Project Name",
+    flex: 0.6
   },  
   {
     field: "completionPercentage",

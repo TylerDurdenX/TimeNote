@@ -16,6 +16,7 @@ type Props = {
 };;
 
 const ProjectsTable = ({ email }: Props) => {
+  localStorage.removeItem('persist:root')
   const { data, isLoading, error} = useGetProjectsQuery(
     { email: email },
     { refetchOnMountOrArgChange: true }

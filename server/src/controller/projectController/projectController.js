@@ -2695,6 +2695,12 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
       },
       data:{
           status: "Closed"
+      },include:{
+        project:{
+          select:{
+            name: true
+          }
+        }
       }
     });
 
@@ -2784,7 +2790,9 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
         ApprovedFlag: "NA",
         userId: user.userId,
         username: user.username,
-        date: indianTimeISOString
+        date: indianTimeISOString,
+        taskName: updatedTask.title,
+        projectName: updatedTask.project.name
       }
     })
     
