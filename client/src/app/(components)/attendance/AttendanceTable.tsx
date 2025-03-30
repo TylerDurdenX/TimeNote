@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from "react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridCellParams, GridColDef } from "@mui/x-data-grid";
 import { dataGridClassNames, dataGridSxStyles, } from "@/lib/utils";
 import { useGetUserAttendanceTableDataQuery } from "@/store/api";
 import { useTheme } from "next-themes";
@@ -46,15 +46,57 @@ const AttendanceTable = ({ email, adminFlag }: Props) => {
     setOpen(true); 
   };
 
+  const addOneDay = (dateString: string) => {
+    // Step 1: Parse the date string "DD/MM/YYYY" into an array of [day, month, year]
+    const [day, month, year] = dateString.split('/').map(Number);
+  
+    // Ensure valid date parsing
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
+      console.error('Invalid date string:', dateString);
+      return 'Invalid date'; // Handle invalid date format
+    }
+  
+    // Step 2: Create a Date object using the parsed components (month is zero-indexed)
+    const date = new Date(year, month - 1, day); // month is zero-based in JS
+  
+    // Check if the created date is valid
+    if (isNaN(date.getTime())) {
+      console.error('Invalid Date object:', date);
+      return 'Invalid date';
+    }
+  
+    // Step 3: Add one day to the date
+    date.setDate(date.getDate() + 1);
+  
+    // Step 4: Format the new date back into "DD/MM/YYYY"
+    const newDay = String(date.getDate()).padStart(2, '0');  // Ensure two digits
+    const newMonth = String(date.getMonth() + 1).padStart(2, '0');  // Ensure two digits
+    const newYear = date.getFullYear();
+  
+    // Return the new formatted date
+    return `${newDay}/${newMonth}/${newYear}`;
+  };
+
 const columns: GridColDef[] = [
   ...(adminFlag ? [
     { field: 'username', headerName: 'User Name', flex: 1 },
   ] : []),
   {
-    field: "date",
-    headerName: "Date",
+    field: 'date',
+    headerName: 'Date',
     flex: 1,
-  },  
+    valueFormatter: (params: string) => {
+      const dateString = params
+
+      if (!dateString) {
+        console.error('Date value is missing or undefined');
+        return 'Invalid date';
+      }
+
+      // Use the addOneDay function to add one day and format the date
+      return addOneDay(dateString);
+    },
+  },
   {
     field: "punchInTime",
     headerName: "In Time",
