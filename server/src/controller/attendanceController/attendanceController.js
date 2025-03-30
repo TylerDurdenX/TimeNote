@@ -689,8 +689,11 @@ export const formatDate = (date) => {
 }
 
   function convertToSeconds(time) {
-    const [minutes, seconds] = time.split(':').map(Number); // Split and convert to integers
-    return minutes * 60 + seconds; // Return total seconds
+    if(time){
+      const [minutes, seconds] = time.split(':').map(Number); // Split and convert to integers
+      return minutes * 60 + seconds; // Return total seconds
+    }
+    return '0'
   }
   
   // Function to convert total seconds into hh:mm:ss format
@@ -740,12 +743,11 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
             idList.push(user.userId)
           })
  
-          const today = new Date(date);
-          today.setHours(0, 0, 0, 0);
-          const isoDate = today.toISOString();
+          const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+          const isoDate = todayDate.toISOString();
           const attendanceRecords = await prisma.attendance.findMany({
             where: {
-              date: isoDate,
+              date: isoDate, 
               userId: {
                 in: idList
               },
@@ -771,7 +773,10 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
               if(attendance.punchOutTime){
                   outTime = formatTime(attendance.punchOutTime)
               }
-              const duration = getTimeDifference(inTime, outTime)
+              let duration = getTimeDifference(inTime, outTime)
+              if(duration.includes('N')){
+                duration = '00:00:00'
+              }
               const breakTime = addTimes(breakTimeList)
               const result = {
                   id: id,

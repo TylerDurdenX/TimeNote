@@ -135,8 +135,7 @@ export const createBreak = catchAsync(async (req, res, next) => {
           }
         });
 
-        const todayDate = new Date()
-        todayDate.setHours(0,0,0,0)
+        const todayDate = moment().tz('Asia/Kolkata').startOf('day');
         const indianTimeISOString = todayDate.toISOString();
 
         const attendance = await prisma.attendance.findFirst({
