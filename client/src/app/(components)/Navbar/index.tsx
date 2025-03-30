@@ -54,7 +54,7 @@ const Navbar = () => {
         </div>
               <div className="h-min w-min rounded p-2">
           <Button className="bg-indigo-600 text-white border-0 p-2.5 rounded-xl w-[120px] text-base cursor-pointer hover:bg-indigo-500"
-          onClick={() => {window.location.href = 'https://lynk247bucket.s3.ap-south-1.amazonaws.com/Lynk247.exe';}}>
+          onClick={() => {window.location.href = 'https://lynkinstallbucket.s3.ap-south-1.amazonaws.com/Lynk247.exe';}}>
             <ArrowDownToLine/>
             Lynk 247 
           </Button>

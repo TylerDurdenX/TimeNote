@@ -742,9 +742,10 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
           userIdList.map((user) => {
             idList.push(user.userId)
           })
- 
-          const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+          //const date = new Date(date); // Or you can pass any date string here
+          const todayDate = moment(date).tz('Asia/Kolkata').startOf('day');
           const isoDate = todayDate.toISOString();
+
           const attendanceRecords = await prisma.attendance.findMany({
             where: {
               date: isoDate, 

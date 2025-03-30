@@ -139,7 +139,7 @@ export const createBreak = catchAsync(async (req, res, next) => {
         const indianTimeISOString = todayDate.toISOString();
 
         const attendance = await prisma.attendance.findFirst({
-          where:{
+          where:{ 
             userId: user.userId,
             date: indianTimeISOString
           }
