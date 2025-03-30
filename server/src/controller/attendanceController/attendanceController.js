@@ -612,14 +612,11 @@ export const getUserAttendanceData = catchAsync(async (req, res, next) => {
 });
 
 export const formatDate = (date) => {
-    // Get day, month, and year from the Date object
-    const day = String(date.getDate()).padStart(2, '0'); // Add leading zero if day < 10
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is zero-based, so we add 1
-    const year = date.getFullYear();
+  // Convert the input UTC date to the 'Asia/Kolkata' timezone (or any other timezone you prefer)
+  const formattedDate = moment(date).tz('Asia/Kolkata', true).format('DD/MM/YYYY');
   
-    // Return the formatted date as DD/MM/YYYY
-    return `${day}/${month}/${year}`;
-  };
+  return formattedDate;
+};
 
   export const formatTime = (date) => {
     // Get hours, minutes, and seconds from the Date object
