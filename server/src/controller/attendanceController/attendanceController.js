@@ -828,6 +828,7 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
               }
               const result = {
                   id: id,
+                  userId: user.userId,
                   date: formatDate(attendance.date),
                   punchInTime: inTime,
                   punchOutTime: outTime,

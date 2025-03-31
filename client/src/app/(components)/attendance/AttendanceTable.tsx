@@ -46,6 +46,34 @@ const AttendanceTable = ({ email, adminFlag }: Props) => {
     setOpen(true); 
   };
 
+  const handleViewDetailsUser = (row: RowData) => {
+    setRowDataUserId(row.userId)
+    setRowDataUserName(row.username)
+    const [day, month, year] = row.date.split('/').map(Number);
+    setSelectedDate(new Date(year, month - 1, day))
+    setOpen(true); 
+  };
+
+  const userRolesList = sessionStorage.getItem('userRoles')
+  
+  let adminPageFlag: boolean = false;
+
+if (userRolesList !== undefined && userRolesList !== null && userRolesList !== '') {
+
+  // Define the function to check if 'ADMIN' is in the list
+  const containsValue = (csvString: string, value: string): boolean => {
+    // Split the string by commas to get an array of values
+    const valuesArray = csvString.split(',');
+    // Check if the value exists in the array
+    return valuesArray.includes(value);
+  };
+
+  // Call containsValue function to set Admin
+  adminPageFlag = containsValue(userRolesList, 'ADMIN');
+} else {
+  console.log('userRolesList is undefined or empty');
+}
+
   const addOneDay = (dateString: string) => {
     // Step 1: Parse the date string "DD/MM/YYYY" into an array of [day, month, year]
     const [day, month, year] = dateString.split('/').map(Number);
@@ -139,7 +167,8 @@ const columns: GridColDef[] = [
             className=" w-full"
           >
           <div className="my-3 flex justify-center items-center">
-            <Button
+            {adminPageFlag ? <>
+              <Button
                   variant="contained"
                   className="mb-5"
                   color="primary"
@@ -153,6 +182,23 @@ const columns: GridColDef[] = [
                 >
                   View Details
                 </Button>
+            </> : <>
+            <Button
+                  variant="contained"
+                  className="mb-5"
+                  color="primary"
+                  size="small"
+                  onClick={() => handleViewDetailsUser(params.row)}
+                  sx={{
+                    backgroundColor: '#3f51b5', 
+                    '&:hover': { backgroundColor: '#2c387e' },
+                    borderRadius: '8px',
+                  }}
+                >
+                  View Details
+                </Button>
+            </>}
+            
                 </div>
           </div>
         );
@@ -204,7 +250,7 @@ const handlePaginationChange = (model: { page: number; pageSize: number }) => {
                   </div>
                 </Dialog>
 <div className="mb-7">
-<TimesheetHeader hasFilters={true} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+{adminPageFlag ? <><TimesheetHeader hasFilters={true} selectedDate={selectedDate} setSelectedDate={setSelectedDate} /></> : ""}
 </div>
         <DataGrid
           rows={data || []}
