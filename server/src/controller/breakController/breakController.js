@@ -299,6 +299,9 @@ export const createBreak = catchAsync(async (req, res, next) => {
 
 function subtractTime(minutesStr, timeStr) {
   // Convert the minutesStr (in minutes) to seconds
+  if(timeStr === null){
+    return "0"
+  }
   let minutesInSeconds = parseInt(minutesStr) * 60;
 
   // Parse the mm:ss format (timeStr) into minutes and seconds
@@ -329,9 +332,8 @@ function subtractTime(minutesStr, timeStr) {
       await prisma.$transaction(async (prisma) => {
 
 
-        const today = new Date(date);
-          today.setHours(0, 0, 0, 0);
-          const isoDate = today.toISOString();
+        const todayDate = moment(date).tz('Asia/Kolkata').startOf('day');
+        const isoDate = todayDate.toISOString();
 
       const breaksList = await prisma.breaks.findMany({
         where:{
@@ -376,6 +378,6 @@ function subtractTime(minutesStr, timeStr) {
     })
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: `Error Occurred while deleting record: ${error.message}` });
+      res.status(500).json({ message: `Error Occurred while fetching record: ${error.message}` });
     }
   });

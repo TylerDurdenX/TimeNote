@@ -623,6 +623,9 @@ export const formatDate = (date) => {
 
   export const formatTime = (date) => {
     // Get hours, minutes, and seconds from the Date object
+    if(date === null){
+      return "00:00:00"
+    }
     const hours = String(date.getHours()).padStart(2, '0'); // Ensure two-digit format for hours
     const minutes = String(date.getMinutes()).padStart(2, '0'); // Ensure two-digit format for minutes
     const seconds = String(date.getSeconds()).padStart(2, '0'); // Ensure two-digit format for seconds
