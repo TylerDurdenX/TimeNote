@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import UserList from "./usersList";
 import UserDetailsSection from "./udComponents/userDetailsSection";
 import UserDetailsLP from "./userDetailsLP";
@@ -11,8 +11,8 @@ const Page = () => {
   const [userId, setUserId] = useState<number | null>(null);
 
   const handleSelectUser = (id: number) => {
-    setIsUserSelected(true)
-    setUserId(id)
+    setIsUserSelected(true);
+    setUserId(id);
   };
 
   localStorage.removeItem("persist:root");
@@ -23,7 +23,7 @@ const Page = () => {
       <div className="w-full flex flex-col h-full overflow-hidden">
         <div className="flex w-full text-gray-900">
           <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
-          <Header
+            <Header
               name="User Details"
               hasFilters={false}
               hasTeamFilter={false}
@@ -36,11 +36,11 @@ const Page = () => {
             <UserList onSelectUser={handleSelectUser} />
           </div>
           <div className="w-3/5 p-4 shadow-lg overflow-hidden justify-center">
-          {isUserSelected ? (
-          <UserDetailsSection id={userId!}/>
-        ) : (
-          <UserDetailsLP />
-        )}
+            {isUserSelected ? (
+              <UserDetailsSection id={userId!} />
+            ) : (
+              <UserDetailsLP />
+            )}
           </div>
         </div>
       </div>

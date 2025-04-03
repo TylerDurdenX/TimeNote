@@ -19,7 +19,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DateRange } from "react-day-picker";
-import { DatePickerWithRange } from "@/components/Header/DateRangePicker";
 import { Input } from "@/components/ui/input";
 
 type Props = {
@@ -94,9 +93,9 @@ const ReportsDialog = ({ name }: Props) => {
             onChange={(e) => setToDate(e.target.value)}
             className="col-span-2"
           />
-      </div>
+        </div>
       </CardContent>
-      
+
       <CardFooter>
         <Button className="ml-auto">Generate Report</Button>
       </CardFooter>

@@ -14,17 +14,18 @@ const userDetailsSection = ({ id }: Props) => {
   localStorage.removeItem("persist:root");
 
   useEffect(() => {
-    setStartingUserId(id)
-  }, [id])
+    setStartingUserId(id);
+  }, [id]);
   return (
     <div className="w-full h-full overflow-hidden overflow-y-auto ">
-      <UserDetailHeader activeTab={activeTab} setActiveTab={setActiveTab}/>
-      {activeTab==="User Settings" && (
-        <UserSettings id = {id}/>
-        )}
-        {activeTab==="Organization" && (
-        <Organization startingUserId={startingUserId} setStartingUserId={setStartingUserId}/>
-        )}
+      <UserDetailHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+      {activeTab === "User Settings" && <UserSettings id={id} />}
+      {activeTab === "Organization" && (
+        <Organization
+          startingUserId={startingUserId}
+          setStartingUserId={setStartingUserId}
+        />
+      )}
     </div>
   );
 };

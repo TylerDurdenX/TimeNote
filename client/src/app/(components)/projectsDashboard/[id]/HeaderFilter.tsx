@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import * as React from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandGroup,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 
 type Props = {
-    priority: string
-    setPriority: (priorityName: string) => void
-}
+  priority: string;
+  setPriority: (priorityName: string) => void;
+};
 
 const frameworks = [
   {
@@ -43,10 +43,10 @@ const frameworks = [
     value: "Backlog",
     label: "Backlog",
   },
-]
+];
 
-export function HeaderFilter({priority, setPriority}: Props) {
-  const [open, setOpen] = React.useState(false)
+export function HeaderFilter({ priority, setPriority }: Props) {
+  const [open, setOpen] = React.useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -58,7 +58,8 @@ export function HeaderFilter({priority, setPriority}: Props) {
           className="w-[150px] justify-between"
         >
           {priority
-            ? frameworks.find((framework) => framework.value === priority)?.label
+            ? frameworks.find((framework) => framework.value === priority)
+                ?.label
             : "Select Priority"}
           <ChevronsUpDown className="opacity-50" />
         </Button>
@@ -72,8 +73,8 @@ export function HeaderFilter({priority, setPriority}: Props) {
                   key={framework.value}
                   value={framework.value}
                   onSelect={(currentValue) => {
-                    setPriority(currentValue === priority ? "" : currentValue)
-                    setOpen(false)
+                    setPriority(currentValue === priority ? "" : currentValue);
+                    setOpen(false);
                   }}
                 >
                   {framework.label}
@@ -90,5 +91,5 @@ export function HeaderFilter({priority, setPriority}: Props) {
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

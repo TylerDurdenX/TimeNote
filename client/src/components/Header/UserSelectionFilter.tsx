@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -11,24 +11,26 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { useGetUserListFilterQuery } from "@/store/api"
+} from "@/components/ui/popover";
+import { useGetUserListFilterQuery } from "@/store/api";
 
 type Props = {
-  setValue : React.Dispatch<React.SetStateAction<string>>
-  value: string
-  email: string
-}
+  setValue: React.Dispatch<React.SetStateAction<string>>;
+  value: string;
+  email: string;
+};
 
-export function UserSelectionFilter( {setValue, value, email} : Props) {
-  const [open, setOpen] = React.useState(false)
+export function UserSelectionFilter({ setValue, value, email }: Props) {
+  const [open, setOpen] = React.useState(false);
 
-const {data, isLoading, error, isSuccess} = useGetUserListFilterQuery({email: email!})
+  const { data, isLoading, error, isSuccess } = useGetUserListFilterQuery({
+    email: email!,
+  });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -56,8 +58,8 @@ const {data, isLoading, error, isSuccess} = useGetUserListFilterQuery({email: em
                   key={user.username}
                   value={user.username}
                   onSelect={(currentValue) => {
-                    setValue(currentValue)
-                    setOpen(false)
+                    setValue(currentValue);
+                    setOpen(false);
                   }}
                 >
                   {user.username}
@@ -74,5 +76,5 @@ const {data, isLoading, error, isSuccess} = useGetUserListFilterQuery({email: em
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

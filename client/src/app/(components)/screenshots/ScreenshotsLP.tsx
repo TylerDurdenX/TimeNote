@@ -24,19 +24,19 @@ import { Stack } from "@mui/material";
 import CircularLoading from "@/components/Sidebar/loading";
 
 type Props = {
-  from: string
-  to: string
+  from: string;
+  to: string;
   setReRenderPage: (page: number) => void;
-}
+};
 
-const ScreenshotsLP = ({from, to, setReRenderPage} : Props) => {
+const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
   const [queriesLoaded, setQueriesLoaded] = useState(false);
   const [page, setPage] = useState(1);
 
   localStorage.removeItem("persist:root");
 
   const { data, isLoading, error, isSuccess, refetch } = useGetScreenshotsQuery(
-    { userId: 0, page: page, limit: 12 , from, to },
+    { userId: 0, page: page, limit: 12, from, to },
     { refetchOnMountOrArgChange: true }
   );
 
@@ -97,8 +97,8 @@ const ScreenshotsLP = ({from, to, setReRenderPage} : Props) => {
   return (
     <>
       {!queriesLoaded ? (
-        <CircularLoading/>
-      ) : ( 
+        <CircularLoading />
+      ) : (
         <>
           <div
             className="flex flex-wrap p-5 overflow-y-auto"
@@ -213,8 +213,7 @@ const ScreenshotsLP = ({from, to, setReRenderPage} : Props) => {
 
                     <div className="w-[35%] flex flex-col">
                       <div className="flex-grow text-xs text-gray-500 ml-1">
-                        
-                      {new Date(card.date).toISOString().split('T')[0]}
+                        {new Date(card.date).toISOString().split("T")[0]}
                       </div>
 
                       <div className="flex-grow text-xs text-gray-500 ml-1">

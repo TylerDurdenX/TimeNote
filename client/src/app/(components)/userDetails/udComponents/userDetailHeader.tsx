@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  UserCog,
-  GitFork,
-} from "lucide-react";
+import { UserCog, GitFork } from "lucide-react";
 
 type Props = {
   activeTab: string;
@@ -38,7 +35,7 @@ const UserDetailHeader = ({ activeTab, setActiveTab }: Props) => {
       <div className="flex self-start flex-1 items-center gap-2 md:gap-4">
         <TabButton
           name="User Settings"
-          icon={<UserCog className="h-5 w-5"/>}
+          icon={<UserCog className="h-5 w-5" />}
           setActiveTab={setActiveTab}
           activeTab={activeTab}
         />

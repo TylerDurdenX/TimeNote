@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { usePiP } from './PIPContext'; // Import the context
+import React, { useEffect, useRef, useState } from "react";
+import { usePiP } from "./PIPContext"; // Import the context
 
 const PiPVideo: React.FC = () => {
   const { isPiPEnabled } = usePiP();
@@ -40,7 +40,7 @@ const PiPVideo: React.FC = () => {
             setIsPiPActive(true); // Mark PiP as active
           }
         } catch (err) {
-          console.error('Error with PiP:', err);
+          console.error("Error with PiP:", err);
         }
       } else {
         // If the page becomes visible again (user switches back), exit PiP
@@ -52,11 +52,11 @@ const PiPVideo: React.FC = () => {
     };
 
     // Add event listener for visibility change
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // Cleanup listener on component unmount
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isPiPActive]);
 
@@ -67,20 +67,20 @@ const PiPVideo: React.FC = () => {
         await videoRef.current.requestPictureInPicture();
         setIsPiPActive(true); // Mark PiP as active after the user click
       } catch (err) {
-        console.error('Error entering PiP:', err);
+        console.error("Error entering PiP:", err);
       }
     }
   };
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div style={{ textAlign: "center" }}>
       <h2>Timer: {seconds}s</h2>
       <video
         ref={videoRef}
         src="https://www.w3schools.com/html/mov_bbb.mp4"
         controls
         width="300"
-        style={{ marginBottom: '20px', borderRadius: '10px' }}
+        style={{ marginBottom: "20px", borderRadius: "10px" }}
         autoPlay
       ></video>
       {/* Button to manually enable PiP */}

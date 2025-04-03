@@ -1,41 +1,46 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandGroup,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 
 type Props = {
-  isTaskOrSubTask: string
-  setIsTaskOrSubTask: (isTask: string) => void
-  email: string
-  setPriority: (priorityName: string) => void
-}
+  isTaskOrSubTask: string;
+  setIsTaskOrSubTask: (isTask: string) => void;
+  email: string;
+  setPriority: (priorityName: string) => void;
+};
 
-export function SubTaskFilter({isTaskOrSubTask, setIsTaskOrSubTask, email, setPriority}: Props) {
-  const [open, setOpen] = React.useState(false)
+export function SubTaskFilter({
+  isTaskOrSubTask,
+  setIsTaskOrSubTask,
+  email,
+  setPriority,
+}: Props) {
+  const [open, setOpen] = React.useState(false);
 
   const frameworks = [
     {
-      value: 'Task',
+      value: "Task",
       label: "Task",
     },
     {
-      value: 'SubTask',
+      value: "SubTask",
       label: "Sub Task",
-    }
-  ]
+    },
+  ];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -46,8 +51,10 @@ export function SubTaskFilter({isTaskOrSubTask, setIsTaskOrSubTask, email, setPr
           aria-expanded={open}
           className="w-[130px] justify-between"
         >
-        {isTaskOrSubTask
-            ? frameworks.find((framework) => framework.value === isTaskOrSubTask)?.label
+          {isTaskOrSubTask
+            ? frameworks.find(
+                (framework) => framework.value === isTaskOrSubTask
+              )?.label
             : "Task"}
           <ChevronsUpDown className="opacity-50" />
         </Button>
@@ -61,20 +68,22 @@ export function SubTaskFilter({isTaskOrSubTask, setIsTaskOrSubTask, email, setPr
                   key={framework.label}
                   value={framework.value}
                   onSelect={(currentValue) => {
-                    setIsTaskOrSubTask(currentValue)
-                    if(currentValue === 'SubTask'){
-                      setPriority('')
+                    setIsTaskOrSubTask(currentValue);
+                    if (currentValue === "SubTask") {
+                      setPriority("");
                     }
-                    setOpen(false)
+                    setOpen(false);
                   }}
                 >
                   {framework.label}
                   <Check
                     className={cn(
                       "ml-auto",
-                      isTaskOrSubTask === framework.value ? "opacity-100" : "opacity-0"
+                      isTaskOrSubTask === framework.value
+                        ? "opacity-100"
+                        : "opacity-0"
                     )}
-                  /> 
+                  />
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -82,5 +91,5 @@ export function SubTaskFilter({isTaskOrSubTask, setIsTaskOrSubTask, email, setPr
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

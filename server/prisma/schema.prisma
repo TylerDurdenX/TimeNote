@@ -187,18 +187,22 @@ model Subtask {
   id              Int       @id @default(autoincrement())
   title           String
   description     String?
+  code           String?    @unique
   status          String?
   taskId          Int
   startDate      DateTime?
   dueDate        DateTime?
   authorUserId   Int
   assignedUserId Int?
+  inProgressStartTime DateTime?
+  inProgressTimeinMinutes String?
 
   attachments     Attachment[]
   assignee        User?            @relation("SubTaskAssignee", fields: [assignedUserId], references: [userId])
   author          User             @relation("SubTaskAuthor", fields: [authorUserId], references: [userId])
   task            Task      @relation(fields: [taskId], references: [id])
   comments        Comment[] // Comments related to the Subtask
+  SubTaskActivity      SubTaskActivity[]    @relation("SubTaskActivity")
 }
 
 model TaskHistory{
@@ -223,6 +227,17 @@ model TaskActivity{
   activity          String?
 
   task            Task    @relation(fields: [taskId], references: [id], name: "TaskActivity")
+}
+
+model SubTaskActivity{
+  id             Int       @id @default(autoincrement())
+  subTaskId         Int
+  userId         Int?
+  date      DateTime
+  username        String?
+  activity          String?
+
+  subTask        Subtask    @relation(fields: [subTaskId], references: [id], name: "SubTaskActivity")
 }
 
 model Alert {
@@ -288,6 +303,8 @@ model Timesheet {
   projectId       Int?
   taskId      Int?
   taskCode      String?
+  subTaskId      Int?
+  subTaskCode      String?
   task         String
   taskName    String?
   projectName   String?
@@ -301,6 +318,8 @@ model Timesheet {
 
   user            User    @relation(fields: [userId], references: [userId], name: "Timesheet")
   @@unique([taskId, date])
+  @@unique([subTaskId, date])
+
 }
 
 model Team {

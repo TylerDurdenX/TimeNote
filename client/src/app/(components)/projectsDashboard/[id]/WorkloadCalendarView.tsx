@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Calendar, dateFnsLocalizer, momentLocalizer, View } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css'; // Import styles
-import "./index.css"
 import { Label } from "@/components/ui/label"
 import {
   Popover,

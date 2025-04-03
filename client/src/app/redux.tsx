@@ -24,7 +24,7 @@ import {
 } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
-import storageSession from 'redux-persist/lib/storage/session';
+import storageSession from "redux-persist/lib/storage/session";
 
 /* REDUX PERSISTENCE */
 const createNoopStorage = () => {
@@ -66,7 +66,7 @@ export const makeStore = () => {
       getDefault({
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-          ignoredPaths: ['api.queries.getTimesheetData'],
+          ignoredPaths: ["api.queries.getTimesheetData"],
         },
       }).concat(api.middleware),
   });
@@ -85,7 +85,7 @@ export default function StoreProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const storeRef =useRef<AppStore | null>(null);
+  const storeRef = useRef<AppStore | null>(null);
   if (!storeRef.current) {
     storeRef.current = makeStore();
     setupListeners(storeRef.current.dispatch);

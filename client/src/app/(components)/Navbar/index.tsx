@@ -1,7 +1,21 @@
 import React, { useEffect } from "react";
-import { User, Moon, Search, Settings, Sun, AlertCircleIcon, Bell, MailIcon, ArrowDownToLine } from "lucide-react";
+import {
+  User,
+  Moon,
+  Search,
+  Settings,
+  Sun,
+  AlertCircleIcon,
+  Bell,
+  MailIcon,
+  ArrowDownToLine,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ApiResponse, useGetAlertsCountQuery, useGetUsersCountQuery } from "@/store/api";
+import {
+  ApiResponse,
+  useGetAlertsCountQuery,
+  useGetUsersCountQuery,
+} from "@/store/api";
 import { useTheme } from "next-themes";
 import { ModeToggle } from "@/components/ModeToggle";
 import { SheetDemo } from "@/components/SettingsSheet";
@@ -9,20 +23,22 @@ import { SheetDemo } from "@/components/SettingsSheet";
 import { useDispatch } from "react-redux";
 import { setAuthUser } from "@/store/authSlice";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Toaster, toast } from 'react-hot-toast';
-import Badge from '@mui/material/Badge';
+import { Toaster, toast } from "react-hot-toast";
+import Badge from "@mui/material/Badge";
 import Link from "next/link";
 
 const Navbar = () => {
   const { setTheme } = useTheme();
-  const { data, isLoading, error } = useGetUsersCountQuery(undefined, { refetchOnMountOrArgChange: true });
+  const { data, isLoading, error } = useGetUsersCountQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const dispatch = useDispatch();
   const router = useRouter();
 
   useEffect(() => {
     if (error) {
-      console.log(error)
+      console.log(error);
       const apiError = error as ApiResponse;
 
       if (Number(apiError.status) === 401) {
@@ -35,28 +51,36 @@ const Navbar = () => {
 
   const userEmail = useSearchParams().get("email");
 
-  const {data: alertCountData} = useGetAlertsCountQuery({email: userEmail!}, 
-    {refetchOnMountOrArgChange: true}
-  )
-  sessionStorage.setItem("userRoles", alertCountData?.roles || "")
+  const { data: alertCountData } = useGetAlertsCountQuery(
+    { email: userEmail! },
+    { refetchOnMountOrArgChange: true }
+  );
+  sessionStorage.setItem("userRoles", alertCountData?.roles || "");
 
   return (
     <div className="flex justify-between bg-white px-4 h-full dark:bg-black">
-      
-
       <div className="flex items-center space-x-4 ml-auto">
-      <div className="h-min w-min rounded p-2 mt-1.2">
-      <Link href={`/alerts?email=${userEmail}`}>
-      <Badge color="error" badgeContent={Number(alertCountData?.count)} max={9}>
-        <Bell />
-      </Badge>
-      </Link>
+        <div className="h-min w-min rounded p-2 mt-1.2">
+          <Link href={`/alerts?email=${userEmail}`}>
+            <Badge
+              color="error"
+              badgeContent={Number(alertCountData?.count)}
+              max={9}
+            >
+              <Bell />
+            </Badge>
+          </Link>
         </div>
-              <div className="h-min w-min rounded p-2">
-          <Button className="bg-indigo-600 text-white border-0 p-2.5 rounded-xl w-[120px] text-base cursor-pointer hover:bg-indigo-500"
-          onClick={() => {window.location.href = 'https://lynkinstallbucket.s3.ap-south-1.amazonaws.com/Lynk247.exe';}}>
-            <ArrowDownToLine/>
-            Lynk 247 
+        <div className="h-min w-min rounded p-2">
+          <Button
+            className="bg-indigo-600 text-white border-0 p-2.5 rounded-xl w-[120px] text-base cursor-pointer hover:bg-indigo-500"
+            onClick={() => {
+              window.location.href =
+                "https://lynkinstallbucket.s3.ap-south-1.amazonaws.com/Lynk247.exe";
+            }}
+          >
+            <ArrowDownToLine />
+            Lynk 247
           </Button>
         </div>
 
@@ -65,7 +89,9 @@ const Navbar = () => {
         </div>
 
         <div className="h-min rounded pr-10 mt-1.2">
-          <h2>{data?.availableUsers} / {data?.totalUsers}</h2>
+          <h2>
+            {data?.availableUsers} / {data?.totalUsers}
+          </h2>
         </div>
 
         <div className="ml-2 mr-5 hidden min-h-[2em] w-[0.1rem] mt-1.3 bg-gray-200 md:inline-block"></div>
@@ -79,7 +105,5 @@ const Navbar = () => {
     </div>
   );
 };
-
-
 
 export default Navbar;

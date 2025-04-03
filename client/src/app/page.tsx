@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 import { Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Toaster, toast } from 'react-hot-toast';
+import { Toaster, toast } from "react-hot-toast";
 import { setAuthUser } from "@/store/authSlice";
 
 const App: React.FC = () => {
@@ -38,14 +38,13 @@ const App: React.FC = () => {
         formData,
         { withCredentials: true }
       );
-      setTimeout(() => {
-      }, 3000);
+      setTimeout(() => {}, 3000);
       const user = response.data.data.user;
       toast.success("Login Successful");
       dispatch(setAuthUser(user));
-      sessionStorage.setItem('email', formData.email)
+      sessionStorage.setItem("email", formData.email);
       //router.push(`/Dashboard?email=${encodeURIComponent(formData.email)}`);
-      router.push(`/attendance?email=${encodeURIComponent(formData.email)}`)
+      router.push(`/attendance?email=${encodeURIComponent(formData.email)}`);
     } catch (error: any) {
       toast.error(error.response.data.message);
       console.log(error);
@@ -56,75 +55,89 @@ const App: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen overflow-hidden sm:overflow-auto items-center flex justify-center">
-                <Toaster position="top-right"/>
-          <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[70vh] h-[45vh] bg-no-repeat bg-white flex "/>
-          <div className="absolute bottom-0 right-0  bg-[url('/circle.svg')] w-[38vh] h-[34vh] bg-white flex bg-no-repeat justify-center items-center overflow-hidden"/>
-          <div className="absolute top-0 left-0  w-[350px] h-[350px] bg-no-repeat bg-white text-white flex">
-          <img src="/lynklog.png" alt="Description of Image" className="w-180 h-180"></img>
-          </div>
-          <div className="absolute bottom-0 left-0 mb-2 ml-4 bg-no-repeat bg-white text-white flex "><h2 className="text-indigo-900">Lynk247 a product of Optimize Innovations</h2></div>
+      <Toaster position="top-right" />
+      <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[70vh] h-[45vh] bg-no-repeat bg-white flex " />
+      <div className="absolute bottom-0 right-0  bg-[url('/circle.svg')] w-[38vh] h-[34vh] bg-white flex bg-no-repeat justify-center items-center overflow-hidden" />
+      <div className="absolute top-0 left-0  w-[350px] h-[350px] bg-no-repeat bg-white text-white flex">
+        <img
+          src="/lynklog.png"
+          alt="Description of Image"
+          className="w-180 h-180"
+        ></img>
+      </div>
+      <div className="absolute bottom-0 left-0 mb-2 ml-4 bg-no-repeat bg-white text-white flex ">
+        <h2 className="text-indigo-900">
+          Lynk247 a product of Optimize Innovations
+        </h2>
+      </div>
 
-          <div className="w-[500px]  flex justify-center absolute top-0 mt-[190px] items-center p-5 bg-white box-border bg-indigo-100 oerflow-hidden">
-          <div className="w-full max-w-[350px] text-center">
-          <h1 className="mt-[20px] font-bold text-5xl text-indigo-700 font-nunito">Login</h1>
-            <h1 className="mt-[20px] mb-[20px] text-xl">Welcome to <span className="text-indigo-900 text-2xl">Lynk24<span className="text-indigo-900 text-xl">7</span>!</span></h1>
-            <p>Please sign in to your account</p>
+      <div className="w-[500px]  flex justify-center absolute top-0 mt-[190px] items-center p-5 bg-white box-border bg-indigo-100 oerflow-hidden">
+        <div className="w-full max-w-[350px] text-center">
+          <h1 className="mt-[20px] font-bold text-5xl text-indigo-700 font-nunito">
+            Login
+          </h1>
+          <h1 className="mt-[20px] mb-[20px] text-xl">
+            Welcome to{" "}
+            <span className="text-indigo-900 text-2xl">
+              Lynk24<span className="text-indigo-900 text-xl">7</span>!
+            </span>
+          </h1>
+          <p>Please sign in to your account</p>
 
-            <form onSubmit={handleSubmit}>
-              <div className="mt-5 mb-5 text-left">
-                <label>Email</label>
+          <form onSubmit={handleSubmit}>
+            <div className="mt-5 mb-5 text-left">
+              <label>Email</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                required
+                className="w-full p-[10px] text-[16px] border border-[#ccc] rounded-[5px] box-border"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mb-5 text-left">
+              <label>Password</label>
+              <div className="flex relative items-center">
                 <input
-                  type="email"
-                  name="email"
-                  placeholder="Enter your email"
+                  type={passwordVisible ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  placeholder="Enter your password"
                   required
                   className="w-full p-[10px] text-[16px] border border-[#ccc] rounded-[5px] box-border"
-                  value={formData.email}
+                  value={formData.password}
                   onChange={handleChange}
                 />
-              </div>
-              <div className="mb-5 text-left">
-                <label>Password</label>
-                <div className="flex relative items-center">
-                  <input
-                    type={passwordVisible ? "text" : "password"}
-                    id="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    required
-                    className="w-full p-[10px] text-[16px] border border-[#ccc] rounded-[5px] box-border"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                  <span
-                    className="absolute right-[10px] cursor-pointer text-[18px] text-[#999] flex items-center justify-center w-[25px] h-[25px] group hover:text-[#333]"
-                    id="toggle-password"
-                    onClick={() => setPasswordVisible(!passwordVisible)}
-                  >
-                    {passwordVisible ? <Visibility /> : <VisibilityOff />}
-                  </span>
-                </div>
-                <a
-                  href="/auth/ForgotPassword"
-                  className="text-[12px] text-[#5a67d8] no-underline hover:underline"
+                <span
+                  className="absolute right-[10px] cursor-pointer text-[18px] text-[#999] flex items-center justify-center w-[25px] h-[25px] group hover:text-[#333]"
+                  id="toggle-password"
+                  onClick={() => setPasswordVisible(!passwordVisible)}
                 >
-                  Forgot Password?
-                </a>
+                  {passwordVisible ? <Visibility /> : <VisibilityOff />}
+                </span>
               </div>
-              {!loading && (
-                <Button className="bg-indigo-600 text-white border-0 p-2.5 rounded w-[170px] text-base cursor-pointer hover:bg-indigo-500">
-                  Sign In
-                </Button>
-              )}
-              {loading && (
-                <Button className="bg-purple-700 text-white border-0 p-2.5 rounded w-[170px] text-base cursor-pointer hover:bg-indigo-500">
-                  <Loader className="animate-spin" />
-                </Button>
-              )}
-            </form>
-          </div>
+              <a
+                href="/auth/ForgotPassword"
+                className="text-[12px] text-[#5a67d8] no-underline hover:underline"
+              >
+                Forgot Password?
+              </a>
+            </div>
+            {!loading && (
+              <Button className="bg-indigo-600 text-white border-0 p-2.5 rounded w-[170px] text-base cursor-pointer hover:bg-indigo-500">
+                Sign In
+              </Button>
+            )}
+            {loading && (
+              <Button className="bg-purple-700 text-white border-0 p-2.5 rounded w-[170px] text-base cursor-pointer hover:bg-indigo-500">
+                <Loader className="animate-spin" />
+              </Button>
+            )}
+          </form>
+        </div>
       </div>
-      
     </div>
   );
 };

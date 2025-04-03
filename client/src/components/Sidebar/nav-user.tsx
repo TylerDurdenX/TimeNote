@@ -2,14 +2,12 @@
 
 import { ChevronsUpDown, Sparkles } from "lucide-react";
 import axios from "axios";
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -34,43 +32,39 @@ export const getInitials = (fullName: string): string => {
 };
 
 export function NavUser({
-  user
+  user,
 }: {
   user: {
     name: string;
     email: string;
     avatar: string;
-  },
-})
- {
+  };
+}) {
   const [isHovered, setIsHovered] = useState(false); // State for hover effect
-    const [isActive, setIsActive] = useState(false); // State for click effect
-  
-    const handleMouseEnter = () => setIsHovered(true);
-    const handleMouseLeave = () => setIsHovered(false);
-  
-    const handleClick = () => {
-      setIsActive(true); // Set as active when clicked
-    };
-  
-    const handleMenuClose = () => {
-      setIsActive(false); // Reset active state
-    };
+  const [isActive, setIsActive] = useState(false); // State for click effect
 
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
+
+  const handleClick = () => {
+    setIsActive(true); // Set as active when clicked
+  };
+
+  const handleMenuClose = () => {
+    setIsActive(false); // Reset active state
+  };
 
   const { isMobile } = useSidebar();
   const dispatch = useDispatch();
   const LogOut = async () => {
     // setLoading(true);
 
-    
-
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/logout`
       );
       dispatch(setAuthUser(null));
-      window.location.href = '/'
+      window.location.href = "/";
       toast.success("Logged Out Successfuly");
     } catch (error: any) {
       toast.error(error.response.data.message);
@@ -82,13 +76,13 @@ export function NavUser({
 
   return (
     <SidebarMenu>
-      <SidebarMenuItem 
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick} 
+      <SidebarMenuItem
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
       >
-        <DropdownMenu >
-          <DropdownMenuTrigger asChild >
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -120,7 +114,7 @@ export function NavUser({
                   isHovered || isActive ? "text-black" : "text-white"
                 }`}
               />
-                </SidebarMenuButton>
+            </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"

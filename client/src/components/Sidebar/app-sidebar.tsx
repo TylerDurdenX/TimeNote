@@ -6,23 +6,18 @@ import {
   AudioWaveform,
   Command,
   UsersRound,
-  Presentation,
   LaptopMinimal,
   MapPin,
   Bell,
   User,
-  ChartCandlestick,
-  ChartNoAxesCombined,
   BriefcaseBusiness,
   Box,
   ScreenShare,
   Cast,
   Radio,
-  FileChartColumnIncreasing,
   PresentationIcon,
   CalendarClock,
   FileClock,
-  BookUser,
   Users,
   Coffee,
 } from "lucide-react";
@@ -36,20 +31,16 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useGetUserQuery} from "@/store/api";
+import { useGetUserQuery } from "@/store/api";
 import { useSearchParams } from "next/navigation";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const userEmail = useSearchParams().get("email");
-  const [activeTab, setActiveTab] = useState('');
-  const [item1Open, setItem1Open] = useState(false)
-  const [item2Open, setItem2Open] = useState(false)
-
+  const [activeTab, setActiveTab] = useState("");
+  const [item1Open, setItem1Open] = useState(false);
+  const [item2Open, setItem2Open] = useState(false);
 
   const mockData = {
     teams: [
@@ -69,7 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         plan: "Free",
       },
     ],
- 
+
     Dashboard: [
       {
         name: "Dashboard",
@@ -162,26 +153,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         name: "Timesheet",
         url: `/timesheet?email=${userEmail}`,
-        icon: FileClock
+        icon: FileClock,
       },
       {
         name: "Teams",
         url: `/teams?email=${userEmail}`,
-        icon: Users
+        icon: Users,
       },
       {
         name: "Breaks",
         url: `/breaks?email=${userEmail}`,
-        icon: Coffee
+        icon: Coffee,
       },
     ],
   };
 
-  const defaultUser ={
-    name :"XXXX",
+  const defaultUser = {
+    name: "XXXX",
     email: "XXX@XXX.XXX",
-    avatar: ""
-  }
+    avatar: "",
+  };
 
   const [items, setItems] = useState([
     {
@@ -217,9 +208,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           item.items = item.items.map((subItem) => {
             // Check if the activeTab matches any subItem's URL
             if (subItem.url.split("?")[0].replace("/", "") === activeTab) {
-              setItem1Open(true)
+              setItem1Open(true);
             }
-            return { ...subItem}; // Otherwise, mark it as inactive
+            return { ...subItem }; // Otherwise, mark it as inactive
           });
         }
         return item;
@@ -233,28 +224,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const [isHovered, setIsHovered] = useState(false);
 
-    const { data, isLoading, error } = useGetUserQuery({ email: userEmail!});
-    return (
-      <Sidebar collapsible="icon" {...props} variant="floating">
-        <SidebarHeader className="bg-[#001742] rounded-t-xl">
-          <TeamSwitcher teams={mockData.teams} />
-        </SidebarHeader>
-        <SidebarContent className="bg-[#001742]">
-          {/* <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/> */}
-          {/* <NavMain items={items} activeTab={activeTab} setActiveTab={setActiveTab}
+  const { data, isLoading, error } = useGetUserQuery({ email: userEmail! });
+  return (
+    <Sidebar collapsible="icon" {...props} variant="floating">
+      <SidebarHeader className="bg-[#001742] rounded-t-xl">
+        <TeamSwitcher teams={mockData.teams} />
+      </SidebarHeader>
+      <SidebarContent className="bg-[#001742]">
+        {/* <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/> */}
+        {/* <NavMain items={items} activeTab={activeTab} setActiveTab={setActiveTab}
            isItem1Open = {item1Open}/> */}
-          <NavProjects projects={mockData.items1} activeTab={activeTab} setActiveTab={setActiveTab}/>
-          <NavMain items={mockData.projects} activeTab={activeTab} setActiveTab={setActiveTab}
-          isItem1Open = {item2Open} key={item2Open ? "open" : "closed"}/>
-          <NavProjects projects={mockData.items2} activeTab={activeTab} setActiveTab={setActiveTab}/>
-        </SidebarContent>
-        <SidebarFooter
-      className="bg-[#001742] rounded-b-xl"
-    >
-      <NavUser user={data?.user || defaultUser} />
-    </SidebarFooter>
-        <SidebarRail />
-      </Sidebar>
-    );
-  
+        <NavProjects
+          projects={mockData.items1}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+        <NavMain
+          items={mockData.projects}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isItem1Open={item2Open}
+          key={item2Open ? "open" : "closed"}
+        />
+        <NavProjects
+          projects={mockData.items2}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      </SidebarContent>
+      <SidebarFooter className="bg-[#001742] rounded-b-xl">
+        <NavUser user={data?.user || defaultUser} />
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
 }

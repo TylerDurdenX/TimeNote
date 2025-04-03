@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -38,7 +37,7 @@ export function NavMain({
   items,
   activeTab,
   setActiveTab,
-  isItem1Open
+  isItem1Open,
 }: Props) {
   return (
     <SidebarGroup>
@@ -83,7 +82,10 @@ export function NavMain({
                             : "bg-transparent text-white hover:bg-gray-100 hover:text-black hover:text-black rounded-xl"
                         }`} // Hover styles for both text and icon
                       >
-                        <Link href={subItem.url} className="flex items-center space-x-2">
+                        <Link
+                          href={subItem.url}
+                          className="flex items-center space-x-2"
+                        >
                           {subItem.icon && (
                             <div
                               className={`${

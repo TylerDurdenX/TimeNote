@@ -26,8 +26,15 @@ import { Switch } from "@/components/ui/switch";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Input } from "@/components/ui/input";
 import { Pencil } from "lucide-react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Toaster, toast } from 'react-hot-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Toaster, toast } from "react-hot-toast";
 
 type Props = {
   id: number;
@@ -73,24 +80,37 @@ const UserSettings = ({ id }: Props) => {
   const [autoCompleteTeams, setAutoCompleteTeams] = React.useState<any[]>([]);
   const [autoCompleteRoles, setAutoCompleteRoles] = React.useState<any[]>([]);
 
-  const idleTimeoutDropdownValues = ["NA", "5 min","10 min", "15 min", "20 min", "30 min"]
+  const idleTimeoutDropdownValues = [
+    "NA",
+    "5 min",
+    "10 min",
+    "15 min",
+    "20 min",
+    "30 min",
+  ];
 
-  const [selectedTimeout, setSelectedTimeout] = useState(dataUser?.idleTimeOut || "NA")
-  const [workingHours, setWorkingHours] = useState(dataUser?.workingHours || '')
-
+  const [selectedTimeout, setSelectedTimeout] = useState(
+    dataUser?.idleTimeOut || "NA"
+  );
+  const [workingHours, setWorkingHours] = useState(
+    dataUser?.workingHours || ""
+  );
 
   const handleTimeoutChange = (value: string) => {
-    setSelectedTimeout(value)
-  }
+    setSelectedTimeout(value);
+  };
 
-  const [isSignoutEnabled, setIsSignoutEnabled] = useState(dataUser?.allowSignout || false); // Set initial state
-  const [isProfilePicModificationEnabled, setIsProfilePicModificationEnabled] = useState(dataUser?.pictureModification || false)
-  const [isOpen, setIsOpen] = useState(false)
-  const [isOpenUserData, setIsOpenUserData] = useState(false)
-  const [userName, setUserName] = useState(dataUser?.username)
-  const [userEmail, setUserEmail] = useState(dataUser?.email)
-  const [designation, setDesignation] = useState(dataUser?.designation)
-  const [phone, setPhone] = useState(dataUser?.phoneNumber)
+  const [isSignoutEnabled, setIsSignoutEnabled] = useState(
+    dataUser?.allowSignout || false
+  ); // Set initial state
+  const [isProfilePicModificationEnabled, setIsProfilePicModificationEnabled] =
+    useState(dataUser?.pictureModification || false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenUserData, setIsOpenUserData] = useState(false);
+  const [userName, setUserName] = useState(dataUser?.username);
+  const [userEmail, setUserEmail] = useState(dataUser?.email);
+  const [designation, setDesignation] = useState(dataUser?.designation);
+  const [phone, setPhone] = useState(dataUser?.phoneNumber);
 
   const handlePPModificationChange = (checked: boolean) => {
     setIsProfilePicModificationEnabled(checked); // Update the state with the new value of the switch
@@ -99,7 +119,6 @@ const UserSettings = ({ id }: Props) => {
   const handleToggle = (checked: boolean) => {
     setIsSignoutEnabled(checked); // Update the state to match the switch's checked value
   };
-
 
   const [dropdownData, setDropdownData] = useState<DropdownData>({
     objectList: [],
@@ -114,7 +133,7 @@ const UserSettings = ({ id }: Props) => {
     isLoading: dropdownLoading,
     error: dropdownError,
     isSuccess: isSuccessDropdown,
-    refetch
+    refetch,
   } = useGetObjectListQuery(
     {
       entityName: "User",
@@ -199,14 +218,14 @@ const UserSettings = ({ id }: Props) => {
         isSuccessDropdown,
       });
     }
-    setIsSignoutEnabled(dataUser?.allowSignout || false)
-    setIsProfilePicModificationEnabled(dataUser?.pictureModification || false)
-    setWorkingHours(dataUser?.workingHours || '')
-    setSelectedTimeout(dataUser?.idleTimeOut || 'NA')
-    setUserEmail(dataUser?.email)
-    setUserName(dataUser?.username)
-    setDesignation(dataUser?.designation)
-    setPhone(dataUser?.phoneNumber)
+    setIsSignoutEnabled(dataUser?.allowSignout || false);
+    setIsProfilePicModificationEnabled(dataUser?.pictureModification || false);
+    setWorkingHours(dataUser?.workingHours || "");
+    setSelectedTimeout(dataUser?.idleTimeOut || "NA");
+    setUserEmail(dataUser?.email);
+    setUserName(dataUser?.username);
+    setDesignation(dataUser?.designation);
+    setPhone(dataUser?.phoneNumber);
   }, [dataUser]);
 
   useEffect(() => {
@@ -327,16 +346,17 @@ const UserSettings = ({ id }: Props) => {
 
   const isFormValid = () => {
     return userName && designation && phone && userEmail;
-  }
+  };
 
   const [updateUserData, { isLoading }] = useUpdateUserSettingsDataMutation();
-  const [updateUserBasicData, { isLoading: isLoadingUpdate }] = useUpdateUserBasicSettingsDataMutation();
+  const [updateUserBasicData, { isLoading: isLoadingUpdate }] =
+    useUpdateUserBasicSettingsDataMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isLoading) return;
-    
+
     try {
       const response = await updateUserData({
         email: dataUser?.email!,
@@ -348,15 +368,19 @@ const UserSettings = ({ id }: Props) => {
         selectedTimeOut: selectedTimeout,
         workingHours: workingHours,
         isSignoutEnabled: isSignoutEnabled,
-        isProfilePicModificationEnabled: isProfilePicModificationEnabled
+        isProfilePicModificationEnabled: isProfilePicModificationEnabled,
       });
-       // @ts-ignore
-            if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
-                            // @ts-ignore
-                            toast.error(response.error?.data.message)
-                          }else{
-                            toast.success(response.data?.message!);
-                          }
+      if (
+        // @ts-ignore
+        response.error?.data.status === "Error" ||
+        // @ts-ignore
+        response.error?.data.status === "Fail"
+      ) {
+        // @ts-ignore
+        toast.error(response.error?.data.message);
+      } else {
+        toast.success(response.data?.message!);
+      }
       setOpen(false);
     } catch (error) {
       toast.error("Some Error occurred");
@@ -377,14 +401,18 @@ const UserSettings = ({ id }: Props) => {
         phone: phone!,
       });
 
- // @ts-ignore
-      if(response.error?.data.status === 'Error' || response.error?.data.status === 'Fail'){
-                      // @ts-ignore
-                      toast.error(response.error?.data.message)
-                    }else{
-                      toast.success(response.data?.message!);
-                    }      
-                    setIsOpenUserData(false);
+      if (
+        // @ts-ignore
+        response.error?.data.status === "Error" ||
+        // @ts-ignore
+        response.error?.data.status === "Fail"
+      ) {
+        // @ts-ignore
+        toast.error(response.error?.data.message);
+      } else {
+        toast.success(response.data?.message!);
+      }
+      setIsOpenUserData(false);
     } catch (error) {
       toast.error("Some Error occurred");
       console.log(error);
@@ -395,9 +423,9 @@ const UserSettings = ({ id }: Props) => {
   return (
     <div>
       {!queriesLoaded ? (
-        <CircularLoading/>
+        <CircularLoading />
       ) : (
-        <form >
+        <form>
           <div className="flex h-full w-full">
             <div className="w-1/4 flex justify-center items-center p-4">
               <Avatar className="h-20 w-20 rounded-full justify-center items-center">
@@ -436,75 +464,67 @@ const UserSettings = ({ id }: Props) => {
               </div>
             </div>
 
-        <Dialog open={isOpenUserData} onOpenChange={setIsOpenUserData} >
-          <DialogTrigger asChild>
-            <div className="flex  justify-center items-center cursor-pointer">
-                  <Pencil/>
+            <Dialog open={isOpenUserData} onOpenChange={setIsOpenUserData}>
+              <DialogTrigger asChild>
+                <div className="flex  justify-center items-center cursor-pointer">
+                  <Pencil />
                 </div>
-          </DialogTrigger>
-          <DialogContent className="max-w-[42vw] h-[24vw] overflow-x-hidden">
+              </DialogTrigger>
+              <DialogContent className="max-w-[42vw] h-[24vw] overflow-x-hidden">
+                <DialogHeader>
+                  <DialogTitle className="mb-2">Edit User Details</DialogTitle>
+                </DialogHeader>
 
-            <DialogHeader>
-              <DialogTitle className="mb-2">Edit User Details</DialogTitle>
-            </DialogHeader>
-
-            <div
-              className="relative w-full "
-              >
-              <div className=" top-0 left-0 w-[calc(100%)] ">
-                <form onSubmit={handleUpdate}>
-                  <div className="grid gap-4 py-3">
-
-                    <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                      <Label className="text-center ">User Name</Label>
-                      <Input
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                        className="col-span-7"
-                      />
-                      <Label className="text-center ">Email</Label>
-                      <Input
-                        value={userEmail}
-                        onChange={(e) => setUserEmail(e.target.value)}
-                        className="col-span-7"
-                      />
-                      <Label className="text-center">Designation</Label>
-                      <Input
-                        value={designation}
-                        onChange={(e) => setDesignation(e.target.value)}
-                        className="col-span-7 shadow border"
-                      />
-                       <Label className="text-center ">Phone Number</Label>
-                      <Input
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="col-span-7"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <button
-                      type="submit"
-                      className={`flex w-200px mt-2 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+                <div className="relative w-full ">
+                  <div className=" top-0 left-0 w-[calc(100%)] ">
+                    <form onSubmit={handleUpdate}>
+                      <div className="grid gap-4 py-3">
+                        <div className="grid grid-cols-8 items-center gap-4 mr-1">
+                          <Label className="text-center ">User Name</Label>
+                          <Input
+                            value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
+                            className="col-span-7"
+                          />
+                          <Label className="text-center ">Email</Label>
+                          <Input
+                            value={userEmail}
+                            onChange={(e) => setUserEmail(e.target.value)}
+                            className="col-span-7"
+                          />
+                          <Label className="text-center">Designation</Label>
+                          <Input
+                            value={designation}
+                            onChange={(e) => setDesignation(e.target.value)}
+                            className="col-span-7 shadow border"
+                          />
+                          <Label className="text-center ">Phone Number</Label>
+                          <Input
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="col-span-7"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <button
+                          type="submit"
+                          className={`flex w-200px mt-2 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
                                 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
                                   !isFormValid() || isLoadingUpdate
                                     ? "cursor-not-allowed opacity-50"
                                     : ""
                                 }`}
-                      disabled={!isFormValid() || isLoadingUpdate}
-                    >
-                      {isLoadingUpdate
-                        ? "Updating..."
-                        : "Update Details"}
-                    </button>
-                  </DialogFooter>
-                </form>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-
+                          disabled={!isFormValid() || isLoadingUpdate}
+                        >
+                          {isLoadingUpdate ? "Updating..." : "Update Details"}
+                        </button>
+                      </DialogFooter>
+                    </form>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="flex  w-full">
@@ -602,7 +622,6 @@ const UserSettings = ({ id }: Props) => {
                 </div>
               </div>
             </div>
-            
           </div>
           <div className="flex  w-full col-span-6">
             <div className="w-1/6 flex justify-center items-center p-4">
@@ -611,27 +630,31 @@ const UserSettings = ({ id }: Props) => {
 
             <div className="w-3/6 flex flex-col justify-center gap-4 p-4">
               <div className="">
-              <div>
-                <FormControl variant="standard" className="w-[100%]">
-                  <InputLabel id="demo-simple-select-standard-label">Idle Timeout</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-standard-label"
-                    id="demo-simple-select-standard"
-                    value={selectedTimeout} // Controlled select, value bound to user state
-                    onChange={(e) => {handleTimeoutChange(e.target.value)}}  // Handle change event to update state
-                    label="Idle Timeout"
-                  >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    {idleTimeoutDropdownValues.map((item) => (
-                      <MenuItem key={item} value={item}>
-                        {item}
+                <div>
+                  <FormControl variant="standard" className="w-[100%]">
+                    <InputLabel id="demo-simple-select-standard-label">
+                      Idle Timeout
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-standard-label"
+                      id="demo-simple-select-standard"
+                      value={selectedTimeout} // Controlled select, value bound to user state
+                      onChange={(e) => {
+                        handleTimeoutChange(e.target.value);
+                      }} // Handle change event to update state
+                      label="Idle Timeout"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
                       </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </div>
+                      {idleTimeoutDropdownValues.map((item) => (
+                        <MenuItem key={item} value={item}>
+                          {item}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
                 <div className="flex justify-center">
                   {error && <div className="text-red-500 text-sm">{error}</div>}
                 </div>
@@ -639,18 +662,19 @@ const UserSettings = ({ id }: Props) => {
             </div>
             <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
               <div className="">
-              <Label htmlFor="airplane-mode" className="mt-5">Allow Signout</Label>
+                <Label htmlFor="airplane-mode" className="mt-5">
+                  Allow Signout
+                </Label>
               </div>
             </div>
             <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
               <div className="">
-
-              <Switch
-              className="ml-5"
-                id="airplane-mode"
-                checked={isSignoutEnabled}
-                onCheckedChange={handleToggle} 
-              />
+                <Switch
+                  className="ml-5"
+                  id="airplane-mode"
+                  checked={isSignoutEnabled}
+                  onCheckedChange={handleToggle}
+                />
               </div>
             </div>
           </div>
@@ -661,15 +685,15 @@ const UserSettings = ({ id }: Props) => {
 
             <div className="w-3/6 flex flex-col justify-center gap-4 p-4">
               <div className="">
-              <div>
-                <FormControl variant="standard" className="w-[100%]">
-                  <Input
-                                value={workingHours}
-                                onChange={(e) => setWorkingHours(e.target.value)}
-                                placeholder="9:30-18:30"
-                              />
-                </FormControl>
-              </div>
+                <div>
+                  <FormControl variant="standard" className="w-[100%]">
+                    <Input
+                      value={workingHours}
+                      onChange={(e) => setWorkingHours(e.target.value)}
+                      placeholder="9:30-18:30"
+                    />
+                  </FormControl>
+                </div>
                 <div className="flex justify-center">
                   {error && <div className="text-red-500 text-sm">{error}</div>}
                 </div>
@@ -677,18 +701,19 @@ const UserSettings = ({ id }: Props) => {
             </div>
             <div className="w-1/6 flex flex-col justify-center items-center gap-4 p-4">
               <div className="">
-              <Label htmlFor="airplane-mode" className="mt-5">Allow Profile Picture Modification</Label>
+                <Label htmlFor="airplane-mode" className="mt-5">
+                  Allow Profile Picture Modification
+                </Label>
               </div>
             </div>
             <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
               <div className="">
-
-              <Switch
-              className="ml-5"
-                id="airplane-mode"
-                checked={isProfilePicModificationEnabled}
-                onCheckedChange={handlePPModificationChange} 
-              />
+                <Switch
+                  className="ml-5"
+                  id="airplane-mode"
+                  checked={isProfilePicModificationEnabled}
+                  onCheckedChange={handlePPModificationChange}
+                />
               </div>
             </div>
           </div>

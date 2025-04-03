@@ -66,11 +66,12 @@ const Page = () => {
           </div>
           <div className="w-3/5 p-4 shadow-lg overflow-hidden justify-center">
             {isUserSelected ? (
-              <ScreenshotUP id={userId!} 
-              from={fromDate!}
+              <ScreenshotUP
+                id={userId!}
+                from={fromDate!}
                 to={toDate!}
                 setReRenderPage={setRetriggerlandingPage}
-                />
+              />
             ) : (
               <ScreenshotsLP
                 from={fromDate!}

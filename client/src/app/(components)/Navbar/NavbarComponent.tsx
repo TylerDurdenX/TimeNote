@@ -1,30 +1,31 @@
-import React, { useState } from 'react'
-import { Search,} from "lucide-react";
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import React, { useState } from "react";
+import { Search } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const NavbarComponent = () => {
-
-  const userEmail = useSearchParams().get("email")
+  const userEmail = useSearchParams().get("email");
 
   const data = [
     { title: "Dashboard", link: `/Dashboard?email=${userEmail}` },
     { title: "Screenshots", link: `/screenshots?email=${userEmail}` },
     { title: "Live Streaming", link: `/liveStream?email=${userEmail}` },
     { title: "Geo Tracking", link: `/geoTrack?email=${userEmail}` },
-    { title: "Projects Dashboard", link: `/projectsDashboard?email=${userEmail}` },
+    {
+      title: "Projects Dashboard",
+      link: `/projectsDashboard?email=${userEmail}`,
+    },
     { title: "Attendance", link: `/attendance?email=${userEmail}` },
     { title: "Productivity", link: `/productivity?email=${userEmail}` },
     { title: "Activity", link: `/activity?email=${userEmail}` },
     { title: "User Details", link: `/userDetails?email=${userEmail}` },
     { title: "Alerts", link: `/alerts?email=${userEmail}` },
     { title: "Reports", link: `/reports?email=${userEmail}` },
-
   ];
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState(data);
-  
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -61,14 +62,16 @@ const NavbarComponent = () => {
         value={searchQuery}
         onChange={handleSearchChange}
       />
-      
+
       {/* Filtered search results dropdown */}
       {searchQuery && (
         <ul className="absolute left-0 w-full bg-white border rounded-xl mt-1 max-h-60 overflow-y-auto shadow-lg z-20 top-full">
           {filteredData.length > 0 ? (
             filteredData.map((item, index) => (
-              <li key={index} className="p-2 cursor-pointer hover:bg-gray-200"
-              onClick={() => handleItemClick()}
+              <li
+                key={index}
+                className="p-2 cursor-pointer hover:bg-gray-200"
+                onClick={() => handleItemClick()}
               >
                 <Link
                   href={item.link} // React Router's Link for navigation
@@ -84,7 +87,7 @@ const NavbarComponent = () => {
         </ul>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default NavbarComponent
+export default NavbarComponent;

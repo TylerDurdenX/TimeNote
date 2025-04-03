@@ -1,14 +1,12 @@
-'use client'
+"use client";
 
-import Header from '@/components/Header'
-import React from 'react'
-import {
-  Card,
-} from "@/components/ui/card";
+import Header from "@/components/Header";
+import React from "react";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ReportsTable from './ReportsTable';
-import ReportsConfigurationTable from './ReportsConfigurationTable';
-import ConfiguredReportsTable from './ConfiguredReportsTable';
+import ReportsTable from "./ReportsTable";
+import ReportsConfigurationTable from "./ReportsConfigurationTable";
+import ConfiguredReportsTable from "./ConfiguredReportsTable";
 
 const page = () => {
   return (
@@ -16,12 +14,7 @@ const page = () => {
       <div className="w-full mb-5">
         <div className="flex w-full text-gray-900">
           <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
-          <Header
-              name="Reports"
-              hasFilters={false}
-              hasTeamFilter={false}
-              
-            />
+            <Header name="Reports" hasFilters={false} hasTeamFilter={false} />
           </div>
         </div>
         <div className="flex gap-4 px-4 w-full h-full  box-border overflow-x-hidden">
@@ -33,24 +26,24 @@ const page = () => {
             </TabsList>
             <TabsContent value="dr" className="w-full">
               <Card>
-                <ReportsTable/>
+                <ReportsTable />
               </Card>
             </TabsContent>
             <TabsContent value="cr">
               <Card>
-                <ReportsConfigurationTable/>
+                <ReportsConfigurationTable />
               </Card>
             </TabsContent>
             <TabsContent value="cdr" className="w-full">
               <Card>
-                <ConfiguredReportsTable/>
+                <ConfiguredReportsTable />
               </Card>
             </TabsContent>
           </Tabs>
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default page
+export default page;

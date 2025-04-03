@@ -8,10 +8,10 @@ type Props = {
   buttonComponent?: any;
   isSmallText?: boolean;
   hasFilters?: boolean;
-  clearFilter: () => void
-  value: string
-  setValue : React.Dispatch<React.SetStateAction<string>>
-  email: string
+  clearFilter: () => void;
+  value: string;
+  setValue: React.Dispatch<React.SetStateAction<string>>;
+  email: string;
 };
 
 const LiveStreamHeader = ({
@@ -22,21 +22,27 @@ const LiveStreamHeader = ({
   email,
   clearFilter,
   setValue,
-  value
+  value,
 }: Props) => {
   return (
     <div className="flex relative w-full pl-5 h-[20px] mb-1 items-center justify-between">
       <h1
-        className={`${isSmallText ? 'text-lg' : 'text-2xl'} font-semibold dark:text-white flex items-center`}
+        className={`${
+          isSmallText ? "text-lg" : "text-2xl"
+        } font-semibold dark:text-white flex items-center`}
       >
-        <Cast className='mr-2' />
-        {name} 
+        <Cast className="mr-2" />
+        {name}
       </h1>
 
       {hasFilters && (
         <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
-          <UserSelectionFilter setValue= {setValue} value={value} email={email}/>
-          
+          <UserSelectionFilter
+            setValue={setValue}
+            value={value}
+            email={email}
+          />
+
           <Button
             className="bg-gray-200 hover:bg-gray-100"
             onClick={clearFilter}

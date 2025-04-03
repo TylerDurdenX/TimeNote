@@ -46,7 +46,6 @@ import {
   TeamLeadResponse,
   TeamRequest,
   Teams,
-  TimesheetData,
   timesheetEntry,
   TimesheetResponse,
   UpdateBreakObj,
@@ -63,11 +62,8 @@ import {
   UserHierarchy,
   UsersListResponse,
 } from "./interfaces";
-import { AxiosProgressEvent } from 'axios';
-import { Toaster, toast } from 'react-hot-toast';
-import { useNavigate } from "react-router-dom";
-import { useRouter } from "next/router";
-
+import { AxiosProgressEvent } from "axios";
+import { toast } from "react-hot-toast";
 
 export interface Project {
   id: number;
@@ -130,12 +126,12 @@ export const api = createApi({
     // Perform the API request
     const result = await fetchBaseQuery({
       baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-      credentials: 'include',
+      credentials: "include",
     })(args, api, extraOptions);
 
     if (result.error?.status === 401) {
-      toast.error('Your session has expired. Please log in again.');
-      window.location.href = '/'
+      toast.error("Your session has expired. Please log in again.");
+      window.location.href = "/";
       return result;
     }
 
@@ -163,9 +159,10 @@ export const api = createApi({
     "Alert",
     "Project",
     "TaskActivity",
+    "SubTaskActivity",
     "Timesheet",
     "PendingTimesheet",
-    "Breaks"
+    "Breaks",
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -239,7 +236,7 @@ export const api = createApi({
       },
       providesTags: ["UsersData"],
     }),
-    getUserData: build.query< UserData, { username: string }>({
+    getUserData: build.query<UserData, { username: string }>({
       query: ({ username }) => {
         const url = `api/user/getUserData?username=${username}`;
         return url;
@@ -266,584 +263,688 @@ export const api = createApi({
         return url;
       },
     }),
-    getUserListFilter: build.query<
-    UserFilterResponse[],
-      { email: string }
-    >({
+    getUserListFilter: build.query<UserFilterResponse[], { email: string }>({
       query: ({ email }) => {
         const url = `api/user/getUsersListFilter?email=${email}`;
         return url;
       },
     }),
     getLiveStreamUsers: build.query<
-    LiveStreamResponse[],
-      { email: string, username: string }
+      LiveStreamResponse[],
+      { email: string; username: string }
     >({
       query: ({ email, username }) => {
         const url = `api/user/getLiveStreamUsers?email=${email}&username=${username}`;
         return url;
       },
     }),
-    getProject: build.query<
-    ProjectResponse,
-      { projectId: number}
-    >({
-      query: ({ projectId,}) => {
+    getProject: build.query<ProjectResponse, { projectId: number }>({
+      query: ({ projectId }) => {
         const url = `api/user/getProject?projectId=${projectId}`;
         return url;
       },
       providesTags: ["Project"],
     }),
-    getProjects: build.query<
-    ProjectListResponse[],
-      { email: string}
-    >({
-      query: ({ email,}) => {
+    getProjects: build.query<ProjectListResponse[], { email: string }>({
+      query: ({ email }) => {
         const url = `api/user/getProjects?email=${email}`;
         return url;
       },
       providesTags: ["ProjectsList"],
     }),
     getProjectForTeams: build.query<
-    ProjectListForTeamResponse[],
-      { email: string}
+      ProjectListForTeamResponse[],
+      { email: string }
     >({
-      query: ({ email,}) => {
+      query: ({ email }) => {
         const url = `api/user/getProjectsForTeam?email=${email}`;
         return url;
       },
     }),
     getSelectedProjectForTeams: build.query<
-    ProjectListForTeamResponse[],
-      { teamId: number}
+      ProjectListForTeamResponse[],
+      { teamId: number }
     >({
-      query: ({ teamId,}) => {
+      query: ({ teamId }) => {
         const url = `api/user/getSelectedProjectsForTeam?teamId=${teamId}`;
         return url;
       },
     }),
     getSelectedBreakTypeForTeams: build.query<
-    BreaksForTeams[],
-      { teamId: number}
+      BreaksForTeams[],
+      { teamId: number }
     >({
-      query: ({ teamId,}) => {
+      query: ({ teamId }) => {
         const url = `api/user/getSelectedBreaksForTeam?teamId=${teamId}`;
         return url;
       },
     }),
     getProjectTasks: build.query<
-    GetProjectTasksResponse,
-      { projectId: string, sprint: string, assignedTo: string, priority: string, isTaskOrSubTask: string, email: string, page: number, limit: number,}
+      GetProjectTasksResponse,
+      {
+        projectId: string;
+        sprint: string;
+        assignedTo: string;
+        priority: string;
+        isTaskOrSubTask: string;
+        email: string;
+        page: number;
+        limit: number;
+      }
     >({
-      query: ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask, email, page, limit}) => {
+      query: ({
+        projectId,
+        sprint,
+        assignedTo,
+        priority,
+        isTaskOrSubTask,
+        email,
+        page,
+        limit,
+      }) => {
         const url = `api/user/getProjectTasks?id=${projectId}&sprint=${sprint}&assignedTo=${assignedTo}&priority=${priority}&isTaskOrSubTask=${isTaskOrSubTask}&email=${email}&page=${page}&limit=${limit}`;
         return url;
       },
       providesTags: ["Tasks"],
     }),
     getProjectTasksCalendar: build.query<
-    GetProjectTasksCalendarResponse[],
-      { projectId: string, sprint: string, assignedTo: string, priority: string, isTaskOrSubTask: string, email: string, page: number, limit: number,}
+      GetProjectTasksCalendarResponse[],
+      {
+        projectId: string;
+        sprint: string;
+        assignedTo: string;
+        priority: string;
+        isTaskOrSubTask: string;
+        email: string;
+        page: number;
+        limit: number;
+      }
     >({
-      query: ({ projectId, sprint, assignedTo, priority, isTaskOrSubTask, email, page, limit}) => {
+      query: ({
+        projectId,
+        sprint,
+        assignedTo,
+        priority,
+        isTaskOrSubTask,
+        email,
+        page,
+        limit,
+      }) => {
         const url = `api/user/getProjectTasksCalendar?id=${projectId}&sprint=${sprint}&assignedTo=${assignedTo}&priority=${priority}&isTaskOrSubTask=${isTaskOrSubTask}&email=${email}&page=${page}&limit=${limit}`;
         return url;
       },
       providesTags: ["Tasks"],
     }),
     getTaskComments: build.query<
-    TaskComments[],
-      { taskId: number, email: string}
+      TaskComments[],
+      { taskId: number; email: string }
     >({
-      query: ({ taskId,email,}) => {
+      query: ({ taskId, email }) => {
         const url = `api/user/getComments?taskId=${taskId}&email=${email}`;
         return url;
       },
       providesTags: ["Comment"],
     }),
-    getTeams: build.query<
-    Teams[],
-      {email: string}
-    >({
-      query: ({email,}) => {
+    getTeams: build.query<Teams[], { email: string }>({
+      query: ({ email }) => {
         const url = `api/user/getTeamsList?&email=${email}`;
         return url;
       },
     }),
-    getBreaks: build.query<
-    Breaks[],
-      {email: string}
-    >({
-      query: ({email,}) => {
+    getBreaks: build.query<Breaks[], { email: string }>({
+      query: ({ email }) => {
         const url = `api/user/getBreaksList?&email=${email}`;
         return url;
       },
-      providesTags: ["Breaks"]
+      providesTags: ["Breaks"],
     }),
-    getBreaksForTeams: build.query<
-    BreaksForTeams[],
-      {email: string}
-    >({
-      query: ({email,}) => {
+    getBreaksForTeams: build.query<BreaksForTeams[], { email: string }>({
+      query: ({ email }) => {
         const url = `api/user/getBreaksListForTeams?&email=${email}`;
         return url;
       },
     }),
     getSubTaskComments: build.query<
-    TaskComments[],
-      { subTaskId: number, email: string}
+      TaskComments[],
+      { subTaskId: number; email: string }
     >({
-      query: ({ subTaskId,email,}) => {
+      query: ({ subTaskId, email }) => {
         const url = `api/user/getSubTaskComments?subTaskId=${subTaskId}&email=${email}`;
         return url;
       },
       providesTags: ["SubTaskComment"],
     }),
-    addComment: build.mutation<
-    ApiResponse[],
-      AddComment
-    >({
+    addComment: build.mutation<ApiResponse[], AddComment>({
       query: (comment) => ({
         url: "api/user/addComment",
         method: "POST",
         body: comment,
       }),
-      invalidatesTags: ["Comment","Tasks", "AlertCount"],
+      invalidatesTags: ["Comment", "Tasks", "AlertCount"],
     }),
-    addSubTaskComment: build.mutation<
-    ApiResponse[],
-    AddSubTaskComment
-    >({
+    addSubTaskComment: build.mutation<ApiResponse[], AddSubTaskComment>({
       query: (comment) => ({
         url: "api/user/addSubTaskComment",
         method: "POST",
         body: comment,
       }),
-      invalidatesTags: ["SubTaskComment","SubTask"],
+      invalidatesTags: ["SubTaskComment", "SubTask"],
     }),
-    getProjectUsers: build.query<
-    ProjectUsers[],
-      { projectId: string}
-    >({
-      query: ({ projectId,}) => {
+    getProjectUsers: build.query<ProjectUsers[], { projectId: string }>({
+      query: ({ projectId }) => {
         const url = `api/user/getProjectUsers?id=${projectId}`;
         return url;
       },
     }),
-    updateTaskStatus: build.mutation<ApiResponse, {taskId: number, status: string, email: string}>({
-      query: ({taskId, status, email})=> ({
-          url: `api/user/updateTaskStatus?taskId=${taskId}&email=${email}`,
-          method: "PATCH",
-          body: {status},
-      }), 
-      invalidatesTags : ["Tasks", "Task"]
-  }),
-  updateTimesheetEntry: build.mutation<ApiResponse, {id: number, email: string,approvedHours: string, approveRejectFlag: boolean}>({
-    query: ({id,  email, approveRejectFlag, approvedHours})=> ({
+    updateTaskStatus: build.mutation<
+      ApiResponse,
+      { taskId: number; status: string; email: string }
+    >({
+      query: ({ taskId, status, email }) => ({
+        url: `api/user/updateTaskStatus?taskId=${taskId}&email=${email}`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["Tasks", "Task"],
+    }),
+    updateTimesheetEntry: build.mutation<
+      ApiResponse,
+      {
+        id: number;
+        email: string;
+        approvedHours: string;
+        approveRejectFlag: boolean;
+      }
+    >({
+      query: ({ id, email, approveRejectFlag, approvedHours }) => ({
         url: `api/user/updateTimesheet?id=${id}&email=${email}&approveRejectFlag=${approveRejectFlag}&approvedHours=${approvedHours}`,
         method: "PATCH",
-    }), 
-    invalidatesTags : ["PendingTimesheet"]
-}),
-  updateProjectStatus: build.mutation<ApiResponse, {projectId: number, status: string, email: string}>({
-    query: ({projectId, status, email})=> ({
+      }),
+      invalidatesTags: ["PendingTimesheet"],
+    }),
+    updateProjectStatus: build.mutation<
+      ApiResponse,
+      { projectId: number; status: string; email: string }
+    >({
+      query: ({ projectId, status, email }) => ({
         url: `api/user/updateProjectStatus?projectId=${projectId}&email=${email}`,
         method: "PATCH",
-        body: {status},
-    }), 
-    invalidatesTags : ["Project"]
-}),
-  closeTask: build.mutation<ApiResponse, {taskId: number, email: string}>({
-    query: ({taskId, email})=> ({
+        body: { status },
+      }),
+      invalidatesTags: ["Project"],
+    }),
+    closeTask: build.mutation<ApiResponse, { taskId: number; email: string }>({
+      query: ({ taskId, email }) => ({
         url: `api/user/closeCompletedTask?taskId=${taskId}&email=${email}`,
         method: "PATCH",
-    }), 
-    invalidatesTags : ["Tasks", "TaskActivity", "TaskHistory","Task"]
-}),
-  updateTaskAssignee: build.mutation<Task, {taskId: number, email: string}>({
-    query: ({taskId, email})=> ({
-        url: `api/user/updateTaskAssignee?taskId=${taskId}&email=${email}`,
+      }),
+      invalidatesTags: ["Tasks", "TaskActivity", "TaskHistory", "Task"],
+    }),
+    updateTaskAssignee: build.mutation<Task, { taskId: number; email: string }>(
+      {
+        query: ({ taskId, email }) => ({
+          url: `api/user/updateTaskAssignee?taskId=${taskId}&email=${email}`,
+          method: "PATCH",
+        }),
+        invalidatesTags: ["Tasks", "Task", "TaskHistory"],
+      }
+    ),
+    updateTaskProgress: build.mutation<
+      ApiResponse,
+      { taskId: number; email: string; progressStart: boolean }
+    >({
+      query: ({ taskId, email, progressStart }) => ({
+        url: `api/user/startTaskProgress?taskId=${taskId}&progressStart=${progressStart}&email=${email}`,
         method: "PATCH",
-    }), 
-    invalidatesTags : ["Tasks", "Task","TaskHistory"]
-}),
-updateTaskProgress: build.mutation<ApiResponse, {taskId: number,email: string,  progressStart: boolean}>({
-  query: ({taskId,email, progressStart})=> ({
-      url: `api/user/startTaskProgress?taskId=${taskId}&progressStart=${progressStart}&email=${email}`,
-      method: "PATCH",
-  }), 
-  invalidatesTags : ["Task","ProjectHours", "TaskActivity"]
-}),
-updateTask: build.mutation<ApiResponse, UpdateTaskData>({
-  query: (body)=> ({
-      url: `api/user/updateTask`,
-      method: "PATCH",
-      body: body,
-  }), 
-  invalidatesTags : ["Tasks", "Task", "TaskHistory", "TaskActivity"]
-}),
-updateProject: build.mutation<ApiResponse, UpdateProjectData>({
-  query: (body)=> ({
-      url: `api/user/updateProject`,
-      method: "PATCH",
-      body: body,
-  }), 
-  invalidatesTags : ["Project"]
-}),
-updateSubTask: build.mutation<ApiResponse, UpdateSubTaskData >({
-  query: (body)=> ({
-      url: `api/user/updateSubTask`,
-      method: "PATCH",
-      body: body,
-  }), 
-  invalidatesTags : ["Task", "SubTask", "Tasks"]
-}),
-uploadAttachment: build.mutation<ApiResponse, UploadAttachment>({
-  query: (body)=> ({
-      url: `api/user/uploadAttachment`,
-      method: "POST",
-      body: body,
-      async onUploadProgress(progressEvent: AxiosProgressEvent) {
-        // Calculate progress as percentage
-        if (progressEvent.total) {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          return progress; // Return progress percentage
-        }
-      },
-  }), 
-  invalidatesTags : ["Task", "TaskActivity"]
-}),
-uploadProjectAttachment: build.mutation<ApiResponse, UploadProjectAttachment>({
-  query: (body)=> ({
-      url: `api/user/uploadProjectAttachment`,
-      method: "POST",
-      body: body,
-      async onUploadProgress(progressEvent: AxiosProgressEvent) {
-        if (progressEvent.total) {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          return progress; 
-        }
-      },
-  }), 
-  invalidatesTags : ["Project"]
-}),
-uploadSubTaskAttachment: build.mutation<ApiResponse, UploadSubTaskAttachment>({
-  query: (body)=> ({
-      url: `api/user/uploadSubTaskAttachment`,
-      method: "POST",
-      body: body,
-      async onUploadProgress(progressEvent: AxiosProgressEvent) {
-        if (progressEvent.total) {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          return progress; 
-        }
-      },
-  }), 
-  invalidatesTags : ["SubTask"]
-}),
-  createTask: build.mutation<ApiResponse, TaskFormData>({
-    query: (task)=> ({
+      }),
+      invalidatesTags: ["Task", "ProjectHours", "TaskActivity"],
+    }),
+    updateSubTaskProgress: build.mutation<
+      ApiResponse,
+      { taskId: number; email: string; progressStart: boolean }
+    >({
+      query: ({ taskId, email, progressStart }) => ({
+        url: `api/user/startSubTaskProgress?taskId=${taskId}&progressStart=${progressStart}&email=${email}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["SubTask", "SubTaskActivity"],
+    }),
+    updateTask: build.mutation<ApiResponse, UpdateTaskData>({
+      query: (body) => ({
+        url: `api/user/updateTask`,
+        method: "PATCH",
+        body: body,
+      }),
+      invalidatesTags: ["Tasks", "Task", "TaskHistory", "TaskActivity"],
+    }),
+    updateProject: build.mutation<ApiResponse, UpdateProjectData>({
+      query: (body) => ({
+        url: `api/user/updateProject`,
+        method: "PATCH",
+        body: body,
+      }),
+      invalidatesTags: ["Project"],
+    }),
+    updateSubTask: build.mutation<ApiResponse, UpdateSubTaskData>({
+      query: (body) => ({
+        url: `api/user/updateSubTask`,
+        method: "PATCH",
+        body: body,
+      }),
+      invalidatesTags: ["SubTask", "SubTaskActivity"],
+    }),
+    uploadAttachment: build.mutation<ApiResponse, UploadAttachment>({
+      query: (body) => ({
+        url: `api/user/uploadAttachment`,
+        method: "POST",
+        body: body,
+        async onUploadProgress(progressEvent: AxiosProgressEvent) {
+          // Calculate progress as percentage
+          if (progressEvent.total) {
+            const progress = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            return progress; // Return progress percentage
+          }
+        },
+      }),
+      invalidatesTags: ["Task", "TaskActivity"],
+    }),
+    uploadProjectAttachment: build.mutation<
+      ApiResponse,
+      UploadProjectAttachment
+    >({
+      query: (body) => ({
+        url: `api/user/uploadProjectAttachment`,
+        method: "POST",
+        body: body,
+        async onUploadProgress(progressEvent: AxiosProgressEvent) {
+          if (progressEvent.total) {
+            const progress = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            return progress;
+          }
+        },
+      }),
+      invalidatesTags: ["Project"],
+    }),
+    uploadSubTaskAttachment: build.mutation<
+      ApiResponse,
+      UploadSubTaskAttachment
+    >({
+      query: (body) => ({
+        url: `api/user/uploadSubTaskAttachment`,
+        method: "POST",
+        body: body,
+        async onUploadProgress(progressEvent: AxiosProgressEvent) {
+          if (progressEvent.total) {
+            const progress = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            return progress;
+          }
+        },
+      }),
+      invalidatesTags: ["SubTask", "SubTaskActivity"],
+    }),
+    createTask: build.mutation<ApiResponse, TaskFormData>({
+      query: (task) => ({
         url: "api/user/createTask",
         method: "POST",
         body: task,
-    }), 
-    invalidatesTags : ["Tasks"]
-}),
-createTeam: build.mutation<ApiResponse, TeamRequest>({
-  query: (teamReq)=> ({
-      url: "api/user/createTeam",
-      method: "POST",
-      body: teamReq,
-  }), 
-}),
-createBreak: build.mutation<ApiResponse, BreakRequest>({
-  query: (breakReq)=> ({
-      url: "api/user/createBreak",
-      method: "POST",
-      body: breakReq,
-  }), 
-}),
-createBulkTasks: build.mutation<ApiResponse, TaskFormData[]>({
-  query: (tasks)=> ({
-      url: "api/user/createBulkTasks",
-      method: "POST",
-      body: tasks,
-  }), 
-  invalidatesTags : ["Tasks", "ProjectHours"]
-}),
-createUser: build.mutation<ApiResponse, CreateUserData>({
-  query: (user)=> ({
-      url: "api/user/signUp",
-      method: "POST",
-      body: user,
-  }), 
-  invalidatesTags : ["UsersList","UserCount"]
-}),
-createTimesheetEntry: build.mutation<ApiResponse, timesheetEntry>({
-  query: (timesheetEntry)=> ({
-      url: "api/user/createTimesheetEntry",
-      method: "POST",
-      body: timesheetEntry,
-  }), 
-  invalidatesTags : ["Timesheet"]
-}),
-createAutoReport: build.mutation<ApiResponse, ReportConfig>({
-  query: (reportConfig)=> ({
-      url: "api/user/createReportsConfig",
-      method: "POST",
-      body: reportConfig,
-  }), 
-  invalidatesTags : ["AutoReports"]
-}),
-getConfiguredReports: build.query<ConfiguredReports[], { email: string}>({
-  query: ({ email,}) => {
-    const url = `api/user/getConfiguredReports?email=${email}`;
-    return url;
-  },
-  providesTags : ["AutoReports"]
-}),
-getTimesheetData: build.query<TimesheetResponse, { email: string, date: string}>({
-  query: ({ email,date}) => {
-    const url = `api/user/getTimesheetData?email=${email}&date=${date}`;
-    return url;
-  },
-  providesTags : ["Timesheet"]
-}),
-getAttendanceData: build.query<AttendanceCardResponse, { email: string, title: string}>({
-  query: ({ email,title}) => {
-    const url = `api/user/getAttendanceData?email=${email}&title=${title}`;
-    return url;
-  },
-}),
-getUserAttendanceData: build.query<AttendanceUserPCResponse, { email: string}>({
-  query: ({ email}) => {
-    const url = `api/user/getUserAttendancePCData?email=${email}`;
-    return url;
-  },
-}),
-getUserAttendanceTableData: build.query<AttendanceUserTableResponse[], { email: string, adminFlag: boolean, date: string}>({
-  query: ({ email, adminFlag, date}) => {
-    const url = `api/user/getUserAttendanceTableData?email=${email}&adminFlag=${adminFlag}&date=${date}`;
-    return url;
-  },
-}),
-getAttendanceLineChartData: build.query<AttendanceCardLCResponse[], { email: string, title: string}>({
-  query: ({ email,title}) => {
-    const url = `api/user/getAttendanceLCData?email=${email}&title=${title}`;
-    return url;
-  },
-}),
-viewTimesheetData: build.query<TimesheetResponse, { name: string, date: string}>({
-  query: ({ name,date}) => {
-    const url = `api/user/viewTimesheetData?name=${name}&date=${date}`;
-    return url;
-  },
-}),
-viewBreakData: build.query<BreakResponse[], { userId: number, date: string}>({
-  query: ({ userId,date}) => {
-    const url = `api/user/viewBreaksheetData?userId=${userId}&date=${date}`;
-    return url;
-  },
-}),
-getPendingTimesheetData: build.query<PendingTimesheetResponse[], { email: string, date: string}>({
-  query: ({ email,date}) => {
-    const url = `api/user/getPendingTimesheetData?email=${email}&date=${date}`;
-    return url;
-  },
-  providesTags : ["PendingTimesheet"]
-}),
-getUsersTimesheetData: build.query<PendingTimesheetResponse[], { email: string, date: string}>({
-  query: ({ email,date}) => {
-    const url = `api/user/getUsersTimesheetData?email=${email}&date=${date}`;
-    return url;
-  },
-}),
-getAlertsCount: build.query<AlertCount, { email: string}>({
-  query: ({ email,}) => {
-    const url = `api/user/getAlertCount?email=${email}`;
-    return url;
-  },
-  providesTags : ["AlertCount"]
-}),
-getAlerts: build.query<Alert[], { email: string}>({
-  query: ({ email,}) => {
-    const url = `api/user/getAlert?email=${email}`;
-    return url;
-  },
-  providesTags: ["Alert"]
-}),
-deleteConfigReports: build.mutation<ApiResponse, { reportId: number}>({
-  query: ({reportId})=> ({
-    url: `api/user/deleteConfigReport?reportId=${reportId}`,
-    method: "DELETE",
-}), 
-  invalidatesTags : ["AutoReports"]
-}),
-deleteTriggeredAlerts: build.mutation<ApiResponse, { alertId: number}>({
-  query: ({alertId})=> ({
-    url: `api/user/deleteAlert?alertId=${alertId}`,
-    method: "DELETE",
-}), 
-  invalidatesTags : ["Alert", "AlertCount"]
-}),
-deleteBreak: build.mutation<ApiResponse, { breakId: number}>({
-  query: ({breakId})=> ({
-    url: `api/user/deleteBreak?breakId=${breakId}`,
-    method: "DELETE",
-}), 
-  invalidatesTags : ["Breaks"]
-}),
-createSubTask: build.mutation<ApiResponse, SubTaskFormData>({
-  query: (task)=> ({
-      url: "api/user/createSubTask",
-      method: "POST",
-      body: task,
-  }), 
-  invalidatesTags : ["Task"]
-}),
-createProject: build.mutation<ApiResponse, ProjectFormData>({
-  query: (project)=> ({
-      url: "api/user/createProject",
-      method: "POST",
-      body: project,
-  }), 
-  invalidatesTags : ["ProjectsList"]
-}),
-createSprint: build.mutation<ApiResponse, CreateSprint>({
-  query: (body)=> ({
-      url: "api/user/createSprint",
-      method: "POST",
-      body: body,
-  }), 
-  invalidatesTags : ["SprintCount"]
-}),
-getSprint: build.query<SprintResponse[], { projectId: string}>({
-  query: ({ projectId,}) => {
-    const url = `api/user/getSprint?projectId=${projectId}`;
-    return url;
-  },
-  providesTags : ["SprintCount"]
-}),
-getTeamLeads: build.query<TeamLeadResponse[], { email: string}>({
-  query: ({ email,}) => {
-    const url = `api/user/getTeamLeads?email=${email}`;
-    return url;
-  },
-}),
-getProjectHoursEstimation: build.query<ProjectHours, { projectId: number}>({
-  query: ({ projectId,}) => {
-    const url = `api/user/getProjectHoursEstimation?projectId=${projectId}`;
-    return url;
-  },
-  providesTags : ["ProjectHours"]
-}),
-getProjectSprint: build.query<SprintData, { sprintId: number}>({
-  query: ({ sprintId,}) => {
-    const url = `api/user/getProjectSprint?sprintId=${sprintId}`;
-    return url;
-  },
-}),
-updateProjectSprint: build.mutation<ApiResponse, UpdateSprintObject>({
-  query: (updateSprintObject)=> ({
-      url: "api/user/updateProjectSprint",
-      method: "POST",
-      body: updateSprintObject,
-  }), 
-  invalidatesTags : ["Tasks","SprintCount"]
-}),
-updateBreakDetails: build.mutation<ApiResponse, UpdateBreakObj>({
-  query: (updateBreakObject)=> ({
-      url: "api/user/updateBreakObj",
-      method: "POST",
-      body: updateBreakObject,
-  }), 
-  invalidatesTags : ["Breaks"]
-}),
-getMentionedUsers: build.query<MentionedUser[], { name: string}>({
-  query: ({ name,}) => {
-    const url = `api/user/getMentionedUsers?name=${name}`;
-    return url;
-  },
-}),
-getTaskHistory: build.query<TaskHistory[], { taskId: number}>({
-  query: ({ taskId,}) => {
-    const url = `api/user/getTaskHistory?taskId=${taskId}`;
-    return url;
-  },
-  providesTags : ["TaskHistory"]
-}),
-getTaskActivity: build.query<TaskActivity[], { taskId: number}>({
-  query: ({ taskId,}) => {
-    const url = `api/user/getTaskActivity?taskId=${taskId}`;
-    return url;
-  },
-  providesTags : ["TaskActivity"]
-}),
-deleteAttachment: build.mutation<ApiResponse, { taskId: number, isSubTask: boolean, email: string}>({
-  query: ({taskId, isSubTask, email})=> ({
-    url: `api/user/deleteAttachment?taskId=${taskId}&isSubTask=${isSubTask}&email=${email}`,
-    method: "DELETE",
-}), 
-  invalidatesTags : ["Task", "SubTask","TaskActivity"]
-}),
-deleteProjectAttachment: build.mutation<ApiResponse, { attachmentId: number, email: string, projectId: number}>({
-  query: ({attachmentId, email,projectId})=> ({
-    url: `api/user/deleteProjectAttachment?attachmentId=${attachmentId}&email=${email}&projectId=${projectId}`,
-    method: "DELETE",
-}), 
-  invalidatesTags : ["Project"]
-}),
-downloadAttachment: build.mutation<DownloadAttachment, { taskId: number, isSubTask: boolean}>({
-  query: ({taskId})=> ({
-    url: `api/user/downloadAttachment?taskId=${taskId}`,
-    method: "GET",
-}), 
-}),
-downloadProjectAttachment: build.mutation<DownloadProjectAttachment, { attachmentId: number}>({
-  query: ({attachmentId})=> ({
-    url: `api/user/downloadProjectAttachment?attachmentId=${attachmentId}`,
-    method: "GET",
-}), 
-}),
-getTask: build.query<Task, { taskId: number}>({
-  query: ({ taskId,}) => {
-    const url = `api/user/getTask?taskId=${taskId}`;
-    return url;
-  },
-  providesTags : ["Task"]
-}),
-getSubTask: build.query<SubTaskObject, { subTaskId: number}>({
-  query: ({ subTaskId,}) => {
-    const url = `api/user/getSubTask?subTaskId=${subTaskId}`;
-    return url;
-  },
-  providesTags : ["SubTask"]
-}),
-getAdminRole: build.query<AdminRoleResponse, { email: string}>({
-  query: ({ email,}) => {
-    const url = `api/user/getAdminRole?email=${email}`;
-    return url;
-  },
-}),
-getProjectManager: build.query<PmUserResponse[], {}>({
-  query: () => {
-    const url = `api/user/getPmUsers`;
-    return url;
-  },
-}),
-updateTeamsConfigurationData: build.mutation<
+      }),
+      invalidatesTags: ["Tasks"],
+    }),
+    createTeam: build.mutation<ApiResponse, TeamRequest>({
+      query: (teamReq) => ({
+        url: "api/user/createTeam",
+        method: "POST",
+        body: teamReq,
+      }),
+    }),
+    createBreak: build.mutation<ApiResponse, BreakRequest>({
+      query: (breakReq) => ({
+        url: "api/user/createBreak",
+        method: "POST",
+        body: breakReq,
+      }),
+    }),
+    createBulkTasks: build.mutation<ApiResponse, TaskFormData[]>({
+      query: (tasks) => ({
+        url: "api/user/createBulkTasks",
+        method: "POST",
+        body: tasks,
+      }),
+      invalidatesTags: ["Tasks", "ProjectHours"],
+    }),
+    createUser: build.mutation<ApiResponse, CreateUserData>({
+      query: (user) => ({
+        url: "api/user/signUp",
+        method: "POST",
+        body: user,
+      }),
+      invalidatesTags: ["UsersList", "UserCount"],
+    }),
+    createTimesheetEntry: build.mutation<ApiResponse, timesheetEntry>({
+      query: (timesheetEntry) => ({
+        url: "api/user/createTimesheetEntry",
+        method: "POST",
+        body: timesheetEntry,
+      }),
+      invalidatesTags: ["Timesheet"],
+    }),
+    createAutoReport: build.mutation<ApiResponse, ReportConfig>({
+      query: (reportConfig) => ({
+        url: "api/user/createReportsConfig",
+        method: "POST",
+        body: reportConfig,
+      }),
+      invalidatesTags: ["AutoReports"],
+    }),
+    getConfiguredReports: build.query<ConfiguredReports[], { email: string }>({
+      query: ({ email }) => {
+        const url = `api/user/getConfiguredReports?email=${email}`;
+        return url;
+      },
+      providesTags: ["AutoReports"],
+    }),
+    getTimesheetData: build.query<
+      TimesheetResponse,
+      { email: string; date: string }
+    >({
+      query: ({ email, date }) => {
+        const url = `api/user/getTimesheetData?email=${email}&date=${date}`;
+        return url;
+      },
+      providesTags: ["Timesheet"],
+    }),
+    getTotalTaskTime: build.query<string, { taskId: string }>({
+      query: ({ taskId }) => {
+        const url = `api/user/getTotalTaskTime?taskId=${taskId}`;
+        return url;
+      },
+    }),
+    getAttendanceData: build.query<
+      AttendanceCardResponse,
+      { email: string; title: string }
+    >({
+      query: ({ email, title }) => {
+        const url = `api/user/getAttendanceData?email=${email}&title=${title}`;
+        return url;
+      },
+    }),
+    getUserAttendanceData: build.query<
+      AttendanceUserPCResponse,
+      { email: string }
+    >({
+      query: ({ email }) => {
+        const url = `api/user/getUserAttendancePCData?email=${email}`;
+        return url;
+      },
+    }),
+    getUserAttendanceTableData: build.query<
+      AttendanceUserTableResponse[],
+      { email: string; adminFlag: boolean; date: string }
+    >({
+      query: ({ email, adminFlag, date }) => {
+        const url = `api/user/getUserAttendanceTableData?email=${email}&adminFlag=${adminFlag}&date=${date}`;
+        return url;
+      },
+    }),
+    getAttendanceLineChartData: build.query<
+      AttendanceCardLCResponse[],
+      { email: string; title: string }
+    >({
+      query: ({ email, title }) => {
+        const url = `api/user/getAttendanceLCData?email=${email}&title=${title}`;
+        return url;
+      },
+    }),
+    viewTimesheetData: build.query<
+      TimesheetResponse,
+      { name: string; date: string }
+    >({
+      query: ({ name, date }) => {
+        const url = `api/user/viewTimesheetData?name=${name}&date=${date}`;
+        return url;
+      },
+    }),
+    viewBreakData: build.query<
+      BreakResponse[],
+      { userId: number; date: string }
+    >({
+      query: ({ userId, date }) => {
+        const url = `api/user/viewBreaksheetData?userId=${userId}&date=${date}`;
+        return url;
+      },
+    }),
+    getPendingTimesheetData: build.query<
+      PendingTimesheetResponse[],
+      { email: string; date: string }
+    >({
+      query: ({ email, date }) => {
+        const url = `api/user/getPendingTimesheetData?email=${email}&date=${date}`;
+        return url;
+      },
+      providesTags: ["PendingTimesheet"],
+    }),
+    getUsersTimesheetData: build.query<
+      PendingTimesheetResponse[],
+      { email: string; date: string }
+    >({
+      query: ({ email, date }) => {
+        const url = `api/user/getUsersTimesheetData?email=${email}&date=${date}`;
+        return url;
+      },
+    }),
+    getAlertsCount: build.query<AlertCount, { email: string }>({
+      query: ({ email }) => {
+        const url = `api/user/getAlertCount?email=${email}`;
+        return url;
+      },
+      providesTags: ["AlertCount"],
+    }),
+    getAlerts: build.query<Alert[], { email: string }>({
+      query: ({ email }) => {
+        const url = `api/user/getAlert?email=${email}`;
+        return url;
+      },
+      providesTags: ["Alert"],
+    }),
+    deleteConfigReports: build.mutation<ApiResponse, { reportId: number }>({
+      query: ({ reportId }) => ({
+        url: `api/user/deleteConfigReport?reportId=${reportId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["AutoReports"],
+    }),
+    deleteTriggeredAlerts: build.mutation<ApiResponse, { alertId: number }>({
+      query: ({ alertId }) => ({
+        url: `api/user/deleteAlert?alertId=${alertId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Alert", "AlertCount"],
+    }),
+    deleteBreak: build.mutation<ApiResponse, { breakId: number }>({
+      query: ({ breakId }) => ({
+        url: `api/user/deleteBreak?breakId=${breakId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Breaks"],
+    }),
+    createSubTask: build.mutation<ApiResponse, SubTaskFormData>({
+      query: (task) => ({
+        url: "api/user/createSubTask",
+        method: "POST",
+        body: task,
+      }),
+      invalidatesTags: ["Task"],
+    }),
+    createProject: build.mutation<ApiResponse, ProjectFormData>({
+      query: (project) => ({
+        url: "api/user/createProject",
+        method: "POST",
+        body: project,
+      }),
+      invalidatesTags: ["ProjectsList"],
+    }),
+    createSprint: build.mutation<ApiResponse, CreateSprint>({
+      query: (body) => ({
+        url: "api/user/createSprint",
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["SprintCount"],
+    }),
+    getSprint: build.query<SprintResponse[], { projectId: string }>({
+      query: ({ projectId }) => {
+        const url = `api/user/getSprint?projectId=${projectId}`;
+        return url;
+      },
+      providesTags: ["SprintCount"],
+    }),
+    getTeamLeads: build.query<TeamLeadResponse[], { email: string }>({
+      query: ({ email }) => {
+        const url = `api/user/getTeamLeads?email=${email}`;
+        return url;
+      },
+    }),
+    getProjectHoursEstimation: build.query<ProjectHours, { projectId: number }>(
+      {
+        query: ({ projectId }) => {
+          const url = `api/user/getProjectHoursEstimation?projectId=${projectId}`;
+          return url;
+        },
+        providesTags: ["ProjectHours"],
+      }
+    ),
+    getProjectSprint: build.query<SprintData, { sprintId: number }>({
+      query: ({ sprintId }) => {
+        const url = `api/user/getProjectSprint?sprintId=${sprintId}`;
+        return url;
+      },
+    }),
+    updateProjectSprint: build.mutation<ApiResponse, UpdateSprintObject>({
+      query: (updateSprintObject) => ({
+        url: "api/user/updateProjectSprint",
+        method: "POST",
+        body: updateSprintObject,
+      }),
+      invalidatesTags: ["Tasks", "SprintCount"],
+    }),
+    updateBreakDetails: build.mutation<ApiResponse, UpdateBreakObj>({
+      query: (updateBreakObject) => ({
+        url: "api/user/updateBreakObj",
+        method: "POST",
+        body: updateBreakObject,
+      }),
+      invalidatesTags: ["Breaks"],
+    }),
+    getMentionedUsers: build.query<MentionedUser[], { name: string }>({
+      query: ({ name }) => {
+        const url = `api/user/getMentionedUsers?name=${name}`;
+        return url;
+      },
+    }),
+    getTaskHistory: build.query<TaskHistory[], { taskId: number }>({
+      query: ({ taskId }) => {
+        const url = `api/user/getTaskHistory?taskId=${taskId}`;
+        return url;
+      },
+      providesTags: ["TaskHistory"],
+    }),
+    getTaskActivity: build.query<TaskActivity[], { taskId: number }>({
+      query: ({ taskId }) => {
+        const url = `api/user/getTaskActivity?taskId=${taskId}`;
+        return url;
+      },
+      providesTags: ["TaskActivity"],
+    }),
+    getSubTaskActivity: build.query<TaskActivity[], { taskId: number }>({
+      query: ({ taskId }) => {
+        const url = `api/user/getSubTaskActivity?taskId=${taskId}`;
+        return url;
+      },
+      providesTags: ["SubTaskActivity"],
+    }),
+    deleteAttachment: build.mutation<
+      ApiResponse,
+      { taskId: number; isSubTask: boolean; email: string }
+    >({
+      query: ({ taskId, isSubTask, email }) => ({
+        url: `api/user/deleteAttachment?taskId=${taskId}&isSubTask=${isSubTask}&email=${email}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Task", "SubTask", "TaskActivity", "SubTaskActivity"],
+    }),
+    deleteProjectAttachment: build.mutation<
+      ApiResponse,
+      { attachmentId: number; email: string; projectId: number }
+    >({
+      query: ({ attachmentId, email, projectId }) => ({
+        url: `api/user/deleteProjectAttachment?attachmentId=${attachmentId}&email=${email}&projectId=${projectId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Project"],
+    }),
+    downloadAttachment: build.mutation<
+      DownloadAttachment,
+      { taskId: number; isSubTask: boolean }
+    >({
+      query: ({ taskId }) => ({
+        url: `api/user/downloadAttachment?taskId=${taskId}`,
+        method: "GET",
+      }),
+    }),
+    downloadProjectAttachment: build.mutation<
+      DownloadProjectAttachment,
+      { attachmentId: number }
+    >({
+      query: ({ attachmentId }) => ({
+        url: `api/user/downloadProjectAttachment?attachmentId=${attachmentId}`,
+        method: "GET",
+      }),
+    }),
+    getTask: build.query<Task, { taskId: number }>({
+      query: ({ taskId }) => {
+        const url = `api/user/getTask?taskId=${taskId}`;
+        return url;
+      },
+      providesTags: ["Task"],
+    }),
+    getSubTask: build.query<SubTaskObject, { subTaskId: number }>({
+      query: ({ subTaskId }) => {
+        const url = `api/user/getSubTask?subTaskId=${subTaskId}`;
+        return url;
+      },
+      providesTags: ["SubTask"],
+    }),
+    getAdminRole: build.query<AdminRoleResponse, { email: string }>({
+      query: ({ email }) => {
+        const url = `api/user/getAdminRole?email=${email}`;
+        return url;
+      },
+    }),
+    getProjectManager: build.query<PmUserResponse[], "">({
+      query: () => {
+        const url = `api/user/getPmUsers`;
+        return url;
+      },
+    }),
+    updateTeamsConfigurationData: build.mutation<
       ApiResponse,
       {
         email: string;
-        teamId: number
+        teamId: number;
         projects: ListReq[];
         breaks: ListReq[];
       }
     >({
-      query: ({ email,teamId,  projects, breaks }) => {
+      query: ({ email, teamId, projects, breaks }) => {
         const requestBody = JSON.stringify({
           projects,
-          breaks
+          breaks,
         });
         return {
           url: `api/user/updateTeamsConfigurationData?email=${email}&teamId=${teamId}`,
@@ -864,13 +965,24 @@ updateTeamsConfigurationData: build.mutation<
         projects: ListResponse[];
         teams: ListResponse[];
         roles: ListResponse[];
-        selectedTimeOut: string
-        workingHours: string
-        isSignoutEnabled: boolean
-        isProfilePicModificationEnabled: boolean
+        selectedTimeOut: string;
+        workingHours: string;
+        isSignoutEnabled: boolean;
+        isProfilePicModificationEnabled: boolean;
       }
     >({
-      query: ({ email, reportingUsers, reportsTo, projects, teams, roles, selectedTimeOut, workingHours, isSignoutEnabled, isProfilePicModificationEnabled }) => {
+      query: ({
+        email,
+        reportingUsers,
+        reportsTo,
+        projects,
+        teams,
+        roles,
+        selectedTimeOut,
+        workingHours,
+        isSignoutEnabled,
+        isProfilePicModificationEnabled,
+      }) => {
         const requestBody = JSON.stringify({
           reportingUsers,
           reportsTo,
@@ -880,7 +992,7 @@ updateTeamsConfigurationData: build.mutation<
           selectedTimeOut,
           workingHours,
           isSignoutEnabled,
-          isProfilePicModificationEnabled
+          isProfilePicModificationEnabled,
         });
         return {
           url: `api/user/updateUserSettingsData?email=${email}`,
@@ -896,20 +1008,20 @@ updateTeamsConfigurationData: build.mutation<
     updateUserBasicSettingsData: build.mutation<
       ApiResponse,
       {
-        userId: number,
+        userId: number;
         email: string;
         username: string;
         designation: string;
         phone: string;
       }
     >({
-      query: ({ email, userId, username, designation, phone}) => {
+      query: ({ email, userId, username, designation, phone }) => {
         const requestBody = JSON.stringify({
           userId,
           email,
           username,
           designation,
-          phone
+          phone,
         });
         return {
           url: `api/user/updateUserBasicSettingsData?email=${email}`,
@@ -1011,5 +1123,8 @@ export const {
   useUpdateTeamsConfigurationDataMutation,
   useGetSelectedBreakTypeForTeamsQuery,
   useGetSelectedProjectForTeamsQuery,
-  useViewBreakDataQuery
+  useViewBreakDataQuery,
+  useUpdateSubTaskProgressMutation,
+  useGetSubTaskActivityQuery,
+  useGetTotalTaskTimeQuery,
 } = api;

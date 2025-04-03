@@ -9,7 +9,7 @@ import {
 import { MentionedUser } from "@/store/interfaces";
 import Link from "next/link";
 import React, { useState } from "react";
-import { Toaster, toast } from 'react-hot-toast';
+import { Toaster, toast } from "react-hot-toast";
 
 type Props = {
   email: string;
@@ -26,7 +26,7 @@ const Comments = ({ taskId, email, taskCode }: Props) => {
 
   const { data: users, isLoading: loading } = useGetMentionedUsersQuery(
     { name: currentQuery },
-    { skip: !currentQuery || isUserSelected } 
+    { skip: !currentQuery || isUserSelected }
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -36,14 +36,14 @@ const Comments = ({ taskId, email, taskCode }: Props) => {
     const atIndex = value.lastIndexOf("@");
 
     if (atIndex !== -1) {
-      const searchText = value.slice(atIndex + 1).trim(); 
+      const searchText = value.slice(atIndex + 1).trim();
 
       if (searchText.length > 0 && !isUserSelected) {
-        setCurrentQuery(searchText); 
+        setCurrentQuery(searchText);
         setShowDropdown(true);
       } else {
-        setCurrentQuery(""); 
-        setShowDropdown(false); 
+        setCurrentQuery("");
+        setShowDropdown(false);
       }
     } else {
       setCurrentQuery("");
@@ -62,12 +62,12 @@ const Comments = ({ taskId, email, taskCode }: Props) => {
         user.username.length + 1
       )}`;
 
-      setNewComment(newCommentValue); 
+      setNewComment(newCommentValue);
     }
 
-    setIsUserSelected(false); 
+    setIsUserSelected(false);
     setUserSuggestions([]);
-    setShowDropdown(false); 
+    setShowDropdown(false);
   };
 
   const handleBlur = () => {
@@ -150,38 +150,38 @@ const Comments = ({ taskId, email, taskCode }: Props) => {
                         if (currentText) {
                           result.push(currentText);
                         }
-                        currentText = ""; 
-                        isInsideBrackets = true; 
+                        currentText = "";
+                        isInsideBrackets = true;
                       } else if (char === "]" && isInsideBrackets) {
                         result.push(
                           <Link href={`/user?email=${email}`}>
-                          <span
-                            key={i}
-                            className="dark:text-white text-blue"
-                            style={{
-                              cursor: "pointer",
-                              textDecoration: "underline",
-                            }}
-                            onClick={(e) => {
-                              const content = (
-                                e.target as HTMLElement
-                              ).textContent?.slice(1, -1); 
-                              if (content) {
-                                sessionStorage.setItem("userName", content);
-                              }
-                            }}
-                          >
-                            {`[${mention}]`}
-                          </span>
+                            <span
+                              key={i}
+                              className="dark:text-white text-blue"
+                              style={{
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                              }}
+                              onClick={(e) => {
+                                const content = (
+                                  e.target as HTMLElement
+                                ).textContent?.slice(1, -1);
+                                if (content) {
+                                  sessionStorage.setItem("userName", content);
+                                }
+                              }}
+                            >
+                              {`[${mention}]`}
+                            </span>
                           </Link>
                         );
 
                         mention = "";
-                        isInsideBrackets = false; 
+                        isInsideBrackets = false;
                       } else if (isInsideBrackets) {
                         mention += char;
                       } else {
-                        currentText += char; 
+                        currentText += char;
                       }
                     }
                     if (currentText) {
@@ -221,19 +221,23 @@ const Comments = ({ taskId, email, taskCode }: Props) => {
                     <li
                       key={user.userId}
                       className="p-2 cursor-pointer hover:bg-gray-200"
-                      onClick={() => handleUserSelect(user)} 
+                      onClick={() => handleUserSelect(user)}
                     >
                       {user.username}
                     </li>
                   ))
                 ) : (
-                  <li className="p-2 text-gray-500">No users available</li> 
+                  <li className="p-2 text-gray-500">No users available</li>
                 )}
               </ul>
             </div>
           )}
 
-          {loading && <div><CircularLoading/></div>}
+          {loading && (
+            <div>
+              <CircularLoading />
+            </div>
+          )}
         </div>
         <button
           onClick={handleAddComment}

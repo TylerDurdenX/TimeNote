@@ -39,12 +39,12 @@ export default function AutocompleteTag({
   }, [selectedList, entityName]);
 
   const handleFieldChange = (_event: any, newValue: any[]) => {
-    setValue(newValue); 
+    setValue(newValue);
 
     // Update parent state (via setters)
     switch (entityName) {
       case "Project":
-        setSelectedProjects(newValue); 
+        setSelectedProjects(newValue);
         break;
       case "Team":
         setSelectedTeams(newValue);
@@ -53,7 +53,7 @@ export default function AutocompleteTag({
         setSelectedRoles(newValue);
         break;
       case "User":
-        setSelectedReportingUsers(newValue); 
+        setSelectedReportingUsers(newValue);
         break;
       default:
         break;
@@ -69,7 +69,7 @@ export default function AutocompleteTag({
         options={objectListLocal}
         onChange={handleFieldChange}
         getOptionLabel={(option) => option.title}
-        value={value} 
+        value={value}
         isOptionEqualToValue={(option, value) => option.title === value.title}
         renderInput={(params) => (
           <TextField

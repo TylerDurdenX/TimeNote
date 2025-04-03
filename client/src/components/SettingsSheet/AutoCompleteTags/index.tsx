@@ -53,7 +53,7 @@ export default function Tags({
           id="tags-outlined"
           options={authoritiesListLocal}
           getOptionLabel={(option) => option.name}
-          value={selectedAuthoritiesState} 
+          value={selectedAuthoritiesState}
           isOptionEqualToValue={(option, value) => option.code === value.code}
           onChange={handleAuthorityChange}
           PopperComponent={(props) => (

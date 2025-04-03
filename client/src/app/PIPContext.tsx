@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode } from "react";
 
 // Create a Context for PiP State
 interface PiPContextType {
@@ -34,7 +34,7 @@ export const PiPProvider: React.FC<PiPProviderProps> = ({ children }) => {
 export const usePiP = (): PiPContextType => {
   const context = useContext(PiPContext);
   if (!context) {
-    throw new Error('usePiP must be used within a PiPProvider');
+    throw new Error("usePiP must be used within a PiPProvider");
   }
   return context;
 };

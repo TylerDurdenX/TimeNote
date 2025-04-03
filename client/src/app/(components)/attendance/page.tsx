@@ -12,6 +12,7 @@ import CircularLoading from "@/components/Sidebar/loading";
 import { AttendancePCUser } from "./AttendancePCUser";
 import AttendanceTable from "./AttendanceTable";
 import { useGetAdminRoleQuery } from "@/store/api";
+import { useErrorContext } from "@/app/ErrorContext";
 
 const App: React.FC = () => {
 
@@ -48,7 +49,6 @@ if (userRolesList !== undefined && userRolesList !== null && userRolesList !== '
 const userEmail = useSearchParams().get('email')
 
 const {data, isLoading} = useGetAdminRoleQuery({email: userEmail!}, {refetchOnMountOrArgChange: true})
-
 
   return (
     <>

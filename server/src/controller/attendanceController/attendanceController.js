@@ -4,7 +4,7 @@ import AppError from "../../utils/appError.js";
 import { isEmpty } from "../../utils/genericMethods.js";
 import { prisma } from "../../server.js";
 import { startOfMonth, endOfMonth } from "date-fns";
-import moment from 'moment-timezone';
+import moment from "moment-timezone";
 
 export const updateAttendance = catchAsync(async (req, res, next) => {
   const { punchInTime, punchOutTime, email } = req.body;
@@ -22,17 +22,17 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
 
       const currentDateTime = new Date();
       currentDateTime.setHours(0, 0, 0, 0);
-      const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+      const todayDate = moment().tz("Asia/Kolkata").startOf("day");
       const indianTimeISOString = todayDate.toISOString();
 
       if (!isEmpty(punchInTime)) {
         const createdAttendance = await prisma.attendance.findFirst({
-          where:{
+          where: {
             userId: user.userId,
-            date: indianTimeISOString
-          }
-        })
-        if(isEmpty(createdAttendance)){
+            date: indianTimeISOString,
+          },
+        });
+        if (isEmpty(createdAttendance)) {
           const attendance = await prisma.attendance.create({
             data: {
               userId: user.userId,
@@ -42,7 +42,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
             },
           });
           return next(new SuccessResponse("Record Updated successfully", 200));
-        }else{
+        } else {
           return next(new SuccessResponse("Record Updated successfully", 200));
 
           //return next(new AppError('User Already Punched in',500))
@@ -60,46 +60,83 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
           },
         });
 
+        const taskStatusList = ["Closed", "To Do"];
+        const subTaskStatusList = ["Completed", "To Do"];
+
         const pendingTasks = await prisma.task.findMany({
           where: {
-            assignedUserId: user.userId
-          }
-        })
+            assignedUserId: user.userId,
+            status: {
+              notIn: taskStatusList,
+            },
+          },
+        });
 
-        let pendingTaskList = []
+        const pendingSubTasks = await prisma.subtask.findMany({
+          where: {
+            assignedUserId: user.userId,
+            status: {
+              notIn: subTaskStatusList,
+            },
+          },
+        });
+
+        let pendingTaskList = [];
+        let pendingSubTaskList = [];
 
         pendingTasks.map((task) => {
-          if((task.status === 'Work In Progress') || (task.status === 'Under Review') || (task.status === 'Completed') ){
+          if (
+            task.status === "Work In Progress" ||
+            task.status === "Under Review" ||
+            task.status === "Completed"
+          ) {
             const pendingTaskEntry = {
               taskname: task.title,
-              taskCode:task.code,
+              taskCode: task.code,
               taskDescription: task.description,
-              taskId: task.id
-            }
-            pendingTaskList.push(pendingTaskEntry)
+              taskId: task.id,
+            };
+            pendingTaskList.push(pendingTaskEntry);
           }
-        })
+        });
 
-        if(!isEmpty(pendingTaskList)){
+        pendingSubTasks.map((subTask) => {
+          if (
+            subTask.status === "Work In Progress" ||
+            subTask.status === "Under Review"
+          ) {
+            const pendingSubTaskEntry = {
+              subTaskname: subTask.title,
+              subTaskCode: subTask.code,
+              subTaskDescription: subTask.description,
+              subTaskId: subTask.id,
+            };
+            pendingSubTaskList.push(pendingSubTaskEntry);
+          }
+        });
+
+        if (!isEmpty(pendingTaskList)) {
           const result = {
             status: "Success",
             error: null,
             message: "Tasks",
-            stack: pendingTaskList,
-          }
+            stack: {
+              tasks: pendingTaskList,
+              subTasks: pendingSubTaskList,
+            },
+          };
 
-          res.status(200).json(result)
-        }else{
+          res.status(200).json(result);
+        } else {
           const result = {
             status: "Success",
             error: null,
             message: "Record Updated successfully",
             stack: null,
-          }
+          };
         }
 
         return next(new SuccessResponse("Record Updated successfully", 200));
-
       }
     });
   } catch (error) {
@@ -127,7 +164,7 @@ export const getAttendanceData = catchAsync(async (req, res, next) => {
 
         const currentDateTime = new Date();
         currentDateTime.setHours(0, 0, 0, 0);
-        const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+        const todayDate = moment().tz("Asia/Kolkata").startOf("day");
         const indianTimeISOString = todayDate.toISOString();
 
         const attendanceRecords = await prisma.attendance.findMany({
@@ -285,8 +322,10 @@ export const getAttendanceLCData = catchAsync(async (req, res, next) => {
     });
     const getPreviousWeekdays = () => {
       const weekdays = []; // To store the weekdays
-      const currentDate = new Date();
-      currentDate.setHours(0, 0, 0, 0); // Set time to 00:00:00 for comparison
+      // const currentDate = new Date();
+      // currentDate.setHours(0, 0, 0, 0); // Set time to 00:00:00 for comparison
+      const todayDate = moment().tz("Asia/Kolkata").startOf("day");
+      const currentDate = todayDate.toISOString();
 
       // Start from the current date and look backward
       let dateIterator = new Date(currentDate);
@@ -478,7 +517,7 @@ export const getUserAttendanceData = catchAsync(async (req, res, next) => {
 
       const currentDateTime = new Date();
       currentDateTime.setHours(0, 0, 0, 0);
-      const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+      const todayDate = moment().tz("Asia/Kolkata").startOf("day");
       const indianTimeISOString = todayDate.toISOString();
 
       let onTimeCount = 0;
@@ -612,358 +651,360 @@ export const getUserAttendanceData = catchAsync(async (req, res, next) => {
 });
 
 export const formatDate = (date) => {
-    // Get day, month, and year from the Date object
-    const day = String(date.getDate()).padStart(2, '0'); // Add leading zero if day < 10
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is zero-based, so we add 1
-    const year = date.getFullYear();
-  
-    // Return the formatted date as DD/MM/YYYY
-    return `${day}/${month}/${year}`;
-  };
+  // Get day, month, and year from the Date object
+  const day = String(date.getDate()).padStart(2, "0"); // Add leading zero if day < 10
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() is zero-based, so we add 1
+  const year = date.getFullYear();
 
-  export const formatTime = (date) => {
-    // Get hours, minutes, and seconds from the Date object
-    if(date === null){
-      return "00:00:00"
-    }
-    const hours = String(date.getHours()).padStart(2, '0'); // Ensure two-digit format for hours
-    const minutes = String(date.getMinutes()).padStart(2, '0'); // Ensure two-digit format for minutes
-    const seconds = String(date.getSeconds()).padStart(2, '0'); // Ensure two-digit format for seconds
-  
-    // Return the formatted time as HH:mm:ss
-    return `${hours}:${minutes}:${seconds}`;
-  };
+  // Return the formatted date as DD/MM/YYYY
+  return `${day}/${month}/${year}`;
+};
 
-  const timeToSeconds = (time) => {
-    const [hours, minutes, seconds] = time.split(':').map(Number);
+export const formatTime = (date) => {
+  // Get hours, minutes, and seconds from the Date object
+  if (date === null) {
+    return "00:00:00";
+  }
+  const hours = String(date.getHours()).padStart(2, "0"); // Ensure two-digit format for hours
+  const minutes = String(date.getMinutes()).padStart(2, "0"); // Ensure two-digit format for minutes
+  const seconds = String(date.getSeconds()).padStart(2, "0"); // Ensure two-digit format for seconds
+
+  // Return the formatted time as HH:mm:ss
+  return `${hours}:${minutes}:${seconds}`;
+};
+
+const timeToSeconds = (time) => {
+  const [hours, minutes, seconds] = time.split(":").map(Number);
+  return hours * 3600 + minutes * 60 + seconds;
+};
+
+const secondsToTime = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )}:${String(remainingSeconds).padStart(2, "0")}`;
+};
+
+const getTimeDifference = (startTime, endTime) => {
+  const startTimeInSeconds = timeToSeconds(startTime);
+  const endTimeInSeconds = timeToSeconds(endTime);
+
+  // Calculate the difference
+  const durationInSeconds = endTimeInSeconds - startTimeInSeconds;
+
+  // If the result is negative, it means the end time is earlier than the start time (next day scenario)
+  if (durationInSeconds < 0) {
+    return "End time cannot be earlier than start time.";
+  }
+
+  // Convert the duration back to HH:mm:ss format
+  return secondsToTime(durationInSeconds);
+};
+
+function timeDifference(time1, time2) {
+  // Helper function to parse time string into seconds
+  const parseTime = (time) => {
+    const [hours, minutes, seconds] = time.split(":").map(Number);
     return hours * 3600 + minutes * 60 + seconds;
   };
-  
-  const secondsToTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-  };
-  
-  const getTimeDifference = (startTime, endTime) => {
-    const startTimeInSeconds = timeToSeconds(startTime);
-    const endTimeInSeconds = timeToSeconds(endTime);
-  
-    // Calculate the difference
-    const durationInSeconds = endTimeInSeconds - startTimeInSeconds;
-  
-    // If the result is negative, it means the end time is earlier than the start time (next day scenario)
-    if (durationInSeconds < 0) {
-      return "End time cannot be earlier than start time.";
-    }
-  
-    // Convert the duration back to HH:mm:ss format
-    return secondsToTime(durationInSeconds);
-  };
 
-  function timeDifference(time1, time2) {
-    // Helper function to parse time string into seconds
-    const parseTime = (time) => {
-        const [hours, minutes, seconds] = time.split(':').map(Number);
-        return hours * 3600 + minutes * 60 + seconds;
-    };
+  // Convert times to seconds
+  const time1InSeconds = parseTime(time1);
+  const time2InSeconds = parseTime(time2);
 
-    // Convert times to seconds
-    const time1InSeconds = parseTime(time1);
-    const time2InSeconds = parseTime(time2);
+  // Calculate the difference in seconds
+  let diffInSeconds = time1InSeconds - time2InSeconds;
 
-    // Calculate the difference in seconds
-    let diffInSeconds = time1InSeconds - time2InSeconds;
+  // Handle negative difference (if time2 > time1, add 24 hours)
+  if (diffInSeconds < 0) {
+    diffInSeconds += 24 * 3600; // Add 24 hours in seconds
+  }
 
-    // Handle negative difference (if time2 > time1, add 24 hours)
-    if (diffInSeconds < 0) {
-        diffInSeconds += 24 * 3600; // Add 24 hours in seconds
-    }
+  // Convert the difference back to hours, minutes, seconds
+  const hours = Math.floor(diffInSeconds / 3600);
+  diffInSeconds %= 3600;
+  const minutes = Math.floor(diffInSeconds / 60);
+  const seconds = diffInSeconds % 60;
 
-    // Convert the difference back to hours, minutes, seconds
-    const hours = Math.floor(diffInSeconds / 3600);
-    diffInSeconds %= 3600;
-    const minutes = Math.floor(diffInSeconds / 60);
-    const seconds = diffInSeconds % 60;
-
-    // Format the result as hh:mm:ss
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  // Format the result as hh:mm:ss
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )}:${String(seconds).padStart(2, "0")}`;
 }
 
-  function convertToSeconds(time) {
-    if(time){
-      const [minutes, seconds] = time.split(':').map(Number); // Split and convert to integers
-      return minutes * 60 + seconds; // Return total seconds
-    }
-    return '0'
+function convertToSeconds(time) {
+  if (time) {
+    const [minutes, seconds] = time.split(":").map(Number); // Split and convert to integers
+    return minutes * 60 + seconds; // Return total seconds
   }
-  
-  // Function to convert total seconds into hh:mm:ss format
-  function convertToHHMMSS(seconds) {
-    const hours = Math.floor(seconds / 3600); // Calculate hours
-    const minutes = Math.floor((seconds % 3600) / 60); // Calculate minutes
-    const remainingSeconds = seconds % 60; // Calculate remaining seconds
-    
-    // Format as hh:mm:ss
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }
-  
-  // Function to sum times in mm:ss format
-  function addTimes(timeList) {
-    let totalSeconds = 0;
-  
-    // Convert each time to seconds and accumulate the total
-    timeList.forEach(time => {
-      totalSeconds += convertToSeconds(time);
-    });
-  
-    // Convert total seconds back to hh:mm:ss
-    return convertToHHMMSS(totalSeconds);
-  }
+  return "0";
+}
+
+// Function to convert total seconds into hh:mm:ss format
+function convertToHHMMSS(seconds) {
+  const hours = Math.floor(seconds / 3600); // Calculate hours
+  const minutes = Math.floor((seconds % 3600) / 60); // Calculate minutes
+  const remainingSeconds = seconds % 60; // Calculate remaining seconds
+
+  // Format as hh:mm:ss
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+}
+
+// Function to sum times in mm:ss format
+function addTimes(timeList) {
+  let totalSeconds = 0;
+
+  // Convert each time to seconds and accumulate the total
+  timeList.forEach((time) => {
+    totalSeconds += convertToSeconds(time);
+  });
+
+  // Convert total seconds back to hh:mm:ss
+  return convertToHHMMSS(totalSeconds);
+}
 
 export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
-    const { email, adminFlag, date } = req.query;
-  
-    try {
-      await prisma.$transaction(async (prisma) => {
-        const user = await prisma.user.findFirst({
-          where: {
-            email: email,
+  const { email, adminFlag, date } = req.query;
+
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email,
+        },
+      });
+
+      if (adminFlag === "true") {
+        let idList = [];
+
+        const userIdList = await prisma.user.findMany({
+          select: {
+            userId: true,
           },
         });
 
-        if(adminFlag === 'true'){
-          let idList =[]
+        userIdList.map((user) => {
+          idList.push(user.userId);
+        });
+        //const date = new Date(date); // Or you can pass any date string here
+        const todayDate = moment(date).tz("Asia/Kolkata").startOf("day");
+        const isoDate = todayDate.toISOString();
 
-          const userIdList = await prisma.user.findMany({
-            select: {
-              userId: true
-            }
-          })
-
-          userIdList.map((user) => {
-            idList.push(user.userId)
-          })
-          //const date = new Date(date); // Or you can pass any date string here
-          const todayDate = moment(date).tz('Asia/Kolkata').startOf('day');
-          const isoDate = todayDate.toISOString();
-
-          const attendanceRecords = await prisma.attendance.findMany({
-            where: {
-              date: isoDate, 
-              userId: {
-                in: idList
-              },
-            },include:{
-              breaks: true
-            }
-          });
-
-          let finalResult = []
-          let id = 1
-  
-          attendanceRecords.map((attendance) => {
-            let breakTimeList = [] 
-            attendance.breaks.forEach((breakTaken) => {
-              breakTimeList.push(breakTaken.breakTimeInMinutes);
-            })
-              let inTime = 'NA'
-              let outTime = 'NA'
-              if(attendance.punchInTime){
-                  inTime = formatTime(attendance.punchInTime)
-              }
-  
-              if(attendance.punchOutTime){
-                  outTime = formatTime(attendance.punchOutTime)
-              }
-              let duration = getTimeDifference(inTime, outTime)
-              if(duration.includes('N')){
-                duration = '00:00:00'
-              }
-              const breakTime = addTimes(breakTimeList)
-              const result = {
-                  id: id,
-                  userId: attendance.userId,
-                  date: formatDate(attendance.date),
-                  punchInTime: inTime,
-                  punchOutTime: outTime,
-                  username: attendance.username,
-                  duration: duration,
-                  totalIdleTime: breakTime,
-                  activeTime: timeDifference(duration, breakTime)
-              }
-              id= id+ 1
-              finalResult.push(result)
-          })
-    
-          return res.status(200).json(finalResult);
-
-        }else{
-          const startOfCurrentMonth = startOfMonth(new Date());
-          const endOfCurrentMonth = endOfMonth(new Date());
-    
-          const attendanceRecords = await prisma.attendance.findMany({
-            where: {
-              date: {
-                gte: startOfCurrentMonth, 
-                lte: endOfCurrentMonth,
-              },
-              userId: user.userId
-            },
-          });
-  
-          let finalResult = []
-          let id = 1
-  
-          attendanceRecords.map((attendance) => {
-              let inTime = 'NA'
-              let outTime = 'NA'
-              if(attendance.punchInTime){
-                  inTime = formatTime(attendance.punchInTime)
-              }
-  
-              if(attendance.punchOutTime){
-                  outTime = formatTime(attendance.punchOutTime)
-              }
-              const result = {
-                  id: id,
-                  userId: user.userId,
-                  date: formatDate(attendance.date),
-                  punchInTime: inTime,
-                  punchOutTime: outTime,
-                  duration: getTimeDifference(inTime, outTime)
-              }
-              id= id+ 1
-              finalResult.push(result)
-          })
-    
-          return res.status(200).json(finalResult);
-        }
-  
-      });
-    } catch (error) {
-      console.error(error);
-      return next(
-        new AppError("Error during getting user attendance PC data", 500)
-      );
-    }
-  });
-
-  export const getAdminRole = catchAsync(async (req, res, next) => {
-    const { email } = req.query;
-  
-    try {
-      await prisma.$transaction(async (prisma) => {
-        const user = await prisma.user.findFirst({
+        const attendanceRecords = await prisma.attendance.findMany({
           where: {
-            email: email,
-          },include: {
-            roles: true
-          }
+            date: isoDate,
+            userId: {
+              in: idList,
+            },
+          },
+          include: {
+            breaks: true,
+          },
         });
 
-        if(user.roles.some((role) => role.code === "ADMIN")){
+        let finalResult = [];
+        let id = 1;
+
+        attendanceRecords.map((attendance) => {
+          let breakTimeList = [];
+          attendance.breaks.forEach((breakTaken) => {
+            breakTimeList.push(breakTaken.breakTimeInMinutes);
+          });
+          let inTime = "NA";
+          let outTime = "NA";
+          if (attendance.punchInTime) {
+            inTime = formatTime(attendance.punchInTime);
+          }
+
+          if (attendance.punchOutTime) {
+            outTime = formatTime(attendance.punchOutTime);
+          }
+          let duration = getTimeDifference(inTime, outTime);
+          if (duration.includes("N")) {
+            duration = "00:00:00";
+          }
+          const breakTime = addTimes(breakTimeList);
           const result = {
-            admin: true
-          }
-          return res.status(200).json(result);
+            id: id,
+            userId: attendance.userId,
+            date: formatDate(attendance.date),
+            punchInTime: inTime,
+            punchOutTime: outTime,
+            username: attendance.username,
+            duration: duration,
+            totalIdleTime: breakTime,
+            activeTime: timeDifference(duration, breakTime),
+          };
+          id = id + 1;
+          finalResult.push(result);
+        });
 
-        }else{
+        return res.status(200).json(finalResult);
+      } else {
+        const startOfCurrentMonth = startOfMonth(new Date());
+        const endOfCurrentMonth = endOfMonth(new Date());
+
+        const attendanceRecords = await prisma.attendance.findMany({
+          where: {
+            date: {
+              gte: startOfCurrentMonth,
+              lte: endOfCurrentMonth,
+            },
+            userId: user.userId,
+          },
+        });
+
+        let finalResult = [];
+        let id = 1;
+
+        attendanceRecords.map((attendance) => {
+          let inTime = "NA";
+          let outTime = "NA";
+          if (attendance.punchInTime) {
+            inTime = formatTime(attendance.punchInTime);
+          }
+
+          if (attendance.punchOutTime) {
+            outTime = formatTime(attendance.punchOutTime);
+          }
           const result = {
-            admin: false
-          }
-          return res.status(200).json(result);
-        }
-  
-  
-      });
-    } catch (error) {
-      console.error(error);
-      return next(
-        new AppError("Error during getting user Admin role", 500)
-      );
-    }
-  });
+            id: id,
+            userId: user.userId,
+            date: formatDate(attendance.date),
+            punchInTime: inTime,
+            punchOutTime: outTime,
+            duration: getTimeDifference(inTime, outTime),
+          };
+          id = id + 1;
+          finalResult.push(result);
+        });
 
-  export const getBreakData = catchAsync(async (req, res, next) => {
-    const { email } = req.query;
-  
-    try {
-      await prisma.$transaction(async (prisma) => {
-
-        const user = await prisma.user.findFirst({
-          where:{
-            email:email
-          },include:{
-            teams: true
-          }
-        })
-
-        let teamsList = []
-
-        user.teams.map((team) => {
-          teamsList.push(team.name)
-        })
-
-        console.log(teamsList)
-
-        const breakTypeList = await prisma.team.findMany({
-          where:{
-            name: {
-              in: teamsList
-            }
-          },include:{
-            breakTypes: {
-              select:{
-                id: true,
-                breakName: true,
-                breakCode: true,
-                breakDescription: true,
-                breakTimeInMinutes: true
-              }
-            }
-          }
-        })
-
-        let resultList = []
-
-        const customObj =  {
-          "breakName": "Custom Break",
-          "breakCode": "CUSTOM_BREAK",
-          "breakDuration": "00"
+        return res.status(200).json(finalResult);
       }
+    });
+  } catch (error) {
+    console.error(error);
+    return next(
+      new AppError("Error during getting user attendance PC data", 500)
+    );
+  }
+});
 
-      resultList.push(customObj)
+export const getAdminRole = catchAsync(async (req, res, next) => {
+  const { email } = req.query;
 
-        breakTypeList.map((breakType) => {
-          breakType.breakTypes.map((breakObj) => {
-            const result = {
-              breakName: breakObj.breakName,
-              breakCode: breakObj.breakCode,
-              breakDuration: breakObj.breakTimeInMinutes
-            }
-            resultList.push(result)
-          })
-        })
-
-        const uniqueObjects = resultList.filter((value, index, self) => 
-          index === self.findIndex((t) => (
-            t.breakCode === value.breakCode
-          ))
-        );
-
-        const breaks = {
-          breaks : uniqueObjects
-        }
-
-        return res.status(200).json(breaks);
-       
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email,
+        },
+        include: {
+          roles: true,
+        },
       });
-    } catch (error) {
-      console.error(error);
-      return next(
-        new AppError("Error during getting user attendance PC data", 500)
+
+      if (user.roles.some((role) => role.code === "ADMIN")) {
+        const result = {
+          admin: true,
+        };
+        return res.status(200).json(result);
+      } else {
+        const result = {
+          admin: false,
+        };
+        return res.status(200).json(result);
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError("Error during getting user Admin role", 500));
+  }
+});
+
+export const getBreakData = catchAsync(async (req, res, next) => {
+  const { email } = req.query;
+
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email,
+        },
+        include: {
+          teams: true,
+        },
+      });
+
+      let teamsList = [];
+
+      user.teams.map((team) => {
+        teamsList.push(team.name);
+      });
+
+      console.log(teamsList);
+
+      const breakTypeList = await prisma.team.findMany({
+        where: {
+          name: {
+            in: teamsList,
+          },
+        },
+        include: {
+          breakTypes: {
+            select: {
+              id: true,
+              breakName: true,
+              breakCode: true,
+              breakDescription: true,
+              breakTimeInMinutes: true,
+            },
+          },
+        },
+      });
+
+      let resultList = [];
+
+      const customObj = {
+        breakName: "Custom Break",
+        breakCode: "CUSTOM_BREAK",
+        breakDuration: "00",
+      };
+
+      resultList.push(customObj);
+
+      breakTypeList.map((breakType) => {
+        breakType.breakTypes.map((breakObj) => {
+          const result = {
+            breakName: breakObj.breakName,
+            breakCode: breakObj.breakCode,
+            breakDuration: breakObj.breakTimeInMinutes,
+          };
+          resultList.push(result);
+        });
+      });
+
+      const uniqueObjects = resultList.filter(
+        (value, index, self) =>
+          index === self.findIndex((t) => t.breakCode === value.breakCode)
       );
-    }
-  });
+
+      const breaks = {
+        breaks: uniqueObjects,
+      };
+
+      return res.status(200).json(breaks);
+    });
+  } catch (error) {
+    console.error(error);
+    return next(
+      new AppError("Error during getting user attendance PC data", 500)
+    );
+  }
+});

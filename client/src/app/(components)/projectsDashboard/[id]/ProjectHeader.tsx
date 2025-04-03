@@ -1,4 +1,4 @@
-import { BookUser, Calendar, Clock, FilterX, Grid3X3, Table } from "lucide-react";
+import { Calendar, Clock, FilterX, Grid3X3, Table } from "lucide-react";
 import React, { useEffect } from "react";
 import { TaskSelectionFilter } from "./TaskSelectionFilter";
 import { Button } from "@mui/material";
@@ -37,14 +37,16 @@ const ProjectHeader = ({
   isTaskOrSubTask,
   setIsTaskOrSubTask,
 }: Props) => {
-
   const projectName = sessionStorage.getItem("projectName");
 
   useEffect(() => {
-    sessionStorage.setItem('activeTab', activeTab)
-  },[activeTab])
+    sessionStorage.setItem("activeTab", activeTab);
+  }, [activeTab]);
 
-  const {data} = useGetProjectHoursEstimationQuery({projectId}, {refetchOnMountOrArgChange: true})
+  const { data } = useGetProjectHoursEstimationQuery(
+    { projectId },
+    { refetchOnMountOrArgChange: true }
+  );
 
   return (
     <div className="px-4 xl:px-4">
@@ -58,14 +60,20 @@ const ProjectHeader = ({
       </div>
       <div className="p-2 flex justify-between items-center dark:border-gray-600 rounded-lg">
         <div className="w-full sm:w-[25%] h-8 p-1 bg-green-700 dark:bg-gray-800 rounded-lg flex flex-col items-center">
-          <span className="font-semibold text-lg text-center text-white">Estimated Hours : {data?.totalHours}</span>
+          <span className="font-semibold text-lg text-center text-white">
+            Estimated Hours : {data?.totalHours}
+          </span>
         </div>
         <div className="w-full sm:w-[25%] h-8 p-1 bg-[#3f51b5] dark:bg-gray-800 rounded-lg flex flex-col items-center">
-          <span className="font-semibold text-lg text-center text-white">Total Consumed Hours : {data?.consumedHours}</span>
+          <span className="font-semibold text-lg text-center text-white">
+            Total Consumed Hours : {data?.consumedHours}
+          </span>
         </div>
 
         <div className="w-full sm:w-[25%] h-8 p-1 bg-red-500 dark:bg-gray-800 rounded-lg flex flex-col items-center">
-          <span className="font-semibold text-lg text-center text-white">Total Hours Overrun : {data?.hoursOverrun}</span>
+          <span className="font-semibold text-lg text-center text-white">
+            Total Hours Overrun : {data?.hoursOverrun}
+          </span>
         </div>
       </div>
 

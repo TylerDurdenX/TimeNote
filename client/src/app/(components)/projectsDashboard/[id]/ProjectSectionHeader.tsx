@@ -7,8 +7,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Toaster, toast } from 'react-hot-toast';
-import { Input } from "@/components/ui/input"; 
+import { toast } from "react-hot-toast";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronLeft, FilePenLine, PlusSquare, SquarePen } from "lucide-react";
 import { useCreateSprintMutation } from "@/store/api";
@@ -17,8 +17,8 @@ type Props = {
   name: string;
   isSmallText?: boolean;
   buttonName: string;
-  email: string
-  projectId: number
+  email: string;
+  projectId: number;
 };
 
 const ProjectSectionHeader = ({
@@ -26,16 +26,15 @@ const ProjectSectionHeader = ({
   isSmallText = false,
   buttonName,
   email,
-  projectId
+  projectId,
 }: Props) => {
-
   const [isOpen, setIsOpen] = useState(false);
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [createSprint, { isLoading: isLoadingCreateSprint }] =
-      useCreateSprintMutation();
+    useCreateSprintMutation();
 
   const isFormValid = () => {
     return title && description && startDate && endDate;
@@ -50,21 +49,21 @@ const ProjectSectionHeader = ({
       startDate: startDate,
       endDate: endDate,
       email: email,
-      projectId: Number(projectId)
+      projectId: Number(projectId),
     };
     try {
       const response = await createSprint(formData);
       // @ts-ignore
-      if(response.error?.data.status === 'Fail'){
+      if (response.error?.data.status === "Fail") {
         // @ts-ignore
-        toast.error(response.error?.data.message)
-      }else{
+        toast.error(response.error?.data.message);
+      } else {
         toast.success(response.data?.message!);
       }
-      setTitle('')
-      setDescription('')
-      setStartDate('')
-      setEndDate('')
+      setTitle("");
+      setDescription("");
+      setStartDate("");
+      setEndDate("");
       setIsOpen(false);
     } catch (err: any) {
       toast.error(err.data.message.message);
@@ -74,17 +73,16 @@ const ProjectSectionHeader = ({
 
   return (
     <div className="flex relative w-full pl-4 h-[20px] mb-1 items-center justify-between">
-
       <h1
-          className={`${
-            isSmallText ? "text-lg" : "text-2xl"
-          } font-semibold dark:text-white flex items-center`}
-        >
-          <button onClick={() => window.history.back()}>
-          <ChevronLeft className="mr-5"/>
-          </button>
-          {name}
-        </h1>
+        className={`${
+          isSmallText ? "text-lg" : "text-2xl"
+        } font-semibold dark:text-white flex items-center`}
+      >
+        <button onClick={() => window.history.back()}>
+          <ChevronLeft className="mr-5" />
+        </button>
+        {name}
+      </h1>
       <div className="flex items-center space-x-4 mr-5 overflow-auto">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
@@ -108,34 +106,41 @@ const ProjectSectionHeader = ({
                 <form onSubmit={handleSubmit}>
                   <div className="grid gap-4 py-3">
                     <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                      <Label className="text-center">Sprint Title<span className="text-red-500 ml-1">*</span></Label>
+                      <Label className="text-center">
+                        Sprint Title<span className="text-red-500 ml-1">*</span>
+                      </Label>
                       <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className="col-span-7"
                         required
                       />
-                      <Label className="text-center">Description<span className="text-red-500 ml-1">*</span></Label>
+                      <Label className="text-center">
+                        Description<span className="text-red-500 ml-1">*</span>
+                      </Label>
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         className="col-span-7 shadow border"
                       />
-                      <Label className="text-center">Start Date<span className="text-red-500 ml-1">*</span></Label>
+                      <Label className="text-center">
+                        Start Date<span className="text-red-500 ml-1">*</span>
+                      </Label>
                       <Input
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
                         className="col-span-3"
                       />
-                      <Label className="text-center">End Date<span className="text-red-500 ml-1">*</span></Label>
+                      <Label className="text-center">
+                        End Date<span className="text-red-500 ml-1">*</span>
+                      </Label>
                       <Input
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
                         className="col-span-3"
                       />
-                      
                     </div>
                   </div>
                   <DialogFooter>
