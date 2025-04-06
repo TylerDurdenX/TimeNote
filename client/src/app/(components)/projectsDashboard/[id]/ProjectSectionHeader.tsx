@@ -10,7 +10,7 @@ import {
 import { toast } from "react-hot-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, FilePenLine, PlusSquare, SquarePen } from "lucide-react";
+import { ChevronLeft, PlusSquare } from "lucide-react";
 import { useCreateSprintMutation } from "@/store/api";
 
 type Props = {
@@ -146,7 +146,7 @@ const ProjectSectionHeader = ({
                   <DialogFooter>
                     <button
                       type="submit"
-                      className={`flex w-200px mt-7 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+                      className={`flex w-200px mt-7 justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
                                 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
                                   !isFormValid() || isLoadingCreateSprint
                                     ? "cursor-not-allowed opacity-50"

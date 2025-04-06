@@ -1003,7 +1003,7 @@ const SubTaskPage = () => {
           <div className="border-2 border-gray-300 p-4 rounded-lg dark:border-gray-600">
             <div className="space-y-4">
               <Tabs defaultValue="comments" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 w-[400px] h-[44px]">
+                <TabsList className="grid grid-cols-2 w-[400px] h-[44px]">
                   <TabsTrigger
                     value="comments"
                     className="font-semibold text-lg"

@@ -446,7 +446,7 @@ const TaskColumn = ({
                       defaultValue="alerts"
                       className="w-full  overflow-auto"
                     >
-                      <TabsList className="grid w-full grid-cols-2 w-[400px] h-[46px]  overflow-auto">
+                      <TabsList className="grid  grid-cols-2 w-[400px] h-[46px]  overflow-auto">
                         <TabsTrigger
                           value="Manual"
                           className="font-semibold text-lg"
@@ -638,7 +638,7 @@ const TaskColumn = ({
                               <DialogFooter>
                                 <button
                                   type="submit"
-                                  className={`flex w-200px mt-4 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+                                  className={`flex w-200px mt-4 justify-centerrounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
                                 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
                                   !isFormValid() || isLoadingCreateTask
                                     ? "cursor-not-allowed opacity-50"
@@ -990,7 +990,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
             {formattedStartDate && <span>{formattedStartDate} - </span>}
             {formattedDueDate && <span>{formattedDueDate}</span>}
           </div>
-          <p className="text-sm text-gray-600 dark:text-neutral-500 line-clamp-5 dark:text-white">
+          <p className="text-sm text-gray-600 line-clamp-5 dark:text-white">
             {task.description}
           </p>
 
@@ -1104,7 +1104,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                   )}
                 </DialogContent>
               </Dialog>
-              <span className="ml-1 text-sm dark:text-neutral-400 dark:text-white">
+              <span className="ml-1 text-sm dark:text-white">
                 {numberOfComments}
               </span>
             </div>

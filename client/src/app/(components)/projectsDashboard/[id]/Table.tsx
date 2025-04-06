@@ -289,7 +289,9 @@ const TableView = ({
 
   const getRowClassName = (params: GridRowParams) => {
     if (params.row.hoursOverrun !== 0) {
-      return "bg-red-100"; // Add the custom class if hoursOverrun > 0
+      if (isTaskOrSubTask === "Task") {
+        return "bg-red-100";
+      }
     }
     return ""; // Return empty string for default style
   };
