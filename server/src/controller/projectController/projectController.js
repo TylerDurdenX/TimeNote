@@ -292,6 +292,14 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             } = task.assignee;
             task.assignee = newAssignee;
 
+            if (task) {
+              if (task.assignee) {
+                if (task.assignee.profilePicture) {
+                  task.assignee.profilePicture.base64 = "abc";
+                }
+              }
+            }
+
             const messageCount = task.comments.length;
 
             task.comments = messageCount;

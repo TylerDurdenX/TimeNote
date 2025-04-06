@@ -19,7 +19,7 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "3mb" }));
+app.use(express.json({ limit: "10mb" }));
 
 app.use("/api/user", router);
 app.get("/generate-token", generateToken);
