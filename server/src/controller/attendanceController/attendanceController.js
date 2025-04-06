@@ -139,7 +139,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
           }
         });
 
-        if (!isEmpty(pendingTaskList)) {
+        if (!isEmpty(pendingTaskList) || !isEmpty(pendingSubTaskList)) {
           const result = {
             status: "Success",
             error: null,
@@ -156,11 +156,14 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
             status: "Success",
             error: null,
             message: "Record Updated successfully",
-            stack: null,
+            stack: {
+              tasks: null,
+              subTasks: null,
+            },
           };
-        }
 
-        return next(new SuccessResponse("Record Updated successfully", 200));
+          res.status(200).json(result);
+        }
       }
     });
   } catch (error) {
