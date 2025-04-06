@@ -379,11 +379,13 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
           res.json(result);
         } else {
           let whereCondition = {
-            projectId: Number(id),
+            task: {
+              projectId: Number(id),
+            },
           };
 
           if (!isEmpty(sprint)) {
-            whereCondition.sprintId = Number(sprint);
+            whereCondition.task.sprintId = Number(sprint);
           }
 
           let assignedUserId;
@@ -403,7 +405,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             whereCondition.priority = priority;
           }
 
-          const tasks = await prisma.task.findMany({
+          const tasks = await prisma.subtask.findMany({
             where: whereCondition,
             include: {
               author: {
@@ -421,55 +423,34 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
                 },
               },
               comments: true,
-              subTasks: {
-                include: {
-                  assignee: {
-                    include: {
-                      profilePicture: {
-                        select: {
-                          base64: true,
-                        },
-                      },
-                    },
-                  },
-                  author: {
-                    select: {
-                      username: true,
-                    },
-                  },
-                  comments: true,
-                },
-              },
+              task: true,
             },
           });
 
           let totalTasks = 0;
 
-          const totalTask = await prisma.task.findMany({
-            where: whereCondition,
-            include: {
-              subTasks: true,
-            },
+          // const totalTask = await prisma.subTask.findMany({
+          //   where: whereCondition,
+          // });
+
+          tasks.map((task) => {
+            totalTasks += task.length;
           });
 
-          totalTask.map((task) => {
-            totalTasks += task.subTasks.length;
-          });
+          // const subTaskList = tasks.map((item) => item.subTasks);
 
-          const subTaskList = tasks.map((item) => item.subTasks);
-
-          const flattenedList = subTaskList
-            .filter((list) => list.length > 0)
-            .flat();
+          // const flattenedList = subTaskList
+          //   .filter((list) => list.length > 0)
+          //   .flat();
           let filteredList;
           if (assignedTo !== "X") {
-            filteredList = flattenedList.filter(
+            filteredList = tasks.filter(
               (item) => item.assignee.email === email
             );
           } else if (assignedTo !== "") {
-            filteredList = flattenedList;
+            filteredList = tasks;
           } else {
-            filteredList = flattenedList;
+            filteredList = tasks;
           }
 
           filteredList.map((subTask) => {
