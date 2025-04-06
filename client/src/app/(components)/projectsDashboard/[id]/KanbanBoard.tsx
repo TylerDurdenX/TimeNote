@@ -6,6 +6,7 @@ import {
   useGetProjectTasksQuery,
   useGetProjectUsersQuery,
   useGetSprintQuery,
+  useUpdateSubTaskStatusMutation,
   useUpdateTaskAssigneeMutation,
   useUpdateTaskStatusMutation,
 } from "../../../../store/api";
@@ -13,7 +14,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Task as TaskType } from "@/store/interfaces";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +38,7 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DialogTitle, SnackbarOrigin } from "@mui/material";
+import { DialogTitle } from "@mui/material";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -95,7 +96,6 @@ const BoardView = ({
 }: BoardProps) => {
   const userEmail = useSearchParams().get("email");
   const [page, setPage] = useState(1);
-  const [loadMoreCunt, setLoadMoreCount] = useState(0);
   const [tasks, setTasks] = useState<any[]>([]);
 
   localStorage.removeItem("persist:root");
@@ -115,7 +115,7 @@ const BoardView = ({
       isTaskOrSubTask,
       email: userEmail!,
       page: page,
-      limit: 12,
+      limit: 9999999,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -149,6 +149,7 @@ const BoardView = ({
   }, [sprint, assignedTo, priority, isTaskOrSubTask]);
 
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
+  const [updateSubTaskStatus] = useUpdateSubTaskStatusMutation();
 
   // Object.defineProperty(window, 'localStorage', {
   //   value: {
@@ -160,9 +161,9 @@ const BoardView = ({
   //   writable: false
   // });
 
-  const moveTask = async (taskId: number, toStatus: string) => {
+  const moveTask = async (taskId: number, toStatus: string, item: any) => {
     try {
-      if (isTaskOrSubTask === "Task") {
+      if (sessionStorage.getItem("isTask") === "1") {
         const response = await updateTaskStatus({
           taskId,
           status: toStatus,
@@ -180,7 +181,23 @@ const BoardView = ({
           toast.success(response.data?.message!);
         }
       } else {
-        toast.error("Please open the subTask Page for updating SubTask status");
+        const obj = {
+          subTaskId: taskId,
+          subTaskStatus: toStatus,
+          email: email!,
+        };
+        const response = await updateSubTaskStatus(obj);
+        if (
+          // @ts-ignore
+          response.error?.data.status === "Error" ||
+          // @ts-ignore
+          response.error?.data.status === "Fail"
+        ) {
+          // @ts-ignore
+          toast.error(response.error?.data.message);
+        } else {
+          toast.success(response.data?.message!);
+        }
       }
     } catch (err) {
       toast.error("Some Error occurred, please try again later");
@@ -243,7 +260,7 @@ const BoardView = ({
 type TaskColumnProps = {
   status: string;
   tasks: TaskType[];
-  moveTask: (taskId: number, toStatus: string) => void;
+  moveTask: (taskId: number, toStatus: string, item: any) => void;
   id: string;
   email: string;
   projectId: string;
@@ -259,9 +276,12 @@ const TaskColumn = ({
   projectId,
   isTaskOrSubTask,
 }: TaskColumnProps) => {
+  localStorage.removeItem("persist:root");
+  localStorage.removeItem("ally-supports-cache");
+
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "task",
-    drop: (item: { id: number }) => moveTask(item.id, status),
+    drop: (item: { id: number }) => moveTask(item.id, status, item),
     collect: (monitor: any) => ({
       isOver: !!monitor.isOver(),
     }),
@@ -303,9 +323,6 @@ const TaskColumn = ({
       assignedUserId
     );
   };
-
-  localStorage.removeItem("persist:root");
-  localStorage.removeItem("ally-supports-cache");
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -357,7 +374,7 @@ const TaskColumn = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const regex = /^[a-zA-Z0-9_]*$/; // Only alphanumeric characters and underscore
+    const regex = /^[a-zA-Z0-9_\s]*$/;
 
     // Check if the value matches the regex
     if (regex.test(value)) {

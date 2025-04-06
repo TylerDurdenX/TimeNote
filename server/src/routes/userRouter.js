@@ -76,6 +76,7 @@ import {
   updateProjectStatus,
   updateSubTask,
   updateSubTaskProgress,
+  updateSubTaskStatus,
   updateTask,
   updateTaskAssignee,
   updateTaskProgress,
@@ -130,6 +131,8 @@ import {
   deleteBreak,
   getBreaksData,
   getBreaksList,
+  idleTimeoutUser,
+  resumeIdleTimeout,
   updateBreak,
   updateBreakTime,
 } from "../controller/breakController/breakController.js";
@@ -280,6 +283,7 @@ router.get(
 );
 router.get("/viewBreaksheetData", isAuthenticated, getBreaksData);
 router.get("/getTotalTaskTime", getTotalTaskTime);
+router.patch("/updateSubTaskStatus", updateSubTaskStatus);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);
@@ -293,5 +297,7 @@ router.post("/signUpTP", authenticateThirdParty, signupTP);
 router.post("/createAuthority", authenticateThirdParty, createAuthority);
 router.get("/takeBreak", authenticateThirdParty, getBreakData);
 router.post("/updateBreakTime", authenticateThirdParty, updateBreakTime);
+router.post("/idleTimeOut", authenticateThirdParty, idleTimeoutUser);
+router.post("/resumeIdleTimeOut", authenticateThirdParty, resumeIdleTimeout);
 
 export default router;

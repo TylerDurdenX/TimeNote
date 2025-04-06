@@ -52,6 +52,7 @@ import {
   UpdateProjectData,
   UpdateSprintObject,
   UpdateSubTaskData,
+  UpdateSubTaskStatusData,
   UpdateTaskData,
   UploadAttachment,
   UploadProjectAttachment,
@@ -532,6 +533,14 @@ export const api = createApi({
         body: body,
       }),
       invalidatesTags: ["SubTask", "SubTaskActivity"],
+    }),
+    updateSubTaskStatus: build.mutation<ApiResponse, UpdateSubTaskStatusData>({
+      query: (body) => ({
+        url: `api/user/updateSubTaskStatus`,
+        method: "PATCH",
+        body: body,
+      }),
+      invalidatesTags: ["Tasks"],
     }),
     uploadAttachment: build.mutation<ApiResponse, UploadAttachment>({
       query: (body) => ({
@@ -1127,4 +1136,5 @@ export const {
   useUpdateSubTaskProgressMutation,
   useGetSubTaskActivityQuery,
   useGetTotalTaskTimeQuery,
+  useUpdateSubTaskStatusMutation,
 } = api;

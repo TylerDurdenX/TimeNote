@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { setAuthUser } from "@/store/authSlice";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export const getInitials = (fullName: string): string => {
   const nameParts = fullName.split(" ");
@@ -54,6 +55,7 @@ export function NavUser({
     setIsActive(false); // Reset active state
   };
 
+  const userEmail = useSearchParams().get("email");
   const { isMobile } = useSidebar();
   const dispatch = useDispatch();
   const LogOut = async () => {
@@ -61,7 +63,7 @@ export function NavUser({
 
     try {
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/logout`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/logout?email=${userEmail}`
       );
       dispatch(setAuthUser(null));
       window.location.href = "/";

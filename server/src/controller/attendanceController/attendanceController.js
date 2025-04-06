@@ -26,6 +26,16 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
       const indianTimeISOString = todayDate.toISOString();
 
       if (!isEmpty(punchInTime)) {
+        let idleTimeOut = 0;
+        if (user.idleTimeOut !== null) {
+          const numbers = user.idleTimeOut.match(/\d+/g);
+          if (numbers !== null) {
+            idleTimeOut = numbers[0];
+          }
+        } else {
+          return next(new AppError("configuration not done"));
+        }
+
         const createdAttendance = await prisma.attendance.findFirst({
           where: {
             userId: user.userId,
@@ -41,11 +51,25 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
               date: indianTimeISOString,
             },
           });
-          return next(new SuccessResponse("Record Updated successfully", 200));
-        } else {
-          return next(new SuccessResponse("Record Updated successfully", 200));
 
-          //return next(new AppError('User Already Punched in',500))
+          const result = {
+            status: "Success",
+            error: "",
+            message: "Record Updated successfully",
+            stack: "",
+            idleTimeout: idleTimeOut,
+          };
+
+          return res.status(200).json(result);
+        } else {
+          const result = {
+            status: "Success",
+            error: "",
+            message: "Record Updated successfully",
+            stack: "",
+            idleTimeout: idleTimeOut,
+          };
+          return res.status(200).json(result);
         }
       } else {
         const attendance = await prisma.attendance.update({
@@ -706,6 +730,9 @@ const getTimeDifference = (startTime, endTime) => {
 
 function timeDifference(time1, time2) {
   // Helper function to parse time string into seconds
+  if (time1 === "00:00:00") {
+    return "00:00:00";
+  }
   const parseTime = (time) => {
     const [hours, minutes, seconds] = time.split(":").map(Number);
     return hours * 3600 + minutes * 60 + seconds;

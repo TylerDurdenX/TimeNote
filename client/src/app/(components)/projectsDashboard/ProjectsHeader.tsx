@@ -57,6 +57,16 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
     );
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow backspace key (keyCode 8) and prevent all other non-alphanumeric keys
+    if (e.key !== "Backspace" && !/^[A-Za-z0-9]$/.test(e.key)) {
+      e.preventDefault(); // Prevent the invalid key from being typed
+      toast.error(
+        "Only alphabets and numbers are allowed, no spaces or special characters."
+      );
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -162,13 +172,16 @@ const ProjectsHeader = ({ name, isSmallText = false, buttonName }: Props) => {
                         onChange={(e) => {
                           const newValue = e.target.value;
 
-                          // Check if the new value contains '/'
-                          if (newValue.includes("/")) {
-                            toast.error("/ not allowed");
+                          // Set the new value if it's valid
+                          if (/^[A-Za-z0-9]*$/.test(newValue)) {
+                            setProjectCode(newValue);
                           } else {
-                            setProjectCode(newValue); // Set the new value if no '/' is present
+                            toast.error(
+                              "Only alphabets and numbers are allowed, no spaces or special characters."
+                            );
                           }
                         }}
+                        onKeyDown={handleKeyDown} // Listen to keydown to allow/disallow characters
                         className="col-span-7"
                         required
                       />

@@ -14,6 +14,7 @@ import { FileDown } from "lucide-react";
 import CircularLoading from "@/components/Sidebar/loading";
 import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
+import SubTaskPage from "./(SubTask)/SubTaskPage";
 
 type Props = {
   projectId: string;
@@ -198,11 +199,19 @@ const TableView = ({
                 </DialogTrigger>
               </div>
               <DialogContent className="max-w-[85vw] mt-5 mb-5 overflow-y-auto">
-                <TaskPage
-                  taskId={params.row.id}
-                  email={userEmail!}
-                  projectId={params.row.projectId}
-                />
+                {isTaskOrSubTask === "Task" ? (
+                  <TaskPage
+                    taskId={params.row.id}
+                    email={userEmail!}
+                    projectId={params.row.projectId}
+                  />
+                ) : (
+                  <SubTaskPage
+                    subTaskId={params.row.id}
+                    email={userEmail!}
+                    projectId={params.row.projectId}
+                  />
+                )}
               </DialogContent>
             </Dialog>
           </div>
@@ -279,7 +288,7 @@ const TableView = ({
   let isDarkMode = theme === "dark";
 
   const getRowClassName = (params: GridRowParams) => {
-    if (params.row.hoursOverrun > 0) {
+    if (params.row.hoursOverrun !== 0) {
       return "bg-red-100"; // Add the custom class if hoursOverrun > 0
     }
     return ""; // Return empty string for default style

@@ -129,6 +129,7 @@ export interface UpdateProjectData {
   projectDescription: string;
   startDate: string;
   dueDate: string;
+  projectName: string;
 }
 
 export interface ProjectListResponse {
@@ -592,6 +593,7 @@ export interface UpdateTaskData {
   startDate: string;
   dueDate: string;
   email: string;
+  taskName: string;
 }
 
 export interface UpdateSubTaskData {
@@ -600,5 +602,15 @@ export interface UpdateSubTaskData {
   subTaskAssignee: string | undefined;
   subTaskDescription: string;
   editedConsumedHours: string;
+  taskName: string;
+  startDate: string;
+  dueDate: string;
+  email: string;
+}
+
+export interface UpdateSubTaskStatusData {
+  subTaskId: number;
+  subTaskStatus: string;
+  assignToMe?: boolean;
   email: string;
 }

@@ -44,7 +44,7 @@ type Props = {
 
 export function DualChart({ onTimeList, lateArrivalList }: Props) {
   const combinedList = onTimeList?.map((entry1, index) => {
-    const entry2 = lateArrivalList[index];
+    const entry2 = lateArrivalList ? lateArrivalList[index] : 0;
     return {
       date: entry1.date,
       onTime: entry1.count,

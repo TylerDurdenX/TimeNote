@@ -367,6 +367,7 @@ const TaskPageFull = () => {
   }, [isProgressStarted, task]);
 
   const [isEditable, setIsEditable] = useState(false);
+  const [isTaskNameEditable, setIsTaskNameEditable] = useState(false);
   const [isConsumedHoursEditable, setIsConsumedHoursEditable] = useState(false);
   const [editedText, setEditedText] = useState(task?.points);
   const [editedConsumedHours, setEditedConsumedHours] = useState(
@@ -380,6 +381,8 @@ const TaskPageFull = () => {
   const [assignee, setAssignee] = useState(task?.assignee?.username);
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(true);
+  const [taskName, setTaskName] = useState(task?.title);
+  const [initailTaskName, setInitialTaskName] = useState(task?.title);
   const [description, setDescription] = useState(task?.description || "");
   const roles = sessionStorage.getItem("userRoles") || "";
   const [PMUser, setPMUser] = useState(
@@ -483,10 +486,12 @@ const TaskPageFull = () => {
     if (task) {
       setDescription(task.description || "");
       setTaskStatus(task.status || "");
+      setInitialStatus(task.status || "");
       setAssignee(task?.assignee?.username || "");
       setEditedText(task?.points);
       setInitialAssignee(task?.assignee?.username || "");
       setInitialDescription(task.description || "");
+      setTaskName(task.title);
       const formattedStartDate = new Date(task.startDate!)
         .toISOString()
         .split("T")[0];
@@ -498,6 +503,7 @@ const TaskPageFull = () => {
       setInitialDueDate(task.dueDate || "");
       setInitialStartDate(task.startDate || "");
       setInitialPoints(task.points || "");
+      setInitialTaskName(task.title);
       setSubTasks(task?.subTasks || []);
       setInitialStatus(task?.status || "");
       setIsSaveButtonEnabled(false);
@@ -514,7 +520,8 @@ const TaskPageFull = () => {
       editedText !== initialPoints ||
       editedConsumedHours !== initialEditedConsumedHours ||
       startDate !== initialStartDate ||
-      dueDate !== initialDueDate;
+      dueDate !== initialDueDate ||
+      taskName !== initailTaskName;
 
     setIsSaveButtonEnabled(isChanged);
   }, [
@@ -523,6 +530,8 @@ const TaskPageFull = () => {
     editedText,
     taskStatus,
     startDate,
+    taskName,
+    initailTaskName,
     dueDate,
     initialStartDate,
     initialDueDate,
@@ -536,6 +545,10 @@ const TaskPageFull = () => {
 
   const handleEditClick = () => {
     setIsEditable(true);
+  };
+
+  const handleEditTaskNameClick = () => {
+    setIsTaskNameEditable(true);
   };
 
   const handleEditConsumedHoursClick = () => {
@@ -559,9 +572,11 @@ const TaskPageFull = () => {
     setIsHovered(true);
     setIsConsumedHoursEditable(false);
     setIsDateEditable(false);
+    setIsTaskNameEditable(false);
   };
 
   const handleAssigneeBlur = () => {
+    console.log(assignee);
     setIsAssigneeEditable(false);
     setIsAssigneeHovered(true);
   };
@@ -593,6 +608,7 @@ const TaskPageFull = () => {
       startDate: startDate!,
       dueDate: dueDate!,
       email: email!,
+      taskName: taskName!,
     };
     try {
       const response = await updateTask(updateTaskData);
@@ -830,8 +846,7 @@ const TaskPageFull = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const regex = /^[a-zA-Z0-9_]*$/; // Only alphanumeric characters and underscore
-
+    const regex = /^[a-zA-Z0-9_\s]*$/;
     // Check if the value matches the regex
     if (regex.test(value)) {
       setSubTaskName(value); // Update the state only if valid
@@ -888,9 +903,33 @@ const TaskPageFull = () => {
           <button onClick={() => window.history.back()}>
             <ChevronLeft className="mr-5" />
           </button>
-          <h1 className="text-3xl font-semibold">
-            {task?.title} - {task?.code}
-          </h1>
+          {isTaskNameEditable ? (
+            <input
+              type="text"
+              value={taskName}
+              onChange={(e) => setTaskName(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              className="border p-1 rounded w-[60vh]"
+            />
+          ) : (
+            <div className="flex items-center">
+              <div className="flex items-center">
+                <h1 className="text-3xl font-semibold">
+                  {taskName} - {task?.code}
+                </h1>
+
+                <Pencil
+                  size={16}
+                  className={`ml-2 cursor-pointer ${
+                    isHovered ? "opacity-100" : "opacity-0"
+                  } transition-opacity`}
+                  onClick={handleEditTaskNameClick}
+                />
+              </div>
+            </div>
+          )}
           <div className="flex space-x-4 ml-auto">
             {task?.status! === "Closed" ? (
               ""
@@ -1136,6 +1175,9 @@ const TaskPageFull = () => {
                 autoFocus
                 className="border p-1 rounded w-40"
               >
+                <option value="" defaultChecked={true}>
+                  Select
+                </option>
                 {users?.map((user) => (
                   <option key={user.userId} value={user.username}>
                     {user.username}
@@ -1448,7 +1490,7 @@ const TaskPageFull = () => {
                       <DialogFooter>
                         <button
                           type="submit"
-                          className={`flex w-200px mt-4 justify-center bg-blue-primary rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+                          className={`flex w-200px mt-4 justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
                                 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
                                   !isFormValid() || isLoadingCreateSubTask
                                     ? "cursor-not-allowed opacity-50"
@@ -1507,7 +1549,7 @@ const TaskPageFull = () => {
       </div>
       <div className="space-y-4">
         <Tabs defaultValue="alerts" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 w-[400px] h-[44px]">
+          <TabsList className="grid  grid-cols-2 w-[400px] h-[44px]">
             <TabsTrigger value="alerts" className="font-semibold text-lg">
               Task History
             </TabsTrigger>

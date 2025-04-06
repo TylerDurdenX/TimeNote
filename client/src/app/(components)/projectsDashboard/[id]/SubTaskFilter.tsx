@@ -42,6 +42,10 @@ export function SubTaskFilter({
     },
   ];
 
+  React.useEffect(() => {
+    sessionStorage.setItem("isTask", "1");
+  }, []);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -69,6 +73,10 @@ export function SubTaskFilter({
                   value={framework.value}
                   onSelect={(currentValue) => {
                     setIsTaskOrSubTask(currentValue);
+                    sessionStorage.setItem(
+                      "isTask",
+                      currentValue === "Task" ? "1" : "0"
+                    );
                     if (currentValue === "SubTask") {
                       setPriority("");
                     }

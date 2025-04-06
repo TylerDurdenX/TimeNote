@@ -590,8 +590,7 @@ const TaskPage = ({ taskId, email, projectId }: Props) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const regex = /^[a-zA-Z0-9_]*$/; // Only alphanumeric characters and underscore
-
+    const regex = /^[a-zA-Z0-9_\s]*$/;
     // Check if the value matches the regex
     if (regex.test(value)) {
       setSubTaskName(value); // Update the state only if valid
@@ -1018,7 +1017,7 @@ const TaskPage = ({ taskId, email, projectId }: Props) => {
                       <DialogFooter>
                         <button
                           type="submit"
-                          className={`flex w-200px mt-4 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+                          className={`flex w-200px mt-4 justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
                                 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
                                   !isFormValid() || isLoadingCreateSubTask
                                     ? "cursor-not-allowed opacity-50"

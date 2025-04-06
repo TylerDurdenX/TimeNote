@@ -205,7 +205,15 @@ const SubTaskPage = () => {
   const [subTaskStatus, setSubTaskStatus] = useState(task?.status);
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(true);
+  const [isTaskNameEditable, setIsTaskNameEditable] = useState(false);
   const [isStatusHovered, setIsStatusHovered] = useState(true);
+  const [isDateEditable, setIsDateEditable] = useState(false);
+  const [startDate, setStartDate] = useState(task?.startDate);
+  const [dueDate, setDueDate] = useState(task?.dueDate);
+  const [initialStartDate, setInitialStartDate] = useState(task?.startDate);
+  const [initialDueDate, setInitialDueDate] = useState(task?.dueDate);
+  const [taskName, setTaskName] = useState(task?.title);
+  const [initailTaskName, setInitialTaskName] = useState(task?.title);
   const [subTaskDescription, setSubTaskDescription] = useState(
     task?.description || ""
   );
@@ -230,11 +238,22 @@ const SubTaskPage = () => {
     if (task) {
       setSubTaskDescription(task.description || "");
       setSubTaskAssignee(task?.assignee?.username || "");
+      setTaskName(task.title);
+      setInitialTaskName(task.title);
       setInitialAssignee(task?.assignee?.username || "");
       setInitialDescription(task.description || "");
       setSubTaskStatus(task.status || "");
       setInitialStatus(task.status || "");
-      setIsSaveButtonEnabled(false);
+      const formattedStartDate = new Date(task.startDate!)
+        .toISOString()
+        .split("T")[0];
+      setStartDate(formattedStartDate);
+      const formattedDueDate = new Date(task.dueDate!)
+        .toISOString()
+        .split("T")[0];
+      setInitialDueDate(task.dueDate || "");
+      setInitialStartDate(task.startDate || "");
+      setDueDate(formattedDueDate);
     }
   }, [task]);
 
@@ -243,7 +262,10 @@ const SubTaskPage = () => {
       subTaskDescription !== initialDescription ||
       subTaskAssignee !== initialAssignee ||
       subTaskStatus !== initialStatus ||
-      editedConsumedHours !== initialEditedConsumedHours;
+      editedConsumedHours !== initialEditedConsumedHours ||
+      startDate !== initialStartDate ||
+      dueDate !== initialDueDate;
+
     setIsSaveButtonEnabled(isChanged);
   }, [
     subTaskDescription,
@@ -271,6 +293,16 @@ const SubTaskPage = () => {
   const handleBlur = () => {
     setIsEditableStatus(false);
     setIsHovered(true);
+    setIsDateEditable(false);
+    setIsTaskNameEditable(false);
+  };
+
+  const handleDateEditClick = () => {
+    setIsDateEditable(true);
+  };
+
+  const handleEditTaskNameClick = () => {
+    setIsTaskNameEditable(true);
   };
 
   const handleAssigneeBlur = () => {
@@ -404,7 +436,10 @@ const SubTaskPage = () => {
       subTaskAssignee: subTaskAssignee,
       subTaskDescription: subTaskDescription,
       editedConsumedHours: editedConsumedHours,
+      startDate: startDate!,
+      dueDate: dueDate!,
       email: userEmail!,
+      taskName: taskName!,
     };
     try {
       const response = await updateSubTask(updateTaskData);
@@ -601,9 +636,33 @@ const SubTaskPage = () => {
           <button onClick={() => window.history.back()}>
             <ChevronLeft className="mr-5" />
           </button>
-          <h1 className="text-3xl font-semibold">
-            {task?.title} - {task?.code}
-          </h1>
+          {isTaskNameEditable ? (
+            <input
+              type="text"
+              value={taskName}
+              onChange={(e) => setTaskName(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              className="border p-1 rounded w-[60vh]"
+            />
+          ) : (
+            <div className="flex items-center">
+              <div className="flex items-center">
+                <h1 className="text-3xl font-semibold">
+                  {taskName} - {task?.code}
+                </h1>
+
+                <Pencil
+                  size={16}
+                  className={`ml-2 cursor-pointer ${
+                    isHovered ? "opacity-100" : "opacity-0"
+                  } transition-opacity`}
+                  onClick={handleEditTaskNameClick}
+                />
+              </div>
+            </div>
+          )}
           <div className="flex space-x-4 ml-auto">
             {task?.status! === "Completed" ? (
               ""
@@ -628,9 +687,47 @@ const SubTaskPage = () => {
 
         <div className="space-y-4 text-gray-600 dark:text-gray-400">
           <div className="text-sm flex justify-between items-center">
-            <span>
-              {formatDate(task?.startDate!)} - {formatDate(task?.dueDate!)}
-            </span>
+            {isDateEditable ? (
+              <div className="flex gap-4">
+                {" "}
+                {/* Use flex and gap to space inputs */}
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)} // Update state as user types
+                  onBlur={handleBlur} // Trigger onBlur event when user clicks outside
+                  onKeyDown={handleKeyDown} // Trigger onBlur when Enter key is pressed
+                  className="border p-1 rounded w-30" // Style the input
+                />
+                -
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)} // Update state as user types
+                  onBlur={handleBlur} // Trigger onBlur event when user clicks outside
+                  onKeyDown={handleKeyDown} // Trigger onBlur when Enter key is pressed
+                  className="border p-1 rounded w-30" // Style the input
+                />
+              </div>
+            ) : (
+              <div className="flex items-center">
+                {/* Display the text */}
+                <div className="flex items-center">
+                  <span>
+                    {formatDate(startDate!)} - {formatDate(dueDate!)}
+                  </span>
+
+                  {/* Pencil icon that appears when hovering over the parent */}
+                  <Pencil
+                    size={16}
+                    className={`ml-2 cursor-pointer ${
+                      isHovered ? "opacity-100" : "opacity-0"
+                    } transition-opacity`}
+                    onClick={handleDateEditClick}
+                  />
+                </div>
+              </div>
+            )}
             <>
               <span className="text-gray-600 text-lg inline-flex items-center mr-5">
                 <Clock className="mr-2 dark:text-white" />

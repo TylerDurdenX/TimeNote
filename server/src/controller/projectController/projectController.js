@@ -259,6 +259,12 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
                 },
               },
               comments: true,
+              subTasks: {
+                select: {
+                  inProgressStartTime: true,
+                  inProgressTimeinMinutes: true,
+                },
+              },
             },
             skip: (page - 1) * limit,
             take: parseInt(limit),
@@ -289,41 +295,77 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
 
             task.comments = messageCount;
 
+            //start
+            let totalTaskTime = "";
+            let timeStartFlag = false;
+            let diff = 0;
+            if (task.inProgressStartTime !== null) {
+              const targetTime = new Date(task.inProgressStartTime);
+              const currentTime = new Date();
+              diff += currentTime.getTime() - targetTime.getTime();
+              timeStartFlag = true;
+            }
+
+            if (task.inProgressTimeinMinutes !== null)
+              diff += Number(task.inProgressTimeinMinutes) * 60 * 1000;
+
+            task.subTasks.map((subTask) => {
+              if (subTask.inProgressStartTime !== null) {
+                const targetTime = new Date(subTask.inProgressStartTime);
+                const currentTime = new Date();
+                diff += currentTime.getTime() - targetTime.getTime();
+                timeStartFlag = true;
+              }
+
+              if (subTask.inProgressTimeinMinutes !== null) {
+                diff += Number(subTask.inProgressTimeinMinutes) * 60 * 1000;
+              }
+            });
+
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const formattedRemainingHours = String(hours).padStart(2, "0");
+            const remainingMinutes = minutes % 60;
+            const formattedRemainingMinutes = String(remainingMinutes).padStart(
+              2,
+              "0"
+            );
+            const remainingSeconds = seconds % 60;
+            const formattedRemainingSeconds = String(remainingSeconds).padStart(
+              2,
+              "0"
+            );
+
+            totalTaskTime =
+              `${formattedRemainingHours}:${formattedRemainingMinutes}:${formattedRemainingSeconds}` +
+              (timeStartFlag ? "*" : "");
+            //end
             let hoursOverrun = 0;
             let totalHours = 0;
             let consumedHours = 0;
 
             totalHours += task.points;
-            if (
-              task.inProgressStartTime === null ||
-              task.inProgressStartTime === undefined
-            ) {
-              if (
-                task.inProgressTimeinMinutes !== null ||
-                task.inProgressTimeinMinutes !== undefined
-              ) {
-                consumedHours += Math.floor(
-                  Number(task.inProgressTimeinMinutes) / 60
-                );
-              }
-            } else {
-              const differenceInMilliseconds =
-                currentDateTime.getTime() -
-                new Date(task.inProgressStartTime).getTime();
-              const differenceInMinutes = Math.floor(
-                differenceInMilliseconds / (1000 * 60)
-              );
-              const progressTime =
-                Number(task.inProgressTimeinMinutes || 0) + differenceInMinutes;
-              consumedHours += Math.floor(progressTime / 60);
+
+            const milliseconds = totalHours * 60 * 60 * 1000;
+            let formattedOverrun = 0;
+
+            if (diff > milliseconds) {
+              const overrun = diff - milliseconds; // Time overrun in milliseconds
+
+              // Convert the overrun to hh:mm:ss format
+              const hours = Math.floor(overrun / 3600000); // Calculate full hours
+              const minutes = Math.floor((overrun % 3600000) / 60000); // Calculate remaining minutes
+              const seconds = Math.floor((overrun % 60000) / 1000); // Calculate remaining seconds
+
+              // Format the result to always show two digits for minutes and seconds
+              formattedOverrun = `${String(hours).padStart(2, "0")}:${String(
+                minutes
+              ).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
             }
 
-            if (consumedHours > totalHours) {
-              hoursOverrun = Math.abs(consumedHours - totalHours);
-            }
-
-            task.consumedHours = consumedHours;
-            task.hoursOverrun = hoursOverrun;
+            task.consumedHours = totalTaskTime;
+            task.hoursOverrun = formattedOverrun;
           });
 
           const skip = (page - 1) * limit;
@@ -688,7 +730,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error("Error during getProjectTasks" + error);
+    console.log(error);
     return next(new AppError("There was an error getting Tasks", 400));
   }
 });
@@ -1327,6 +1369,96 @@ export const updateSubTaskProgress = catchAsync(async (req, res, next) => {
             },
           });
         }
+
+        return next(new SuccessResponse("Task updated Successfully", 200));
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("Some Error Occurred", 500));
+  }
+});
+
+export const updateSubTaskStatus = catchAsync(async (req, res, next) => {
+  const { subTaskId, subTaskStatus, email } = req.body;
+
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      const currentDateTime = new Date();
+      const indianTimeISOString = currentDateTime.toISOString();
+
+      const operationUser = await prisma.user.findFirst({
+        where: {
+          email: email,
+        },
+      });
+
+      const subTaskToBeUpdated = await prisma.subtask.findFirst({
+        where: {
+          id: subTaskId,
+        },
+      });
+
+      if (subTaskToBeUpdated.inProgressStartTime !== null) {
+        const differenceInMilliseconds =
+          currentDateTime - new Date(subTaskToBeUpdated.inProgressStartTime);
+        const differenceInMinutes = Math.floor(
+          differenceInMilliseconds / (1000 * 60)
+        );
+        const progressTime =
+          Number(subTaskToBeUpdated.inProgressTimeinMinutes || 0) +
+          differenceInMinutes;
+
+        await prisma.subtask.update({
+          where: {
+            id: subTaskId,
+          },
+          data: {
+            status: subTaskStatus,
+            inProgressStartTime: null,
+            inProgressTimeinMinutes: String(progressTime),
+          },
+        });
+
+        const taskActivity = await prisma.subTaskActivity.createMany({
+          data: [
+            {
+              subTaskId: subTaskToBeUpdated.id,
+              userId: operationUser.userId,
+              username: operationUser.username,
+              date: indianTimeISOString,
+              activity: ` Paused Task Progress`,
+            },
+            {
+              subTaskId: subTaskToBeUpdated.id,
+              userId: operationUser.userId,
+              username: operationUser.username,
+              date: indianTimeISOString,
+              activity: ` Updated Task Status to : ${subTaskStatus}`,
+            },
+          ],
+        });
+
+        return next(new SuccessResponse("Sub Task Updated Successfully", 200));
+      } else {
+        await prisma.subtask.update({
+          where: {
+            id: subTaskId,
+          },
+          data: {
+            status: subTaskStatus,
+          },
+        });
+
+        const taskActivity = await prisma.subTaskActivity.create({
+          data: {
+            subTaskId: subTaskToBeUpdated.id,
+            userId: operationUser.userId,
+            username: operationUser.username,
+            date: indianTimeISOString,
+            activity: ` Updated Task Status to : ${subTaskStatus}`,
+          },
+        });
 
         return next(new SuccessResponse("Task updated Successfully", 200));
       }
@@ -2323,11 +2455,20 @@ export const getTask = catchAsync(async (req, res, next) => {
           const seconds = Math.floor(diff / 1000);
           const minutes = Math.floor(seconds / 60);
           const hours = Math.floor(minutes / 60);
+          const formattedRemainingHours = String(hours).padStart(2, "0");
           const remainingMinutes = minutes % 60;
+          const formattedRemainingMinutes = String(remainingMinutes).padStart(
+            2,
+            "0"
+          );
           const remainingSeconds = seconds % 60;
+          const formattedRemainingSeconds = String(remainingSeconds).padStart(
+            2,
+            "0"
+          );
 
           totalTaskTime =
-            `${hours}:${remainingMinutes}:${remainingSeconds}` +
+            `${formattedRemainingHours}:${formattedRemainingMinutes}:${formattedRemainingSeconds}` +
             (timeStartFlag ? "*" : "");
           const newObj = {
             id: subTask.id,
@@ -2368,6 +2509,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
     startDate,
     dueDate,
     email,
+    taskName,
   } = req.body;
 
   try {
@@ -2460,6 +2602,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
             points: taskPoints,
             startDate: new Date(startDate),
             dueDate: new Date(dueDate),
+            title: taskName,
           },
         });
 
@@ -2491,6 +2634,18 @@ export const updateTask = catchAsync(async (req, res, next) => {
 
         const currentDateTime = new Date();
         const indianTimeISOString = currentDateTime.toISOString();
+
+        if (taskToBeUpdated.title !== updatedTask.title) {
+          const taskActivity = await prisma.taskActivity.create({
+            data: {
+              taskId: updatedTask.id,
+              userId: operationUser.userId,
+              username: operationUser.username,
+              date: indianTimeISOString,
+              activity: ` Updated Task Name`,
+            },
+          });
+        }
 
         if (updatedTask && !isEmpty(descriptionError)) {
           const taskActivity = await prisma.taskActivity.create({
@@ -2530,6 +2685,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
               assignedUserId: user.userId,
               startDate: new Date(startDate),
               dueDate: new Date(dueDate),
+              title: taskName,
             },
           });
 
@@ -2561,6 +2717,18 @@ export const updateTask = catchAsync(async (req, res, next) => {
 
           const currentDateTime = new Date();
           const currentTimeISOString = currentDateTime.toISOString();
+
+          if (taskToBeUpdated.title !== updatedTask.title) {
+            const taskActivity = await prisma.taskActivity.create({
+              data: {
+                taskId: updatedTask.id,
+                userId: operationUser.userId,
+                username: operationUser.username,
+                date: currentTimeISOString,
+                activity: ` Updated Task Name`,
+              },
+            });
+          }
 
           if (updatedTask && !isEmpty(descriptionError)) {
             const taskActivity = await prisma.taskActivity.create({
@@ -2849,6 +3017,9 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
     subTaskAssignee,
     subTaskDescription,
     editedConsumedHours,
+    taskName,
+    startDate,
+    dueDate,
     email,
   } = req.body;
 
@@ -2964,137 +3135,147 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
           description: subTaskDescription,
           status: subTaskStatus,
           assignedUserId: user.userId,
+          title: taskName,
+          startDate: new Date(startDate),
+          dueDate: new Date(dueDate),
         },
       });
 
-      if (subTaskStatus === "Completed") {
-        //TODO
-        const today = new Date();
-        const startOfDay = moment(today)
-          .tz("Asia/Kolkata")
-          .startOf("day")
-          .toDate();
-        const endOfDay = moment(today).tz("Asia/Kolkata").endOf("day").toDate();
-        const todayDate = moment()
-          .tz("Asia/Kolkata")
-          .startOf("day")
-          .toISOString();
+      if (subTaskToBeUpdated.status !== subTask.status) {
+        if (subTaskStatus === "Completed") {
+          //TODO
+          const today = new Date();
+          const startOfDay = moment(today)
+            .tz("Asia/Kolkata")
+            .startOf("day")
+            .toDate();
+          const endOfDay = moment(today)
+            .tz("Asia/Kolkata")
+            .endOf("day")
+            .toDate();
+          const todayDate = moment()
+            .tz("Asia/Kolkata")
+            .startOf("day")
+            .toISOString();
 
-        const activityList = await prisma.subTaskActivity.findMany({
-          where: {
-            userId: user.userId,
-            subTaskId: subTask.id,
-            date: {
-              gte: startOfDay,
-              lte: endOfDay,
-            },
-          },
-        });
-        let consumedHours = "";
-        let consumedMinutes = 0;
-        const sortedActivityList = activityList.sort((a, b) => a.id - b.id);
-        let startTime = "";
-        sortedActivityList.map((activity) => {
-          if (activity.activity.includes(" Started Task Progress")) {
-            startTime = activity.date;
-          }
-          if (
-            startTime != "" &&
-            (activity.activity.includes(" Paused Task Progress") ||
-              activity.activity.includes(" Assigned the task to") ||
-              activity.activity.includes(" updated status to"))
-          ) {
-            const diffInMilliseconds = activity.date - startTime;
-
-            const diffInMinutes = diffInMilliseconds / (1000 * 60);
-            consumedMinutes += diffInMinutes;
-            startTime = "";
-          }
-        });
-        const hours = Math.floor(consumedMinutes / 60);
-        const minutes = Math.floor(consumedMinutes % 60);
-        const formattedMinutes = String(minutes).padStart(2, "0");
-        consumedHours = `${hours}:${formattedMinutes}`;
-
-        const oldTimesheetEntry = await prisma.timesheet.findMany({
-          where: {
-            subTaskId: subTask.id,
-          },
-        });
-
-        let oldCompletionPercentage = "";
-        if (!isEmpty(oldTimesheetEntry)) {
-          oldCompletionPercentage =
-            oldTimesheetEntry[oldTimesheetEntry.length - 1]
-              .completionPercentage;
-        }
-
-        const completionPercentage = 100 - Number(oldCompletionPercentage);
-
-        const newTimesheetEntry = await prisma.timesheet.create({
-          data: {
-            projectId: subTaskToBeUpdated.task.projectId,
-            subTaskId: subTask.id,
-            subTaskCode: subTask.code,
-            task: `Worked on Task : ${subTask.code}`,
-            completionPercentage: String(completionPercentage),
-            consumedHours: consumedHours,
-            ApprovedFlag: "NA",
-            userId: user.userId,
-            username: user.username,
-            date: todayDate,
-            taskName: subTask.title,
-            projectName: subTaskToBeUpdated.task.project.name,
-          },
-        });
-      }
-
-      if (subTaskToBeUpdated.status === "Completed") {
-        let timeInMinutes = 0;
-        if (!isEmpty(editedConsumedHours)) {
-          const [hours, minutes, seconds] = editedConsumedHours
-            .split(":")
-            .map(Number);
-          timeInMinutes = hours * 60 + minutes;
-        }
-
-        if (subTaskToBeUpdated.inProgressTimeinMinutes !== timeInMinutes) {
-          const project = await prisma.project.findFirst({
+          const activityList = await prisma.subTaskActivity.findMany({
             where: {
-              id: Number(subTaskToBeUpdated.task.projectId),
+              userId: user.userId,
+              subTaskId: subTask.id,
+              date: {
+                gte: startOfDay,
+                lte: endOfDay,
+              },
+            },
+          });
+          let consumedHours = "";
+          let consumedMinutes = 0;
+          const sortedActivityList = activityList.sort((a, b) => a.id - b.id);
+          let startTime = "";
+          sortedActivityList.map((activity) => {
+            if (activity.activity.includes(" Started Task Progress")) {
+              startTime = activity.date;
+            }
+            if (
+              startTime != "" &&
+              (activity.activity.includes(" Paused Task Progress") ||
+                activity.activity.includes(" Assigned the task to") ||
+                activity.activity.includes(" updated status to"))
+            ) {
+              const diffInMilliseconds = activity.date - startTime;
+
+              const diffInMinutes = diffInMilliseconds / (1000 * 60);
+              consumedMinutes += diffInMinutes;
+              startTime = "";
+            }
+          });
+          const hours = Math.floor(consumedMinutes / 60);
+          const minutes = Math.floor(consumedMinutes % 60);
+          const formattedMinutes = String(minutes).padStart(2, "0");
+          consumedHours = `${hours}:${formattedMinutes}`;
+
+          const oldTimesheetEntry = await prisma.timesheet.findMany({
+            where: {
+              subTaskId: subTask.id,
             },
           });
 
-          if (project.projectManager === operationUser.userId) {
-            const updateTask = await prisma.subtask.update({
+          let oldCompletionPercentage = "";
+          if (!isEmpty(oldTimesheetEntry)) {
+            oldCompletionPercentage =
+              oldTimesheetEntry[oldTimesheetEntry.length - 1]
+                .completionPercentage;
+          }
+
+          const completionPercentage = 100 - Number(oldCompletionPercentage);
+
+          const newTimesheetEntry = await prisma.timesheet.create({
+            data: {
+              projectId: subTaskToBeUpdated.task.projectId,
+              subTaskId: subTask.id,
+              subTaskCode: subTask.code,
+              task: `Worked on Task : ${subTask.code}`,
+              completionPercentage: String(completionPercentage),
+              consumedHours: consumedHours,
+              ApprovedFlag: "NA",
+              userId: user.userId,
+              username: user.username,
+              date: todayDate,
+              taskName: subTask.title,
+              projectName: subTaskToBeUpdated.task.project.name,
+            },
+          });
+        }
+      }
+
+      if (subTaskToBeUpdated.status !== subTask.status) {
+        if (subTaskToBeUpdated.status === "Completed") {
+          let timeInMinutes = 0;
+          if (!isEmpty(editedConsumedHours)) {
+            const [hours, minutes, seconds] = editedConsumedHours
+              .split(":")
+              .map(Number);
+            timeInMinutes = hours * 60 + minutes;
+          }
+
+          if (subTaskToBeUpdated.inProgressTimeinMinutes !== timeInMinutes) {
+            const project = await prisma.project.findFirst({
               where: {
-                id: Number(subTask.id),
-              },
-              data: {
-                inProgressTimeinMinutes: String(timeInMinutes),
+                id: Number(subTaskToBeUpdated.task.projectId),
               },
             });
-            const currentDateTime = new Date();
-            const indianTimeISOString = currentDateTime.toISOString();
 
-            if (updateTask) {
-              const taskActivity = await prisma.subTaskActivity.create({
+            if (project.projectManager === operationUser.userId) {
+              const updateTask = await prisma.subtask.update({
+                where: {
+                  id: Number(subTask.id),
+                },
                 data: {
-                  subTaskId: subTask.id,
-                  userId: operationUser.userId,
-                  username: operationUser.username,
-                  date: indianTimeISOString,
-                  activity: ` Updated Consumed Hours`,
+                  inProgressTimeinMinutes: String(timeInMinutes),
                 },
               });
+              const currentDateTime = new Date();
+              const indianTimeISOString = currentDateTime.toISOString();
+
+              if (updateTask) {
+                const taskActivity = await prisma.subTaskActivity.create({
+                  data: {
+                    subTaskId: subTask.id,
+                    userId: operationUser.userId,
+                    username: operationUser.username,
+                    date: indianTimeISOString,
+                    activity: ` Updated Consumed Hours`,
+                  },
+                });
+              }
+            } else {
+              return next(
+                new AppError(
+                  "Only Project Manager can change the consumed Hours",
+                  500
+                )
+              );
             }
-          } else {
-            return next(
-              new AppError(
-                "Only Project Manager can change the consumed Hours",
-                500
-              )
-            );
           }
         }
       }
@@ -3130,6 +3311,18 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
 
         const currentDateTime = new Date();
         const indianTimeISOString = currentDateTime.toISOString();
+
+        if (subTaskToBeUpdated.title !== subTask.title) {
+          const taskActivity = await prisma.subTaskActivity.create({
+            data: {
+              subTaskId: subTask.id,
+              userId: operationUser.userId,
+              username: operationUser.username,
+              date: indianTimeISOString,
+              activity: ` Updated Sub Task Name`,
+            },
+          });
+        }
 
         if (subTask && !isEmpty(descriptionError)) {
           const taskActivity = await prisma.subTaskActivity.create({
@@ -3190,6 +3383,18 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
           const currentDateTime = new Date();
           const currentTimeISOString = currentDateTime.toISOString();
 
+          if (subTaskToBeUpdated.title !== subTask.title) {
+            const taskActivity = await prisma.subTaskActivity.create({
+              data: {
+                subTaskId: subTask.id,
+                userId: operationUser.userId,
+                username: operationUser.username,
+                date: indianTimeISOString,
+                activity: ` Updated Sub Task Name`,
+              },
+            });
+          }
+
           if (subTask && !isEmpty(descriptionError)) {
             const taskActivity = await prisma.subTaskActivity.create({
               data: {
@@ -3215,12 +3420,12 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
           }
 
           if (!isEmpty(dateActivity)) {
-            const taskActivity = await prisma.taskActivity.create({
+            const taskActivity = await prisma.subTaskActivity.create({
               data: {
-                taskId: updatedTask.id,
+                subTaskId: subTask.id,
                 userId: operationUser.userId,
                 username: operationUser.username,
-                date: indianTimeISOString,
+                date: currentTimeISOString,
                 activity: ` ${dateActivity}`,
               },
             });
@@ -3285,6 +3490,18 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
                 username: operationUser.username,
                 date: currentTimeISOString,
                 activity: ` ${descriptionError}`,
+              },
+            });
+          }
+
+          if (subTaskToBeUpdated.title !== subTask.title) {
+            const taskActivity = await prisma.subTaskActivity.create({
+              data: {
+                subTaskId: subTask.id,
+                userId: operationUser.userId,
+                username: operationUser.username,
+                date: indianTimeISOString,
+                activity: ` Updated Sub Task Name`,
               },
             });
           }
@@ -4163,12 +4380,17 @@ export const updateProject = catchAsync(async (req, res, next) => {
     projectCode,
     startDate,
     dueDate,
+    projectName,
   } = req.body;
   try {
     await prisma.$transaction(async (prisma) => {
+      console.log(projectName);
       const user = await prisma.user.findFirst({
         where: {
           email: email,
+        },
+        include: {
+          roles: true,
         },
       });
 
@@ -4178,10 +4400,12 @@ export const updateProject = catchAsync(async (req, res, next) => {
         },
       });
 
-      if (project.projectManager !== user.userId) {
-        return next(
-          new AppError("Only Project Mananger can edit Project", 500)
-        );
+      if (user.roles.every((role) => role.code !== "ADMIN")) {
+        if (project.projectManager !== user.userId) {
+          return next(
+            new AppError("Only Project Mananger can edit Project", 500)
+          );
+        }
       }
 
       const projectManagerUser = await prisma.user.findFirst({
@@ -4200,6 +4424,7 @@ export const updateProject = catchAsync(async (req, res, next) => {
           description: projectDescription,
           startDate: startDate,
           endDate: dueDate,
+          name: projectName,
         },
       });
 
@@ -4492,7 +4717,7 @@ export const createBulkTasks = catchAsync(async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.log("Error during createBulkTasks" + error);
+    console.log(error);
     return next(new AppError("Unexpected error", 500));
   }
 });
