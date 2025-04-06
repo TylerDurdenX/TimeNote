@@ -205,6 +205,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
 
   try {
     await prisma.$transaction(async (prisma) => {
+      console.log("req received");
       const user = await prisma.user.findFirst({
         where: {
           email: email,
@@ -375,6 +376,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             tasks: tasks,
             hasmore: hasMore,
           };
+          console.log("response");
 
           res.json(result);
         } else {
@@ -480,6 +482,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             tasks: filteredList,
             hasmore: hasMore,
           };
+          console.log("response");
           res.json(result);
         }
       } else {

@@ -171,7 +171,7 @@ router.get("/getScreenshots", isAuthenticated, getScreenshots);
 router.get("/getUsersListFilter", getUsersForUserFilter);
 router.get("/getLiveStreamUsers", getLiveStreamUsers);
 router.get("/getProjects", isAuthenticated, getProjects);
-router.get("/getProjectTasks", isAuthenticated, getProjectTasks);
+router.get("/getProjectTasks", getProjectTasks);
 router.get(
   "/getProjectTasksCalendar",
   isAuthenticated,
