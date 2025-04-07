@@ -447,6 +447,14 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             totalTasks += task.length;
           });
 
+          if (tasks) {
+            if (tasks.assignee) {
+              if (tasks.assignee.profilePicture) {
+                tasks.assignee.profilePicture.base64 = "abc";
+              }
+            }
+          }
+
           // const subTaskList = tasks.map((item) => item.subTasks);
 
           // const flattenedList = subTaskList
