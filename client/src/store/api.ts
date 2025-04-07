@@ -43,6 +43,7 @@ import {
   TaskComments,
   TaskFormData,
   TaskHistory,
+  TeamConfiguration,
   TeamLeadResponse,
   TeamRequest,
   Teams,
@@ -402,6 +403,15 @@ export const api = createApi({
     getBreaksForTeams: build.query<BreaksForTeams[], { email: string }>({
       query: ({ email }) => {
         const url = `api/user/getBreaksListForTeams?&email=${email}`;
+        return url;
+      },
+    }),
+    getTeamsConfiguration: build.query<
+      TeamConfiguration,
+      { email: string; teamId: number }
+    >({
+      query: ({ email, teamId }) => {
+        const url = `api/user/getTeamsConfiguration?&email=${email}&teamId=${teamId}`;
         return url;
       },
     }),
@@ -1137,4 +1147,5 @@ export const {
   useGetSubTaskActivityQuery,
   useGetTotalTaskTimeQuery,
   useUpdateSubTaskStatusMutation,
+  useGetTeamsConfigurationQuery,
 } = api;

@@ -166,7 +166,6 @@ router.post(
 );
 router.post("/createProject", isAuthenticated, createProject);
 router.get("/getUserHierarchyData", isAuthenticated, getUserHierarchyData);
-router.post("/saveScreenshot", isAuthenticated, addscreenshots);
 router.get("/getScreenshots", isAuthenticated, getScreenshots);
 router.get("/getUsersListFilter", getUsersForUserFilter);
 router.get("/getLiveStreamUsers", getLiveStreamUsers);
@@ -299,5 +298,6 @@ router.get("/takeBreak", authenticateThirdParty, getBreakData);
 router.post("/updateBreakTime", authenticateThirdParty, updateBreakTime);
 router.post("/idleTimeOut", authenticateThirdParty, idleTimeoutUser);
 router.post("/resumeIdleTimeOut", authenticateThirdParty, resumeIdleTimeout);
+router.post("/saveScreenshot", authenticateThirdParty, addscreenshots);
 
 export default router;

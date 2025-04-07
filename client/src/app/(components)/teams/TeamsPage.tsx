@@ -6,10 +6,11 @@ import { dataGridClassNames } from "@/lib/utils";
 import {
   useGetBreaksForTeamsQuery,
   useGetProjectForTeamsQuery,
+  useGetTeamsConfigurationQuery,
   useGetTeamsQuery,
   useUpdateTeamsConfigurationDataMutation,
 } from "@/store/api";
-import { Button } from "@mui/material";
+import { Button, FormControl, MenuItem, Select } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import {
   Dialog,
@@ -23,6 +24,7 @@ import { Loader } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Tags from "./AutoComplete";
 import toast from "react-hot-toast";
+import { relative } from "path";
 
 const TeamsPage = () => {
   const userEmail = useSearchParams().get("email");
@@ -30,7 +32,7 @@ const TeamsPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
   const [selectedBreaks, setSelectedBreaks] = useState<any[]>([]);
-  const [selectTeamId, setSelectedTeamId] = useState(0);
+  const [selectedTeamId, setSelectedTeamId] = useState(0);
 
   const { data: teamsData, isLoading } = useGetTeamsQuery(
     { email: userEmail! },
@@ -41,21 +43,39 @@ const TeamsPage = () => {
     setIsOpen(true);
     setSelectedTeamId(id);
   };
-  const { data: projectsList } = useGetProjectForTeamsQuery(
-    { email: userEmail! },
-    { refetchOnMountOrArgChange: true }
-  );
+  // const { data: projectsList } = useGetProjectForTeamsQuery(
+  //   { email: userEmail! },
+  //   { refetchOnMountOrArgChange: true }
+  // );
 
   const { data: breaksList } = useGetBreaksForTeamsQuery(
     { email: userEmail! },
     { refetchOnMountOrArgChange: true }
   );
 
+  const { data } = useGetTeamsConfigurationQuery(
+    { email: userEmail!, teamId: selectedTeamId },
+    { refetchOnMountOrArgChange: true }
+  );
+
+  const idleTimeoutDropdownValues = [
+    "NA",
+    "5 min",
+    "10 min",
+    "15 min",
+    "20 min",
+    "30 min",
+  ];
+
+  const handleTimeoutChange = (value: string) => {
+    setSelectedTimeout(value);
+  };
+
   const handleSaveConfiguration = async () => {
     try {
       const response = await updateTeamConfiguration({
         email: userEmail!,
-        teamId: selectTeamId,
+        teamId: selectedTeamId,
         projects: selectedProjects,
         breaks: selectedBreaks,
       });
@@ -76,6 +96,10 @@ const TeamsPage = () => {
       toast.error("Some Error occurred, please try again later");
     }
   };
+
+  const [selectedTimeout, setSelectedTimeout] = useState(
+    data?.idleTimeOut || "NA"
+  );
 
   const [updateTeamConfiguration, { isLoading: updateConfigLoading }] =
     useUpdateTeamsConfigurationDataMutation();
@@ -101,7 +125,6 @@ const TeamsPage = () => {
       headerName: "Actions",
       flex: 1,
       renderCell: (params) => {
-        console.log("renderCell");
         const rowData = params.row;
         return (
           <div
@@ -156,10 +179,17 @@ const TeamsPage = () => {
               <div className="grid gap-4 py-9">
                 <div className="grid grid-cols-8 items-center gap-4">
                   {/* <Label className="text-center">Projects</Label>
-                    <div className='col-span-7'>
-                    <Tags projectFlag={true} userEmail={userEmail!} projectsList={projectsList} setSelectedProjects={setSelectedProjects}
-                    setSelectedBreaks={setSelectedBreaks} teamId={selectTeamId} selectedList={selectedProjects}/>
-                    </div>  */}
+                  <div className="col-span-7">
+                    <Tags
+                      projectFlag={true}
+                      userEmail={userEmail!}
+                      projectsList={projectsList}
+                      setSelectedProjects={setSelectedProjects}
+                      setSelectedBreaks={setSelectedBreaks}
+                      teamId={selectTeamId}
+                      selectedList={selectedProjects}
+                    />
+                  </div> */}
                   <div className="col-span-8 flex justify-center"></div>
                   <Label className="text-center">Breaks</Label>
                   <div className="col-span-7">
@@ -169,10 +199,44 @@ const TeamsPage = () => {
                       breaksList={breaksList}
                       setSelectedBreaks={setSelectedBreaks}
                       setSelectedProjects={setSelectedProjects}
-                      teamId={selectTeamId}
+                      teamId={selectedTeamId}
                       selectedList={selectedBreaks}
                     />
                   </div>
+                  {/* <div className="col-span-8 flex justify-center"></div>
+                  <Label className="text-center">Idle Timeout</Label>
+                  <div className="col-span-7">
+                    <FormControl
+                      variant="standard"
+                      className="w-[100%]"
+                      sx={{ position: "relative", zIndex: 2000 }}
+                    >
+                      <Select
+                        labelId="demo-simple-select-standard-label"
+                        id="demo-simple-select-standard"
+                        value={selectedTimeout} // Controlled select, value bound to user state
+                        onChange={(e) => {
+                          handleTimeoutChange(e.target.value);
+                        }} // Handle change event to update state
+                        label="Idle Timeout"
+                      >
+                        <MenuItem value="">
+                          <em>None</em>
+                        </MenuItem>
+                        {idleTimeoutDropdownValues.map((item) => (
+                          <MenuItem key={item} value={item}>
+                            {item}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div className="col-span-8 flex justify-center"></div>
+                  <Label className="text-center">Breaks</Label>
+                  <div className="col-span-3"></div>
+                  <div className="col-span-8 flex justify-center"></div>
+                  <Label className="text-center">Breaks</Label>
+                  <div className="col-span-3"></div> */}
                 </div>
               </div>
 

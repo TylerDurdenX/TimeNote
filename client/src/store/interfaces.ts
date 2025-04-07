@@ -493,6 +493,12 @@ export interface BreaksForTeams {
   title: string;
 }
 
+export interface TeamConfiguration {
+  idleTimeOut: string;
+  workingHours: string;
+  allowPictureModification: boolean;
+}
+
 export interface Teams {
   name: string;
   description: string;

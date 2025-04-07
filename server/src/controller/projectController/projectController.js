@@ -205,7 +205,6 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
 
   try {
     await prisma.$transaction(async (prisma) => {
-      console.log("req received");
       const user = await prisma.user.findFirst({
         where: {
           email: email,
@@ -250,15 +249,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
                   username: true,
                 },
               },
-              assignee: {
-                include: {
-                  profilePicture: {
-                    select: {
-                      base64: true,
-                    },
-                  },
-                },
-              },
+              assignee: true,
               comments: true,
               subTasks: {
                 select: {
@@ -291,14 +282,6 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
               ...newAssignee
             } = task.assignee;
             task.assignee = newAssignee;
-
-            if (task) {
-              if (task.assignee) {
-                if (task.assignee.profilePicture) {
-                  task.assignee.profilePicture.base64 = "abc";
-                }
-              }
-            }
 
             const messageCount = task.comments.length;
 
@@ -384,7 +367,6 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             tasks: tasks,
             hasmore: hasMore,
           };
-          console.log("response");
 
           res.json(result);
         } else {
@@ -423,15 +405,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
                   username: true,
                 },
               },
-              assignee: {
-                include: {
-                  profilePicture: {
-                    select: {
-                      base64: true,
-                    },
-                  },
-                },
-              },
+              assignee: true,
               comments: true,
               task: true,
             },
@@ -446,14 +420,6 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
           tasks.map((task) => {
             totalTasks += task.length;
           });
-
-          if (tasks) {
-            if (tasks.assignee) {
-              if (tasks.assignee.profilePicture) {
-                tasks.assignee.profilePicture.base64 = "abc";
-              }
-            }
-          }
 
           // const subTaskList = tasks.map((item) => item.subTasks);
 
@@ -498,7 +464,6 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
             tasks: filteredList,
             hasmore: hasMore,
           };
-          console.log("response");
           res.json(result);
         }
       } else {
@@ -1016,7 +981,7 @@ export const createTask = catchAsync(async (req, res, next) => {
         },
       });
 
-      const taskCode = project.code + String(task.id).padStart(6, "0");
+      const taskCode = "TASK" + String(task.id).padStart(6, "0");
       const currentDateTime = new Date();
       const indianTimeISOString = currentDateTime.toISOString();
 

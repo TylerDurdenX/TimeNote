@@ -40,11 +40,10 @@ export default function LimitTags({
     { refetchOnMountOrArgChange: true }
   );
 
-  console.log("autoComplete", teamId);
-
   React.useEffect(() => {
     if (projectFlag == true) {
       setValue(selectedProjects || []);
+      setSelectedProjects(selectedProjects || []);
     } else {
       setValue(selectedBreaks || []);
     }

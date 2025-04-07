@@ -69,6 +69,7 @@ model Attendance {
     punchInTime   DateTime?
     punchOutTime    DateTime?
     date      DateTime
+    geoLocation     String?
 
     @@unique([userId, date])
     breaks      Breaks[]
@@ -332,6 +333,10 @@ model Team {
 
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  allowPictureModification   Boolean?
+  workingHours    String?
+  IdleTimeout     String?
+
 
   // Many-to-many relationship between users and teams (a user can belong to many teams)
   members     User[]     @relation("TeamMembers")

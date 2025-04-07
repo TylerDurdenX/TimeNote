@@ -1000,7 +1000,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
             <div className="flex space-x-[6px] overflow-hidden">
               {task.assignee && (
                 <Avatar className="h-8 w-8 rounded-full border-white object-cover dark:border-dark-secondary">
-                  {task.assignee?.profilePicture?.base64 ? (
+                  {/* {task.assignee?.profilePicture?.base64 ? (
                     <AvatarImage
                       src={task.assignee.profilePicture.base64}
                       alt={task.assignee.username}
@@ -1009,7 +1009,10 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                     <AvatarFallback className="rounded-lg">
                       {getInitials(task.assignee.username!)}
                     </AvatarFallback>
-                  )}
+                  )} */}
+                  <AvatarFallback className="rounded-lg">
+                    {getInitials(task.assignee.username!)}
+                  </AvatarFallback>
                 </Avatar>
               )}
               {task.assignee && (
@@ -1069,7 +1072,7 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
                       </DialogDescription>
                       <DialogDescription className="ml-7">
                         {" "}
-                        Task Points: {task.points || ""}
+                        Estimated Hours: {task.points || ""}
                       </DialogDescription>
                     </DialogHeader>
                     <TaskHistory
