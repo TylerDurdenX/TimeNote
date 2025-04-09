@@ -1,16 +1,15 @@
 "use client";
 
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { dataGridClassNames } from "@/lib/utils";
 import {
   useGetBreaksForTeamsQuery,
-  useGetProjectForTeamsQuery,
   useGetTeamsConfigurationQuery,
   useGetTeamsQuery,
   useUpdateTeamsConfigurationDataMutation,
 } from "@/store/api";
-import { Button, FormControl, MenuItem, Select } from "@mui/material";
+import { Button, FormControl } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import {
   Dialog,
@@ -24,7 +23,16 @@ import { Loader } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Tags from "./AutoComplete";
 import toast from "react-hot-toast";
-import { relative } from "path";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const TeamsPage = () => {
   const userEmail = useSearchParams().get("email");
@@ -33,6 +41,7 @@ const TeamsPage = () => {
   const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
   const [selectedBreaks, setSelectedBreaks] = useState<any[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState(0);
+  const [error, setError] = useState("");
 
   const { data: teamsData, isLoading } = useGetTeamsQuery(
     { email: userEmail! },
@@ -43,20 +52,20 @@ const TeamsPage = () => {
     setIsOpen(true);
     setSelectedTeamId(id);
   };
-  // const { data: projectsList } = useGetProjectForTeamsQuery(
-  //   { email: userEmail! },
-  //   { refetchOnMountOrArgChange: true }
-  // );
 
   const { data: breaksList } = useGetBreaksForTeamsQuery(
     { email: userEmail! },
     { refetchOnMountOrArgChange: true }
   );
 
-  const { data } = useGetTeamsConfigurationQuery(
-    { email: userEmail!, teamId: selectedTeamId },
-    { refetchOnMountOrArgChange: true }
-  );
+  const { data, refetch } = useGetTeamsConfigurationQuery({
+    email: userEmail!,
+    teamId: selectedTeamId,
+  });
+
+  useEffect(() => {
+    refetch();
+  }, [selectedTeamId]);
 
   const idleTimeoutDropdownValues = [
     "NA",
@@ -67,10 +76,6 @@ const TeamsPage = () => {
     "30 min",
   ];
 
-  const handleTimeoutChange = (value: string) => {
-    setSelectedTimeout(value);
-  };
-
   const handleSaveConfiguration = async () => {
     try {
       const response = await updateTeamConfiguration({
@@ -78,6 +83,9 @@ const TeamsPage = () => {
         teamId: selectedTeamId,
         projects: selectedProjects,
         breaks: selectedBreaks,
+        idleTimeout: selectedTimeout || "",
+        allowPictureModification: isProfilePicModificationEnabled || false,
+        workingHours: workingHours || "",
       });
       if (
         // @ts-ignore
@@ -97,12 +105,24 @@ const TeamsPage = () => {
     }
   };
 
-  const [selectedTimeout, setSelectedTimeout] = useState(
-    data?.idleTimeOut || "NA"
-  );
+  const [selectedTimeout, setSelectedTimeout] = useState(data?.idleTimeOut);
+  const [isProfilePicModificationEnabled, setIsProfilePicModificationEnabled] =
+    useState(data?.allowPictureModification);
+
+  const [workingHours, setWorkingHours] = useState(data?.workingHours);
+
+  const handlePPModificationChange = (checked: boolean) => {
+    setIsProfilePicModificationEnabled(checked); // Update the state with the new value of the switch
+  };
 
   const [updateTeamConfiguration, { isLoading: updateConfigLoading }] =
     useUpdateTeamsConfigurationDataMutation();
+
+  useEffect(() => {
+    setSelectedTimeout(data?.idleTimeOut);
+    setIsProfilePicModificationEnabled(data?.allowPictureModification);
+    setWorkingHours(data?.workingHours);
+  }, [data]);
 
   const columns: GridColDef[] = [
     {
@@ -203,40 +223,53 @@ const TeamsPage = () => {
                       selectedList={selectedBreaks}
                     />
                   </div>
-                  {/* <div className="col-span-8 flex justify-center"></div>
+                  <div className="col-span-8 flex justify-center"></div>
                   <Label className="text-center">Idle Timeout</Label>
                   <div className="col-span-7">
-                    <FormControl
-                      variant="standard"
-                      className="w-[100%]"
-                      sx={{ position: "relative", zIndex: 2000 }}
+                    <Select
+                      value={selectedTimeout}
+                      onValueChange={(value) => setSelectedTimeout(value)}
                     >
-                      <Select
-                        labelId="demo-simple-select-standard-label"
-                        id="demo-simple-select-standard"
-                        value={selectedTimeout} // Controlled select, value bound to user state
-                        onChange={(e) => {
-                          handleTimeoutChange(e.target.value);
-                        }} // Handle change event to update state
-                        label="Idle Timeout"
-                      >
-                        <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem>
-                        {idleTimeoutDropdownValues.map((item) => (
-                          <MenuItem key={item} value={item}>
-                            {item}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                      <SelectTrigger className="col-span-7 p-2 border rounded-md">
+                        <SelectValue defaultValue={selectedTimeout} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {idleTimeoutDropdownValues.map((item) => (
+                            <SelectItem key={item} value={item}>
+                              {item}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="col-span-8 flex justify-center"></div>
-                  <Label className="text-center">Breaks</Label>
-                  <div className="col-span-3"></div>
-                  <div className="col-span-8 flex justify-center"></div>
-                  <Label className="text-center">Breaks</Label>
-                  <div className="col-span-3"></div> */}
+                  <Label className="text-center col-span-2">
+                    Allow Picture Modification
+                  </Label>
+                  <div className="col-span-2">
+                    <Switch
+                      className="ml-5"
+                      id="airplane-mode"
+                      checked={isProfilePicModificationEnabled}
+                      onCheckedChange={handlePPModificationChange}
+                    />
+                  </div>
+                  <Label className="">Working Hours</Label>
+                  <div className="col-span-3">
+                    <div className="">
+                      <div>
+                        <FormControl variant="standard" className="w-[100%]">
+                          <Input
+                            value={workingHours}
+                            onChange={(e) => setWorkingHours(e.target.value)}
+                            placeholder="9:30-18:30"
+                          />
+                        </FormControl>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

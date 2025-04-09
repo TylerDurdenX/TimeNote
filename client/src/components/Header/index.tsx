@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button as Bttn } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,11 +19,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Bell,
   CalendarClock,
+  CalendarIcon,
   ChartCandlestick,
   ChartNoAxesCombined,
   Coffee,
@@ -38,7 +47,7 @@ import {
   Users,
   UsersRound,
 } from "lucide-react";
-import { Button } from "@mui/material";
+import { Button, FormControl } from "@mui/material";
 import { DatePickerWithRange } from "./DateRangePicker";
 import { DateRange } from "react-day-picker";
 import { useCreateUserMutation } from "@/store/api";
@@ -56,6 +65,9 @@ type Props = {
   onRangeSelect?: () => void;
   clearFilter?: () => void;
   buttonName?: string;
+  hasDateFilter?: boolean;
+  setSelectedDate?: React.Dispatch<React.SetStateAction<Date>>;
+  selectedDate?: Date;
 };
 
 const Header = ({
@@ -68,6 +80,9 @@ const Header = ({
   onRangeSelect,
   clearFilter,
   buttonName,
+  hasDateFilter,
+  setSelectedDate,
+  selectedDate,
 }: Props) => {
   let icon;
 
@@ -112,6 +127,19 @@ const Header = ({
       icon = <FileClock className="mr-2" />;
       break;
   }
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      if (setSelectedDate) setSelectedDate(date);
+    }
+  };
+
+  const todayWithMidnightTime = new Date();
+  todayWithMidnightTime.setHours(0, 0, 0, 0); // Set the time to 00:00:00
+
+  useEffect(() => {
+    if (setSelectedDate) setSelectedDate(new Date(todayWithMidnightTime));
+  }, []);
 
   const [isOpen, setIsOpen] = useState(false);
   const [username, setUsername] = useState("");
@@ -356,6 +384,46 @@ const Header = ({
               </div>
             </DialogContent>
           </Dialog>
+        </>
+      ) : (
+        ""
+      )}
+
+      {hasDateFilter ? (
+        <>
+          <div className="mr-5 ">
+            <Popover>
+              <PopoverTrigger asChild>
+                <FormControl>
+                  <Bttn
+                    variant={"outline"}
+                    className={cn(
+                      "w-[240px] pl-3 text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    {selectedDate ? (
+                      <>{selectedDate.toDateString()}</>
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Bttn>
+                </FormControl>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateSelect}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </>
       ) : (
         ""

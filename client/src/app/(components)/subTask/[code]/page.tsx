@@ -208,6 +208,12 @@ const SubTaskPage = () => {
   const [subTaskDescription, setSubTaskDescription] = useState(
     task?.description || ""
   );
+  const [startDate, setStartDate] = useState(task?.startDate);
+  const [dueDate, setDueDate] = useState(task?.dueDate);
+  const [initialStartDate, setInitialStartDate] = useState(task?.startDate);
+  const [initialDueDate, setInitialDueDate] = useState(task?.dueDate);
+  const [taskName, setTaskName] = useState(task?.title);
+  const [initailTaskName, setInitialTaskName] = useState(task?.title);
   const [isConsumedHoursEditable, setIsConsumedHoursEditable] = useState(false);
   const [editedConsumedHours, setEditedConsumedHours] = useState(
     task?.inProgressTime!
@@ -234,6 +240,18 @@ const SubTaskPage = () => {
       setSubTaskStatus(task.status || "");
       setInitialStatus(task.status || "");
       setIsSaveButtonEnabled(false);
+      setTaskName(task.title);
+      setInitialTaskName(task.title);
+      const formattedStartDate = new Date(task.startDate!)
+        .toISOString()
+        .split("T")[0];
+      setStartDate(formattedStartDate);
+      const formattedDueDate = new Date(task.dueDate!)
+        .toISOString()
+        .split("T")[0];
+      setInitialDueDate(task.dueDate || "");
+      setInitialStartDate(task.startDate || "");
+      setDueDate(formattedDueDate);
     }
   }, [task]);
 
@@ -242,7 +260,9 @@ const SubTaskPage = () => {
       subTaskDescription !== initialDescription ||
       subTaskAssignee !== initialAssignee ||
       subTaskStatus !== initialStatus ||
-      editedConsumedHours !== initialEditedConsumedHours;
+      editedConsumedHours !== initialEditedConsumedHours ||
+      startDate !== initialStartDate ||
+      dueDate !== initialDueDate;
     setIsSaveButtonEnabled(isChanged);
   }, [
     subTaskDescription,
@@ -404,6 +424,9 @@ const SubTaskPage = () => {
       subTaskDescription: subTaskDescription,
       editedConsumedHours: editedConsumedHours,
       email: userEmail!,
+      startDate: startDate!,
+      dueDate: dueDate!,
+      taskName: taskName!,
     };
     try {
       const response = await updateSubTask(updateTaskData);

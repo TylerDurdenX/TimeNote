@@ -199,6 +199,12 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
   const [isDescriptionHovered, setIsDescriptionHovered] = useState(true);
   const [isStatusHovered, setIsStatusHovered] = useState(true);
+  const [startDate, setStartDate] = useState(task?.startDate);
+  const [dueDate, setDueDate] = useState(task?.dueDate);
+  const [initialStartDate, setInitialStartDate] = useState(task?.startDate);
+  const [initialDueDate, setInitialDueDate] = useState(task?.dueDate);
+  const [taskName, setTaskName] = useState(task?.title);
+  const [initailTaskName, setInitialTaskName] = useState(task?.title);
   const [subTaskDescription, setSubTaskDescription] = useState(
     task?.description || ""
   );
@@ -221,7 +227,19 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
       setInitialDescription(task.description || "");
       setSubTaskStatus(task.status || "");
       setInitialStatus(task.status || "");
+      setTaskName(task.title);
+      setInitialTaskName(task.title);
       setIsSaveButtonEnabled(false);
+      const formattedStartDate = new Date(task.startDate!)
+        .toISOString()
+        .split("T")[0];
+      setStartDate(formattedStartDate);
+      const formattedDueDate = new Date(task.dueDate!)
+        .toISOString()
+        .split("T")[0];
+      setInitialDueDate(task.dueDate || "");
+      setInitialStartDate(task.startDate || "");
+      setDueDate(formattedDueDate);
     }
   }, [task]);
 
@@ -229,7 +247,9 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
     const isChanged =
       subTaskDescription !== initialDescription ||
       subTaskAssignee !== initialAssignee ||
-      subTaskStatus !== initialStatus;
+      subTaskStatus !== initialStatus ||
+      startDate !== initialStartDate ||
+      dueDate !== initialDueDate;
     setIsSaveButtonEnabled(isChanged);
   }, [
     subTaskDescription,
@@ -288,6 +308,9 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
       subTaskAssignee: subTaskAssignee,
       subTaskDescription: subTaskDescription,
       email: userEmail!,
+      startDate: startDate!,
+      dueDate: dueDate!,
+      taskName: taskName!,
     };
     try {
       const response = await updateSubTask(updateTaskData);

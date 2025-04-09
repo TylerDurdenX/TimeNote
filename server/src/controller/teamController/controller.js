@@ -156,6 +156,23 @@ export const getTeamLeads = catchAsync(async (req, res, next) => {
   }
 });
 
+export const getTeamConfiguration = catchAsync(async (req, res, next) => {
+  const { email, teamId } = req.query;
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      const team = await prisma.team.findFirst({
+        where: {
+          id: Number(teamId),
+        },
+      });
+      res.status(200).json(team);
+    });
+  } catch (error) {
+    console.error("Error during createTeam" + error);
+    return next(new AppError("There was an error getting Users List", 400));
+  }
+});
+
 export const getProjectsForTeam = catchAsync(async (req, res, next) => {
   try {
     await prisma.$transaction(async (prisma) => {
@@ -276,7 +293,13 @@ export const getSelectedBreaksForTeam = catchAsync(async (req, res, next) => {
 export const updateTeamsConfigurationData = catchAsync(
   async (req, res, next) => {
     const { email, teamId } = req.query;
-    const { breaks, projects } = req.body;
+    const {
+      breaks,
+      projects,
+      idleTimeout,
+      workingHours,
+      allowPictureModification,
+    } = req.body;
     try {
       await prisma.$transaction(async (prisma) => {
         const teamIdNum = Number(teamId);
@@ -299,83 +322,103 @@ export const updateTeamsConfigurationData = catchAsync(
           },
         });
 
-        const configuredProjects = await prisma.team.findFirst({
+        const updateUserPromises = userslist.map(async (user) => {
+          // If there are projects to connect, update the user
+          await prisma.user.update({
+            where: { email: user.email },
+            data: {
+              idleTimeOut: idleTimeout,
+              workingHours: workingHours,
+              pictureModification: allowPictureModification,
+            },
+          });
+        });
+
+        await Promise.all(updateUserPromises);
+
+        const updatedTeam = await prisma.team.update({
           where: {
             id: teamIdNum,
           },
-          include: {
-            projects: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
+          data: {
+            allowPictureModification: allowPictureModification,
+            IdleTimeout: idleTimeout,
+            workingHours: workingHours,
           },
         });
 
-        console.log(configuredProjects.projects);
+        // const configuredProjects = await prisma.team.findFirst({
+        //   where: {
+        //     id: teamIdNum,
+        //   },
+        //   include: {
+        //     projects: {
+        //       select: {
+        //         id: true,
+        //         name: true,
+        //       },
+        //     },
+        //   },
+        // });
 
-        let projectIds = [];
-        projects.map((item) => {
-          projectIds.push(item.id);
-        });
-        console.log(projectIds);
+        // let projectIds = [];
+        // projects.map((item) => {
+        //   projectIds.push(item.id);
+        // });
 
-        const projectIdsToRemove = configuredProjects.projects
-          .filter((item) => !projectIds.includes(item.id))
-          .map((item) => item.id);
+        // const projectIdsToRemove = configuredProjects.projects
+        //   .filter((item) => !projectIds.includes(item.id))
+        //   .map((item) => item.id);
 
-        console.log(projectIdsToRemove);
+        // if (!isEmpty(projects)) {
+        //   let projectsToConnect = [];
+        //   const newProjectIdList = projects.map((project) => project.id);
 
-        if (!isEmpty(projects)) {
-          let projectsToConnect = [];
-          const newProjectIdList = projects.map((project) => project.id);
+        //   newProjectIdList.map((project) => {});
 
-          newProjectIdList.map((project) => {});
+        //   const updatePromises = userslist.map(async (user) => {
+        //     let projectIdList = user.projects.map((project) => project.id);
 
-          const updatePromises = userslist.map(async (user) => {
-            let projectIdList = user.projects.map((project) => project.id);
+        //     // Find the projects that need to be connected (projects not already associated)
+        //     projectsToConnect = newProjectIdList.filter(
+        //       (newProjectId) => !projectIdList.includes(newProjectId)
+        //     );
 
-            // Find the projects that need to be connected (projects not already associated)
-            projectsToConnect = newProjectIdList.filter(
-              (newProjectId) => !projectIdList.includes(newProjectId)
-            );
+        //     // If there are projects to connect, update the user
+        //     if (projectsToConnect.length > 0) {
+        //       await prisma.user.update({
+        //         where: { email: user.email },
+        //         data: {
+        //           projects: {
+        //             connect: projectsToConnect.map((projectId) => ({
+        //               id: projectId,
+        //             })),
+        //             disconnect: projectIdsToRemove.map((projectId) => ({
+        //               id: projectId,
+        //             })),
+        //           },
+        //         },
+        //       });
+        //     }
+        //   });
 
-            // If there are projects to connect, update the user
-            if (projectsToConnect.length > 0) {
-              await prisma.user.update({
-                where: { email: user.email },
-                data: {
-                  projects: {
-                    connect: projectsToConnect.map((projectId) => ({
-                      id: projectId,
-                    })),
-                    disconnect: projectIdsToRemove.map((projectId) => ({
-                      id: projectId,
-                    })),
-                  },
-                },
-              });
-            }
-          });
+        //   // Wait for all update promises to finish
+        //   await Promise.all(updatePromises);
 
-          // Wait for all update promises to finish
-          await Promise.all(updatePromises);
-
-          const updatedTeam = await prisma.team.update({
-            where: {
-              id: teamIdNum,
-            },
-            data: {
-              projects: {
-                connect: projectIds.map((id) => ({ id })),
-                disconnect: projectIdsToRemove.map((projectId) => ({
-                  id: projectId,
-                })),
-              },
-            },
-          });
-        }
+        //   const updatedTeam = await prisma.team.update({
+        //     where: {
+        //       id: teamIdNum,
+        //     },
+        //     data: {
+        //       projects: {
+        //         connect: projectIds.map((id) => ({ id })),
+        //         disconnect: projectIdsToRemove.map((projectId) => ({
+        //           id: projectId,
+        //         })),
+        //       },
+        //     },
+        //   });
+        // }
 
         if (!isEmpty(breaks)) {
           const newBreakTypeIdList = breaks.map((breakObj) => breakObj.id);

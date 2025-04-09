@@ -81,11 +81,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             url: `/screenshots?email=${userEmail}`,
             icon: ScreenShare,
           },
-          {
-            title: "Live Streaming",
-            url: `/liveStream?email=${userEmail}`,
-            icon: Cast,
-          },
+          // {
+          //   title: "Live Streaming",
+          //   url: `/liveStream?email=${userEmail}`,
+          //   icon: Cast,
+          // },
           {
             title: "Geo Tracking",
             url: `/geoTrack?email=${userEmail}`,
@@ -186,11 +186,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: `/screenshots?email=${userEmail}`,
           icon: ScreenShare,
         },
-        {
-          title: "Live Streaming",
-          url: `/liveStream?email=${userEmail}`,
-          icon: Cast,
-        },
+        // {
+        //   title: "Live Streaming",
+        //   url: `/liveStream?email=${userEmail}`,
+        //   icon: Cast,
+        // },
         {
           title: "Geo Tracking",
           url: `/geoTrack?email=${userEmail}`,
@@ -232,8 +232,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="bg-[#001742]">
         {/* <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/> */}
-        {/* <NavMain items={items} activeTab={activeTab} setActiveTab={setActiveTab}
-           isItem1Open = {item1Open}/> */}
+        <NavMain
+          items={items}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isItem1Open={item1Open}
+        />
         <NavProjects
           projects={mockData.items1}
           activeTab={activeTab}

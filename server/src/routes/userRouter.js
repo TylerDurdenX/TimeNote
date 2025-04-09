@@ -35,6 +35,7 @@ import {
   getProjectsForTeam,
   getSelectedBreaksForTeam,
   getSelectedProjectsForTeam,
+  getTeamConfiguration,
   getTeamLeads,
   getTeamsList,
   updateTeamsConfigurationData,
@@ -136,6 +137,7 @@ import {
   updateBreak,
   updateBreakTime,
 } from "../controller/breakController/breakController.js";
+import { getUsersGeoData } from "../controller/LiveTracking/geoTrackingController.js";
 const router = express.Router();
 
 router.post("/customerDataUpdate", authenticateThirdParty, updateCustomerData);
@@ -283,6 +285,8 @@ router.get(
 router.get("/viewBreaksheetData", isAuthenticated, getBreaksData);
 router.get("/getTotalTaskTime", getTotalTaskTime);
 router.patch("/updateSubTaskStatus", updateSubTaskStatus);
+router.get("/getTeamsConfiguration", getTeamConfiguration);
+router.get("/getUsersGeoData", getUsersGeoData);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);

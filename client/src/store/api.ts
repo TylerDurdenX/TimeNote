@@ -18,6 +18,7 @@ import {
   CreateUserData,
   DownloadAttachment,
   DownloadProjectAttachment,
+  GeoDataResponse,
   GetProjectTasksCalendarResponse,
   GetProjectTasksResponse,
   ListReq,
@@ -66,6 +67,7 @@ import {
 } from "./interfaces";
 import { AxiosProgressEvent } from "axios";
 import { toast } from "react-hot-toast";
+import { UserGeoData } from "@/app/(components)/geoTrack/HeatMap";
 
 export interface Project {
   id: number;
@@ -678,6 +680,12 @@ export const api = createApi({
       },
       providesTags: ["Timesheet"],
     }),
+    getUsersGeoData: build.query<UserGeoData[], { date: string }>({
+      query: ({ date }) => {
+        const url = `api/user/getUsersGeoData?date=${date}`;
+        return url;
+      },
+    }),
     getTotalTaskTime: build.query<string, { taskId: string }>({
       query: ({ taskId }) => {
         const url = `api/user/getTotalTaskTime?taskId=${taskId}`;
@@ -958,12 +966,26 @@ export const api = createApi({
         teamId: number;
         projects: ListReq[];
         breaks: ListReq[];
+        idleTimeout: string;
+        allowPictureModification: boolean;
+        workingHours: string;
       }
     >({
-      query: ({ email, teamId, projects, breaks }) => {
+      query: ({
+        email,
+        teamId,
+        projects,
+        breaks,
+        idleTimeout,
+        allowPictureModification,
+        workingHours,
+      }) => {
         const requestBody = JSON.stringify({
           projects,
           breaks,
+          idleTimeout,
+          allowPictureModification,
+          workingHours,
         });
         return {
           url: `api/user/updateTeamsConfigurationData?email=${email}&teamId=${teamId}`,
@@ -1148,4 +1170,5 @@ export const {
   useGetTotalTaskTimeQuery,
   useUpdateSubTaskStatusMutation,
   useGetTeamsConfigurationQuery,
+  useGetUsersGeoDataQuery,
 } = api;

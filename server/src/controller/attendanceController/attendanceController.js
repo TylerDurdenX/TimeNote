@@ -7,7 +7,7 @@ import { startOfMonth, endOfMonth } from "date-fns";
 import moment from "moment-timezone";
 
 export const updateAttendance = catchAsync(async (req, res, next) => {
-  const { punchInTime, punchOutTime, email } = req.body;
+  const { punchInTime, punchOutTime, email, geoLocation } = req.body;
 
   try {
     await prisma.$transaction(async (prisma) => {
@@ -49,6 +49,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
               username: user.username,
               punchInTime: punchInTime,
               date: indianTimeISOString,
+              geoLocation: geoLocation,
             },
           });
 

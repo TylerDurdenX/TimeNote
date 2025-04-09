@@ -4634,7 +4634,7 @@ export const createBulkTasks = catchAsync(async (req, res, next) => {
 
         const currentDateTime = new Date();
         const indianTimeISOString = currentDateTime.toISOString();
-        const taskCode = project.code + String(task.id).padStart(6, "0");
+        const taskCode = "TASK" + String(task.id).padStart(6, "0");
 
         if (task) {
           const taskActivity = await prisma.taskActivity.create({

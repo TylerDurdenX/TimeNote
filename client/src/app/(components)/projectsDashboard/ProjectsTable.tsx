@@ -33,7 +33,7 @@ const ProjectsTable = ({ email }: Props) => {
       flex: 1,
       renderCell: (params) => (
         <Link
-          href={`project/${params.value}?email=${email}`}
+          href={`project/${params.row.id}?email=${email}`}
           rel="noopener noreferrer"
           className="text-blue-500 dark:text-white underline font-medium"
           style={{ fontWeight: 500 }}

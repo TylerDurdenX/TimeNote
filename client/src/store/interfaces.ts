@@ -323,6 +323,14 @@ export interface TimesheetResponse {
   totalTime: string;
 }
 
+export interface GeoDataResponse {
+  number1: number;
+  number2: number;
+  number3: number;
+  userName: string;
+  designation: string;
+}
+
 export interface BreakResponse {
   id: number;
   breakType: string;

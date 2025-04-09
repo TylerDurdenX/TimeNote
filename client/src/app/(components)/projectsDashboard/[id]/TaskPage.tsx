@@ -647,7 +647,7 @@ const TaskPage = ({ taskId, email, projectId }: Props) => {
               </>
             )}
             <Link
-              href={`/projectsDashboard/${projectId}/${task?.code}?email=${email}`}
+              href={`/projectsDashboard/${projectId}/${task?.id}?email=${email}`}
             >
               <button
                 className="px-4 py-2 text-gray-900 rounded-lg bg-gray-200 hover:bg-gray-300 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
