@@ -224,11 +224,11 @@ export const api = createApi({
     }),
     getUsersList: build.query<
       UsersListResponse[] | ApiResponse,
-      { email: string }
+      { email: string; page: number; limit: number; searchQuery: string }
     >({
-      query: ({ email }) => {
+      query: ({ email, page, limit, searchQuery }) => {
         const encodedEmail = encodeURIComponent(email);
-        const url = `api/user/getUsersList?email=${encodedEmail}`;
+        const url = `api/user/getUsersList?email=${encodedEmail}&page=${page}&limit=${limit}&searchQuery=${searchQuery}`;
         return url;
       },
       providesTags: ["UsersList"],

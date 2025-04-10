@@ -5,9 +5,11 @@ import { isEmpty, extractTitles } from "../utils/genericMethods.js";
 
 //get list of users form the table
 export const getUsersList = catchAsync(async (req, res, next) => {
-  const { email } = req.query;
+  const { email, page, limit, searchQuery } = req.query;
   try {
     const result = await prisma.$transaction(async (prisma) => {
+      const pageNumber = parseInt(page);
+      const pageSize = parseInt(limit);
       const user = await prisma.user.findFirst({
         where: {
           email: email,
@@ -17,9 +19,19 @@ export const getUsersList = catchAsync(async (req, res, next) => {
         },
       });
 
+      let whereCondition = {};
+
+      if (!isEmpty(searchQuery) && searchQuery !== "undefined") {
+        whereCondition.username = {
+          startsWith: searchQuery.toLowerCase(), // Case insensitive comparison
+          mode: "insensitive", // This makes the comparison case-insensitive in Prisma
+        };
+      }
+
       if (user.roles.some((role) => role.code === "ADMIN")) {
         return res.status(200).json(
           await prisma.user.findMany({
+            where: whereCondition,
             select: {
               userId: true,
               username: true,
@@ -30,6 +42,8 @@ export const getUsersList = catchAsync(async (req, res, next) => {
                 },
               },
             },
+            skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
+            take: pageSize,
           })
         );
       } else if (user.roles.some((role) => role.code === "PROJECT_MANAGER")) {
@@ -45,6 +59,14 @@ export const getUsersList = catchAsync(async (req, res, next) => {
           projects.map((project) => {
             projectIdList.push(project.id);
           });
+
+          whereCondition.projects = {
+            some: {
+              id: {
+                in: projectIdList,
+              },
+            },
+          };
 
           const usersList = await prisma.user.findMany({
             where: {
@@ -66,12 +88,16 @@ export const getUsersList = catchAsync(async (req, res, next) => {
                 },
               },
             },
+            skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
+            take: pageSize,
           });
 
+          delete whereCondition.projects;
+
+          whereCondition.reportsToId = user.userId;
+
           const reportingUsersList = await prisma.user.findMany({
-            where: {
-              reportsToId: user.userId,
-            },
+            where: whereCondition,
             select: {
               userId: true,
               username: true,
@@ -82,6 +108,8 @@ export const getUsersList = catchAsync(async (req, res, next) => {
                 },
               },
             },
+            skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
+            take: pageSize,
           });
 
           const mergedList = [
@@ -99,11 +127,12 @@ export const getUsersList = catchAsync(async (req, res, next) => {
 
           return res.status(200).json(updatedUsersList);
         } else {
+          delete whereCondition.projects;
+          whereCondition.reportsToId = user.userId;
+
           return res.status(200).json(
             await prisma.user.findMany({
-              where: {
-                reportsToId: user.userId,
-              },
+              where: whereCondition,
               select: {
                 userId: true,
                 username: true,
@@ -114,6 +143,8 @@ export const getUsersList = catchAsync(async (req, res, next) => {
                   },
                 },
               },
+              skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
+              take: pageSize,
             })
           );
         }
@@ -133,6 +164,8 @@ export const getUsersList = catchAsync(async (req, res, next) => {
                 },
               },
             },
+            skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
+            take: pageSize,
           })
         );
       }

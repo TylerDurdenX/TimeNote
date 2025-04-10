@@ -1,3 +1,5 @@
+"use client";
+
 import { useGetScreenshotsQuery } from "@/store/api";
 import React, { useEffect, useRef, useState } from "react";
 import Pagination from "@mui/material/Pagination";

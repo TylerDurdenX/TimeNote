@@ -6,7 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetUsersListQuery } from "@/store/api";
 import {
   Box,
+  Button,
   Divider,
+  InputAdornment,
   List,
   ListItem,
   ListItemText,
@@ -15,7 +17,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 type Props = {
   onSelectUser: (id: number) => void;
@@ -27,23 +30,108 @@ const UserList = ({ onSelectUser }: Props) => {
   localStorage.removeItem("persist:root");
   localStorage.removeItem("ally-supports-cache");
 
-  const { data, isLoading, error } = useGetUsersListQuery(
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParam, setSearchParam] = useState("");
+
+  useEffect(() => {
+    if (searchQuery.length > 2) {
+      setSearchParam(searchQuery);
+    }
+  }, [searchQuery]);
+
+  const useScrollToBottom = (
+    containerRef: React.RefObject<HTMLDivElement | null>,
+    callback: () => void,
+    isLoading: boolean,
+    hasMore: boolean
+  ) => {
+    useEffect(() => {
+      const handleScroll = () => {
+        if (!containerRef.current || isLoading || !hasMore) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5;
+
+        if (isAtBottom) {
+          callback();
+        }
+      };
+
+      const container = containerRef.current;
+      container?.addEventListener("scroll", handleScroll);
+
+      return () => {
+        container?.removeEventListener("scroll", handleScroll);
+      };
+    }, [containerRef, callback, isLoading, hasMore]);
+  };
+
+  const {
+    data: list,
+    isLoading,
+    error,
+    refetch,
+  } = useGetUsersListQuery(
     {
       email: userEmail!,
+      page: page,
+      limit: 15,
+      searchQuery: searchParam,
     },
     {
       refetchOnMountOrArgChange: true,
     }
   );
 
-  const [searchQuery, setSearchQuery] = useState("");
+  useScrollToBottom(
+    scrollContainerRef,
+    () => {
+      console.log("Fetching more users...");
+      setPage((prev) => prev + 1);
+    },
+    isLoading,
+    hasMore
+  );
+
+  useEffect(() => {
+    if (list && Array.isArray(list)) {
+      if (list.length > 0) {
+        setData((prev) => {
+          const existingIds = new Set(prev.map((user) => user.userId));
+          const newItems = list.filter((user) => {
+            const isNew = !existingIds.has(user.userId);
+
+            return isNew;
+          });
+
+          return [...prev, ...newItems];
+        });
+
+        setHasMore(list.length === 15); // or however your API signals the end
+      } else {
+        setHasMore(false); // No more data
+      }
+    } else {
+      setHasMore(false); // Invalid list or error
+    }
+
+    setLoading(false);
+  }, [list]);
 
   const filteredEmployees =
     data && Array.isArray(data)
-      ? data.filter((employee) =>
-          employee.username.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+      ? searchQuery.length > 2
+        ? data.filter((employee) =>
+            employee.username.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : data // Return the original list when searchQuery is less than or equal to 3 characters
       : [];
+
   return (
     <Paper className="p-2 flex flex-col items-center h-full">
       {isLoading ? (
@@ -55,15 +143,41 @@ const UserList = ({ onSelectUser }: Props) => {
           <Typography variant="h6" gutterBottom>
             Users List
           </Typography>
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Search employees..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="mb-2"
-          />
+          <div className="relative mb-4 ">
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Search employees (abc...)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <i className="fas fa-search text-gray-500"></i>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                borderRadius: "25px",
+                padding: "10px 15px",
+                backgroundColor: "#ffffff", // White background for search input
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "25px",
+                  "& fieldset": {
+                    borderColor: "#ccc",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#888",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#5c6bc0",
+                  },
+                },
+              }}
+            />
+          </div>
           <Box
+            ref={scrollContainerRef}
             sx={{
               flex: 1,
               overflowY: "auto",
@@ -114,6 +228,13 @@ const UserList = ({ onSelectUser }: Props) => {
               </Typography>
             )}
           </Box>
+          {isLoading ? (
+            <>
+              <CircularLoading />
+            </>
+          ) : (
+            ""
+          )}
         </Box>
       )}
     </Paper>

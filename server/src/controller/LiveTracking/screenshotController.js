@@ -3,31 +3,49 @@ import catchAsync from "../../utils/catchAsync.js";
 import { prisma } from "../../server.js";
 import { formatTime } from "../attendanceController/attendanceController.js";
 import SuccessResponse from "../../utils/SuccessResponse.js";
+import { isEmpty } from "../../utils/genericMethods.js";
 
 export const addscreenshots = catchAsync(async (req, res, next) => {
-  const { email, base64, time } = req.body;
+  const { email, screenshots } = req.body;
+
   try {
     const user = await prisma.user.findUnique({
       where: { email: email },
     });
 
-    const date = new Date(time);
+    function convertTime(time) {
+      // Example: converts "14:30" => "14:30:00"
+      const date = new Date(time);
 
-    // Format the time as HH:mm (24-hour format)
-    const hours = String(date.getHours()).padStart(2, "0"); // Ensure 2 digits for hours
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const formattedTime = `${hours}:${minutes}`;
+      // Format the time as HH:mm (24-hour format)
+      const hours = String(date.getHours()).padStart(2, "0"); // Ensure 2 digits for hours
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const formattedTime = `${hours}:${minutes}`;
+      return formattedTime;
+    }
 
-    const newScreenshot = await prisma.screenshots.create({
-      data: {
-        username: user.username,
-        time: formattedTime,
-        base64: base64,
-        date: time,
-        user: {
-          connect: { userId: user.userId },
-        },
-      },
+    if (!isEmpty(screenshots)) {
+      screenshots.map((screenshot) => {
+        const date = new Date(screenshot.time);
+
+        // Format the time as HH:mm (24-hour format)
+        const hours = String(date.getHours()).padStart(2, "0"); // Ensure 2 digits for hours
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        const formattedTime = `${hours}:${minutes}`;
+      });
+    }
+
+    const formattedScreenshots = screenshots.map((screenshot) => ({
+      username: user.username,
+      time: convertTime(screenshot.time), // convert the time here
+      base64: screenshot.base64, // use the base64 string directly
+      date: screenshot.time, // assuming `time` is a date variable you're using
+      userId: user.userId, // save the foreign key manually
+    }));
+
+    const newScreenshots = await prisma.screenshots.createMany({
+      data: formattedScreenshots,
+      skipDuplicates: true, // optional
     });
 
     return next(new SuccessResponse("Screenshot saved successfully", 200));
