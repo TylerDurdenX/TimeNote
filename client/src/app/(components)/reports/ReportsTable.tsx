@@ -4,10 +4,13 @@ import { dataGridClassNames } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@mui/material";
 import ReportsDialog from "./ReportsDialog";
+import { useSearchParams } from "next/navigation";
 
 type Props = {};
 
 function ReportsTable({}: Props) {
+  const userEmail = useSearchParams().get("email");
+
   const reports = [
     {
       id: 1,
@@ -15,18 +18,18 @@ function ReportsTable({}: Props) {
       description: "Attendance Report of users",
       name: "Attendance Report",
     },
-    {
-      id: 2,
-      title: "Activity Report",
-      description: "Activity Report of users",
-      name: "Activity Report",
-    },
-    {
-      id: 3,
-      title: "Productivity Report",
-      description: "Productivity Report of users",
-      name: "Productivity Report",
-    },
+    // {
+    //   id: 2,
+    //   title: "Activity Report",
+    //   description: "Activity Report of users",
+    //   name: "Activity Report",
+    // },
+    // {
+    //   id: 3,
+    //   title: "Productivity Report",
+    //   description: "Productivity Report of users",
+    //   name: "Productivity Report",
+    // },
     {
       id: 4,
       title: "Project Report",
@@ -65,7 +68,7 @@ function ReportsTable({}: Props) {
                 </DialogTrigger>
               </div>
               <DialogContent className="max-w-[65vw] mt-5 mb-5 overflow-y-auto">
-                <ReportsDialog name={params.value} />
+                <ReportsDialog name={params.value} email={userEmail!} />
               </DialogContent>
             </Dialog>
           </div>

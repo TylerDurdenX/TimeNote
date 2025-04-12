@@ -1712,6 +1712,96 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
   return next(new AppError("Some Error Occurred", 500));
 });
 
+export const reopenTask = catchAsync(async (req, res, next) => {
+  const { taskId, email, status, comment } = req.body;
+
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      const currentDateTime = new Date();
+      const indianTimeISOString = currentDateTime.toISOString();
+
+      const task = await prisma.task.findFirst({
+        where: {
+          id: Number(taskId),
+        },
+        include: {
+          assignee: {
+            select: {
+              userId: true,
+              email: true,
+              username: true,
+            },
+          },
+        },
+      });
+
+      const operationUser = await prisma.user.findFirst({
+        where: {
+          email: email,
+        },
+      });
+
+      const updatedTask = await prisma.task.update({
+        where: {
+          id: Number(taskId),
+        },
+        data: {
+          status: status,
+        },
+      });
+
+      if (task.assignee.email !== email) {
+        const newAlert = await prisma.alert.create({
+          data: {
+            title: "Reopened Task",
+            description: `${operationUser.username} reopened the task :${updatedTask.code}`,
+            triggeredDate: indianTimeISOString,
+            userId: task.assignee.userId,
+          },
+        });
+      }
+
+      if (updatedTask) {
+        const taskActivity = await prisma.taskActivity.create({
+          data: {
+            taskId: updatedTask.id,
+            userId: task.assignee.userId,
+            username: operationUser.username,
+            date: indianTimeISOString,
+            activity: ` Reopened the Task`,
+          },
+        });
+      }
+
+      const taskHistory = await prisma.taskHistory.create({
+        data: {
+          taskId: updatedTask.id,
+          userId: task.assignee.userId,
+          startDate: indianTimeISOString,
+          sprint: String(updatedTask.sprintId),
+          time: "0,0,0,0,0",
+        },
+      });
+
+      const newComment = await prisma.comment.create({
+        data: {
+          text: comment,
+          taskId,
+          userId: operationUser.userId,
+          username: operationUser.username,
+          commentTime: indianTimeISOString,
+        },
+      });
+
+      return next(new SuccessResponse("Task Reopened Successfully", 200));
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("Some Error Occurred", 500));
+  }
+  return next(new AppError("Some Error Occurred", 500));
+});
+
 export const updateTaskAssignee = catchAsync(async (req, res, next) => {
   const { taskId } = req.query;
   const { email } = req.query;
@@ -3159,20 +3249,12 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
           const formattedMinutes = String(minutes).padStart(2, "0");
           consumedHours = `${hours}:${formattedMinutes}`;
 
-          const oldTimesheetEntry = await prisma.timesheet.findMany({
-            where: {
-              subTaskId: subTask.id,
-            },
-          });
-
-          let oldCompletionPercentage = "";
-          if (!isEmpty(oldTimesheetEntry)) {
-            oldCompletionPercentage =
-              oldTimesheetEntry[oldTimesheetEntry.length - 1]
-                .completionPercentage;
+          let approveFlag = "";
+          if (isEmpty(user.reportsToId)) {
+            approveFlag = "NA";
+          } else {
+            approveFlag = "NO";
           }
-
-          const completionPercentage = 100 - Number(oldCompletionPercentage);
 
           const newTimesheetEntry = await prisma.timesheet.create({
             data: {
@@ -3180,9 +3262,9 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
               subTaskId: subTask.id,
               subTaskCode: subTask.code,
               task: `Worked on Task : ${subTask.code}`,
-              completionPercentage: String(completionPercentage),
+              completionPercentage: "100",
               consumedHours: consumedHours,
-              ApprovedFlag: "NA",
+              ApprovedFlag: approveFlag,
               userId: user.userId,
               username: user.username,
               date: todayDate,
@@ -3922,6 +4004,7 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
         select: {
           userId: true,
           username: true,
+          reportsToId: true,
         },
       });
 
@@ -3977,36 +4060,52 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
       const formattedMinutes = String(minutes).padStart(2, "0");
       consumedHours = `${hours}:${formattedMinutes}`;
 
-      const oldTimesheetEntry = await prisma.timesheet.findMany({
+      const createdTimesheetEntry = await prisma.timesheet.findFirst({
         where: {
           taskId: updatedTask.id,
+          date: indianTimeISOString,
         },
       });
 
-      let oldCompletionPercentage = "";
-      if (!isEmpty(oldTimesheetEntry)) {
-        oldCompletionPercentage =
-          oldTimesheetEntry[oldTimesheetEntry.length - 1].completionPercentage;
+      let approveFlag = "";
+      if (isEmpty(user.reportsToId)) {
+        approveFlag = "NA";
+      } else {
+        approveFlag = "NO";
       }
 
-      const completionPercentage = 100 - Number(oldCompletionPercentage);
-
-      const newTimesheetEntry = await prisma.timesheet.create({
-        data: {
-          projectId: updatedTask.projectId,
-          taskId: updatedTask.id,
-          taskCode: updatedTask.code,
-          task: `Worked on Task : ${updatedTask.code}`,
-          completionPercentage: String(completionPercentage),
-          consumedHours: consumedHours,
-          ApprovedFlag: "NA",
-          userId: user.userId,
-          username: user.username,
-          date: indianTimeISOString,
-          taskName: updatedTask.title,
-          projectName: updatedTask.project.name,
-        },
-      });
+      if (isEmpty(createdTimesheetEntry)) {
+        const newTimesheetEntry = await prisma.timesheet.create({
+          data: {
+            projectId: updatedTask.projectId,
+            taskId: updatedTask.id,
+            taskCode: updatedTask.code,
+            task: `Worked on Task : ${updatedTask.code}`,
+            completionPercentage: "100",
+            consumedHours: consumedHours,
+            ApprovedFlag: approveFlag,
+            userId: user.userId,
+            username: user.username,
+            date: indianTimeISOString,
+            taskName: updatedTask.title,
+            projectName: updatedTask.project.name,
+          },
+        });
+      } else {
+        await prisma.timesheet.update({
+          where: {
+            taskId_date: {
+              taskId: updatedTask.id,
+              date: indianTimeISOString,
+            },
+          },
+          data: {
+            consumedHours: consumedHours,
+            ApprovedFlag: approveFlag,
+            completionPercentage: "100",
+          },
+        });
+      }
 
       return next(new SuccessResponse("Task Closed Successfully", 200));
     });

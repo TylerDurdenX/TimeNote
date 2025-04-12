@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import UserList from "../userDetails/usersList";
 import ScreenshotsLP from "./ScreenshotsLP";
@@ -37,6 +37,19 @@ const Page = () => {
       setToDate(newToDate.toISOString().split("T")[0]);
     }
   };
+
+  useEffect(() => {
+    if (date?.from && date?.to) {
+      const newFromDate = new Date(date.from);
+      newFromDate.setDate(newFromDate.getDate() + 1);
+
+      const newToDate = new Date(date.to);
+      newToDate.setDate(newToDate.getDate() + 1);
+
+      setFromDate(newFromDate.toISOString().split("T")[0]);
+      setToDate(newToDate.toISOString().split("T")[0]);
+    }
+  }, [date]);
 
   const clearFilter = () => {
     setDate(undefined);

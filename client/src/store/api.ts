@@ -33,6 +33,7 @@ import {
   ProjectListResponse,
   ProjectResponse,
   ProjectUsers,
+  ReopenTaskData,
   ReportConfig,
   ScreenshotResponse,
   SprintData,
@@ -529,6 +530,14 @@ export const api = createApi({
         body: body,
       }),
       invalidatesTags: ["Tasks", "Task", "TaskHistory", "TaskActivity"],
+    }),
+    reopenTask: build.mutation<ApiResponse, ReopenTaskData>({
+      query: (body) => ({
+        url: `api/user/reopenTask`,
+        method: "PATCH",
+        body: body,
+      }),
+      invalidatesTags: ["Task", "TaskHistory", "TaskActivity", "Comment"],
     }),
     updateProject: build.mutation<ApiResponse, UpdateProjectData>({
       query: (body) => ({
@@ -1171,4 +1180,5 @@ export const {
   useUpdateSubTaskStatusMutation,
   useGetTeamsConfigurationQuery,
   useGetUsersGeoDataQuery,
+  useReopenTaskMutation,
 } = api;

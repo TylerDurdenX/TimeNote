@@ -7,25 +7,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DateRange } from "react-day-picker";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useGetUserListFilterQuery } from "@/store/api";
+import { Check, ChevronsUpDown } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 type Props = {
   name: string;
+  email: string;
 };
 
-const ReportsDialog = ({ name }: Props) => {
+const ReportsDialog = ({ name, email }: Props) => {
   const [projectTeam, setProjectTeam] = useState("");
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: undefined,
@@ -35,18 +43,13 @@ const ReportsDialog = ({ name }: Props) => {
   const [fromDate, setFromDate] = useState<string>("2000-01-01T00:00:00Z");
   const [toDate, setToDate] = useState<string>("2000-01-01T00:00:00Z");
 
-  const logDateRange = () => {
-    if (date?.from && date?.to) {
-      const newFromDate = new Date(date.from);
-      newFromDate.setDate(newFromDate.getDate() + 1);
+  const [value, setValue] = React.useState("");
 
-      const newToDate = new Date(date.to);
-      newToDate.setDate(newToDate.getDate() + 1);
+  const [open, setOpen] = React.useState(false);
 
-      setFromDate(newFromDate.toISOString().split("T")[0]);
-      setToDate(newToDate.toISOString().split("T")[0]);
-    }
-  };
+  const { data, isLoading, error, isSuccess } = useGetUserListFilterQuery({
+    email: email!,
+  });
 
   return (
     <Card>
@@ -60,25 +63,53 @@ const ReportsDialog = ({ name }: Props) => {
 
       <CardContent className="space-y-2">
         <div className="grid grid-cols-10 items-center gap-4 mr-1">
-          <Label className="text-center">Team/Project</Label>
-          <Select
-            value={projectTeam}
-            onValueChange={(value) => setProjectTeam(value)}
-          >
-            <SelectTrigger className="col-span-2 p-2 border rounded-md">
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Priority</SelectLabel>
-                <SelectItem value="Urgent">Urgent</SelectItem>
-                <SelectItem value="High">High</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Low">Low</SelectItem>
-                <SelectItem value="Backlog">Backlog</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <Label className="text-center">Project</Label>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-[200px] justify-between col-span-2"
+              >
+                {value
+                  ? data?.find((framework) => framework.username === value)
+                      ?.username
+                  : "Find User"}
+                <ChevronsUpDown className="opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0 ">
+              <Command>
+                <CommandInput placeholder="Search User..." className="h-9" />
+                <CommandList>
+                  <CommandEmpty>No User found.</CommandEmpty>
+                  <CommandGroup>
+                    {data?.map((user) => (
+                      <CommandItem
+                        key={user.username}
+                        value={user.username}
+                        onSelect={(currentValue) => {
+                          setValue(currentValue);
+                          setOpen(false);
+                        }}
+                      >
+                        {user.username}
+                        <Check
+                          className={cn(
+                            "ml-auto",
+                            value === user.username
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
           <Label className="text-center">From</Label>
           <Input
             type="date"

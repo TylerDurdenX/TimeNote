@@ -871,6 +871,7 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
             duration: duration,
             totalIdleTime: breakTime,
             activeTime: timeDifference(duration, breakTime),
+            place: attendance.city,
           };
           id = id + 1;
           finalResult.push(result);
@@ -911,6 +912,7 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
             punchInTime: inTime,
             punchOutTime: outTime,
             duration: getTimeDifference(inTime, outTime),
+            place: attendance.city,
           };
           id = id + 1;
           finalResult.push(result);

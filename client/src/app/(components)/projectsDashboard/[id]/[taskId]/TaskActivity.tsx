@@ -105,9 +105,18 @@ const TaskActivity = ({ taskId }: Props) => {
                     </span>
                   </Link>
                 )}
-                <span className="activity ml-2">
+                {/* <span className="activity ml-2">
                   {formatActivityText(activity.activity)}
-                </span>{" "}
+                </span>{" "} */}
+                <span
+                  className={`activity ml-2 ${
+                    activity.activity.startsWith(" Reopened")
+                      ? "bg-red-200"
+                      : ""
+                  }`}
+                >
+                  {formatActivityText(activity.activity)}
+                </span>
                 {/* Activity description */}
               </div>
               <div className="right-content">

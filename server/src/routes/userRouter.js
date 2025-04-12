@@ -72,6 +72,7 @@ import {
   getTaskHistory,
   getTotalTaskTime,
   getUserData,
+  reopenTask,
   updateProject,
   updateProjectSprint,
   updateProjectStatus,
@@ -287,6 +288,7 @@ router.get("/getTotalTaskTime", getTotalTaskTime);
 router.patch("/updateSubTaskStatus", updateSubTaskStatus);
 router.get("/getTeamsConfiguration", getTeamConfiguration);
 router.get("/getUsersGeoData", getUsersGeoData);
+router.patch("/reopenTask", isAuthenticated, reopenTask);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);

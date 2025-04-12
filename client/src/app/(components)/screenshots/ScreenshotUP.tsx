@@ -100,8 +100,8 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
       ) : (
         <>
           <div
-            className="flex flex-wrap p-5 overflow-y-auto"
-            style={{ maxHeight: "calc(100vh - 4rem)" }}
+            className="flex flex-wrap p-5 mb-2"
+            // style={{ maxHeight: "calc(100vh - 4rem)" }}
           >
             <div className="grid grid-cols-3 gap-4 w-full">
               {screenshotList.map((card, index) => (

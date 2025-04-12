@@ -20,6 +20,7 @@ import {
   FileClock,
   Users,
   Coffee,
+  FileChartColumnIncreasing,
 } from "lucide-react";
 
 import { NavMain } from "@/components/Sidebar/nav-main";
@@ -145,11 +146,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: `/alerts?email=${userEmail}`,
         icon: Bell,
       },
-      // {
-      //   name: "Reports",
-      //   url: `/reports?email=${userEmail}`,
-      //   icon: FileChartColumnIncreasing,
-      // },
+      {
+        name: "Reports",
+        url: `/reports?email=${userEmail}`,
+        icon: FileChartColumnIncreasing,
+      },
       {
         name: "Timesheet",
         url: `/timesheet?email=${userEmail}`,
@@ -186,11 +187,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: `/screenshots?email=${userEmail}`,
           icon: ScreenShare,
         },
-        // {
-        //   title: "Live Streaming",
-        //   url: `/liveStream?email=${userEmail}`,
-        //   icon: Cast,
-        // },
+        {
+          title: "Live Streaming",
+          url: `/liveStream?email=${userEmail}`,
+          icon: Cast,
+        },
         {
           title: "Geo Tracking",
           url: `/geoTrack?email=${userEmail}`,

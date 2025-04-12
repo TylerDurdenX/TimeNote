@@ -70,6 +70,7 @@ model Attendance {
     punchOutTime    DateTime?
     date      DateTime
     geoLocation     String?
+    city          String?
 
     @@unique([userId, date])
     breaks      Breaks[]

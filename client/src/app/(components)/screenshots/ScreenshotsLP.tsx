@@ -43,6 +43,10 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
   );
 
   useEffect(() => {
+    console.log("date changed");
+  }, [from, to]);
+
+  useEffect(() => {
     if (!isLoading) {
       // Ensure both queries have finished loading
       if (isSuccess) {
@@ -103,8 +107,8 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
       ) : (
         <>
           <div
-            className="flex flex-wrap p-5 overflow-y-auto"
-            style={{ maxHeight: "calc(100vh - 4rem)" }}
+            className="flex flex-wrap p-5 mb-2"
+            // style={{ maxHeight: "calc(100vh - 1rem)" }}
           >
             <div className="grid grid-cols-3 gap-4 w-full">
               {screenshotList.map((card, index) => (
@@ -119,7 +123,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
                         style={{ paddingTop: "56.25%" }}
                         onClick={handleDialogOpen}
                       >
-                        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-full ">
                           <img
                             src={card.base64}
                             alt="Base64 Image"
@@ -128,7 +132,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
                         </div>
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[90vw] lg:max-w-[70vw]">
+                    <DialogContent className="max-w-[90vw] ">
                       <DialogHeader>
                         <DialogTitle>{card.username}</DialogTitle>
                         <DialogDescription>{card.time}</DialogDescription>
@@ -140,7 +144,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
                           paddingTop: "39.375%",
                         }}
                       >
-                        <div className="absolute top-0 left-0 w-[calc(100%)] h-[calc(100%)]">
+                        <div className="absolute top-0 left-0 w-[calc(100%)] h-[calc(100%)] pl-10 pr-10">
                           <img
                             ref={imgRef}
                             src={card.base64}
@@ -155,7 +159,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
                         </div>
                       </div>
 
-                      <DialogFooter className="w-full justify-between items-center">
+                      <DialogFooter className="w-full flex justify-center items-center">
                         <div className="absolute flex gap-4 left-10">
                           <Button
                             color="primary"

@@ -610,6 +610,13 @@ export interface UpdateTaskData {
   taskName: string;
 }
 
+export interface ReopenTaskData {
+  status: string;
+  comment: string;
+  email: string;
+  taskId: number;
+}
+
 export interface UpdateSubTaskData {
   subTaskId: number;
   subTaskStatus: string | undefined;

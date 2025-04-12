@@ -5,9 +5,7 @@ import {
   PlusSquare,
   Pencil,
   Download,
-  Maximize2,
   EllipsisVertical,
-  Clock,
   ChevronLeft,
   Timer,
 } from "lucide-react";
@@ -20,6 +18,7 @@ import {
   useGetProjectUsersQuery,
   useGetTaskQuery,
   useGetTotalTaskTimeQuery,
+  useReopenTaskMutation,
   useUpdateSubTaskProgressMutation,
   useUpdateTaskAssigneeMutation,
   useUpdateTaskMutation,
@@ -27,7 +26,7 @@ import {
   useUpdateTaskStatusMutation,
   useUploadAttachmentMutation,
 } from "@/store/api";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -76,17 +75,18 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
 } from "@/components/ui/card";
 import TaskActivity from "./TaskActivity";
 import CircularLoading from "@/components/Sidebar/loading";
-import { useErrorContext } from "@/app/ErrorContext";
 import ErrorDialog from "@/app/ErrorDialog";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 const TaskPageFull = () => {
   const projectId = sessionStorage.getItem("projectId");
@@ -299,8 +299,8 @@ const TaskPageFull = () => {
       const seconds = Math.floor(diff / 1000);
       const minutes = Math.floor(seconds / 60);
       const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      const remainingSeconds = seconds % 60;
+      const remainingMinutes = (minutes % 60).toString().padStart(2, "0");
+      const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
 
       setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
       setEditedConsumedHours(
@@ -313,7 +313,7 @@ const TaskPageFull = () => {
       if (count === 0) {
         const minutes = Number(task?.inProgressTimeinMinutes);
         const hours = Math.floor(minutes / 60);
-        const remainingMinutes = minutes % 60;
+        const remainingMinutes = (minutes % 60).toString().padStart(2, "0");
         setTimeDiff(`${hours}:${remainingMinutes}:00`);
         setEditedConsumedHours(`${hours}:${remainingMinutes}:00`);
         setInitialEditedConsumedHours(`${hours}:${remainingMinutes}:00`);
@@ -329,8 +329,8 @@ const TaskPageFull = () => {
         const seconds = Math.floor(diff / 1000);
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
-        const remainingMinutes = minutes % 60;
-        const remainingSeconds = seconds % 60;
+        const remainingMinutes = (minutes % 60).toString().padStart(2, "0");
+        const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
 
         setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
         setEditedConsumedHours(
@@ -347,7 +347,7 @@ const TaskPageFull = () => {
     if (!isProgressStarted && task?.inProgressTimeinMinutes !== null) {
       const minutes = Number(task?.inProgressTimeinMinutes);
       const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
+      const remainingMinutes = (minutes % 60).toString().padStart(2, "0");
       setTimeDiff(`${hours}:${remainingMinutes}:00`);
       setEditedConsumedHours(`${hours}:${remainingMinutes}:00`);
       setInitialEditedConsumedHours(`${hours}:${remainingMinutes}:00`);
@@ -416,6 +416,9 @@ const TaskPageFull = () => {
   const [createSubTask, { isLoading: isLoadingCreateSubTask }] =
     useCreateSubTaskMutation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [reopenStatus, setReopenStatus] = useState("");
+  const [newComment, setNewComment] = useState("");
   const [closeCompletedTask] = useCloseTaskMutation();
   const [updateTaskAssignee] = useUpdateTaskAssigneeMutation();
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
@@ -623,6 +626,42 @@ const TaskPageFull = () => {
       } else {
         // @ts-ignore
         toast.success(response.data?.message);
+      }
+    } catch (err: any) {
+      toast.error(err.data.message);
+      console.error("Error creating role:", err.data.Message);
+    }
+  };
+
+  const [reopenTaskApi, { isLoading: isLoadingReopenTask }] =
+    useReopenTaskMutation();
+
+  const reopenTask = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    // Prepare the form data to submit
+    const reopenTaskObj = {
+      status: reopenStatus,
+      comment: newComment,
+      email: email!,
+      taskId: taskId,
+    };
+    try {
+      const response = await reopenTaskApi(reopenTaskObj);
+      if (
+        // @ts-ignore
+        response.error?.data.status === "Error" ||
+        // @ts-ignore
+        response.error?.data.status === "Fail"
+      ) {
+        // @ts-ignore
+        toast.error(response.error?.data.message);
+      } else {
+        // @ts-ignore
+        toast.success(response.data?.message);
+        setNewComment("");
+        setReopenStatus("");
+        setIsTaskDialogOpen(false);
       }
     } catch (err: any) {
       toast.error(err.data.message);
@@ -878,6 +917,10 @@ const TaskPageFull = () => {
     refetch();
   };
 
+  const isValueSelected = () => {
+    return newComment && reopenStatus;
+  };
+
   if (isLoading)
     return (
       <div>
@@ -932,7 +975,99 @@ const TaskPageFull = () => {
           )}
           <div className="flex space-x-4 ml-auto">
             {task?.status! === "Closed" ? (
-              ""
+              <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex h-8 w-6 mt-1 mr-3 flex-shrink-0 items-center justify-center dark:text-neutral-500">
+                    <EllipsisVertical size={52} className="dark:text-white" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <Dialog
+                      open={isTaskDialogOpen}
+                      onOpenChange={setIsTaskDialogOpen}
+                    >
+                      <div className="my-3 flex justify-between">
+                        <DialogTrigger asChild>
+                          <DropdownMenuItem
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              setIsTaskDialogOpen(true);
+                            }}
+                          >
+                            Reopen Task{" "}
+                          </DropdownMenuItem>
+                        </DialogTrigger>
+                      </div>
+                      <DialogContent className="max-w-[65vw] mt-5 mb-5 overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="font-semibold text-lg">
+                            Reopen Task
+                          </DialogTitle>
+                        </DialogHeader>
+                        <Card>
+                          <CardHeader>
+                            <CardDescription>
+                              Please provide the below data for reopening the
+                              task
+                            </CardDescription>
+                          </CardHeader>
+
+                          <CardContent className="space-y-2">
+                            <div className="grid grid-cols-8 items-center gap-4 mr-1">
+                              <Label className="text-center">Task Status</Label>
+                              <Select
+                                value={reopenStatus}
+                                onValueChange={(value) =>
+                                  setReopenStatus(value)
+                                }
+                              >
+                                <SelectTrigger className="col-span-3 p-2 border rounded-md">
+                                  <SelectValue placeholder="Task Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectItem value="To Do">To Do</SelectItem>
+                                    <SelectItem value="Work In Progress">
+                                      Work In Progress
+                                    </SelectItem>
+                                    <SelectItem value="Under Review">
+                                      Under Review
+                                    </SelectItem>
+                                    <SelectItem value="Completed">
+                                      Completed
+                                    </SelectItem>
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
+                              <Label className="text-center">
+                                Reopen Comments
+                              </Label>
+                              <textarea
+                                value={newComment}
+                                onChange={(e) => {
+                                  setNewComment(e.target.value);
+                                }}
+                                onBlur={handleBlur}
+                                className="w-full p-2 border rounded-md col-span-3 shadow-sm resize-none dark:bg-gray-800 dark:border-gray-300"
+                                placeholder="Add a comment..."
+                              />{" "}
+                            </div>
+                          </CardContent>
+
+                          <CardFooter>
+                            <Button
+                              className="ml-auto"
+                              onClick={reopenTask}
+                              disabled={!isValueSelected()}
+                            >
+                              Reopen Task
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      </DialogContent>
+                    </Dialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <>
                 <DropdownMenu>

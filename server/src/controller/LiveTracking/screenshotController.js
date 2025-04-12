@@ -76,6 +76,9 @@ export const getScreenshots = catchAsync(async (req, res, next) => {
         where: filters,
         skip: (page - 1) * limit,
         take: parseInt(limit),
+        orderBy: {
+          date: "desc", // Replace 'createdAt' with the field you want to sort by
+        },
       });
 
       const totalPages = Math.ceil(screenshotsCount / limit);

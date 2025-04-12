@@ -28,6 +28,10 @@ const TaskHistory = ({ taskId, estimatedHours, task, fullPageFlag }: Props) => {
   );
 
   const formatDate = (dateString: string) => {
+    console.log(dateString);
+    if (dateString === "") {
+      return "NA";
+    }
     const date = new Date(dateString);
 
     const day = String(date.getDate()).padStart(2, "0");
