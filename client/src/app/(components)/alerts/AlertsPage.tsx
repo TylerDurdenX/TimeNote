@@ -192,7 +192,7 @@ const AlertsPage = () => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription className="text-gray-700">
-                    Do you want to delete this configuration?
+                    Do you want to delete this alert notification?
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

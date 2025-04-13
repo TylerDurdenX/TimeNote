@@ -126,6 +126,7 @@ import {
 } from "../controller/attendanceController/attendanceController.js";
 import {
   signInUser,
+  signOutApplication,
   signupTP,
 } from "../controller/thirdPartyController/thirdPartyController.js";
 import {
@@ -305,5 +306,6 @@ router.post("/updateBreakTime", authenticateThirdParty, updateBreakTime);
 router.post("/idleTimeOut", authenticateThirdParty, idleTimeoutUser);
 router.post("/resumeIdleTimeOut", authenticateThirdParty, resumeIdleTimeout);
 router.post("/saveScreenshot", authenticateThirdParty, addscreenshots);
+router.get("/signOutApplication", authenticateThirdParty, signOutApplication);
 
 export default router;

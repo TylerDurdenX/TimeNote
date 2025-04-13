@@ -28,7 +28,6 @@ const TaskHistory = ({ taskId, estimatedHours, task, fullPageFlag }: Props) => {
   );
 
   const formatDate = (dateString: string) => {
-    console.log(dateString);
     if (dateString === "") {
       return "NA";
     }

@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  Download,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
@@ -100,6 +101,15 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
     setOffset({ x: 0, y: 0 });
   };
 
+  const downloadImage = (base64: string, fileName = "download.png") => {
+    const link = document.createElement("a");
+    link.href = base64;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       {!queriesLoaded ? (
@@ -132,34 +142,25 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
                         </div>
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-[90vw] ">
+                    <DialogContent className="max-w-[80vw] max-h-[80vh] overflow-hidden">
                       <DialogHeader>
                         <DialogTitle>{card.username}</DialogTitle>
                         <DialogDescription>{card.time}</DialogDescription>
                       </DialogHeader>
 
-                      <div
-                        className="relative w-full h-full overflow-hidden"
-                        style={{
-                          paddingTop: "39.375%",
-                        }}
-                      >
-                        <div className="absolute top-0 left-0 w-[calc(100%)] h-[calc(100%)] pl-10 pr-10">
-                          <img
-                            ref={imgRef}
-                            src={card.base64}
-                            alt="Full-size Base64 Image"
-                            className="object-cover mb-15"
-                            style={{
-                              transform: `scale(${zoomLevel}) translate(${offset.x}px, ${offset.y}px)`,
-                              width: "100%",
-                              height: "100%",
-                            }}
-                          />
-                        </div>
+                      <div className="relative w-full h-[60vh] flex justify-center items-center overflow-hidden">
+                        <img
+                          ref={imgRef}
+                          src={card.base64}
+                          alt="Full-size Base64 Image"
+                          className="max-w-full max-h-full object-contain transition-transform duration-200 ease-in-out"
+                          style={{
+                            transform: `scale(${zoomLevel}) translate(${offset.x}px, ${offset.y}px)`,
+                          }}
+                        />
                       </div>
 
-                      <DialogFooter className="w-full flex justify-center items-center">
+                      <DialogFooter className="w-full flex justify-center items-center relative mt-4">
                         <div className="absolute flex gap-4 left-10">
                           <Button
                             color="primary"
@@ -179,31 +180,35 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
 
                         <div className="flex items-center space-x-2">
                           <button
-                            className="p-2 bg-blue-500 text-white rounded-md"
-                            onClick={() => moveImage("left")}
+                            className="p-2 bg-green-500 text-white rounded-md mr-2"
+                            onClick={() => downloadImage(card.base64)}
                           >
-                            <ChevronLeft className="fas fa-chevron-left" />{" "}
+                            <Download />
                           </button>
 
                           <button
                             className="p-2 bg-blue-500 text-white rounded-md"
-                            onClick={() => moveImage("down")}
+                            onClick={() => moveImage("left")}
                           >
-                            <ChevronUp className="fas fa-chevron-up" />
+                            <ChevronLeft />
                           </button>
-
                           <button
                             className="p-2 bg-blue-500 text-white rounded-md"
                             onClick={() => moveImage("up")}
                           >
-                            <ChevronDown className="fas fa-chevron-down" />{" "}
+                            <ChevronUp />
                           </button>
-
+                          <button
+                            className="p-2 bg-blue-500 text-white rounded-md"
+                            onClick={() => moveImage("down")}
+                          >
+                            <ChevronDown />
+                          </button>
                           <button
                             className="p-2 bg-blue-500 text-white rounded-md"
                             onClick={() => moveImage("right")}
                           >
-                            <ChevronRight className="fas fa-chevron-right" />{" "}
+                            <ChevronRight />
                           </button>
                         </div>
                       </DialogFooter>

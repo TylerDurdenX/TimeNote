@@ -550,18 +550,13 @@ const TaskPage = ({ taskId, email, projectId }: Props) => {
     }
   }, [task]);
 
-  useEffect(() => {
-    if (!isProgressStarted && task?.inProgressTimeinMinutes !== null) {
-      const minutes = Number(task?.inProgressTimeinMinutes);
-      const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      setTimeDiff(`${hours}:${remainingMinutes}:00`);
-    }
+  const targetTime = new Date(task?.inProgressStartTime!);
 
-    const targetTime = new Date(task?.inProgressStartTime!);
-    let intervalId: NodeJS.Timeout | null = null;
+  let targetTimeLocal = new Date();
+  let count = 0;
 
-    const updateTime = () => {
+  const updateTime = () => {
+    if (isProgressStarted === true && task?.inProgressStartTime !== null) {
       const currentTime = new Date();
       let diff = currentTime.getTime() - targetTime.getTime();
 
@@ -571,11 +566,45 @@ const TaskPage = ({ taskId, email, projectId }: Props) => {
       const seconds = Math.floor(diff / 1000);
       const minutes = Math.floor(seconds / 60);
       const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      const remainingSeconds = seconds % 60;
+      const remainingMinutes = (minutes % 60).toString().padStart(2, "0");
+      const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
 
       setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
-    };
+    } else {
+      if (count === 0) {
+        const minutes = Number(task?.inProgressTimeinMinutes);
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = (minutes % 60).toString().padStart(2, "0");
+        setTimeDiff(`${hours}:${remainingMinutes}:00`);
+        targetTimeLocal = new Date();
+        count = 1;
+      } else {
+        const currentTime = new Date();
+        let diff = currentTime.getTime() - targetTimeLocal!.getTime();
+
+        if (task?.inProgressTimeinMinutes !== null)
+          diff += Number(task?.inProgressTimeinMinutes!) * 60 * 1000;
+
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = (minutes % 60).toString().padStart(2, "0");
+        const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
+
+        setTimeDiff(`${hours}:${remainingMinutes}:${remainingSeconds}`);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!isProgressStarted && task?.inProgressTimeinMinutes !== null) {
+      const minutes = Number(task?.inProgressTimeinMinutes);
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = (minutes % 60).toString().padStart(2, "0");
+      setTimeDiff(`${hours}:${remainingMinutes}:00`);
+    }
+
+    let intervalId: NodeJS.Timeout | null = null;
 
     if (isProgressStarted) {
       intervalId = setInterval(updateTime, 1000);

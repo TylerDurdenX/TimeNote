@@ -55,7 +55,7 @@ const UserList = ({ onSelectUser }: Props) => {
         if (!containerRef.current || isLoading || !hasMore) return;
 
         const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 70;
 
         if (isAtBottom) {
           callback();

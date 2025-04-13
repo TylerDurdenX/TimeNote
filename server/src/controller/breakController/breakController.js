@@ -316,6 +316,14 @@ export const updateBreakTime = catchAsync(async (req, res, next) => {
           });
         })
       );
+      const userLogout = await prisma.user.update({
+        where: {
+          email: email,
+        },
+        data: {
+          isLoggedIn: false,
+        },
+      });
 
       const result = {
         status: "Success",

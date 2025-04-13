@@ -2196,7 +2196,7 @@ export const addComment = catchAsync(async (req, res, next) => {
           const alert = await prisma.alert.create({
             data: {
               title: "Mentioned in Comment",
-              description: `${u.username} mentioned you in task :${taskCode}`,
+              description: `${user.username} mentioned you in task :${taskCode}`,
               triggeredDate: commentTime,
               userId: u.userId,
             },

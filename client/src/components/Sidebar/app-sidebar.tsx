@@ -187,11 +187,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: `/screenshots?email=${userEmail}`,
           icon: ScreenShare,
         },
-        {
-          title: "Live Streaming",
-          url: `/liveStream?email=${userEmail}`,
-          icon: Cast,
-        },
+        // {
+        //   title: "Live Streaming",
+        //   url: `/liveStream?email=${userEmail}`,
+        //   icon: Cast,
+        // },
         {
           title: "Geo Tracking",
           url: `/geoTrack?email=${userEmail}`,
