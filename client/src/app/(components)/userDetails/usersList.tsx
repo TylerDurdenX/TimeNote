@@ -44,32 +44,32 @@ const UserList = ({ onSelectUser }: Props) => {
     }
   }, [searchQuery]);
 
-  const useScrollToBottom = (
-    containerRef: React.RefObject<HTMLDivElement | null>,
-    callback: () => void,
-    isLoading: boolean,
-    hasMore: boolean
-  ) => {
-    useEffect(() => {
-      const handleScroll = () => {
-        if (!containerRef.current || isLoading || !hasMore) return;
+  // const useScrollToBottom = (
+  //   containerRef: React.RefObject<HTMLDivElement | null>,
+  //   callback: () => void,
+  //   isLoading: boolean,
+  //   hasMore: boolean
+  // ) => {
+  //   useEffect(() => {
+  //     const handleScroll = () => {
+  //       if (!containerRef.current || isLoading || !hasMore) return;
 
-        const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 70;
+  //       const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+  //       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 70;
 
-        if (isAtBottom) {
-          callback();
-        }
-      };
+  //       if (isAtBottom) {
+  //         callback();
+  //       }
+  //     };
 
-      const container = containerRef.current;
-      container?.addEventListener("scroll", handleScroll);
+  //     const container = containerRef.current;
+  //     container?.addEventListener("scroll", handleScroll);
 
-      return () => {
-        container?.removeEventListener("scroll", handleScroll);
-      };
-    }, [containerRef, callback, isLoading, hasMore]);
-  };
+  //     return () => {
+  //       container?.removeEventListener("scroll", handleScroll);
+  //     };
+  //   }, [containerRef, callback, isLoading, hasMore]);
+  // };
 
   const {
     data: list,
@@ -80,7 +80,7 @@ const UserList = ({ onSelectUser }: Props) => {
     {
       email: userEmail!,
       page: page,
-      limit: 15,
+      limit: 999999,
       searchQuery: searchParam,
     },
     {
@@ -88,15 +88,15 @@ const UserList = ({ onSelectUser }: Props) => {
     }
   );
 
-  useScrollToBottom(
-    scrollContainerRef,
-    () => {
-      console.log("Fetching more users...");
-      setPage((prev) => prev + 1);
-    },
-    isLoading,
-    hasMore
-  );
+  // useScrollToBottom(
+  //   scrollContainerRef,
+  //   () => {
+  //     console.log("Fetching more users...");
+  //     setPage((prev) => prev + 1);
+  //   },
+  //   isLoading,
+  //   hasMore
+  // );
 
   useEffect(() => {
     if (list && Array.isArray(list)) {
@@ -196,6 +196,7 @@ const UserList = ({ onSelectUser }: Props) => {
                         <Avatar className="h-[50px] w-[50px] rounded-full justify-center items-center">
                           <AvatarImage
                             className="object-cover w-full h-full rounded-full"
+                            loading="lazy" // ✅ native lazy loading
                             src={
                               employee.profilePicture
                                 ? employee.profilePicture.base64
