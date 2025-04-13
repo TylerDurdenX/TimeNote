@@ -142,7 +142,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
                         </div>
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-[80vw] max-h-[80vh] overflow-hidden">
+                    <DialogContent className="max-w-[80vw] max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>{card.username}</DialogTitle>
                         <DialogDescription>{card.time}</DialogDescription>

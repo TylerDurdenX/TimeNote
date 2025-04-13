@@ -93,7 +93,7 @@ const Header = ({
     case "Screenshots":
       icon = <ScreenShare className="mr-2" />;
       break;
-    case "Geo Tracking":
+    case "Geo Tracking (Beta)":
       icon = <MapPin className="mr-2" />;
       break;
     case "Attendance":

@@ -1,18 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapContainer, TileLayer } from "react-leaflet";
 import HeatMap from "./HeatMap";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import GeoTableView from "./GeoTableView";
 import { useSearchParams } from "next/navigation";
 
@@ -26,7 +19,7 @@ const page = () => {
       <div className="flex w-full text-gray-900">
         <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
           <Header
-            name="Geo Tracking"
+            name="Geo Tracking (Beta)"
             hasFilters={false}
             hasTeamFilter={false}
             hasDateFilter={true}
@@ -36,7 +29,7 @@ const page = () => {
         </div>
       </div>
       <div className="flex gap-4 px-4 w-full h-full  box-border overflow-x-hidden">
-        <Tabs defaultValue="tableView" className="w-full">
+        <Tabs defaultValue="map" className="w-full">
           <TabsList className="grid w-full grid-cols-2 w-[400px]">
             <TabsTrigger value="map">Map</TabsTrigger>
             <TabsTrigger value="tableView">Table View</TabsTrigger>
