@@ -20,17 +20,20 @@ import {
 import { useGetUserListFilterQuery } from "@/store/api";
 
 type Props = {
-  setValue: React.Dispatch<React.SetStateAction<string>>;
-  value: string;
+  setValue: React.Dispatch<React.SetStateAction<number>>;
+  value: number;
   email: string;
 };
 
 export function UserSelectionFilter({ setValue, value, email }: Props) {
   const [open, setOpen] = React.useState(false);
 
-  const { data, isLoading, error, isSuccess } = useGetUserListFilterQuery({
-    email: email!,
-  });
+  const { data, isLoading, error, isSuccess } = useGetUserListFilterQuery(
+    {
+      email: email!,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -42,8 +45,8 @@ export function UserSelectionFilter({ setValue, value, email }: Props) {
           className="w-[200px] justify-between"
         >
           {value
-            ? data?.find((framework) => framework.username === value)?.username
-            : "Find User"}
+            ? data?.find((framework) => framework.userId === value)?.username
+            : "Select User"}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -58,7 +61,8 @@ export function UserSelectionFilter({ setValue, value, email }: Props) {
                   key={user.username}
                   value={user.username}
                   onSelect={(currentValue) => {
-                    setValue(currentValue);
+                    console.log(currentValue);
+                    setValue(user.userId);
                     setOpen(false);
                   }}
                 >
@@ -66,7 +70,7 @@ export function UserSelectionFilter({ setValue, value, email }: Props) {
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === user.username ? "opacity-100" : "opacity-0"
+                      value === user.userId ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

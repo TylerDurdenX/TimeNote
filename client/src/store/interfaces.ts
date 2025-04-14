@@ -85,11 +85,13 @@ interface ScreenshotObject {
   base64: string;
   userId: number;
   date: string;
+  flag: boolean;
 }
 
 export interface UserFilterResponse {
   username: string;
   email: string;
+  userId: number;
 }
 
 export interface LiveStreamResponse {

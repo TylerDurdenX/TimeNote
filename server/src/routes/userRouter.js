@@ -89,7 +89,9 @@ import {
 } from "../controller/projectController/projectController.js";
 import {
   addscreenshots,
+  getFlaggedScreenshots,
   getScreenshots,
+  updateScreenshot,
 } from "../controller/LiveTracking/screenshotController.js";
 import {
   getLiveStreamUsers,
@@ -171,6 +173,7 @@ router.post(
 router.post("/createProject", isAuthenticated, createProject);
 router.get("/getUserHierarchyData", isAuthenticated, getUserHierarchyData);
 router.get("/getScreenshots", isAuthenticated, getScreenshots);
+router.get("/getFlaggedScreenshots", getFlaggedScreenshots);
 router.get("/getUsersListFilter", getUsersForUserFilter);
 router.get("/getLiveStreamUsers", getLiveStreamUsers);
 router.get("/getProjects", isAuthenticated, getProjects);
@@ -290,6 +293,7 @@ router.patch("/updateSubTaskStatus", updateSubTaskStatus);
 router.get("/getTeamsConfiguration", getTeamConfiguration);
 router.get("/getUsersGeoData", getUsersGeoData);
 router.patch("/reopenTask", isAuthenticated, reopenTask);
+router.patch("/updateScreenshotFlag", updateScreenshot);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);

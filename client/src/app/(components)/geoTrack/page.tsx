@@ -30,7 +30,7 @@ const page = () => {
       </div>
       <div className="flex gap-4 px-4 w-full h-full  box-border overflow-x-hidden">
         <Tabs defaultValue="map" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 w-[400px]">
+          <TabsList className="grid grid-cols-2 w-[400px]">
             <TabsTrigger value="map">Map</TabsTrigger>
             <TabsTrigger value="tableView">Table View</TabsTrigger>
           </TabsList>

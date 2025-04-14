@@ -1,8 +1,12 @@
-import { useGetScreenshotsQuery } from "@/store/api";
+import {
+  useGetScreenshotsQuery,
+  useUpdateScreenshotFlagMutation,
+} from "@/store/api";
 import React, { useEffect, useRef, useState } from "react";
 import Pagination from "@mui/material/Pagination";
 
 import { Button } from "@/components/ui/button";
+import { SkeletonCard as SkeletonLoader } from "../liveStream/SkeletonLoader";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +22,7 @@ import {
   ChevronRight,
   ChevronUp,
   Download,
+  Flag,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
@@ -72,6 +77,24 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
     setZoomLevel((prev) => Math.max(prev - 0.2, 1));
   };
 
+  const [updateScreenshot] = useUpdateScreenshotFlagMutation();
+
+  const handleFlagClick = async (id: number, flag: boolean) => {
+    const response = await updateScreenshot({ screenshotId: id, flag: flag });
+    if (
+      // @ts-ignore
+      response.error?.data.status === "Error" ||
+      // @ts-ignore
+      response.error?.data.status === "Fail"
+    ) {
+      // @ts-ignore
+      toast.error(response.error?.data.message);
+    } else {
+      // @ts-ignore
+      toast.success(response.data.error?.message!);
+    }
+  };
+
   const moveImage = (direction: "up" | "down" | "left" | "right") => {
     setOffset((prev) => {
       switch (direction) {
@@ -106,17 +129,23 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
   return (
     <>
       {!queriesLoaded ? (
-        <CircularLoading />
+        <div className="grid grid-cols-3 gap-4 w-full">
+          {Array()
+            .fill(0)
+            .map((_, index) => (
+              <SkeletonLoader key={index} />
+            ))}
+        </div>
       ) : (
         <>
           <div
             className="flex flex-wrap p-5 mb-2"
-            // style={{ maxHeight: "calc(100vh - 4rem)" }}
+            // style={{ maxHeight: "calc(100vh - 1rem)" }}
           >
             <div className="grid grid-cols-3 gap-4 w-full">
               {screenshotList.map((card, index) => (
                 <div
-                  key={index}
+                  key={card.id}
                   className="w-full p-1 rounded-lg shadow-md bg-white flex flex-col items-center"
                 >
                   <Dialog>
@@ -126,7 +155,7 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
                         style={{ paddingTop: "56.25%" }}
                         onClick={handleDialogOpen}
                       >
-                        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-full ">
                           <img
                             src={card.base64}
                             alt="Base64 Image"
@@ -138,7 +167,24 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
                     <DialogContent className="max-w-[80vw] max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>{card.username}</DialogTitle>
-                        <DialogDescription>{card.time}</DialogDescription>
+                        <div className="flex items-center justify-between">
+                          <DialogDescription>{card.time}</DialogDescription>
+                          <button
+                            onClick={() => handleFlagClick(card.id, card.flag)}
+                          >
+                            {card.flag ? (
+                              <>
+                                {" "}
+                                <Flag className="text-red-600" fill="red" />
+                              </>
+                            ) : (
+                              <>
+                                {" "}
+                                <Flag />
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </DialogHeader>
 
                       <div className="relative w-full h-[60vh] flex justify-center items-center overflow-hidden">
@@ -178,6 +224,7 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
                           >
                             <Download />
                           </button>
+
                           <button
                             className="p-2 bg-blue-500 text-white rounded-md"
                             onClick={() => moveImage("left")}
@@ -208,10 +255,8 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
                   </Dialog>
 
                   <div className="w-full mt-2 flex">
-                    <div className="w-[65%]">
-                      <div className="text-lg font-semibold">
-                        {card.username}
-                      </div>
+                    <div className="w-[55%]">
+                      <div className="">{card.username}</div>
                     </div>
 
                     <div className="w-[35%] flex flex-col">
@@ -219,8 +264,27 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
                         {new Date(card.date).toISOString().split("T")[0]}
                       </div>
 
-                      <div className="flex-grow text-xs text-gray-500 ml-1">
+                      <div className="w-[55%] text-xs text-gray-500 ml-1">
                         {card.time}
+                      </div>
+                    </div>
+                    <div className="flex items-center h-full">
+                      <div className="w-[10%] text-xs text-gray-500 mt-2">
+                        {/* <button
+                          onClick={() => handleFlagClick(card.id, card.flag)}
+                        > */}
+                        {card.flag ? (
+                          <>
+                            {" "}
+                            <Flag className="text-red-600" fill="red" />
+                          </>
+                        ) : (
+                          <>
+                            {" "}
+                            <Flag />
+                          </>
+                        )}
+                        {/* </button> */}
                       </div>
                     </div>
                   </div>

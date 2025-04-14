@@ -1,9 +1,12 @@
 "use client";
 
-import { useGetScreenshotsQuery } from "@/store/api";
+import {
+  useGetScreenshotsQuery,
+  useUpdateScreenshotFlagMutation,
+} from "@/store/api";
 import React, { useEffect, useRef, useState } from "react";
 import Pagination from "@mui/material/Pagination";
-
+import { SkeletonCard as SkeletonLoader } from "../liveStream/SkeletonLoader";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,11 +23,13 @@ import {
   ChevronRight,
   ChevronUp,
   Download,
+  Flag,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
 import { Stack } from "@mui/material";
 import CircularLoading from "@/components/Sidebar/loading";
+import toast from "react-hot-toast";
 
 type Props = {
   from: string;
@@ -35,6 +40,7 @@ type Props = {
 const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
   const [queriesLoaded, setQueriesLoaded] = useState(false);
   const [page, setPage] = useState(1);
+  const [flagSelected, setFlagSelected] = useState(false);
 
   localStorage.removeItem("persist:root");
 
@@ -43,9 +49,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
     { refetchOnMountOrArgChange: true }
   );
 
-  useEffect(() => {
-    console.log("date changed");
-  }, [from, to]);
+  useEffect(() => {}, [from, to]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -65,6 +69,24 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
     newPage: number
   ) => {
     setPage(newPage);
+  };
+
+  const [updateScreenshot] = useUpdateScreenshotFlagMutation();
+
+  const handleFlagClick = async (id: number, flag: boolean) => {
+    const response = await updateScreenshot({ screenshotId: id, flag: flag });
+    if (
+      // @ts-ignore
+      response.error?.data.status === "Error" ||
+      // @ts-ignore
+      response.error?.data.status === "Fail"
+    ) {
+      // @ts-ignore
+      toast.error(response.error?.data.message);
+    } else {
+      // @ts-ignore
+      toast.success(response.data.error?.message!);
+    }
   };
 
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -113,7 +135,13 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
   return (
     <>
       {!queriesLoaded ? (
-        <CircularLoading />
+        <div className="grid grid-cols-3 gap-4 w-full">
+          {Array()
+            .fill(0)
+            .map((_, index) => (
+              <SkeletonLoader key={index} />
+            ))}
+        </div>
       ) : (
         <>
           <div
@@ -123,7 +151,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
             <div className="grid grid-cols-3 gap-4 w-full">
               {screenshotList.map((card, index) => (
                 <div
-                  key={index}
+                  key={card.id}
                   className="w-full p-1 rounded-lg shadow-md bg-white flex flex-col items-center"
                 >
                   <Dialog>
@@ -145,7 +173,24 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
                     <DialogContent className="max-w-[80vw] max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>{card.username}</DialogTitle>
-                        <DialogDescription>{card.time}</DialogDescription>
+                        <div className="flex items-center justify-between">
+                          <DialogDescription>{card.time}</DialogDescription>
+                          <button
+                            onClick={() => handleFlagClick(card.id, card.flag)}
+                          >
+                            {card.flag ? (
+                              <>
+                                {" "}
+                                <Flag className="text-red-600" fill="red" />
+                              </>
+                            ) : (
+                              <>
+                                {" "}
+                                <Flag />
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </DialogHeader>
 
                       <div className="relative w-full h-[60vh] flex justify-center items-center overflow-hidden">
@@ -216,10 +261,8 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
                   </Dialog>
 
                   <div className="w-full mt-2 flex">
-                    <div className="w-[65%]">
-                      <div className="text-lg font-semibold">
-                        {card.username}
-                      </div>
+                    <div className="w-[55%]">
+                      <div className="">{card.username}</div>
                     </div>
 
                     <div className="w-[35%] flex flex-col">
@@ -227,8 +270,27 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
                         {new Date(card.date).toISOString().split("T")[0]}
                       </div>
 
-                      <div className="flex-grow text-xs text-gray-500 ml-1">
+                      <div className="w-[55%] text-xs text-gray-500 ml-1">
                         {card.time}
+                      </div>
+                    </div>
+                    <div className="flex items-center h-full">
+                      <div className="w-[10%] text-xs text-gray-500 mt-2">
+                        {/* <button
+                          onClick={() => handleFlagClick(card.id, card.flag)}
+                        > */}
+                        {card.flag ? (
+                          <>
+                            {" "}
+                            <Flag className="text-red-600" fill="red" />
+                          </>
+                        ) : (
+                          <>
+                            {" "}
+                            <Flag />
+                          </>
+                        )}
+                        {/* </button> */}
                       </div>
                     </div>
                   </div>

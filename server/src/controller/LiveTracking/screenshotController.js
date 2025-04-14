@@ -119,6 +119,9 @@ export const getScreenshots = catchAsync(async (req, res, next) => {
         where: filters,
         skip: (page - 1) * limit,
         take: parseInt(limit),
+        orderBy: {
+          date: "desc", // Replace 'createdAt' with the field you want to sort by
+        },
       });
 
       const totalPages = Math.ceil(screenshotsCount / limit);
@@ -131,6 +134,119 @@ export const getScreenshots = catchAsync(async (req, res, next) => {
         limit,
       });
     }
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("There was an error fetching screenshots", 400));
+  }
+});
+
+export const getFlaggedScreenshots = catchAsync(async (req, res, next) => {
+  const { userId, page = 1, limit = 20 } = req.query;
+
+  try {
+    if (Number(userId) === 0) {
+      const filters = {};
+
+      const screenshotsCount = await prisma.screenshots.count({
+        where: {
+          flag: true,
+        },
+      });
+      const screenshotList = await prisma.screenshots.findMany({
+        where: {
+          flag: true,
+        },
+        skip: (page - 1) * limit,
+        take: parseInt(limit),
+        orderBy: {
+          date: "desc", // Replace 'createdAt' with the field you want to sort by
+        },
+      });
+
+      const totalPages = Math.ceil(screenshotsCount / limit);
+
+      res.status(200).json({
+        screenshotList,
+        totalPages,
+        currentPage: page,
+        totalItems: screenshotsCount,
+        limit,
+      });
+    } else {
+      const user = await prisma.user.findFirst({
+        where: {
+          userId: Number(userId),
+        },
+      });
+
+      if (!user) {
+        return next(new AppError("User Not Found", 404));
+      }
+
+      const filters = {
+        userId: user.userId,
+        flag: true,
+      };
+
+      const screenshotsCount = await prisma.screenshots.count({
+        where: filters,
+      });
+      const screenshotList = await prisma.screenshots.findMany({
+        where: filters,
+        skip: (page - 1) * limit,
+        take: parseInt(limit),
+      });
+
+      const totalPages = Math.ceil(screenshotsCount / limit);
+
+      res.status(200).json({
+        screenshotList,
+        totalPages,
+        currentPage: page,
+        totalItems: screenshotsCount,
+        limit,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("There was an error fetching screenshots", 400));
+  }
+});
+
+export const updateScreenshot = catchAsync(async (req, res, next) => {
+  const { id, flag } = req.query;
+
+  try {
+    await prisma.$transaction(async (prisma) => {
+      let actualFlag =
+        flag === "false" || flag === "null" || flag === "undefined"
+          ? false
+          : flag;
+
+      if (!actualFlag) {
+        await prisma.screenshots.update({
+          where: {
+            id: Number(id),
+          },
+          data: {
+            flag: true,
+          },
+        });
+      } else {
+        await prisma.screenshots.update({
+          where: {
+            id: Number(id),
+          },
+          data: {
+            flag: false,
+          },
+        });
+      }
+
+      return next(
+        new SuccessResponse("Screenshot flag updated Successfully!", 200)
+      );
+    });
   } catch (error) {
     console.log(error);
     return next(new AppError("There was an error fetching screenshots", 400));

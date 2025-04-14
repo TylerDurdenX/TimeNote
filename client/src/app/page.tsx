@@ -48,7 +48,6 @@ const App: React.FC = () => {
         const commaSeparatedNames = user.roles
           .map((role: Role) => role.code)
           .join(", ");
-        console.log(commaSeparatedNames);
         sessionStorage.setItem("userRoles", commaSeparatedNames);
       }
       toast.success("Login Successful");

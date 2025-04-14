@@ -168,6 +168,8 @@ export const api = createApi({
     "Timesheet",
     "PendingTimesheet",
     "Breaks",
+    "Screenshots",
+    "FlaggedScreenshots",
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -267,6 +269,17 @@ export const api = createApi({
         const url = `api/user/getScreenshots?userId=${userId}&page=${page}&limit=${limit}&from=${from}&to=${to}`;
         return url;
       },
+      providesTags: ["Screenshots"],
+    }),
+    getFlaggedScreenshots: build.query<
+      ScreenshotResponse,
+      { userId: number; page: number; limit: number }
+    >({
+      query: ({ userId, page, limit }) => {
+        const url = `api/user/getFlaggedScreenshots?userId=${userId}&page=${page}&limit=${limit}`;
+        return url;
+      },
+      providesTags: ["FlaggedScreenshots"],
     }),
     getUserListFilter: build.query<UserFilterResponse[], { email: string }>({
       query: ({ email }) => {
@@ -449,6 +462,16 @@ export const api = createApi({
         const url = `api/user/getProjectUsers?id=${projectId}`;
         return url;
       },
+    }),
+    updateScreenshotFlag: build.mutation<
+      ApiResponse,
+      { screenshotId: number; flag: boolean }
+    >({
+      query: ({ screenshotId, flag }) => ({
+        url: `api/user/updateScreenshotFlag?id=${screenshotId}&flag=${flag}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Screenshots", "FlaggedScreenshots"],
     }),
     updateTaskStatus: build.mutation<
       ApiResponse,
@@ -1181,4 +1204,6 @@ export const {
   useGetTeamsConfigurationQuery,
   useGetUsersGeoDataQuery,
   useReopenTaskMutation,
+  useUpdateScreenshotFlagMutation,
+  useGetFlaggedScreenshotsQuery,
 } = api;
