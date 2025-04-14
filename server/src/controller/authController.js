@@ -206,6 +206,13 @@ export const login = catchAsync(async (req, res, next) => {
     where: {
       email: email,
     },
+    include: {
+      roles: {
+        select: {
+          code: true,
+        },
+      },
+    },
   });
 
   if (!user) {

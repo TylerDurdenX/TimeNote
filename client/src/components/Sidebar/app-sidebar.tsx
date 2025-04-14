@@ -225,6 +225,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const [isHovered, setIsHovered] = useState(false);
 
+  const userRolesList = sessionStorage.getItem("userRoles");
+
+  let adminPageFlag: boolean = false;
+
+  if (
+    userRolesList !== undefined &&
+    userRolesList !== null &&
+    userRolesList !== ""
+  ) {
+    // Define the function to check if 'ADMIN' is in the list
+    const containsValue = (csvString: string, value: string): boolean => {
+      // Split the string by commas to get an array of values
+      const valuesArray = csvString.split(",");
+      // Check if the value exists in the array
+      return valuesArray.includes(value);
+    };
+
+    // Call containsValue function to set Admin
+    adminPageFlag = containsValue(userRolesList, "ADMIN");
+  } else {
+    console.log("userRolesList is undefined or empty");
+  }
+
   const { data, isLoading, error } = useGetUserQuery({ email: userEmail! });
   return (
     <Sidebar collapsible="icon" {...props} variant="floating">
@@ -233,12 +256,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="bg-[#001742]">
         {/* <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/> */}
-        <NavMain
-          items={items}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          isItem1Open={item1Open}
-        />
+        {adminPageFlag ? (
+          <>
+            <NavMain
+              items={items}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              isItem1Open={item1Open}
+            />
+          </>
+        ) : (
+          ""
+        )}
+
         <NavProjects
           projects={mockData.items1}
           activeTab={activeTab}

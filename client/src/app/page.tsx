@@ -28,6 +28,10 @@ const App: React.FC = () => {
     });
   };
 
+  type Role = {
+    code: string;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -40,6 +44,13 @@ const App: React.FC = () => {
       );
       setTimeout(() => {}, 3000);
       const user = response.data.data.user;
+      if (user.roles !== null && user.roles !== undefined) {
+        const commaSeparatedNames = user.roles
+          .map((role: Role) => role.code)
+          .join(", ");
+        console.log(commaSeparatedNames);
+        sessionStorage.setItem("userRoles", commaSeparatedNames);
+      }
       toast.success("Login Successful");
       dispatch(setAuthUser(user));
       sessionStorage.setItem("email", formData.email);
