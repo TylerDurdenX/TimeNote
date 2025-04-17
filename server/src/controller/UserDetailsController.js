@@ -828,3 +828,90 @@ export const getUserHierarchyData = catchAsync(async (req, res, next) => {
     );
   }
 });
+
+export const createBulkUsers = catchAsync(async (req, res, next) => {
+  const usersList = req.body;
+  try {
+    await prisma.$transaction(async (prisma) => {
+      let errorFlag = "";
+
+      console.log(usersList);
+
+      const userPromises = usersList.map(async (user) => {
+        let joiningDateIsoString = null;
+        let dateOfBirthObjISOString = null;
+        if (user.joiningDate) {
+          const joiningDate = user.joiningDate;
+          const joiningDateObj = new Date(joiningDate);
+          joiningDateIsoString = joiningDateObj.toISOString();
+        }
+        if (user.dateOfBirth) {
+          const dateOfBirth = user.dateOfBirth;
+          const dateOfBirthObj = new Date(dateOfBirth);
+          dateOfBirthObjISOString = dateOfBirthObj.toISOString();
+        }
+
+        // if (
+        //   isNaN(new Date(isoDueDateString).getTime()) ||
+        //   isNaN(new Date(isoStartDateString).getTime())
+        // ) {
+        //   errorFlag = "Please check the data of Start Date and Due Date";
+        //   throw new Error("Invalid date format");
+        // }
+
+        let oldUser;
+        oldUser = await prisma.user.findFirst({
+          where: {
+            email: user.email,
+          },
+        });
+        if (oldUser !== null) {
+          errorFlag = "invalid User mail id";
+          throw new Error("Invalid mail id");
+        }
+
+        const newUserDetails = await prisma.userDetails.create({
+          data: {
+            address: user.address,
+            employeeId: user.employeeId,
+            personalEmail: user.personalEmail,
+            bloodGroup: user.bloodGroup,
+            employeeGrade: user.employeeGrade,
+            gender: user.gender,
+            department: user.department,
+            joiningDate: joiningDateIsoString,
+            dateOfBirth: dateOfBirthObjISOString,
+            emergencyContact: user.emergencyContact,
+            totalLeaves: user.totalLeaves,
+            employeeStatus: user.employeeStatus,
+            workLocation: user.workLocation,
+            employementType: user.employementType,
+            issuedDevices: user.issuedDevices,
+          },
+        });
+
+        const newUser = await prisma.user.create({
+          data: {
+            username: user.username,
+            email: user.email,
+            password: user.password,
+            designation: user.designation,
+            phoneNumber: user.phoneNumber,
+            userDetailsId: newUserDetails.id,
+          },
+        });
+      });
+
+      await Promise.all(userPromises); // Ensure all tasks are processed before finishing
+
+      if (isEmpty(errorFlag)) {
+        return next(new SuccessResponse("Users Created Successfully", 200));
+      } else {
+        return next(new AppError(errorFlag, 500)); // Return the error message
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("Unexpected error", 500));
+  }
+});

@@ -21,6 +21,7 @@ import {
   getAuthorities,
 } from "../controller/settingsController.js";
 import {
+  createBulkUsers,
   getListOfObjects,
   getUserDetails,
   getUserHierarchyData,
@@ -254,6 +255,7 @@ router.get(
   downloadProjectAttachment
 );
 router.post("/createBulkTasks", isAuthenticated, createBulkTasks);
+router.post("/createBulkUsers", isAuthenticated, createBulkUsers);
 router.get("/getTaskActivity", isAuthenticated, getTaskActivity);
 router.get("/getSubTaskActivity", isAuthenticated, getSubTaskActivity);
 router.get("/getTimesheetData", isAuthenticated, getTimesheetData);

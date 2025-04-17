@@ -13,6 +13,7 @@ import {
   BreakResponse,
   Breaks,
   BreaksForTeams,
+  BulkUser,
   ConfiguredReports,
   CreateSprint,
   CreateUserData,
@@ -715,6 +716,14 @@ export const api = createApi({
       }),
       invalidatesTags: ["Tasks", "ProjectHours"],
     }),
+    createBulkUsers: build.mutation<ApiResponse, BulkUser[]>({
+      query: (tasks) => ({
+        url: "api/user/createBulkUsers",
+        method: "POST",
+        body: tasks,
+      }),
+      invalidatesTags: ["UsersList"],
+    }),
     createUser: build.mutation<ApiResponse, CreateUserData>({
       query: (user) => ({
         url: "api/user/signUp",
@@ -1270,4 +1279,5 @@ export const {
   useGetLeaveDataQuery,
   useGetLeaveApprovalDataQuery,
   useUpdateLeaveMutation,
+  useCreateBulkUsersMutation,
 } = api;

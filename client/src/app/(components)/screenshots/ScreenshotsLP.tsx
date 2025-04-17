@@ -136,7 +136,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
     <>
       {!queriesLoaded ? (
         <div className="grid grid-cols-3 gap-4 w-full">
-          {Array(9)
+          {Array(12)
             .fill(0)
             .map((_, index) => (
               <SkeletonLoader key={index} />

@@ -488,6 +488,29 @@ export interface TaskFormData {
   projectId: number;
 }
 
+export interface BulkUser {
+  username: string;
+  email: string;
+  password: string;
+  designation: string;
+  phoneNumber: string;
+  employeeId?: string;
+  personalEmail?: string;
+  bloodGroup?: string;
+  employeeGrade?: string;
+  address?: string;
+  gender?: string;
+  department?: string;
+  joiningDate?: string;
+  dateOfBirth?: string;
+  emergencyContact?: string;
+  totalLeaves?: string;
+  employeeStatus?: string;
+  workLocation?: string;
+  employementType?: string;
+  issuedDevices?: string;
+}
+
 export interface LeaveData {
   title: string;
   description: string;

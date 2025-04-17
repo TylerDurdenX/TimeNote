@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { CloudUpload, Download } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
-import { SprintResponse, TaskFormData } from "@/store/interfaces";
+import { BulkUser, SprintResponse, User } from "@/store/interfaces";
 import { toast } from "react-hot-toast";
 import ExcelJS from "exceljs";
-import { useCreateBulkTasksMutation } from "@/store/api";
+import { useCreateBulkUsersMutation } from "@/store/api";
 
 type Props = {
   sprintList?: SprintResponse[];
@@ -25,12 +25,12 @@ const BulkCreateUsers = ({
   const [error, setError] = useState<string | null>(null);
   const [uploadedData, setUploadedData] = useState<any[]>([]);
 
-  const [createBulkTasks] = useCreateBulkTasksMutation();
+  const [createBulkUsers] = useCreateBulkUsersMutation();
 
   const allowedExtensions = [".xls", ".xlsx"];
   const maxSize = 1 * 1024 * 1024; // in bytes
 
-  const [taskList, setTaskList] = useState<TaskFormData[]>();
+  const [usersList, setUsersList] = useState<BulkUser[]>();
   const [isOver, setIsOver] = useState(false);
 
   let sprints: string[] = [];
@@ -103,7 +103,7 @@ const BulkCreateUsers = ({
         // Extract data from the worksheet
         const data: any[] = [];
         let errors: string[] = []; // To hold any validation errors
-        let tasksList: TaskFormData[] = [];
+        let usersList: BulkUser[] = [];
         worksheet.eachRow({ includeEmpty: true }, (row, rowIndex) => {
           if (rowIndex === 1) return;
 
@@ -113,105 +113,102 @@ const BulkCreateUsers = ({
 
           const rowData: any = {};
           let rowIsValid = true;
-          let rowTaskData: TaskFormData = Object.create(null);
+          let rowTaskData: BulkUser = Object.create(null);
           row.eachCell({ includeEmpty: true }, (cell, colIndex) => {
             rowData[`col${colIndex}`] = cell.text;
-            if (colIndex > 9) return;
+            if (colIndex > 20) return;
 
             if (colIndex === 1) {
               if (!cell.text.trim()) {
                 rowIsValid = false;
-                errors.push(`Row ${rowIndex} - Task Name cannot be empty.`);
+                errors.push(`Row ${rowIndex} - User Name cannot be empty.`);
               } else {
-                if (cell.text.includes("?") || cell.text.includes("=")) {
-                  rowIsValid = false;
-                  errors.push(
-                    `Row ${rowIndex} - Task Name cannot have special characters`
-                  );
-                } else {
-                  rowTaskData.title = cell.text;
-                  rowTaskData.authorUserId = email;
-                }
+                rowTaskData.username = cell.text;
               }
             }
             if (colIndex === 2) {
               if (!cell.text.trim()) {
                 rowIsValid = false;
-                errors.push(
-                  `Row ${rowIndex} - Task Description cannot be empty.`
-                );
+                errors.push(`Row ${rowIndex} - Email cannot be empty.`);
               } else {
-                rowTaskData.description = cell.text;
+                rowTaskData.email = cell.text;
               }
             }
             if (colIndex === 3) {
               if (!cell.text.trim()) {
                 rowIsValid = false;
-                errors.push(`Row ${rowIndex} - Task Priority cannot be empty.`);
+                errors.push(`Row ${rowIndex} - Password cannot be empty.`);
               } else {
-                rowTaskData.priority = cell.text;
+                rowTaskData.password = cell.text;
               }
             }
             if (colIndex === 4) {
-              if (isNaN(Number(cell.text))) {
-                errors.push(
-                  `Row ${rowIndex} - Column ${colIndex} must be a number.`
-                );
+              if (!cell.text.trim()) {
+                rowIsValid = false;
+                errors.push(`Row ${rowIndex} - Designation cannot be empty.`);
               } else {
-                if (!cell.text.trim()) {
-                  rowIsValid = false;
-                  errors.push(
-                    `Row ${rowIndex} - Estimated hours cannot be empty.`
-                  );
-                } else {
-                  rowTaskData.points = cell.text;
-                }
+                rowTaskData.designation = cell.text;
               }
             }
             if (colIndex === 5) {
               if (!cell.text.trim()) {
                 rowIsValid = false;
-                errors.push(`Row ${rowIndex} - Start Date cannot be empty.`);
+                errors.push(`Row ${rowIndex} - Phone Number cannot be empty.`);
               } else {
-                rowTaskData.startDate = cell.value!.toString();
+                rowTaskData.phoneNumber = cell.value!.toString();
               }
             }
             if (colIndex === 6) {
-              if (!cell.text.trim()) {
-                rowIsValid = false;
-                errors.push(`Row ${rowIndex} - Due Date cannot be empty.`);
-              } else {
-                rowTaskData.dueDate = cell.value!.toString();
-              }
+              rowTaskData.employeeId = cell.value!.toString();
+            }
+            if (colIndex === 7) {
+              rowTaskData.personalEmail = cell.value!.toString();
             }
             if (colIndex === 8) {
-              if (!cell.text.trim()) {
-                rowIsValid = false;
-                errors.push(`Row ${rowIndex} - Assigne email cannot be empty.`);
-              } else {
-                rowTaskData.assignedUserId = cell.text;
-              }
+              rowTaskData.bloodGroup = cell.value!.toString();
             }
             if (colIndex === 9) {
-              const sprintValue = cell.text?.trim();
-              if (!sprintValue) {
-                rowIsValid = false;
-                errors.push(`Row ${rowIndex} - Sprint cannot be empty.`);
-              } else {
-                if (!sprints.includes(cell.text.trim())) {
-                  rowIsValid = false;
-                  errors.push(
-                    `Row ${rowIndex} - Column ${colIndex} value is not correct. Found "${cell.text}".`
-                  );
-                } else {
-                  rowTaskData.sprintId = cell.text;
-                }
+              rowTaskData.employeeGrade = cell.value!.toString();
+            }
+            if (colIndex === 10) {
+              rowTaskData.address = cell.value!.toString();
+            }
+            if (colIndex === 11) {
+              rowTaskData.gender = cell.value!.toString();
+            }
+            if (colIndex === 12) {
+              rowTaskData.department = cell.value!.toString();
+            }
+            if (colIndex === 13) {
+              rowTaskData.joiningDate = cell.value!.toString();
+            }
+            if (colIndex === 14) {
+              rowTaskData.dateOfBirth = cell.value!.toString();
+            }
+            if (colIndex === 15) {
+              if (cell.value !== null) {
+                rowTaskData.emergencyContact = cell.value!.toString();
               }
             }
+            if (colIndex === 16) {
+              rowTaskData.totalLeaves = cell.value!.toString();
+            }
+            if (colIndex === 17) {
+              rowTaskData.employeeStatus = cell.value!.toString();
+            }
+            if (colIndex === 18) {
+              rowTaskData.workLocation = cell.value!.toString();
+            }
+            if (colIndex === 19) {
+              rowTaskData.employementType = cell.value!.toString();
+            }
+            if (colIndex === 20) {
+              rowTaskData.issuedDevices = cell.value!.toString();
+            }
           });
-          tasksList.push(rowTaskData);
+          usersList.push(rowTaskData);
         });
-        setTaskList(tasksList);
+        setUsersList(usersList);
         if (errors.length > 0) {
           setError(errors.join(" ")); // Set the validation errors
 
@@ -239,7 +236,7 @@ const BulkCreateUsers = ({
           link.click();
         }
         try {
-          const response = await createBulkTasks(tasksList!);
+          const response = await createBulkUsers(usersList!);
           setIsOpen(false);
           if (
             // @ts-ignore
@@ -270,8 +267,8 @@ const BulkCreateUsers = ({
   const handleDownload = () => {
     toast.success("Please wait, the download will begin shortly");
     const link = document.createElement("a");
-    link.href = "/assets/Create Tasks.xlsx";
-    link.download = "Create Tasks.xlsx";
+    link.href = "/assets/User Onboarding.xlsx";
+    link.download = "User Onboarding.xlsx";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
