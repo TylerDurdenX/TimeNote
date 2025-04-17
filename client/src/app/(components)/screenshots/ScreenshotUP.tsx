@@ -41,7 +41,7 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
   const [page, setPage] = useState(1);
 
   const { data, isLoading, error, isSuccess, refetch } = useGetScreenshotsQuery(
-    { userId: id, page: page, limit: 9, from, to },
+    { userId: id, page: page, limit: 6, from, to },
     { refetchOnMountOrArgChange: true }
   );
 
@@ -130,7 +130,7 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
     <>
       {!queriesLoaded ? (
         <div className="grid grid-cols-3 gap-4 w-full">
-          {Array(9)
+          {Array(6)
             .fill(0)
             .map((_, index) => (
               <SkeletonLoader key={index} />
