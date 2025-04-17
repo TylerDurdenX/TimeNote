@@ -83,13 +83,22 @@ export const getScreenshots = catchAsync(async (req, res, next) => {
 
       const totalPages = Math.ceil(screenshotsCount / limit);
 
-      res.status(200).json({
+      const result = {
         screenshotList,
         totalPages,
         currentPage: page,
         totalItems: screenshotsCount,
         limit,
-      });
+      };
+
+      const sizeInBytes = Buffer.byteLength(JSON.stringify(result));
+
+      // Convert bytes to megabytes (1 MB = 1024 * 1024 bytes)
+      const sizeInMB = sizeInBytes / (1024 * 1024);
+
+      console.log(sizeInMB);
+
+      res.status(200).json(result);
     } else {
       const user = await prisma.user.findFirst({
         where: {
@@ -126,13 +135,22 @@ export const getScreenshots = catchAsync(async (req, res, next) => {
 
       const totalPages = Math.ceil(screenshotsCount / limit);
 
-      res.status(200).json({
+      const result = {
         screenshotList,
         totalPages,
         currentPage: page,
         totalItems: screenshotsCount,
         limit,
-      });
+      };
+
+      const sizeInBytes = Buffer.byteLength(JSON.stringify(result));
+
+      // Convert bytes to megabytes (1 MB = 1024 * 1024 bytes)
+      const sizeInMB = sizeInBytes / (1024 * 1024);
+
+      console.log(sizeInMB);
+
+      res.status(200).json(result);
     }
   } catch (error) {
     console.log(error);
