@@ -55,12 +55,12 @@ const page = () => {
         <div className="flex w-full space-x-6">
           {/* Avatar Section */}
           <div className="w-1/4 flex justify-center items-center">
-            <Avatar className="h-24 w-24 rounded-full shadow-lg">
+            <Avatar className="h-36 w-36 rounded-full shadow-lg">
               <AvatarImage
                 src={dataUser?.profilePicture?.base64}
                 alt={dataUser?.username}
               />
-              <AvatarFallback className="rounded-lg text-4xl text-white bg-[#003366]">
+              <AvatarFallback className="rounded-lg text-6xl text-white bg-[#003366]">
                 {getInitials(dataUser?.username || "XX")}
               </AvatarFallback>
             </Avatar>

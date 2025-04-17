@@ -25,6 +25,9 @@ const page = () => {
     // sessionStorage.setItem("timesheetSelectedTab", value);
   };
 
+  localStorage.removeItem("persist:root");
+  localStorage.removeItem("ally-supports-cache");
+
   const url = window.location.href;
   const urlParams = new URL(url);
   const id = urlParams.pathname.split("/")[2];

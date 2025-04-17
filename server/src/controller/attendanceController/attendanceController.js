@@ -42,6 +42,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
             date: indianTimeISOString,
           },
         });
+        console.log(createdAttendance);
         if (isEmpty(createdAttendance)) {
           const attendance = await prisma.attendance.create({
             data: {
@@ -73,14 +74,15 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
 
           return res.status(200).json(result);
         } else {
-          await prisma.attendance.update({
-            where: {
-              id: createdAttendance.id,
-            },
-            data: {
-              punchOutTime: "",
-            },
-          });
+          if (!isEmpty())
+            await prisma.attendance.update({
+              where: {
+                id: createdAttendance.id,
+              },
+              data: {
+                punchOutTime: null,
+              },
+            });
 
           const result = {
             status: "Success",
