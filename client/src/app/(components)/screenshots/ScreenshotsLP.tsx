@@ -45,7 +45,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
   localStorage.removeItem("persist:root");
 
   const { data, isLoading, error, isSuccess, refetch } = useGetScreenshotsQuery(
-    { userId: 0, page: page, limit: 12, from, to },
+    { userId: 0, page: page, limit: 9, from, to },
     { refetchOnMountOrArgChange: true }
   );
 
@@ -136,7 +136,7 @@ const ScreenshotsLP = ({ from, to, setReRenderPage }: Props) => {
     <>
       {!queriesLoaded ? (
         <div className="grid grid-cols-3 gap-4 w-full">
-          {Array(12)
+          {Array(9)
             .fill(0)
             .map((_, index) => (
               <SkeletonLoader key={index} />

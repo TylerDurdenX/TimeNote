@@ -41,7 +41,7 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
   const [page, setPage] = useState(1);
 
   const { data, isLoading, error, isSuccess, refetch } = useGetScreenshotsQuery(
-    { userId: id, page: page, limit: 12, from, to },
+    { userId: id, page: page, limit: 9, from, to },
     { refetchOnMountOrArgChange: true }
   );
 
