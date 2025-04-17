@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import UserList from "./usersList";
 import UserDetailsSection from "./udComponents/userDetailsSection";
 import UserDetailsLP from "./userDetailsLP";
+import UserListHR from "./usersListHR";
 
 const Page = () => {
   const [isUserSelected, setIsUserSelected] = useState(false);
@@ -32,16 +33,16 @@ const Page = () => {
           </div>
         </div>
         <div className="flex gap-4 px-4 mr-4 h-full">
-          <div className="w-2/5 p-4 shadow-lg mb-5 overflow-hidden">
-            <UserList onSelectUser={handleSelectUser} />
+          <div className="w-full p-4 shadow-lg mb-5 overflow-hidden">
+            <UserListHR onSelectUser={handleSelectUser} activeFlag={true} />
           </div>
-          <div className="w-3/5 p-4 shadow-lg overflow-hidden justify-center">
+          {/* <div className="w-3/5 p-4 shadow-lg overflow-hidden justify-center">
             {isUserSelected ? (
               <UserDetailsSection id={userId!} />
             ) : (
               <UserDetailsLP />
             )}
-          </div>
+          </div> */}
         </div>
       </div>
     </>

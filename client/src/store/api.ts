@@ -21,6 +21,8 @@ import {
   GeoDataResponse,
   GetProjectTasksCalendarResponse,
   GetProjectTasksResponse,
+  LeaveData,
+  LeaveResponse,
   ListReq,
   ListResponse,
   LiveStreamResponse,
@@ -57,11 +59,13 @@ import {
   UpdateSubTaskData,
   UpdateSubTaskStatusData,
   UpdateTaskData,
+  UpdateUserData,
   UploadAttachment,
   UploadProjectAttachment,
   UploadSubTaskAttachment,
   UserData,
   UserDetails,
+  UserDetailsData,
   UserFilterResponse,
   UserHierarchy,
   UsersListResponse,
@@ -170,6 +174,9 @@ export const api = createApi({
     "Breaks",
     "Screenshots",
     "FlaggedScreenshots",
+    "UsersDetails",
+    "LeaveData",
+    "LeaveApprovalData",
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -242,6 +249,13 @@ export const api = createApi({
         return url;
       },
       providesTags: ["UsersData"],
+    }),
+    getUserPersonalDetails: build.query<UserDetailsData, { id: number }>({
+      query: ({ id }) => {
+        const url = `api/user/getUserPersonalDetails?id=${id}`;
+        return url;
+      },
+      providesTags: ["UsersDetails"],
     }),
     getUserData: build.query<UserData, { username: string }>({
       query: ({ username }) => {
@@ -499,6 +513,20 @@ export const api = createApi({
       }),
       invalidatesTags: ["PendingTimesheet"],
     }),
+    updateLeave: build.mutation<
+      ApiResponse,
+      {
+        leaveId: number;
+        email: string;
+        approveRejectFlag: boolean;
+      }
+    >({
+      query: ({ leaveId, email, approveRejectFlag }) => ({
+        url: `api/user/updateLeave?id=${leaveId}&email=${email}&approveRejectFlag=${approveRejectFlag}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["LeaveApprovalData"],
+    }),
     updateProjectStatus: build.mutation<
       ApiResponse,
       { projectId: number; status: string; email: string }
@@ -553,6 +581,14 @@ export const api = createApi({
         body: body,
       }),
       invalidatesTags: ["Tasks", "Task", "TaskHistory", "TaskActivity"],
+    }),
+    updateUserData: build.mutation<ApiResponse, UpdateUserData>({
+      query: (body) => ({
+        url: `api/user/updateUserData`,
+        method: "PATCH",
+        body: body,
+      }),
+      invalidatesTags: ["UsersDetails"],
     }),
     reopenTask: build.mutation<ApiResponse, ReopenTaskData>({
       query: (body) => ({
@@ -649,6 +685,14 @@ export const api = createApi({
       }),
       invalidatesTags: ["Tasks"],
     }),
+    createLeave: build.mutation<ApiResponse, LeaveData>({
+      query: (leaveData) => ({
+        url: "api/user/createLeave",
+        method: "POST",
+        body: leaveData,
+      }),
+      invalidatesTags: ["LeaveData"],
+    }),
     createTeam: build.mutation<ApiResponse, TeamRequest>({
       query: (teamReq) => ({
         url: "api/user/createTeam",
@@ -711,6 +755,20 @@ export const api = createApi({
         return url;
       },
       providesTags: ["Timesheet"],
+    }),
+    getLeaveData: build.query<LeaveResponse[], { email: string }>({
+      query: ({ email }) => {
+        const url = `api/user/getLeaveData?email=${email}`;
+        return url;
+      },
+      providesTags: ["LeaveData"],
+    }),
+    getLeaveApprovalData: build.query<LeaveResponse[], { email: string }>({
+      query: ({ email }) => {
+        const url = `api/user/getLeaveApprovalData?email=${email}`;
+        return url;
+      },
+      providesTags: ["LeaveApprovalData"],
     }),
     getUsersGeoData: build.query<UserGeoData[], { date: string }>({
       query: ({ date }) => {
@@ -1206,4 +1264,10 @@ export const {
   useReopenTaskMutation,
   useUpdateScreenshotFlagMutation,
   useGetFlaggedScreenshotsQuery,
+  useGetUserPersonalDetailsQuery,
+  useUpdateUserDataMutation,
+  useCreateLeaveMutation,
+  useGetLeaveDataQuery,
+  useGetLeaveApprovalDataQuery,
+  useUpdateLeaveMutation,
 } = api;

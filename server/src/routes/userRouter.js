@@ -24,8 +24,10 @@ import {
   getListOfObjects,
   getUserDetails,
   getUserHierarchyData,
+  getUserPersonalDetails,
   getUsersList,
   mapRolesToUser,
+  saveUserPersonalDetails,
   updateUserBasicDetailsData,
   updateUserDetailsData,
 } from "../controller/UserDetailsController.js";
@@ -142,6 +144,12 @@ import {
   updateBreakTime,
 } from "../controller/breakController/breakController.js";
 import { getUsersGeoData } from "../controller/LiveTracking/geoTrackingController.js";
+import {
+  createLeave,
+  getLeaves,
+  getLeavesApprovalData,
+  updateLeave,
+} from "../controller/leaveController/leaveController.js";
 const router = express.Router();
 
 router.post("/customerDataUpdate", authenticateThirdParty, updateCustomerData);
@@ -157,9 +165,11 @@ router.get("/getUserCount", isAuthenticated, getUserCount);
 router.post("/createRole", createRole);
 router.get("/checkRoleCode", checkRoleCode);
 router.get("/getAuthorities", getAuthorities);
-router.get("/getUsersList", isAuthenticated, getUsersList);
+router.get("/getUsersList", getUsersList);
 router.post("/mapRolesToUser", mapRolesToUser);
 router.get("/getUserDetails", isAuthenticated, getUserDetails);
+router.get("/getUserPersonalDetails", getUserPersonalDetails);
+router.patch("/updateUserData", saveUserPersonalDetails);
 router.get("/getList", getListOfObjects);
 router.post("/createTeam", createTeam);
 router.get("/getTeamsList", getTeamsList);
@@ -170,6 +180,7 @@ router.post(
   isAuthenticated,
   updateUserBasicDetailsData
 );
+router.post("/createLeave", createLeave);
 router.post("/createProject", isAuthenticated, createProject);
 router.get("/getUserHierarchyData", isAuthenticated, getUserHierarchyData);
 router.get("/getScreenshots", isAuthenticated, getScreenshots);
@@ -294,6 +305,9 @@ router.get("/getTeamsConfiguration", getTeamConfiguration);
 router.get("/getUsersGeoData", getUsersGeoData);
 router.patch("/reopenTask", isAuthenticated, reopenTask);
 router.patch("/updateScreenshotFlag", updateScreenshot);
+router.get("/getLeaveData", getLeaves);
+router.get("/getLeaveApprovalData", getLeavesApprovalData);
+router.patch("/updateLeave", updateLeave);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);

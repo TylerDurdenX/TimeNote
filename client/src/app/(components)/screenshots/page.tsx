@@ -114,7 +114,10 @@ const Page = () => {
               <Card>
                 <div className="flex gap-4 px-4 mr-4 h-full overflow-hidden">
                   <div className="w-2/5 p-4 h-full shadow-lg mb-5 overflow-y-auto">
-                    <UserList onSelectUser={handleSelectUser} />
+                    <UserList
+                      onSelectUser={handleSelectUser}
+                      activeFlag={true}
+                    />
                   </div>
                   <div className="w-3/5 p-4 shadow-lg overflow-hidden justify-center">
                     {isUserSelected ? (

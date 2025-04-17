@@ -2,6 +2,8 @@ import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 import { prisma } from "../server.js";
 import { isEmpty, extractTitles } from "../utils/genericMethods.js";
+import SuccessResponse from "../utils/SuccessResponse.js";
+import { getFinancialYearRange } from "./leaveController/leaveController.js";
 
 //get list of users form the table
 export const getUsersList = catchAsync(async (req, res, next) => {
@@ -36,6 +38,7 @@ export const getUsersList = catchAsync(async (req, res, next) => {
               userId: true,
               username: true,
               designation: true,
+              userStatus: true,
               profilePicture: {
                 select: {
                   base64: true,
@@ -82,6 +85,7 @@ export const getUsersList = catchAsync(async (req, res, next) => {
               userId: true,
               username: true,
               designation: true,
+              userStatus: true,
               profilePicture: {
                 select: {
                   base64: true,
@@ -102,6 +106,7 @@ export const getUsersList = catchAsync(async (req, res, next) => {
               userId: true,
               username: true,
               designation: true,
+              userStatus: true,
               profilePicture: {
                 select: {
                   base64: true,
@@ -137,6 +142,7 @@ export const getUsersList = catchAsync(async (req, res, next) => {
                 userId: true,
                 username: true,
                 designation: true,
+                userStatus: true,
                 profilePicture: {
                   select: {
                     base64: true,
@@ -158,6 +164,7 @@ export const getUsersList = catchAsync(async (req, res, next) => {
               userId: true,
               username: true,
               designation: true,
+              userStatus: true,
               profilePicture: {
                 select: {
                   base64: true,
@@ -269,7 +276,188 @@ export const getUserDetails = catchAsync(async (req, res, next) => {
       return res.status(200).json(newObj);
     });
   } catch (error) {
-    console.error("Error during getUserDetails" + error);
+    console.log(error);
+    return next(
+      new AppError("There was an error fetching user details : " + error, 400)
+    );
+  }
+});
+export const getUserPersonalDetails = catchAsync(async (req, res, next) => {
+  const { id } = req.query;
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          userId: Number(id),
+        },
+        include: {
+          profilePicture: {
+            select: {
+              base64: true,
+            },
+          },
+          userDetails: true,
+        },
+      });
+
+      const { startDate, endDate } = getFinancialYearRange();
+
+      const leavesTaken = await prisma.leaves.findMany({
+        where: {
+          userId: user.userId,
+          date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      });
+
+      const {
+        password,
+        profilePictureId,
+        reportsToId,
+        resetPasswordOTP,
+        otpExpires,
+        createdAt,
+        updatedAt,
+        ...newObj
+      } = user;
+
+      if (newObj.userDetails) {
+        newObj.userDetails.claimedLeaves = String(leavesTaken.length);
+      }
+      return res.status(200).json(newObj);
+    });
+  } catch (error) {
+    console.log(error);
+    return next(
+      new AppError("There was an error fetching user details : " + error, 400)
+    );
+  }
+});
+
+export const saveUserPersonalDetails = catchAsync(async (req, res, next) => {
+  const {
+    address,
+    base64,
+    bloodGroup,
+    dateOfBirth,
+    department,
+    designation,
+    email,
+    emergencyContact,
+    employeeGrade,
+    employeeId,
+    employeeStatus,
+    employmentType,
+    gender,
+    issuedDevices,
+    joiningDate,
+    personalEmail,
+    phoneNumber,
+    totalLeaves,
+    userId,
+    username,
+    workLocation,
+  } = req.body;
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.update({
+        where: {
+          userId: userId,
+        },
+        data: {
+          email: email,
+          username: username,
+          designation: designation,
+          phoneNumber: phoneNumber,
+        },
+        include: {
+          profilePicture: true,
+        },
+      });
+
+      if (!isEmpty(base64)) {
+        await prisma.profilePicture.update({
+          where: { id: user.profilePicture.id },
+          data: { base64 },
+        });
+      }
+
+      if (user.userDetailsId !== null) {
+        let dob = null;
+        let joinDate = null;
+        if (!isEmpty(dateOfBirth)) {
+          dob = new Date(dateOfBirth);
+        }
+        if (!isEmpty(joiningDate)) {
+          joinDate = new Date(joiningDate);
+        }
+        await prisma.userDetails.update({
+          where: {
+            id: user.userDetailsId,
+          },
+          data: {
+            address: address,
+            bloodGroup: bloodGroup,
+            dateOfBirth: dob,
+            department: department,
+            emergencyContact: emergencyContact,
+            employeeGrade: employeeGrade,
+            employeeId: employeeId,
+            employeeStatus: employeeStatus,
+            employementType: employmentType,
+            gender: gender,
+            issuedDevices: issuedDevices,
+            joiningDate: joinDate,
+            personalEmail: personalEmail,
+            totalLeaves: totalLeaves,
+            workLocation: workLocation,
+          },
+        });
+      } else {
+        let dob = null;
+        let joinDate = null;
+        if (!isEmpty(dateOfBirth)) {
+          dob = new Date(dateOfBirth);
+        }
+        if (!isEmpty(joiningDate)) {
+          joinDate = new Date(joiningDate);
+        }
+        const userDetails = await prisma.userDetails.create({
+          data: {
+            address: address,
+            bloodGroup: bloodGroup,
+            dateOfBirth: dob,
+            department: department,
+            emergencyContact: emergencyContact,
+            employeeGrade: employeeGrade,
+            employeeId: employeeId,
+            employeeStatus: employeeStatus,
+            employementType: employmentType,
+            gender: gender,
+            issuedDevices: issuedDevices,
+            joiningDate: joinDate,
+            personalEmail: personalEmail,
+            totalLeaves: totalLeaves,
+            workLocation: workLocation,
+          },
+        });
+
+        await prisma.user.update({
+          where: {
+            userId: userId,
+          },
+          data: {
+            userDetailsId: userDetails.id,
+          },
+        });
+      }
+
+      return next(new SuccessResponse("User data Updated Successfully", 200));
+    });
+  } catch (error) {
+    console.log(error);
     return next(
       new AppError("There was an error fetching user details : " + error, 400)
     );

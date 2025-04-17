@@ -54,6 +54,15 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
             },
           });
 
+          await prisma.user.update({
+            where: {
+              userId: user.userId,
+            },
+            data: {
+              userStatus: "active",
+            },
+          });
+
           const result = {
             status: "Success",
             error: "",
@@ -64,6 +73,15 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
 
           return res.status(200).json(result);
         } else {
+          await prisma.attendance.update({
+            where: {
+              id: createdAttendance.id,
+            },
+            data: {
+              punchOutTime: "",
+            },
+          });
+
           const result = {
             status: "Success",
             error: "",
@@ -83,6 +101,15 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
           },
           data: {
             punchOutTime: punchOutTime,
+          },
+        });
+
+        await prisma.user.update({
+          where: {
+            userId: user.userId,
+          },
+          data: {
+            userStatus: "offline",
           },
         });
 

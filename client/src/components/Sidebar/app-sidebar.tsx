@@ -21,6 +21,7 @@ import {
   Users,
   Coffee,
   FileChartColumnIncreasing,
+  CalendarCheck,
 } from "lucide-react";
 
 import { NavMain } from "@/components/Sidebar/nav-main";
@@ -122,6 +123,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         name: "Attendance",
         url: `/attendance?email=${userEmail}`,
         icon: UsersRound,
+      },
+      {
+        name: "Leave Management",
+        url: `/leaveManagement?email=${userEmail}`,
+        icon: CalendarCheck,
       },
       // {
       //   name: "Productivity",

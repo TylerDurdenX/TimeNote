@@ -130,7 +130,7 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
     <>
       {!queriesLoaded ? (
         <div className="grid grid-cols-3 gap-4 w-full">
-          {Array()
+          {Array(9)
             .fill(0)
             .map((_, index) => (
               <SkeletonLoader key={index} />

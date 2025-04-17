@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/popover";
 import {
   Bell,
+  CalendarCheck,
   CalendarClock,
   CalendarIcon,
   ChartCandlestick,
@@ -54,6 +55,9 @@ import { useCreateUserMutation } from "@/store/api";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { getInitials } from "../Sidebar/nav-user";
 import { toast } from "react-hot-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader } from "../ui/card";
+import BulkCreateUsers from "@/app/(components)/userDetails/BulkUserCreate";
 
 type Props = {
   name: string;
@@ -125,6 +129,9 @@ const Header = ({
       break;
     case "Timesheet":
       icon = <FileClock className="mr-2" />;
+      break;
+    case "Leave Management":
+      icon = <CalendarCheck className="mr-2" />;
       break;
   }
 
@@ -287,101 +294,127 @@ const Header = ({
               <DialogHeader>
                 <DialogTitle className="mb-2">Add User</DialogTitle>
               </DialogHeader>
+              <Tabs defaultValue="alerts" className="w-full  overflow-auto">
+                <TabsList className="grid  grid-cols-2 w-[400px] h-[46px]  overflow-auto">
+                  <TabsTrigger value="Manual" className="font-semibold text-lg">
+                    Create Manually
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="Upload"
+                    className="font-semibold text-lg "
+                  >
+                    Upload Excel
+                  </TabsTrigger>
+                </TabsList>
+                <div className="mt-2 mb-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
 
-              <div className="relative w-full h-full">
-                <div className=" top-0 left-0 w-[calc(100%)] h-full">
-                  <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-3">
-                      <div className="flex flex-col justify-center items-center">
-                        {/* Button wrapped around Avatar */}
-                        <button
-                          type="button" // Prevent form submission
-                          className="cursor-pointer"
-                          onClick={handleAvatarClick}
-                        >
-                          <Avatar className="h-28 w-28 rounded-full flex justify-center items-center">
-                            {/* If base64Image exists, use it as the src, else show the fallback */}
-                            <AvatarImage
-                              src={base64Image || ""}
-                              alt={"profilePic"}
+                <TabsContent value="Manual" className="w-full  overflow-auto">
+                  <div className="relative w-full h-full">
+                    <div className=" top-0 left-0 w-[calc(100%)] h-full">
+                      <form onSubmit={handleSubmit}>
+                        <div className="grid gap-4 py-3">
+                          <div className="flex flex-col justify-center items-center">
+                            {/* Button wrapped around Avatar */}
+                            <button
+                              type="button" // Prevent form submission
+                              className="cursor-pointer"
+                              onClick={handleAvatarClick}
+                            >
+                              <Avatar className="h-28 w-28 rounded-full flex justify-center items-center">
+                                {/* If base64Image exists, use it as the src, else show the fallback */}
+                                <AvatarImage
+                                  src={base64Image || ""}
+                                  alt={"profilePic"}
+                                />
+                                {username !== "" ? (
+                                  <AvatarFallback className="rounded-lg text-4xl">
+                                    {getInitials(username)}
+                                  </AvatarFallback>
+                                ) : (
+                                  <AvatarFallback className="rounded-lg text-4xl">
+                                    <User2 className="h-16 w-16" />
+                                  </AvatarFallback>
+                                )}
+                              </Avatar>
+                            </button>
+
+                            {/* Add the text under the avatar */}
+                            <p className="mt-2 text-sm text-center">
+                              Click above picture for uploading profile picture
+                            </p>
+
+                            {/* Hidden file input */}
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              onChange={handleFileChange} // This handles the file selection
+                              style={{ display: "none" }} // Hide the file input
                             />
-                            {username !== "" ? (
-                              <AvatarFallback className="rounded-lg text-4xl">
-                                {getInitials(username)}
-                              </AvatarFallback>
-                            ) : (
-                              <AvatarFallback className="rounded-lg text-4xl">
-                                <User2 className="h-16 w-16" />
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                        </button>
+                          </div>
 
-                        {/* Add the text under the avatar */}
-                        <p className="mt-2 text-sm text-center">
-                          Click above picture for uploading profile picture
-                        </p>
-
-                        {/* Hidden file input */}
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          onChange={handleFileChange} // This handles the file selection
-                          style={{ display: "none" }} // Hide the file input
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                        <Label className="text-center ">User Name</Label>
-                        <Input
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                          className="col-span-7"
-                        />
-                        <Label className="text-center ">Email</Label>
-                        <Input
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="col-span-7"
-                        />
-                        <Label className="text-center">Password</Label>
-                        <Input
-                          type="password"
-                          value={userPassword}
-                          onChange={(e) => setUserPassword(e.target.value)}
-                          className="col-span-7 shadow border"
-                        />
-                        <Label className="text-center ">Designation</Label>
-                        <Input
-                          value={designation}
-                          onChange={(e) => setDesignation(e.target.value)}
-                          className="col-span-7"
-                        />
-                        <Label className="text-center">Phone Number</Label>
-                        <Input
-                          value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value)}
-                          className="col-span-7"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <button
-                        type="submit"
-                        className={`flex w-200px mt-2 justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+                          <div className="grid grid-cols-8 items-center gap-4 mr-1">
+                            <Label className="text-center ">User Name</Label>
+                            <Input
+                              value={username}
+                              onChange={(e) => setUsername(e.target.value)}
+                              className="col-span-7"
+                            />
+                            <Label className="text-center ">Email</Label>
+                            <Input
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              className="col-span-7"
+                            />
+                            <Label className="text-center">Password</Label>
+                            <Input
+                              type="password"
+                              value={userPassword}
+                              onChange={(e) => setUserPassword(e.target.value)}
+                              className="col-span-7 shadow border"
+                            />
+                            <Label className="text-center ">Designation</Label>
+                            <Input
+                              value={designation}
+                              onChange={(e) => setDesignation(e.target.value)}
+                              className="col-span-7"
+                            />
+                            <Label className="text-center">Phone Number</Label>
+                            <Input
+                              value={phoneNumber}
+                              onChange={(e) => setPhoneNumber(e.target.value)}
+                              className="col-span-7"
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <button
+                            type="submit"
+                            className={`flex w-200px mt-2 justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
                                 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
                                   !isFormValid() || isLoading
                                     ? "cursor-not-allowed opacity-50"
                                     : ""
                                 }`}
-                        disabled={!isFormValid() || isLoading}
-                      >
-                        {isLoading ? "Creating..." : "Create User"}
-                      </button>
-                    </DialogFooter>
-                  </form>
-                </div>
-              </div>
+                            disabled={!isFormValid() || isLoading}
+                          >
+                            {isLoading ? "Creating..." : "Create User"}
+                          </button>
+                        </DialogFooter>
+                      </form>
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="Upload" className=" overflow-auto">
+                  <Card>
+                    <CardHeader>
+                      <CardDescription>Bulk Create Users</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <BulkCreateUsers email={email} setIsOpen={setIsOpen} />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </DialogContent>
           </Dialog>
         </>

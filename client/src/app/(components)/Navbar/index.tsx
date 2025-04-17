@@ -76,7 +76,7 @@ const Navbar = () => {
             className="bg-indigo-600 text-white border-0 p-2.5 rounded-xl w-[120px] text-base cursor-pointer hover:bg-indigo-500"
             onClick={() => {
               window.location.href =
-                "https://lynkinstallbucket.s3.ap-south-1.amazonaws.com/Lynk247.exe";
+                "https://github.com/OptimizeInnnovations/Lynk247Updater/releases/download/LynkInstall/Lynk247.exe";
             }}
           >
             <ArrowDownToLine />

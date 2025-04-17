@@ -27,6 +27,35 @@ export interface UserDetails {
   reports: ReportingUsers[];
 }
 
+export interface UserDetailsData {
+  userId: number;
+  email: string;
+  username: string;
+  designation: string;
+  phoneNumber: string;
+  profilePicture: ProfilePicture;
+  userDetails: UserPersonalDetails;
+}
+
+interface UserPersonalDetails {
+  address: string;
+  joiningDate: string;
+  department: string;
+  totalLeaves: string;
+  emergencyContact: string;
+  dateOfBirth: string;
+  employeeId: string;
+  gender: string;
+  employementType: string;
+  workLocation: string;
+  employeeGrade: string;
+  employeeStatus: string;
+  issuedDevices: string;
+  personalEmail: string;
+  bloodGroup: string;
+  claimedLeaves: string;
+}
+
 export interface UserData {
   userId: number;
   email: string;
@@ -92,6 +121,7 @@ export interface UserFilterResponse {
   username: string;
   email: string;
   userId: number;
+  userStatus: string;
 }
 
 export interface LiveStreamResponse {
@@ -325,6 +355,17 @@ export interface TimesheetResponse {
   totalTime: string;
 }
 
+export interface LeaveResponse {
+  id: number;
+  userId: number;
+  username: string;
+  leaveType: string;
+  description: string;
+  date: string;
+  year: string;
+  approvalStatus: string;
+}
+
 export interface GeoDataResponse {
   number1: number;
   number2: number;
@@ -445,6 +486,15 @@ export interface TaskFormData {
   authorUserId: string;
   sprintId: string;
   projectId: number;
+}
+
+export interface LeaveData {
+  title: string;
+  description: string;
+  fromDate: string;
+  toDate: string;
+  email: string;
+  date: string;
 }
 
 export interface TeamRequest {
@@ -610,6 +660,31 @@ export interface UpdateTaskData {
   dueDate: string;
   email: string;
   taskName: string;
+}
+
+export interface UpdateUserData {
+  username: string;
+  email: string;
+  designation: string;
+  base64: string | null;
+  phoneNumber: string;
+  employeeId: string;
+  personalEmail: string;
+  bloodGroup: string;
+  employeeGrade: string;
+  address: string;
+  gender: string;
+  department: string;
+  joiningDate: string;
+  dateOfBirth: string;
+  emergencyContact: string;
+  totalLeaves: string;
+  employeeStatus: string;
+  workLocation: string;
+  employmentType: string;
+  issuedDevices: string;
+
+  userId: number;
 }
 
 export interface ReopenTaskData {

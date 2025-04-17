@@ -55,7 +55,7 @@ const page = () => {
               }
               className="full"
             >
-              <TabsList className="grid w-full grid-cols-3  w-[500px] ml-5">
+              <TabsList className="grid grid-cols-3  w-[500px] ml-5">
                 <TabsTrigger
                   value="myTimesheet"
                   onClick={() => handleTabClick("myTimesheet")}

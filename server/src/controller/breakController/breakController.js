@@ -188,6 +188,15 @@ export const updateBreakTime = catchAsync(async (req, res, next) => {
             },
           });
 
+          await prisma.user.update({
+            where: {
+              userId: user.userId,
+            },
+            data: {
+              userStatus: "inactive",
+            },
+          });
+
           resultBreakId = breakTaken.id;
         } else {
           const breakTime = await prisma.breaks.findFirst({
@@ -225,6 +234,16 @@ export const updateBreakTime = catchAsync(async (req, res, next) => {
                 .padStart(2, "0")}`,
             },
           });
+
+          await prisma.user.update({
+            where: {
+              userId: user.userId,
+            },
+            data: {
+              userStatus: "active",
+            },
+          });
+
           resultBreakId = breakTaken.id;
         }
       } else {
@@ -237,6 +256,15 @@ export const updateBreakTime = catchAsync(async (req, res, next) => {
               attendanceId: attendance.id,
               breakTypeCode: "CUSTOM_BREAK",
               breakTypeName: customBreakType,
+            },
+          });
+
+          await prisma.user.update({
+            where: {
+              userId: user.userId,
+            },
+            data: {
+              userStatus: "inactive",
             },
           });
 
@@ -271,6 +299,15 @@ export const updateBreakTime = catchAsync(async (req, res, next) => {
             data: {
               endTime: endTime,
               breakTimeInMinutes: `${breakTimeInMinutes}:${remainingSeconds}`,
+            },
+          });
+
+          await prisma.user.update({
+            where: {
+              userId: user.userId,
+            },
+            data: {
+              userStatus: "active",
             },
           });
         }
@@ -524,6 +561,7 @@ export const idleTimeoutUser = catchAsync(async (req, res, next) => {
         },
         data: {
           isLoggedIn: false,
+          userStatus: "inactive",
         },
       });
 
@@ -626,6 +664,15 @@ export const resumeIdleTimeout = catchAsync(async (req, res, next) => {
         data: {
           endTime: currentDateTime,
           breakTimeInMinutes: `${breakTimeInMinutes}:${remainingSeconds}`,
+        },
+      });
+
+      await prisma.user.update({
+        where: {
+          userId: user.userId,
+        },
+        data: {
+          userStatus: "active",
         },
       });
 

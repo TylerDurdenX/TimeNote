@@ -34,7 +34,7 @@ const UserWorkload = ({
   return (
     <div className="flex gap-4 px-4 mr-4 h-full">
       <div className="w-2/5 p-4 shadow-lg mb-5 overflow-hidden">
-        <UserList onSelectUser={handleSelectUser} />
+        <UserList onSelectUser={handleSelectUser} activeFlag={true} />
       </div>
       <div className="w-3/5 p-4 shadow-lg overflow-hidden justify-center">
         {isUserSelected ? (

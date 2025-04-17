@@ -16,17 +16,17 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { CheckCircle, CircleCheck, CircleX, Flag, History } from "lucide-react";
+import { CircleCheck, CircleX, History } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
 
 type Props = {
   onSelectUser: (id: number) => void;
   activeFlag: boolean;
 };
 
-const UserList = ({ onSelectUser, activeFlag }: Props) => {
+const UserListHR = ({ onSelectUser, activeFlag }: Props) => {
   const userEmail = useSearchParams().get("email");
 
   localStorage.removeItem("persist:root");
@@ -190,9 +190,8 @@ const UserList = ({ onSelectUser, activeFlag }: Props) => {
               {filteredEmployees.map((employee) => (
                 <React.Fragment key={employee.userId}>
                   <div className="relative">
-                    <button
-                      onClick={() => onSelectUser(employee.userId)}
-                      className="w-full"
+                    <Link
+                      href={`/userSettings/${employee.userId}?email=${userEmail}`}
                     >
                       <ListItem
                         className="flex items-center justify-between gap-2 cursor-pointer"
@@ -218,8 +217,7 @@ const UserList = ({ onSelectUser, activeFlag }: Props) => {
                           />
                         </Box>
                       </ListItem>
-                    </button>
-
+                    </Link>
                     {employee.userStatus === "active" ? (
                       <>
                         <div className="absolute top-1/2 right-2 -translate-y-1/2 mr-5 group flex items-center cursor-pointer">
@@ -286,4 +284,4 @@ const UserList = ({ onSelectUser, activeFlag }: Props) => {
   );
 };
 
-export default UserList;
+export default UserListHR;

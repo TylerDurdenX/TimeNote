@@ -1,15 +1,15 @@
+"use client";
+
 import { getInitials } from "@/components/Sidebar/nav-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import React, { useEffect, useState } from "react";
-import AutocompleteTag from "./Autocomplete";
 import {
   useGetObjectListQuery,
   useGetUserDetailsQuery,
   useUpdateUserBasicSettingsDataMutation,
   useUpdateUserSettingsDataMutation,
 } from "@/store/api";
-import DropdownTag from "./DropdownTag";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,27 +25,20 @@ import CircularLoading from "@/components/Sidebar/loading";
 import { Switch } from "@/components/ui/switch";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Input } from "@/components/ui/input";
-import { Pencil } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Toaster, toast } from "react-hot-toast";
-
-type Props = {
-  id: number;
-};
+import { toast } from "react-hot-toast";
+import AutocompleteTag from "../../userDetails/udComponents/Autocomplete";
+import DropdownTag from "../../userDetails/udComponents/DropdownTag";
 
 interface DropdownData {
   objectList: { title: string; misc: string }[];
   isSuccessDropdown: boolean;
 }
 
-const UserSettings = ({ id }: Props) => {
+type Props = {
+  id: number;
+};
+
+const UserSettingsHR = ({ id }: Props) => {
   const [selectedTeams, setSelectedTeams] = useState<any[]>([]);
   const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<any[]>([]);
@@ -61,7 +54,7 @@ const UserSettings = ({ id }: Props) => {
     isSuccess: userLoadingSuccess,
   } = useGetUserDetailsQuery(
     {
-      id: id,
+      id: Number(id),
     },
     {
       refetchOnMountOrArgChange: true,
@@ -426,14 +419,14 @@ const UserSettings = ({ id }: Props) => {
         <CircularLoading />
       ) : (
         <form>
-          <div className="flex h-full w-full">
+          <div className="flex h-full w-full mt-7 mb-7">
             <div className="w-1/4 flex justify-center items-center p-4">
-              <Avatar className="h-20 w-20 rounded-full justify-center items-center">
+              <Avatar className="h-40 w-40 rounded-full justify-center items-center">
                 <AvatarImage
                   src={dataUser?.profilePicture?.base64}
                   alt={dataUser?.username}
                 />
-                <AvatarFallback className="rounded-lg text-4xl">
+                <AvatarFallback className="rounded-lg text-6xl">
                   {getInitials(dataUser?.username || "XX")}
                 </AvatarFallback>
               </Avatar>
@@ -463,68 +456,6 @@ const UserSettings = ({ id }: Props) => {
                 </div>
               </div>
             </div>
-
-            <Dialog open={isOpenUserData} onOpenChange={setIsOpenUserData}>
-              <DialogTrigger asChild>
-                <div className="flex  justify-center items-center cursor-pointer">
-                  <Pencil />
-                </div>
-              </DialogTrigger>
-              <DialogContent className="max-w-[42vw] h-[24vw] overflow-x-hidden">
-                <DialogHeader>
-                  <DialogTitle className="mb-2">Edit User Details</DialogTitle>
-                </DialogHeader>
-
-                <div className="relative w-full ">
-                  <div className=" top-0 left-0 w-[calc(100%)] ">
-                    <form onSubmit={handleUpdate}>
-                      <div className="grid gap-4 py-3">
-                        <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                          <Label className="text-center ">User Name</Label>
-                          <Input
-                            value={userName}
-                            onChange={(e) => setUserName(e.target.value)}
-                            className="col-span-7"
-                          />
-                          <Label className="text-center ">Email</Label>
-                          <Input
-                            value={userEmail}
-                            onChange={(e) => setUserEmail(e.target.value)}
-                            className="col-span-7"
-                          />
-                          <Label className="text-center">Designation</Label>
-                          <Input
-                            value={designation}
-                            onChange={(e) => setDesignation(e.target.value)}
-                            className="col-span-7 shadow border"
-                          />
-                          <Label className="text-center ">Phone Number</Label>
-                          <Input
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            className="col-span-7"
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <button
-                          type="submit"
-                          className={`flex w-200px mt-2 justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
-                                hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
-                                  !isFormValid() || isLoadingUpdate
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
-                                }`}
-                          disabled={!isFormValid() || isLoadingUpdate}
-                        >
-                          {isLoadingUpdate ? "Updating..." : "Update Details"}
-                        </button>
-                      </DialogFooter>
-                    </form>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
 
           <div className="flex  w-full">
@@ -660,7 +591,7 @@ const UserSettings = ({ id }: Props) => {
                 </div>
               </div>
             </div>
-            <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
+            <div className="w-1/6 flex flex-col justify-center items-center gap-4 p-4">
               <div className="">
                 <Label htmlFor="airplane-mode" className="mt-5">
                   Allow Signout
@@ -756,4 +687,4 @@ const UserSettings = ({ id }: Props) => {
   );
 };
 
-export default UserSettings;
+export default UserSettingsHR;
