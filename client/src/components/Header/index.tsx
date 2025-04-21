@@ -203,7 +203,7 @@ const Header = ({
     const formData = {
       username: username,
       password: userPassword,
-      email: email,
+      email: email.trim(),
       designation: designation,
       phoneNumber: phoneNumber,
       base64Image: base64Image,

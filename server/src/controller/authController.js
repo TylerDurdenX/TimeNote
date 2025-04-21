@@ -101,7 +101,10 @@ export const signup = catchAsync(async (req, res, next) => {
         } catch (err) {
           await prisma.user.delete({
             where: {
-              email: newUser.email,
+              email: {
+                equals: newUser.email,
+                mode: "insensitive",
+              },
             },
           });
           console.log(err);
@@ -128,7 +131,10 @@ export const signup = catchAsync(async (req, res, next) => {
         } catch (err) {
           await prisma.user.delete({
             where: {
-              email: newUser.email,
+              email: {
+                equals: newUser.email,
+                mode: "insensitive",
+              },
             },
           });
           console.log(err);
@@ -156,7 +162,10 @@ export const resendOtp = catchAsync(async (req, res, next) => {
 
   const user = await prisma.user.findFirst({
     where: {
-      email: email,
+      email: {
+        equals: email,
+        mode: "insensitive",
+      },
     },
   });
 
@@ -170,7 +179,10 @@ export const resendOtp = catchAsync(async (req, res, next) => {
   user.otpExpires = Date.now() + 24 * 60 * 60 * 1000;
   await prisma.user.update({
     where: {
-      email: user.email,
+      email: {
+        equals: user.email,
+        mode: "insensitive",
+      },
     },
   });
 
@@ -204,7 +216,10 @@ export const login = catchAsync(async (req, res, next) => {
 
   const user = await prisma.user.findFirst({
     where: {
-      email: email,
+      email: {
+        equals: email,
+        mode: "insensitive",
+      },
     },
     include: {
       roles: {
@@ -246,20 +261,31 @@ export const logout = catchAsync(async (req, res, next) => {
     secure: process.env.NODE_ENV === "production",
   });
 
-  const { email } = req.query;
-  await prisma.user.update({
-    where: {
-      email: email,
-    },
-    data: {
-      isLoggedIn: false,
-    },
-  });
+  try {
+    const { email } = req.query;
+    await prisma.user.update({
+      where: {
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
+      },
+      data: {
+        isLoggedIn: false,
+      },
+    });
 
-  res.status(200).json({
-    status: "success",
-    message: "Logged out successfully",
-  });
+    res.status(200).json({
+      status: "success",
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(200).json({
+      status: "success",
+      message: "Logged out successfully",
+    });
+  }
 });
 
 export const forgotPassword = catchAsync(async (req, res, next) => {
@@ -267,7 +293,10 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
   const user = await prisma.user.findFirst({
     where: {
-      email: email,
+      email: {
+        equals: email,
+        mode: "insensitive",
+      },
     },
   });
 
@@ -279,7 +308,10 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   try {
     await prisma.user.update({
       where: {
-        email: user.email,
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
       },
       data: {
         resetPasswordOTP: otp,
@@ -300,7 +332,10 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   } catch (error) {
     await prisma.user.update({
       where: {
-        email: user.email,
+        email: {
+          equals: user.email,
+          mode: "insensitive",
+        },
       },
       data: {
         resetPasswordOTP: null,
@@ -322,7 +357,10 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   const user = await prisma.user.findFirst({
     where: {
-      email: email,
+      email: {
+        equals: email,
+        mode: "insensitive",
+      },
       resetPasswordOTP: otp,
     },
   });
@@ -339,7 +377,10 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   await prisma.user.update({
     where: {
-      email: email,
+      email: {
+        equals: email,
+        mode: "insensitive",
+      },
     },
     data: {
       password: hashedPassword,

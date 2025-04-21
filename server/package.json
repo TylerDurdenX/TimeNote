@@ -23,6 +23,7 @@
     "moment-timezone": "^0.5.48",
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.9",
+    "sharp": "^0.34.1",
     "socket.io": "^4.8.1",
     "validator": "^13.12.0"
   },

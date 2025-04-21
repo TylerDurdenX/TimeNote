@@ -121,6 +121,7 @@ model Attendance {
     date      DateTime
     geoLocation     String?
     city          String?
+    status      String?
 
     @@unique([userId, date])
     breaks      Breaks[]

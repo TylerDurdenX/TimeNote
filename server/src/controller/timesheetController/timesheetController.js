@@ -11,7 +11,10 @@ export const getTimesheetData = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
       });
 
@@ -146,7 +149,10 @@ export const createTimesheetEntry = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
       });
 
@@ -193,7 +199,10 @@ export const getPendingTimesheetData = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
       });
 
@@ -243,7 +252,10 @@ export const getUsersTimesheetData = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: {
           roles: true,
@@ -408,7 +420,10 @@ export const updateTimesheetRecords = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
       });
 

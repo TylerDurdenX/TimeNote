@@ -10,50 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button as Bttn } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Bell,
-  CalendarClock,
-  CalendarIcon,
-  ChartCandlestick,
-  ChartNoAxesCombined,
-  Coffee,
-  FileChartColumnIncreasing,
-  FileClock,
-  FilterX,
-  LaptopMinimal,
-  MapPin,
-  PlusSquare,
-  ScreenShare,
-  User,
-  User2,
-  Users,
-  UsersRound,
-} from "lucide-react";
-import { Button, FormControl } from "@mui/material";
+import { FilterX, ScreenShare } from "lucide-react";
+import { Button } from "@mui/material";
 import { DateRange } from "react-day-picker";
-import { useCreateUserMutation } from "@/store/api";
-import { toast } from "react-hot-toast";
 import { DatePickerWithRange } from "@/components/Header/DateRangePicker";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getInitials } from "@/components/Sidebar/nav-user";
 import { UserSelectionFilter } from "@/components/Header/UserSelectionFilter";
 
 type Props = {

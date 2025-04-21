@@ -8,7 +8,10 @@ export const getUsersForUserFilter = catchAsync(async (req, res, next) => {
   try {
     const user = await prisma.user.findFirst({
       where: {
-        email: email,
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
       },
       include: {
         roles: true,
@@ -39,7 +42,10 @@ export const getLiveStreamUsers = catchAsync(async (req, res, next) => {
   try {
     const user = await prisma.user.findFirst({
       where: {
-        email: email,
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
       },
       include: {
         roles: true,

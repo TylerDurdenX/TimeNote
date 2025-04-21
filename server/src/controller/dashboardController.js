@@ -9,7 +9,10 @@ export const getUser = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const dbUser = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: { profilePicture: true },
       });
@@ -49,39 +52,49 @@ export const updateUserProfilePicture = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: { profilePicture: true },
       });
 
-      if(user.pictureModification === null){
-        return next(new AppError('User Not authorized to perform this action',500))
-      }else{
-      if(user.pictureModification === true){
-        if (user.profilePictureId === null) {
-          await prisma.profilePicture.create({
-            data: {
-              user: {
-                connect: { userId: user.userId }, 
+      if (user.pictureModification === null) {
+        return next(
+          new AppError("User Not authorized to perform this action", 500)
+        );
+      } else {
+        if (user.pictureModification === true) {
+          if (user.profilePictureId === null) {
+            await prisma.profilePicture.create({
+              data: {
+                user: {
+                  connect: { userId: user.userId },
+                },
+                base64: base64,
               },
-              base64: base64,
-            },
-          });
+            });
 
-          return next(new SuccessResponse('Profile Picture updated successfully',200))
+            return next(
+              new SuccessResponse("Profile Picture updated successfully", 200)
+            );
+          } else {
+            await prisma.profilePicture.update({
+              where: { id: user.profilePicture.id },
+              data: { base64 },
+            });
+
+            return next(
+              new SuccessResponse("Profile Picture updated successfully", 200)
+            );
+          }
         } else {
-          await prisma.profilePicture.update({
-            where: { id: user.profilePicture.id },
-            data: { base64 },
-          });
-
-          return next(new SuccessResponse('Profile Picture updated successfully',200))
+          return next(
+            new AppError("User Not authorized to perform this action", 500)
+          );
         }
-      }else{
-        return next(new AppError('User Not authorized to perform this action',500))
       }
-    }
-      
     });
   } catch (error) {
     console.log("Error during updateUserProfilePicture" + error);
@@ -108,17 +121,20 @@ export const getAlertCount = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: {
-          roles: true
-        }
+          roles: true,
+        },
       });
 
-      let roleList = []
+      let roleList = [];
       user.roles.map((role) => {
-        roleList.push(role.code)
-      })
+        roleList.push(role.code);
+      });
 
       const alerts = await prisma.alert.findMany({
         where: {
@@ -128,8 +144,8 @@ export const getAlertCount = catchAsync(async (req, res, next) => {
 
       const result = {
         count: alerts.length,
-        roles: roleList.toString()
-      }
+        roles: roleList.toString(),
+      };
 
       res.json(result);
     });

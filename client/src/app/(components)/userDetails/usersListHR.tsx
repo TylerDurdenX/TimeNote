@@ -206,6 +206,7 @@ const UserListHR = ({ onSelectUser, activeFlag }: Props) => {
                                   : ""
                               }
                               alt={employee.username}
+                              loading="lazy"
                             />
                             <AvatarFallback className="absolute inset-0 flex justify-center items-center text-[150%]">
                               {getInitials(employee.username!)}

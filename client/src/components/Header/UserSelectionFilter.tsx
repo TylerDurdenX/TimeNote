@@ -61,7 +61,6 @@ export function UserSelectionFilter({ setValue, value, email }: Props) {
                   key={user.username}
                   value={user.username}
                   onSelect={(currentValue) => {
-                    console.log(currentValue);
                     setValue(user.userId);
                     setOpen(false);
                   }}

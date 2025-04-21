@@ -7,6 +7,7 @@ import {
   AlertCount,
   AttendanceCardLCResponse,
   AttendanceCardResponse,
+  AttendanceCardsResponse,
   AttendanceUserPCResponse,
   AttendanceUserTableResponse,
   BreakRequest,
@@ -49,6 +50,7 @@ import {
   TaskFormData,
   TaskHistory,
   TeamConfiguration,
+  TeamFilterResponse,
   TeamLeadResponse,
   TeamRequest,
   Teams,
@@ -302,6 +304,12 @@ export const api = createApi({
         return url;
       },
     }),
+    getTeamListFilter: build.query<TeamFilterResponse[], { email: string }>({
+      query: ({ email }) => {
+        const url = `api/user/getTeamsListFilter?email=${email}`;
+        return url;
+      },
+    }),
     getLiveStreamUsers: build.query<
       LiveStreamResponse[],
       { email: string; username: string }
@@ -318,9 +326,21 @@ export const api = createApi({
       },
       providesTags: ["Project"],
     }),
-    getProjects: build.query<ProjectListResponse[], { email: string }>({
-      query: ({ email }) => {
-        const url = `api/user/getProjects?email=${email}`;
+    getAttendanceCardsData: build.query<
+      AttendanceCardsResponse,
+      { email: string; fromDate: string; toDate: string; teamId: number }
+    >({
+      query: ({ email, fromDate, toDate, teamId }) => {
+        const url = `api/user/getAttendanceCardsResponse?email=${email}&from=${fromDate}&to=${toDate}&teamId=${teamId}`;
+        return url;
+      },
+    }),
+    getProjects: build.query<
+      ProjectListResponse[],
+      { email: string; closedFlag: boolean }
+    >({
+      query: ({ email, closedFlag }) => {
+        const url = `api/user/getProjects?email=${email}&closedFlag=${closedFlag}`;
         return url;
       },
       providesTags: ["ProjectsList"],
@@ -1280,4 +1300,6 @@ export const {
   useGetLeaveApprovalDataQuery,
   useUpdateLeaveMutation,
   useCreateBulkUsersMutation,
+  useGetAttendanceCardsDataQuery,
+  useGetTeamListFilterQuery,
 } = api;

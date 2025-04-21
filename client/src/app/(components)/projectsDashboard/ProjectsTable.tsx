@@ -6,19 +6,21 @@ import React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { Button } from "@mui/material";
-import { useGetProjectsQuery } from "@/store/api";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
+import { useGetProjectsQuery } from "@/store/api";
 
 type Props = {
   email: string;
+  closedProjectFlag: boolean;
 };
 
-const ProjectsTable = ({ email }: Props) => {
+const ProjectsTable = ({ email, closedProjectFlag }: Props) => {
   localStorage.removeItem("persist:root");
+
   const { data, isLoading, error } = useGetProjectsQuery(
-    { email: email },
+    { email: email, closedFlag: closedProjectFlag },
     { refetchOnMountOrArgChange: true }
   );
 

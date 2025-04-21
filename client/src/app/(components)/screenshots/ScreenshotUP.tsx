@@ -55,6 +55,13 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
     refetch();
   }, [isLoading, isSuccess, refetch, setReRenderPage]);
 
+  useEffect(() => {
+    if (isLoading) {
+      console.log("1");
+      setQueriesLoaded(false);
+    }
+  }, [isLoading, id]);
+
   const screenshotList = data?.screenshotList || [];
   const totalPages = data?.totalPages || 0;
 

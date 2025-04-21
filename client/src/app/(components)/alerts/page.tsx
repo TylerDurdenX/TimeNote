@@ -25,11 +25,9 @@ const page = () => {
         </div>
         <div className="flex gap-4 px-4 w-full h-full  box-border overflow-x-hidden">
           <Tabs defaultValue="alerts" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 w-[400px]">
+            <TabsList className="grid grid-cols-2 w-[400px]">
               <TabsTrigger value="alerts">Alerts</TabsTrigger>
-              <TabsTrigger value="configure" disabled={true}>
-                Configure Alerts
-              </TabsTrigger>
+              <TabsTrigger value="configure">Configure Alerts</TabsTrigger>
             </TabsList>
             <TabsContent value="alerts" className="w-full">
               <Card>

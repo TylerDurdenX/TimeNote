@@ -124,6 +124,11 @@ export interface UserFilterResponse {
   userStatus: string;
 }
 
+export interface TeamFilterResponse {
+  name: string;
+  id: number;
+}
+
 export interface LiveStreamResponse {
   email: string;
   username: string;
@@ -146,6 +151,17 @@ export interface ProjectResponse {
   projectManager: string;
 
   projectAttachments: ProjectAttachments[];
+}
+
+export interface AttendanceCardsResponse {
+  onTimeArrival: string;
+  onTimePercentage: string;
+  lateArrival: string;
+  lateArrivalPercentage: string;
+  avgActiveTime: string;
+  avgActiveTimePercentage: string;
+  breakTime: string;
+  breakTimePercentage: string;
 }
 
 interface ProjectAttachments {

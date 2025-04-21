@@ -60,7 +60,7 @@ const page = () => {
                 src={dataUser?.profilePicture?.base64}
                 alt={dataUser?.username}
               />
-              <AvatarFallback className="rounded-lg text-6xl text-white bg-[#003366]">
+              <AvatarFallback className="rounded-lg text-6  xl text-white bg-[#003366]">
                 {getInitials(dataUser?.username || "XX")}
               </AvatarFallback>
             </Avatar>

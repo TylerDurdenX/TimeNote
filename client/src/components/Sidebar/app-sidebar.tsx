@@ -22,6 +22,7 @@ import {
   Coffee,
   FileChartColumnIncreasing,
   CalendarCheck,
+  MonitorX,
 } from "lucide-react";
 
 import { NavMain } from "@/components/Sidebar/nav-main";
@@ -108,6 +109,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Projects Dashboard",
             url: `/projectsDashboard?email=${userEmail}`,
             icon: PresentationIcon,
+          },
+          {
+            title: "Closed Projects",
+            url: `/closedProjects?email=${userEmail}`,
+            icon: MonitorX,
           },
           {
             title: "Projects Timeline",

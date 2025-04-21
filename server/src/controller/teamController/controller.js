@@ -10,7 +10,10 @@ export const createTeam = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: {
           roles: {
@@ -62,7 +65,10 @@ export const getTeamsList = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: {
           roles: {
@@ -106,7 +112,10 @@ export const getTeamLeads = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: {
           roles: {
@@ -325,7 +334,12 @@ export const updateTeamsConfigurationData = catchAsync(
         const updateUserPromises = userslist.map(async (user) => {
           // If there are projects to connect, update the user
           await prisma.user.update({
-            where: { email: user.email },
+            where: {
+              email: {
+                equals: user.email,
+                mode: "insensitive",
+              },
+            },
             data: {
               idleTimeOut: idleTimeout,
               workingHours: workingHours,
@@ -461,3 +475,36 @@ export const updateTeamsConfigurationData = catchAsync(
     }
   }
 );
+
+export const getTeamsForFilter = catchAsync(async (req, res, next) => {
+  const { email } = req.query;
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
+      },
+      include: {
+        roles: true,
+      },
+    });
+
+    if (user.roles.some((role) => role.code === "ADMIN")) {
+      return res.status(200).json(
+        await prisma.team.findMany({
+          select: {
+            name: true,
+            id: true,
+          },
+        })
+      );
+    } else {
+      // Case to be handled in case of other users
+    }
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("There was an error getting Users List", 400));
+  }
+});

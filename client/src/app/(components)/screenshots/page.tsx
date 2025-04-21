@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Header from "@/components/Header";
 import UserList from "../userDetails/usersList";
 import ScreenshotsLP from "./ScreenshotsLP";
 import ScreenshotUP from "./ScreenshotUP";
@@ -10,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import FlaggedScreenshots from "./FlaggedScreenshots";
 import ScreenshotPageHeader from "./ScreenshotPageHeader";
-import { useGetLiveStreamUsersQuery } from "@/store/api";
 import { useSearchParams } from "next/navigation";
 
 const Page = () => {

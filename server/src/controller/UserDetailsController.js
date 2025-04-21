@@ -14,7 +14,10 @@ export const getUsersList = catchAsync(async (req, res, next) => {
       const pageSize = parseInt(limit);
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: {
           roles: true,
@@ -190,7 +193,10 @@ export const mapRolesToUser = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
       });
 
@@ -203,7 +209,12 @@ export const mapRolesToUser = catchAsync(async (req, res, next) => {
       });
 
       await prisma.user.update({
-        where: { email: email },
+        where: {
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
+        },
         data: {
           roles: {
             connect: roles.map((role) => ({ id: role.id })),
@@ -567,11 +578,21 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
         });
 
         const currentProjects = await prisma.user.findUnique({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           select: { projects: { select: { id: true } } },
         });
         await prisma.user.update({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           data: {
             projects: {
               disconnect: currentProjects?.projects.map((project) => ({
@@ -583,11 +604,21 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
         });
       } else {
         const currentProjects = await prisma.user.findUnique({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           select: { projects: { select: { id: true } } },
         });
         await prisma.user.update({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           data: {
             projects: {
               disconnect: currentProjects?.projects.map((project) => ({
@@ -608,11 +639,21 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
         });
 
         const currentTeams = await prisma.user.findUnique({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           select: { teams: { select: { id: true } } },
         });
         await prisma.user.update({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           data: {
             teams: {
               disconnect: currentTeams?.teams.map((team) => ({ id: team.id })),
@@ -622,11 +663,21 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
         });
       } else {
         const currentTeams = await prisma.user.findUnique({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           select: { teams: { select: { id: true } } },
         });
         await prisma.user.update({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           data: {
             teams: {
               disconnect: currentTeams?.teams.map((team) => ({ id: team.id })),
@@ -644,11 +695,21 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
           },
         });
         const currentRoles = await prisma.user.findUnique({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           select: { roles: { select: { id: true } } },
         });
         await prisma.user.update({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           data: {
             roles: {
               disconnect: currentRoles?.roles?.map((role) => ({ id: role.id })),
@@ -658,12 +719,22 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
         });
       } else {
         const currentRoles = await prisma.user.findUnique({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           select: { roles: { select: { id: true } } },
         });
         if (currentRoles) {
           await prisma.user.update({
-            where: { email: email },
+            where: {
+              email: {
+                equals: email,
+                mode: "insensitive",
+              },
+            },
             data: {
               roles: {
                 disconnect: currentRoles?.roles.map((role) => ({
@@ -678,12 +749,20 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
       if (!isEmpty(reportsTo)) {
         const manager = await prisma.user.findFirst({
           where: {
-            email: reportsTo,
+            email: {
+              equals: reportsTo,
+              mode: "insensitive",
+            },
           },
         });
 
         await prisma.user.update({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           data: {
             reportsTo: {
               connect: {
@@ -694,7 +773,12 @@ export const updateUserDetailsData = catchAsync(async (req, res, next) => {
         });
       } else {
         await prisma.user.update({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           data: {
             reportsTo: {
               disconnect: true, // Removes the reporting relationship
@@ -862,7 +946,10 @@ export const createBulkUsers = catchAsync(async (req, res, next) => {
         let oldUser;
         oldUser = await prisma.user.findFirst({
           where: {
-            email: user.email,
+            email: {
+              equals: user.email,
+              mode: "insensitive",
+            },
           },
         });
         if (oldUser !== null) {

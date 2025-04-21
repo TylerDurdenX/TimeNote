@@ -40,6 +40,7 @@ import {
   getSelectedProjectsForTeam,
   getTeamConfiguration,
   getTeamLeads,
+  getTeamsForFilter,
   getTeamsList,
   updateTeamsConfigurationData,
 } from "../controller/teamController/controller.js";
@@ -122,6 +123,7 @@ import { updateCustomerData } from "../middleware/customerController.js";
 import { authenticateThirdParty } from "../middleware/generateToken.js";
 import {
   getAdminRole,
+  getAttendanceCardsResponse,
   getAttendanceData,
   getAttendanceLCData,
   getBreakData,
@@ -187,6 +189,7 @@ router.get("/getUserHierarchyData", isAuthenticated, getUserHierarchyData);
 router.get("/getScreenshots", isAuthenticated, getScreenshots);
 router.get("/getFlaggedScreenshots", getFlaggedScreenshots);
 router.get("/getUsersListFilter", getUsersForUserFilter);
+router.get("/getTeamsListFilter", getTeamsForFilter);
 router.get("/getLiveStreamUsers", getLiveStreamUsers);
 router.get("/getProjects", isAuthenticated, getProjects);
 router.get("/getProjectTasks", getProjectTasks);
@@ -310,6 +313,7 @@ router.patch("/updateScreenshotFlag", updateScreenshot);
 router.get("/getLeaveData", getLeaves);
 router.get("/getLeaveApprovalData", getLeavesApprovalData);
 router.patch("/updateLeave", updateLeave);
+router.get("/getAttendanceCardsResponse", getAttendanceCardsResponse);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);

@@ -17,7 +17,10 @@ export const signInUser = catchAsync(async (req, res, next) => {
 
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: {
           profilePicture: true,
@@ -83,7 +86,10 @@ export const signOutApplication = catchAsync(async (req, res, next) => {
 
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
       });
 
@@ -120,7 +126,15 @@ export const signupTP = catchAsync(async (req, res, next) => {
 
       const existingUser = await prisma.user.findMany({
         where: {
-          OR: [{ email: email }, { username: username }],
+          OR: [
+            {
+              email: {
+                equals: email,
+                mode: "insensitive",
+              },
+            },
+            { username: username },
+          ],
         },
       });
 
@@ -149,7 +163,12 @@ export const signupTP = catchAsync(async (req, res, next) => {
         });
 
         await prisma.user.update({
-          where: { email: email },
+          where: {
+            email: {
+              equals: email,
+              mode: "insensitive",
+            },
+          },
           data: {
             roles: {
               connect: dbRoles.map((role) => ({ id: role.id })),
@@ -163,7 +182,10 @@ export const signupTP = catchAsync(async (req, res, next) => {
       } catch (err) {
         await prisma.user.delete({
           where: {
-            email: newUser.email,
+            email: {
+              equals: newUser.email,
+              mode: "insensitive",
+            },
           },
         });
         console.log(err);

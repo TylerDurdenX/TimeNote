@@ -18,7 +18,7 @@ import {
   useDeleteTriggeredAlertsMutation,
   useGetAlertsQuery,
 } from "@/store/api";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { useSearchParams } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { Typography } from "@mui/material";
