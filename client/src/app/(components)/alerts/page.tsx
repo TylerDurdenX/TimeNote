@@ -27,7 +27,9 @@ const page = () => {
           <Tabs defaultValue="alerts" className="w-full">
             <TabsList className="grid grid-cols-2 w-[400px]">
               <TabsTrigger value="alerts">Alerts</TabsTrigger>
-              <TabsTrigger value="configure">Configure Alerts</TabsTrigger>
+              <TabsTrigger value="configure" disabled={true}>
+                Configure Alerts
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="alerts" className="w-full">
               <Card>

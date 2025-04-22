@@ -44,6 +44,7 @@ const App: React.FC = () => {
       );
       setTimeout(() => {}, 3000);
       const user = response.data.data.user;
+      console.log(user);
       if (user.roles !== null && user.roles !== undefined) {
         const commaSeparatedNames = user.roles
           .map((role: Role) => role.code)
@@ -52,9 +53,9 @@ const App: React.FC = () => {
       }
       toast.success("Login Successful");
       dispatch(setAuthUser(user));
-      sessionStorage.setItem("email", formData.email);
+      sessionStorage.setItem("email", user.email);
       //router.push(`/Dashboard?email=${encodeURIComponent(formData.email)}`);
-      router.push(`/attendance?email=${encodeURIComponent(formData.email)}`);
+      router.push(`/attendance?email=${encodeURIComponent(user.email)}`);
     } catch (error: any) {
       toast.error(error.response.data.message);
       console.log(error);

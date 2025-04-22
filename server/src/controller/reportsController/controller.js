@@ -10,10 +10,7 @@ export const createAutoReportConfig = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -58,10 +55,7 @@ export const getAutoReportConfig = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 

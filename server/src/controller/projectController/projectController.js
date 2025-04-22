@@ -70,10 +70,7 @@ export const getProjects = catchAsync(async (req, res, next) => {
       }
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: true,
@@ -231,10 +228,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: true,
@@ -255,10 +249,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
           if (!isEmpty(assignedTo)) {
             const user = await prisma.user.findFirst({
               where: {
-                email: {
-                  equals: assignedTo,
-                  mode: "insensitive",
-                },
+                email: assignedTo,
               },
             });
             if (user) {
@@ -414,10 +405,7 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
           if (!isEmpty(assignedTo)) {
             const user = await prisma.user.findFirst({
               where: {
-                email: {
-                  equals: assignedTo,
-                  mode: "insensitive",
-                },
+                email: assignedTo,
               },
             });
             if (user) {
@@ -762,10 +750,7 @@ export const getProjectTasksCalendar = catchAsync(async (req, res, next) => {
           if (!isEmpty(assignedTo)) {
             const user = await prisma.user.findFirst({
               where: {
-                email: {
-                  equals: assignedTo,
-                  mode: "insensitive",
-                },
+                email: assignedTo,
               },
             });
             if (user) {
@@ -831,10 +816,7 @@ export const getProjectTasksCalendar = catchAsync(async (req, res, next) => {
           if (!isEmpty(assignedTo)) {
             const user = await prisma.user.findFirst({
               where: {
-                email: {
-                  equals: assignedTo,
-                  mode: "insensitive",
-                },
+                email: assignedTo,
               },
             });
             if (user) {
@@ -989,10 +971,7 @@ export const createTask = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const authorUser = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: authorUserId,
-            mode: "insensitive",
-          },
+          email: authorUserId,
         },
       });
       const date = new Date(startDate);
@@ -1094,10 +1073,7 @@ export const updateTaskProgress = catchAsync(async (req, res, next) => {
 
       const operationUser = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -1251,10 +1227,7 @@ export const updateSubTaskProgress = catchAsync(async (req, res, next) => {
 
       const operationUser = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -1402,10 +1375,7 @@ export const updateSubTaskStatus = catchAsync(async (req, res, next) => {
 
       const operationUser = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -1788,10 +1758,7 @@ export const reopenTask = catchAsync(async (req, res, next) => {
 
       const operationUser = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -1866,10 +1833,7 @@ export const updateTaskAssignee = catchAsync(async (req, res, next) => {
       const result = await prisma.$transaction(async (prisma) => {
         const user = await prisma.user.findFirst({
           where: {
-            email: {
-              equals: email,
-              mode: "insensitive",
-            },
+            email: email,
           },
         });
 
@@ -2236,10 +2200,7 @@ export const addComment = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: userEmail,
-            mode: "insensitive",
-          },
+          email: userEmail,
         },
       });
       const result = extractTextInBrackets(text);
@@ -2288,10 +2249,7 @@ export const addSubTaskComment = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: userEmail,
-            mode: "insensitive",
-          },
+          email: userEmail,
         },
       });
 
@@ -2319,10 +2277,7 @@ export const createSprint = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: true,
@@ -2420,10 +2375,7 @@ export const updateProjectSprint = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -2646,10 +2598,7 @@ export const updateTask = catchAsync(async (req, res, next) => {
 
       const operationUser = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -3160,10 +3109,7 @@ export const updateSubTask = catchAsync(async (req, res, next) => {
 
       const operationUser = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -3671,10 +3617,7 @@ export const uploadAttachment = catchAsync(async (req, res, next) => {
 
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: uploadedBy,
-            mode: "insensitive",
-          },
+          email: uploadedBy,
         },
       });
 
@@ -3711,10 +3654,7 @@ export const uploadSubTaskAttachment = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: uploadedBy,
-            mode: "insensitive",
-          },
+          email: uploadedBy,
         },
       });
 
@@ -3765,10 +3705,7 @@ export const deleteAttachment = catchAsync(async (req, res, next) => {
           const indianTimeISOString = currentDateTime.toISOString();
           const operationUser = await prisma.user.findFirst({
             where: {
-              email: {
-                equals: email,
-                mode: "insensitive",
-              },
+              email: email,
             },
             select: {
               userId: true,
@@ -3805,10 +3742,7 @@ export const deleteAttachment = catchAsync(async (req, res, next) => {
           const indianTimeISOString = currentDateTime.toISOString();
           const user = await prisma.user.findFirst({
             where: {
-              email: {
-                equals: email,
-                mode: "insensitive",
-              },
+              email: email,
             },
             select: {
               userId: true,
@@ -3879,10 +3813,7 @@ export const createSubTask = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const authorUser = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: authorUserId,
-            mode: "insensitive",
-          },
+          email: authorUserId,
         },
       });
       const date = new Date(startDate);
@@ -4089,10 +4020,7 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
 
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         select: {
           userId: true,
@@ -4494,10 +4422,7 @@ export const updateProjectStatus = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -4547,10 +4472,7 @@ export const updateProject = catchAsync(async (req, res, next) => {
       console.log(projectName);
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: true,
@@ -4605,10 +4527,7 @@ export const uploadProjectAttachment = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -4651,10 +4570,7 @@ export const deleteProjectAttachment = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -4771,10 +4687,7 @@ export const createBulkTasks = catchAsync(async (req, res, next) => {
 
       const authorUser = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: taskList[0].authorUserId,
-            mode: "insensitive",
-          },
+          email: taskList[0].authorUserId,
         },
       });
 
@@ -4809,10 +4722,7 @@ export const createBulkTasks = catchAsync(async (req, res, next) => {
         let assignee;
         assignee = await prisma.user.findFirst({
           where: {
-            email: {
-              equals: taskObj.assignedUserId,
-              mode: "insensitive",
-            },
+            email: taskObj.assignedUserId,
           },
         });
         if (!assignee) {

@@ -10,10 +10,7 @@ export const createTeam = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: {
@@ -65,10 +62,7 @@ export const getTeamsList = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: {
@@ -112,10 +106,7 @@ export const getTeamLeads = catchAsync(async (req, res, next) => {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: {
@@ -335,10 +326,7 @@ export const updateTeamsConfigurationData = catchAsync(
           // If there are projects to connect, update the user
           await prisma.user.update({
             where: {
-              email: {
-                equals: user.email,
-                mode: "insensitive",
-              },
+              email: user.email,
             },
             data: {
               idleTimeOut: idleTimeout,
@@ -481,10 +469,7 @@ export const getTeamsForFilter = catchAsync(async (req, res, next) => {
   try {
     const user = await prisma.user.findFirst({
       where: {
-        email: {
-          equals: email,
-          mode: "insensitive",
-        },
+        email: email,
       },
       include: {
         roles: true,

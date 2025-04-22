@@ -9,10 +9,7 @@ export const getAlerts = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -44,10 +41,8 @@ export const deleteAlert = catchAsync(async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error during deleteAlert" + error);
-    res
-      .status(500)
-      .json({
-        message: `Error Occurred while deleting error: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `Error Occurred while deleting error: ${error.message}`,
+    });
   }
 });

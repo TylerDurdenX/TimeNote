@@ -14,10 +14,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           profilePicture: true,
@@ -214,10 +211,7 @@ export const getAttendanceData = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: true,
@@ -379,10 +373,7 @@ export const getAttendanceLCData = catchAsync(async (req, res, next) => {
   try {
     const user = await prisma.user.findFirst({
       where: {
-        email: {
-          equals: email,
-          mode: "insensitive",
-        },
+        email: email,
       },
       include: {
         roles: true,
@@ -576,10 +567,7 @@ export const getUserAttendanceData = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -873,10 +861,7 @@ export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
       });
 
@@ -1021,10 +1006,7 @@ export const getAdminRole = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: true,
@@ -1056,10 +1038,7 @@ export const getBreakData = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           teams: true,
@@ -1196,10 +1175,7 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
+          email: email,
         },
         include: {
           roles: true,
@@ -1521,6 +1497,8 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
             }
           });
         });
+
+        console.log(diffInMilliseconds);
 
         const avgDiffInMinutess = (
           (diffInMilliseconds / attendanceRecordsinRange.length / 1000).toFixed(

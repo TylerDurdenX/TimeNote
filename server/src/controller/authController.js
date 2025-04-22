@@ -52,10 +52,7 @@ export const signup = catchAsync(async (req, res, next) => {
 
       const existingUserEmail = await prisma.user.findMany({
         where: {
-          email: {
-            equals: email,
-            mode: "insensitive", // Case-insensitive comparison
-          },
+          email: email,
         },
       });
 
@@ -101,10 +98,7 @@ export const signup = catchAsync(async (req, res, next) => {
         } catch (err) {
           await prisma.user.delete({
             where: {
-              email: {
-                equals: newUser.email,
-                mode: "insensitive",
-              },
+              email: newUser.email,
             },
           });
           console.log(err);
@@ -131,10 +125,7 @@ export const signup = catchAsync(async (req, res, next) => {
         } catch (err) {
           await prisma.user.delete({
             where: {
-              email: {
-                equals: newUser.email,
-                mode: "insensitive",
-              },
+              email: newUser.email,
             },
           });
           console.log(err);
@@ -162,10 +153,7 @@ export const resendOtp = catchAsync(async (req, res, next) => {
 
   const user = await prisma.user.findFirst({
     where: {
-      email: {
-        equals: email,
-        mode: "insensitive",
-      },
+      email: email,
     },
   });
 
@@ -179,10 +167,7 @@ export const resendOtp = catchAsync(async (req, res, next) => {
   user.otpExpires = Date.now() + 24 * 60 * 60 * 1000;
   await prisma.user.update({
     where: {
-      email: {
-        equals: user.email,
-        mode: "insensitive",
-      },
+      email: email,
     },
   });
 
@@ -265,10 +250,7 @@ export const logout = catchAsync(async (req, res, next) => {
     const { email } = req.query;
     await prisma.user.update({
       where: {
-        email: {
-          equals: email,
-          mode: "insensitive",
-        },
+        email: email,
       },
       data: {
         isLoggedIn: false,
@@ -293,10 +275,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
   const user = await prisma.user.findFirst({
     where: {
-      email: {
-        equals: email,
-        mode: "insensitive",
-      },
+      email: email,
     },
   });
 
@@ -308,10 +287,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   try {
     await prisma.user.update({
       where: {
-        email: {
-          equals: email,
-          mode: "insensitive",
-        },
+        email: email,
       },
       data: {
         resetPasswordOTP: otp,
@@ -332,10 +308,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   } catch (error) {
     await prisma.user.update({
       where: {
-        email: {
-          equals: user.email,
-          mode: "insensitive",
-        },
+        email: email,
       },
       data: {
         resetPasswordOTP: null,
@@ -357,10 +330,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   const user = await prisma.user.findFirst({
     where: {
-      email: {
-        equals: email,
-        mode: "insensitive",
-      },
+      email: email,
       resetPasswordOTP: otp,
     },
   });
@@ -377,10 +347,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   await prisma.user.update({
     where: {
-      email: {
-        equals: email,
-        mode: "insensitive",
-      },
+      email: email,
     },
     data: {
       password: hashedPassword,
