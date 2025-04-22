@@ -90,7 +90,6 @@ const LeaveCalendar = ({ email }: Props) => {
 
   const handleEventClick = (event: any) => {
     // Log the event that was clicked
-    console.log("Event clicked:", event.id);
     sessionStorage.setItem("taskId", event.id);
   };
 
@@ -151,7 +150,6 @@ const LeaveCalendar = ({ email }: Props) => {
         bgColor = "#E5E7EB"; // Gray
         textColor = "#000000"; // Black
     }
-    console.log(text);
     return { bgColor, textColor, text };
   };
 

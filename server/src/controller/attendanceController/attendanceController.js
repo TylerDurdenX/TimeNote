@@ -43,7 +43,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
             date: indianTimeISOString,
           },
         });
-        console.log(createdAttendance);
+
         if (isEmpty(createdAttendance)) {
           const attendance = await prisma.attendance.create({
             data: {
@@ -856,7 +856,6 @@ export async function compressBase64(base64Str, quality = 40) {
 
 export const getUserAttendanceTableData = catchAsync(async (req, res, next) => {
   const { email, adminFlag, date } = req.query;
-
   try {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
@@ -1051,8 +1050,6 @@ export const getBreakData = catchAsync(async (req, res, next) => {
         teamsList.push(team.name);
       });
 
-      console.log(teamsList);
-
       const breakTypeList = await prisma.team.findMany({
         where: {
           name: {
@@ -1161,7 +1158,7 @@ function formatMinutesToHHMMSS(totalMinutes) {
   const totalSeconds = totalMinutes * 60;
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+  const seconds = (totalSeconds % 60).toFixed(0);
 
   const pad = (num) => String(num).padStart(2, "0");
 
@@ -1210,15 +1207,6 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
           }
 
           attendanceRecordsinRange.map((attendance) => {
-            const totalBreakTimeInMinutes = attendance.breaks.reduce(
-              (sum, b) => {
-                const minutes = Number(b.breakTimeInMinutes);
-                return sum + (isNaN(minutes) ? 0 : minutes);
-              },
-              0
-            );
-
-            breakTime = breakTime + totalBreakTimeInMinutes;
             usersList.map((user) => {
               if (user.userId === attendance.userId) {
                 if (
@@ -1239,15 +1227,33 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                   }
 
                   if (
-                    !isEmpty(attendance.punchInTime) &&
-                    !isEmpty(attendance.punchOutTime)
+                    attendance.punchInTime !== null &&
+                    attendance.punchOutTime !== null
                   ) {
                     diffInMilliseconds =
-                      attendance.punchInTime?.getTime() -
-                      attendance.punchOutTime?.getTime();
-                  } else {
-                    diffInMilliseconds = 0;
+                      diffInMilliseconds +
+                      (attendance.punchOutTime?.getTime() -
+                        attendance.punchInTime?.getTime());
                   }
+
+                  const totalBreakTimeInMinutes = attendance.breaks.reduce(
+                    (sum, b) => {
+                      const [minStr, secStr] = (
+                        b.breakTimeInMinutes || "0:00"
+                      ).split(":");
+                      const minutes = parseInt(minStr, 10);
+                      const seconds = parseInt(secStr, 10);
+
+                      const totalMinutes =
+                        (isNaN(minutes) ? 0 : minutes) +
+                        (isNaN(seconds) ? 0 : seconds / 60);
+
+                      return sum + totalMinutes;
+                    },
+                    0
+                  );
+
+                  breakTime = breakTime + totalBreakTimeInMinutes;
                 } else {
                   const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
                   const timeRange = "9:00-18:00";
@@ -1261,28 +1267,43 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                   }
 
                   if (
-                    !isEmpty(attendance.punchInTime) &&
-                    !isEmpty(attendance.punchOutTime)
+                    attendance.punchInTime !== null &&
+                    attendance.punchOutTime !== null
                   ) {
                     diffInMilliseconds =
-                      attendance.punchInTime?.getTime() -
-                      attendance.punchOutTime?.getTime();
-                  } else {
-                    diffInMilliseconds = 0;
+                      diffInMilliseconds +
+                      (attendance.punchOutTime?.getTime() -
+                        attendance.punchInTime?.getTime());
                   }
+
+                  const totalBreakTimeInMinutes = attendance.breaks.reduce(
+                    (sum, b) => {
+                      const [minStr, secStr] = (
+                        b.breakTimeInMinutes || "0:00"
+                      ).split(":");
+                      const minutes = parseInt(minStr, 10);
+                      const seconds = parseInt(secStr, 10);
+
+                      const totalMinutes =
+                        (isNaN(minutes) ? 0 : minutes) +
+                        (isNaN(seconds) ? 0 : seconds / 60);
+
+                      return sum + totalMinutes;
+                    },
+                    0
+                  );
+
+                  breakTime = breakTime + totalBreakTimeInMinutes;
                 }
               }
             });
           });
           const avgDiffInMinutess = (
-            (
-              diffInMilliseconds /
-              attendanceRecordsinRange.length /
-              1000
-            ).toFixed(2) /
+            diffInMilliseconds /
+            attendanceRecordsinRange.length /
             (1000 * 60)
           ).toFixed(2);
-          console.log(breakTime);
+
           const result = {
             onTimeArrival: record,
             onTimePercentage: "0",
@@ -1353,8 +1374,6 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
         let previousDiffinMilliseconds = 0;
         let breakTime = 0;
         let previousBreakTime = 0;
-        const workStartTime = 9;
-        const workEndTime = 18;
         let usersList;
         if (teamId === "0") {
           usersList = await prisma.user.findMany();
@@ -1372,12 +1391,6 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
         }
 
         attendanceRecordsinRange.map((attendance) => {
-          const totalBreakTimeInMinutes = attendance.breaks.reduce((sum, b) => {
-            const minutes = Number(b.breakTimeInMinutes);
-            return sum + (isNaN(minutes) ? 0 : minutes);
-          }, 0);
-
-          breakTime = breakTime + totalBreakTimeInMinutes;
           usersList.map((user) => {
             if (user.userId === attendance.userId) {
               if (
@@ -1398,15 +1411,33 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                 }
 
                 if (
-                  !isEmpty(attendance.punchInTime) &&
-                  !isEmpty(attendance.punchOutTime)
+                  attendance.punchInTime !== null &&
+                  attendance.punchOutTime !== null
                 ) {
                   diffInMilliseconds =
-                    attendance.punchInTime?.getTime() -
-                    attendance.punchOutTime?.getTime();
-                } else {
-                  diffInMilliseconds = 0;
+                    diffInMilliseconds +
+                    (attendance.punchOutTime?.getTime() -
+                      attendance.punchInTime?.getTime());
                 }
+
+                const totalBreakTimeInMinutes = attendance.breaks.reduce(
+                  (sum, b) => {
+                    const [minStr, secStr] = (
+                      b.breakTimeInMinutes || "0:00"
+                    ).split(":");
+                    const minutes = parseInt(minStr, 10);
+                    const seconds = parseInt(secStr, 10);
+
+                    const totalMinutes =
+                      (isNaN(minutes) ? 0 : minutes) +
+                      (isNaN(seconds) ? 0 : seconds / 60);
+
+                    return sum + totalMinutes;
+                  },
+                  0
+                );
+
+                breakTime = breakTime + totalBreakTimeInMinutes;
               } else {
                 const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
                 const timeRange = "9:00-18:00";
@@ -1420,27 +1451,39 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                 }
 
                 if (
-                  !isEmpty(attendance.punchInTime) &&
-                  !isEmpty(attendance.punchOutTime)
+                  attendance.punchInTime !== null &&
+                  attendance.punchOutTime !== null
                 ) {
                   diffInMilliseconds =
-                    attendance.punchInTime?.getTime() -
-                    attendance.punchOutTime?.getTime();
-                } else {
-                  diffInMilliseconds = 0;
+                    diffInMilliseconds +
+                    (attendance.punchOutTime?.getTime() -
+                      attendance.punchInTime?.getTime());
                 }
+
+                const totalBreakTimeInMinutes = attendance.breaks.reduce(
+                  (sum, b) => {
+                    const [minStr, secStr] = (
+                      b.breakTimeInMinutes || "0:00"
+                    ).split(":");
+                    const minutes = parseInt(minStr, 10);
+                    const seconds = parseInt(secStr, 10);
+
+                    const totalMinutes =
+                      (isNaN(minutes) ? 0 : minutes) +
+                      (isNaN(seconds) ? 0 : seconds / 60);
+
+                    return sum + totalMinutes;
+                  },
+                  0
+                );
+
+                breakTime = breakTime + totalBreakTimeInMinutes;
               }
             }
           });
         });
 
         attendanceRecordsPrev.map((attendance) => {
-          const totalBreakTimeInMinutes = attendance.breaks.reduce((sum, b) => {
-            const minutes = Number(b.breakTimeInMinutes);
-            return sum + (isNaN(minutes) ? 0 : minutes);
-          }, 0);
-
-          previousBreakTime = previousBreakTime + totalBreakTimeInMinutes;
           usersList.map((user) => {
             if (user.userId === attendance.userId) {
               if (
@@ -1459,15 +1502,33 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                   previousLateArrivals = previousLateArrivals + 1;
                 }
 
+                const totalBreakTimeInMinutes = attendance.breaks.reduce(
+                  (sum, b) => {
+                    const [minStr, secStr] = (
+                      b.breakTimeInMinutes || "0:00"
+                    ).split(":");
+                    const minutes = parseInt(minStr, 10);
+                    const seconds = parseInt(secStr, 10);
+
+                    const totalMinutes =
+                      (isNaN(minutes) ? 0 : minutes) +
+                      (isNaN(seconds) ? 0 : seconds / 60);
+
+                    return sum + totalMinutes;
+                  },
+                  0
+                );
+
+                previousBreakTime = previousBreakTime + totalBreakTimeInMinutes;
+
                 if (
-                  !isEmpty(attendance.punchInTime) &&
-                  !isEmpty(attendance.punchOutTime)
+                  attendance.punchInTime !== null &&
+                  attendance.punchOutTime !== null
                 ) {
                   previousDiffinMilliseconds =
-                    attendance.punchInTime?.getTime() -
-                    attendance.punchOutTime?.getTime();
-                } else {
-                  previousDiffinMilliseconds = 0;
+                    previousDiffinMilliseconds +
+                    (attendance.punchOutTime?.getTime() -
+                      attendance.punchInTime?.getTime());
                 }
               } else {
                 const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
@@ -1483,35 +1544,48 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                   previousLateArrivals = previousLateArrivals + 1;
                 }
 
+                const totalBreakTimeInMinutes = attendance.breaks.reduce(
+                  (sum, b) => {
+                    const [minStr, secStr] = (
+                      b.breakTimeInMinutes || "0:00"
+                    ).split(":");
+                    const minutes = parseInt(minStr, 10);
+                    const seconds = parseInt(secStr, 10);
+
+                    const totalMinutes =
+                      (isNaN(minutes) ? 0 : minutes) +
+                      (isNaN(seconds) ? 0 : seconds / 60);
+
+                    return sum + totalMinutes;
+                  },
+                  0
+                );
+
+                previousBreakTime = previousBreakTime + totalBreakTimeInMinutes;
+
                 if (
-                  !isEmpty(attendance.punchInTime) &&
-                  !isEmpty(attendance.punchOutTime)
+                  attendance.punchInTime !== null &&
+                  attendance.punchOutTime !== null
                 ) {
                   previousDiffinMilliseconds =
-                    attendance.punchInTime?.getTime() -
-                    attendance.punchOutTime?.getTime();
-                } else {
-                  previousDiffinMilliseconds = 0;
+                    previousDiffinMilliseconds +
+                    (attendance.punchOutTime?.getTime() -
+                      attendance.punchInTime?.getTime());
                 }
               }
             }
           });
         });
 
-        console.log(diffInMilliseconds);
-
         const avgDiffInMinutess = (
-          (diffInMilliseconds / attendanceRecordsinRange.length / 1000).toFixed(
-            2
-          ) /
+          diffInMilliseconds /
+          attendanceRecordsinRange.length /
           (1000 * 60)
         ).toFixed(2);
+
         const avgPrevDiffInMinutes = (
-          (
-            previousDiffinMilliseconds /
-            attendanceRecordsPrev.length /
-            1000
-          ).toFixed(2) /
+          previousDiffinMilliseconds /
+          attendanceRecordsPrev.length /
           (1000 * 60)
         ).toFixed(2);
 
@@ -1539,7 +1613,562 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     return next(new AppError("Error during calculating attendance data", 500));
   }
 });
+
+export const getAttendanceChartResponse = catchAsync(async (req, res, next) => {
+  const { email, from, to, teamId } = req.query;
+
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email,
+        },
+        include: {
+          roles: true,
+        },
+      });
+
+      if (user.roles.some((role) => role.code === "ADMIN")) {
+        if (isEmpty(from) || isEmpty(to)) {
+          const attendanceRecordsinRange = await prisma.attendance.findMany();
+          let onTimeArrivalCount = 0;
+          let lateArrivalCount = 0;
+          let resultList = [];
+          let usersList;
+          if (teamId === "0") {
+            usersList = await prisma.user.findMany();
+          } else {
+            const team = await prisma.team.findFirst({
+              where: {
+                id: Number(teamId),
+              },
+              include: {
+                members: true,
+              },
+            });
+
+            usersList = team.members;
+          }
+
+          const dateList = [
+            ...new Set(
+              attendanceRecordsinRange.map(
+                (item) => new Date(item.date).toISOString().split("T")[0]
+              )
+            ),
+          ];
+
+          dateList.map((date) => {
+            const dateConst = date;
+            attendanceRecordsinRange.map((attendance) => {
+              if (date === attendance.date.toISOString().split("T")[0]) {
+                usersList.map((user) => {
+                  if (user.userId === attendance.userId) {
+                    if (
+                      user.workingHours !== null &&
+                      user.workingHours !== undefined &&
+                      !isEmpty(user.workingHours)
+                    ) {
+                      const prismaDateTime = attendance.punchInTime;
+                      const timeRange = user.workingHours;
+
+                      const status = isDateTimeInRange(
+                        timeRange,
+                        prismaDateTime
+                      );
+
+                      if (status === "Before Start Time") {
+                        onTimeArrivalCount = onTimeArrivalCount + 1;
+                      }
+                      if (status === "After Start Time") {
+                        lateArrivalCount = lateArrivalCount + 1;
+                      }
+                    } else {
+                      const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
+                      const timeRange = "9:00-18:00";
+                      const status = isDateTimeInRange(
+                        timeRange,
+                        prismaDateTime
+                      );
+
+                      if (status === "Before Start Time") {
+                        onTimeArrivalCount = onTimeArrivalCount + 1;
+                      }
+                      if (status === "After Start Time") {
+                        lateArrivalCount = lateArrivalCount + 1;
+                      }
+                    }
+                  }
+                });
+              }
+            });
+            const obj = {
+              date: dateConst,
+              desktop: onTimeArrivalCount,
+              mobile: lateArrivalCount,
+            };
+
+            resultList.push(obj);
+            onTimeArrivalCount = 0;
+            lateArrivalCount = 0;
+          });
+          return res.status(200).json(resultList);
+        }
+
+        const formattedDate1 = moment
+          .tz(from, "Asia/Kolkata")
+          .startOf("day")
+          .toISOString();
+        const formattedDate2 = moment
+          .tz(to, "Asia/Kolkata")
+          .startOf("day")
+          .toISOString();
+
+        const attendanceRecordsinRange = await prisma.attendance.findMany({
+          where: {
+            date: {
+              gte: formattedDate1,
+              lte: formattedDate2,
+            },
+          },
+        });
+
+        const dateList = [
+          ...new Set(
+            attendanceRecordsinRange.map(
+              (item) => new Date(item.date).toISOString().split("T")[0]
+            )
+          ),
+        ];
+
+        let onTimeArrivalCount = 0;
+        let lateArrivalCount = 0;
+        let resultList = [];
+
+        let usersList;
+        if (teamId === "0") {
+          usersList = await prisma.user.findMany();
+        } else {
+          const team = await prisma.team.findFirst({
+            where: {
+              id: Number(teamId),
+            },
+            include: {
+              members: true,
+            },
+          });
+
+          usersList = team.members;
+        }
+
+        dateList.map((date) => {
+          const dateConst = date;
+          attendanceRecordsinRange.map((attendance) => {
+            if (date === attendance.date.toISOString().split("T")[0]) {
+              usersList.map((user) => {
+                if (user.userId === attendance.userId) {
+                  if (
+                    user.workingHours !== null &&
+                    user.workingHours !== undefined &&
+                    !isEmpty(user.workingHours)
+                  ) {
+                    const prismaDateTime = attendance.punchInTime;
+                    const timeRange = user.workingHours;
+
+                    const status = isDateTimeInRange(timeRange, prismaDateTime);
+
+                    if (status === "Before Start Time") {
+                      onTimeArrivalCount = onTimeArrivalCount + 1;
+                    }
+                    if (status === "After Start Time") {
+                      lateArrivalCount = lateArrivalCount + 1;
+                    }
+                  } else {
+                    const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
+                    const timeRange = "9:00-18:00";
+                    const status = isDateTimeInRange(timeRange, prismaDateTime);
+
+                    if (status === "Before Start Time") {
+                      onTimeArrivalCount = onTimeArrivalCount + 1;
+                    }
+                    if (status === "After Start Time") {
+                      lateArrivalCount = lateArrivalCount + 1;
+                    }
+                  }
+                }
+              });
+            }
+          });
+          const obj = {
+            date: dateConst,
+            desktop: onTimeArrivalCount,
+            mobile: lateArrivalCount,
+          };
+
+          resultList.push(obj);
+          onTimeArrivalCount = 0;
+          lateArrivalCount = 0;
+        });
+
+        return res.status(200).json(resultList);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("Error during calculating attendance data", 500));
+  }
+});
+
+export const getAttendancePCResponse = catchAsync(async (req, res, next) => {
+  const { email, teamId } = req.query;
+
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findFirst({
+        where: {
+          email: email,
+        },
+        include: {
+          roles: true,
+        },
+      });
+
+      if (user.roles.some((role) => role.code === "ADMIN")) {
+        const today = moment.tz("Asia/Kolkata").startOf("day").toISOString();
+
+        const attendanceRecordsinRange = await prisma.attendance.findMany({
+          where: {
+            date: today,
+          },
+        });
+
+        let onTimeArrivalCount = 0;
+        let lateArrivalCount = 0;
+
+        let usersList;
+        if (teamId === "0") {
+          usersList = await prisma.user.findMany();
+        } else {
+          const team = await prisma.team.findFirst({
+            where: {
+              id: Number(teamId),
+            },
+            include: {
+              members: true,
+            },
+          });
+
+          usersList = team.members;
+        }
+
+        attendanceRecordsinRange.map((attendance) => {
+          usersList.map((user) => {
+            if (user.userId === attendance.userId) {
+              if (
+                user.workingHours !== null &&
+                user.workingHours !== undefined &&
+                !isEmpty(user.workingHours)
+              ) {
+                const prismaDateTime = attendance.punchInTime;
+                const timeRange = user.workingHours;
+
+                const status = isDateTimeInRange(timeRange, prismaDateTime);
+
+                if (status === "Before Start Time") {
+                  onTimeArrivalCount = onTimeArrivalCount + 1;
+                }
+                if (status === "After Start Time") {
+                  lateArrivalCount = lateArrivalCount + 1;
+                }
+              } else {
+                const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
+                const timeRange = "9:00-18:00";
+                const status = isDateTimeInRange(timeRange, prismaDateTime);
+
+                if (status === "Before Start Time") {
+                  onTimeArrivalCount = onTimeArrivalCount + 1;
+                }
+                if (status === "After Start Time") {
+                  lateArrivalCount = lateArrivalCount + 1;
+                }
+              }
+            }
+          });
+        });
+
+        const leaveCount = await prisma.leaves.findMany({
+          where: {
+            date: today,
+            approvalStatus: "YES",
+          },
+        });
+
+        const obj = {
+          onTime: onTimeArrivalCount,
+          lateCount: lateArrivalCount,
+          onLeave: leaveCount.length,
+        };
+
+        return res.status(200).json(obj);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("Error during calculating attendance data", 500));
+  }
+});
+
+function getTop4MostFrequentNumbers(arr) {
+  // Create an object to track frequencies
+  const freqMap = {};
+
+  // Count frequencies of each number in the list
+  arr.forEach((num) => {
+    freqMap[num] = (freqMap[num] || 0) + 1;
+  });
+
+  // Sort the frequency map by the counts in descending order and return the top 4
+  return Object.entries(freqMap)
+    .sort((a, b) => b[1] - a[1]) // Sort by frequency count (highest first)
+    .slice(0, 4) // Take the top 4
+    .map(([num, count]) => ({ number: Number(num), count })); // Return an object with number and count
+}
+
+// Example usage:
+const numbers = [1, 2, 3, 2, 4, 3, 2, 5, 1, 3, 3, 6, 1, 1];
+const result = getTop4MostFrequentNumbers(numbers);
+console.log(result);
+
+export const getAttendanceCustomTableResponse = catchAsync(
+  async (req, res, next) => {
+    const { email, from, to, teamId, lateFlag } = req.query;
+
+    try {
+      await prisma.$transaction(async (prisma) => {
+        const user = await prisma.user.findFirst({
+          where: {
+            email: email,
+          },
+          include: {
+            roles: true,
+          },
+        });
+
+        if (user.roles.some((role) => role.code === "ADMIN")) {
+          if (isEmpty(from) || isEmpty(to)) {
+            const attendanceRecordsinRange = await prisma.attendance.findMany();
+            let onTimeArrivalCount = 0;
+            let lateArrivalCount = 0;
+            let resultList = [];
+            let usersList;
+            if (teamId === "0") {
+              usersList = await prisma.user.findMany();
+            } else {
+              const team = await prisma.team.findFirst({
+                where: {
+                  id: Number(teamId),
+                },
+                include: {
+                  members: true,
+                },
+              });
+
+              usersList = team.members;
+            }
+
+            const dateList = [
+              ...new Set(
+                attendanceRecordsinRange.map(
+                  (item) => new Date(item.date).toISOString().split("T")[0]
+                )
+              ),
+            ];
+
+            dateList.map((date) => {
+              const dateConst = date;
+              attendanceRecordsinRange.map((attendance) => {
+                if (date === attendance.date.toISOString().split("T")[0]) {
+                  usersList.map((user) => {
+                    if (user.userId === attendance.userId) {
+                      if (
+                        user.workingHours !== null &&
+                        user.workingHours !== undefined &&
+                        !isEmpty(user.workingHours)
+                      ) {
+                        const prismaDateTime = attendance.punchInTime;
+                        const timeRange = user.workingHours;
+
+                        const status = isDateTimeInRange(
+                          timeRange,
+                          prismaDateTime
+                        );
+
+                        if (status === "Before Start Time") {
+                          onTimeArrivalCount = onTimeArrivalCount + 1;
+                        }
+                        if (status === "After Start Time") {
+                          lateArrivalCount = lateArrivalCount + 1;
+                        }
+                      } else {
+                        const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
+                        const timeRange = "9:00-18:00";
+                        const status = isDateTimeInRange(
+                          timeRange,
+                          prismaDateTime
+                        );
+
+                        if (status === "Before Start Time") {
+                          onTimeArrivalCount = onTimeArrivalCount + 1;
+                        }
+                        if (status === "After Start Time") {
+                          lateArrivalCount = lateArrivalCount + 1;
+                        }
+                      }
+                    }
+                  });
+                }
+              });
+              const obj = {
+                date: dateConst,
+                desktop: onTimeArrivalCount,
+                mobile: lateArrivalCount,
+              };
+
+              resultList.push(obj);
+              onTimeArrivalCount = 0;
+              lateArrivalCount = 0;
+            });
+            return res.status(200).json(resultList);
+          }
+
+          const formattedDate1 = moment
+            .tz(from, "Asia/Kolkata")
+            .startOf("day")
+            .toISOString();
+          const formattedDate2 = moment
+            .tz(to, "Asia/Kolkata")
+            .startOf("day")
+            .toISOString();
+
+          const attendanceRecordsinRange = await prisma.attendance.findMany({
+            where: {
+              date: {
+                gte: formattedDate1,
+                lte: formattedDate2,
+              },
+            },
+          });
+
+          let onTimeArrivalCount = 0;
+          let lateArrivalCount = 0;
+          let resultList = [];
+
+          let usersList;
+          if (teamId === "0") {
+            usersList = await prisma.user.findMany();
+          } else {
+            const team = await prisma.team.findFirst({
+              where: {
+                id: Number(teamId),
+              },
+              include: {
+                members: true,
+              },
+            });
+
+            usersList = team.members;
+          }
+
+          let lateUserIds = [];
+          let onTimeUserIds = [];
+
+          attendanceRecordsinRange.map((attendance) => {
+            usersList.map((user) => {
+              if (user.userId === attendance.userId) {
+                if (
+                  user.workingHours !== null &&
+                  user.workingHours !== undefined &&
+                  !isEmpty(user.workingHours)
+                ) {
+                  const prismaDateTime = attendance.punchInTime;
+                  const timeRange = user.workingHours;
+
+                  const status = isDateTimeInRange(timeRange, prismaDateTime);
+
+                  if (status === "Before Start Time") {
+                    onTimeArrivalCount = onTimeArrivalCount + 1;
+                    onTimeUserIds.push(user.userId);
+                  }
+                  if (status === "After Start Time") {
+                    lateArrivalCount = lateArrivalCount + 1;
+                    lateUserIds.push(user.userId);
+                  }
+                } else {
+                  const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
+                  const timeRange = "9:00-18:00";
+                  const status = isDateTimeInRange(timeRange, prismaDateTime);
+
+                  if (status === "Before Start Time") {
+                    onTimeArrivalCount = onTimeArrivalCount + 1;
+                    onTimeUserIds.push(user.userId);
+                  }
+                  if (status === "After Start Time") {
+                    lateArrivalCount = lateArrivalCount + 1;
+                    lateUserIds.push(user.userId);
+                  }
+                }
+              }
+            });
+          });
+
+          if (lateFlag === "true") {
+            const top4LateUsers = getTop4MostFrequentNumbers(lateUserIds);
+
+            const IdList = result.map((item) => item.number);
+
+            const users = await prisma.user.findMany({
+              where: {
+                userId: {
+                  in: IdList,
+                },
+              },
+            });
+
+            let reultList = [];
+            users.map((user) => {
+              const obj = {
+                username: user.username,
+                userStatus: user.userStatus,
+                lateCount: top4LateUsers.find(
+                  (item) => item.number === user.userId
+                ),
+                avgWorkingTime: "",
+              };
+            });
+          }
+
+          const obj = {
+            date: dateConst,
+            desktop: onTimeArrivalCount,
+            mobile: lateArrivalCount,
+          };
+
+          resultList.push(obj);
+          onTimeArrivalCount = 0;
+          lateArrivalCount = 0;
+
+          return res.status(200).json(resultList);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+      return next(
+        new AppError("Error during calculating attendance data", 500)
+      );
+    }
+  }
+);

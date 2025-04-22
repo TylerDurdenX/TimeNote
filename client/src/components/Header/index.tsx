@@ -169,8 +169,6 @@ const Header = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      console.log("Selected file:", file);
-
       const reader = new FileReader();
 
       // Event handler to run once the file is read

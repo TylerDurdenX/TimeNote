@@ -95,7 +95,6 @@ const MyCalendar = ({
 
   const handleEventClick = (event: any) => {
     // Log the event that was clicked
-    console.log("Event clicked:", event.id);
     sessionStorage.setItem("taskId", event.id);
   };
 

@@ -57,7 +57,6 @@ const ScreenshotUP = ({ id, from, to, setReRenderPage }: Props) => {
 
   useEffect(() => {
     if (isLoading) {
-      console.log("1");
       setQueriesLoaded(false);
     }
   }, [isLoading, id]);

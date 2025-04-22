@@ -95,7 +95,7 @@ export function SectionCards({ email, fromDate, toDate, teamId }: Props) {
       </Card>
       <Card className="@container/card">
         <CardHeader className="relative">
-          <CardDescription>Active Time</CardDescription>
+          <CardDescription>Average Active Time</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
             {data?.avgActiveTime}
           </CardTitle>
@@ -123,7 +123,7 @@ export function SectionCards({ email, fromDate, toDate, teamId }: Props) {
       </Card>
       <Card className="@container/card">
         <CardHeader className="relative">
-          <CardDescription>Break Time</CardDescription>
+          <CardDescription>Average Break Time</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
             {data?.breakTime}
           </CardTitle>

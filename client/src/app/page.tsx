@@ -44,7 +44,7 @@ const App: React.FC = () => {
       );
       setTimeout(() => {}, 3000);
       const user = response.data.data.user;
-      console.log(user);
+
       if (user.roles !== null && user.roles !== undefined) {
         const commaSeparatedNames = user.roles
           .map((role: Role) => role.code)
@@ -82,7 +82,7 @@ const App: React.FC = () => {
         </h2>
       </div>
 
-      <div className="w-[500px]  flex justify-center absolute top-0 mt-[190px] items-center p-5 bg-white box-border bg-indigo-100 oerflow-hidden">
+      <div className="w-[500px]  flex justify-center absolute top-0 mt-[190px] items-center p-5 bg-white box-border oerflow-hidden">
         <div className="w-full max-w-[350px] text-center">
           <h1 className="mt-[20px] font-bold text-5xl text-indigo-700 font-nunito">
             Login

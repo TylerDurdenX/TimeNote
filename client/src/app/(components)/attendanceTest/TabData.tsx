@@ -10,10 +10,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DataTable } from "./LateUsersTable";
+import HighlightedUsersTable from "./LateUsersTable";
 import data from "./newData.json";
+import AttendanceTable from "../attendance/AttendanceTable";
 
-export function TabsDemo() {
+type Props = {
+  userEmail: string;
+  fromDate: string;
+  toDate: string;
+  teamId: number;
+};
+
+export function TabsDemo({ userEmail, fromDate, toDate, teamId }: Props) {
   return (
     <div className="w-full">
       <Tabs defaultValue="account" className="w-full">
@@ -25,20 +33,36 @@ export function TabsDemo() {
           <Card>
             <CardHeader className="mt-1">
               <CardDescription>
-                Change your password here. After saving, you'll be logged out.
+                People who have punched in late the most number of times in
+                given period
               </CardDescription>
             </CardHeader>
-            <DataTable data={data} />
+            <HighlightedUsersTable
+              email={userEmail!}
+              adminFlag={true}
+              lateFlag={true}
+              fromDate={fromDate}
+              toDate={toDate}
+              teamId={teamId}
+            />
           </Card>
         </TabsContent>
         <TabsContent value="password">
           <Card>
             <CardHeader className="mt-1">
               <CardDescription>
-                Change your password here. After saving, you'll be logged out.
+                People who have punched in on-time the most number of times in
+                given period
               </CardDescription>
             </CardHeader>
-            <DataTable data={data} />
+            <HighlightedUsersTable
+              email={userEmail!}
+              adminFlag={true}
+              lateFlag={false}
+              fromDate={fromDate}
+              toDate={toDate}
+              teamId={teamId}
+            />
           </Card>
         </TabsContent>
       </Tabs>

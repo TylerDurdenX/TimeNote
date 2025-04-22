@@ -579,7 +579,6 @@ const TaskPageFull = () => {
   };
 
   const handleAssigneeBlur = () => {
-    console.log(assignee);
     setIsAssigneeEditable(false);
     setIsAssigneeHovered(true);
   };
@@ -779,7 +778,6 @@ const TaskPageFull = () => {
 
   const toggleProgress = async () => {
     const newState = !isProgressStarted;
-    console.log(editedConsumedHours);
     if (newState) {
       try {
         const response = await updateTaskProgress({

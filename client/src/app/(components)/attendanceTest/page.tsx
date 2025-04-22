@@ -1,6 +1,5 @@
 "use client";
 
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { SectionCards } from "@/components/section-cards";
 
 import { useEffect, useState } from "react";
@@ -8,9 +7,12 @@ import { AttendancePC } from "../Dashboard/AttendancePC";
 import { TabsDemo } from "./TabData";
 import AttendanceTable from "../attendance/AttendanceTable";
 import { useSearchParams } from "next/navigation";
-import Header from "@/components/Header";
 import { DateRange } from "react-day-picker";
 import AttendanceHeader from "./attendanceHeader";
+import { Component } from "./lineChart";
+import { BarChartComponent } from "./barChart";
+import { ChartAreaInteractive } from "@/components/chart-area-interactive";
+import { useGetAttendancePCDataQuery } from "@/store/api";
 
 export default function Page() {
   const [teamId, setTeamId] = useState(0);
@@ -63,10 +65,10 @@ export default function Page() {
 
   const userEmail = useSearchParams().get("email");
 
-  useEffect(() => {
-    console.log(fromDate);
-    console.log(toDate);
-  }, [fromDate, toDate]);
+  const { data, isLoading } = useGetAttendancePCDataQuery({
+    email: userEmail!,
+    teamId: teamId,
+  });
 
   return (
     <div className="flex flex-1 flex-col">
@@ -98,21 +100,48 @@ export default function Page() {
             teamId={teamId}
           />
           <div className="px-4 lg:px-6">
-            <ChartAreaInteractive />
+            {/* <ChartAreaInteractive
+              email={userEmail!}
+              fromDate={fromDate}
+              toDate={toDate}
+              teamId={teamId}
+            /> */}
+            {/* <Component
+              email={userEmail!}
+              fromDate={fromDate}
+              toDate={toDate}
+              teamId={teamId}
+            /> */}
+            <BarChartComponent
+              email={userEmail!}
+              fromDate={fromDate}
+              toDate={toDate}
+              teamId={teamId}
+            />
           </div>
           <div className="grid grid-rows-1 grid-cols-[35%_65%] ">
             <div className="p-4">
               <div>
                 {
                   <AttendancePC
-                    onTimeCount={onTimeCount}
-                    lateCount={lateCount}
+                    onTimeCount={data?.onTime!}
+                    lateCount={data?.lateCount!}
+                    onLeave={data?.onLeave}
                   />
                 }
               </div>
             </div>
             <div className="p-4">
-              <div>{<TabsDemo />}</div>
+              <div>
+                {
+                  <TabsDemo
+                    userEmail={userEmail!}
+                    fromDate={fromDate}
+                    toDate={toDate}
+                    teamId={teamId}
+                  />
+                }
+              </div>
             </div>
           </div>
           <div className="p-4">

@@ -164,6 +164,27 @@ export interface AttendanceCardsResponse {
   breakTimePercentage: string;
 }
 
+export interface AttendanceChartResponse {
+  month: string;
+  desktop: number;
+  mobile: number;
+}
+
+export interface PCResponse {
+  lateCount: string;
+  onTime: string;
+  onLeave: string;
+}
+
+export interface CustomTableResponse {
+  username: string;
+  userStatus: string;
+  lateCount: string;
+  onTimeCount: string;
+  avgWorkingTime: string;
+  avgActiveTime: string;
+}
+
 interface ProjectAttachments {
   id: number;
   fileName: string;

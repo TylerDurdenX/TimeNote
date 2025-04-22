@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
 import {
   Card,
@@ -13,15 +13,10 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-  useGetAttendanceCardsDataQuery,
-  useGetAttendanceChartDataQuery,
-} from "@/store/api";
+import { useGetAttendanceChartDataQuery } from "@/store/api";
 const chartData = [
   { date: "2024-04-01", desktop: 222, mobile: 150 },
   { date: "2024-04-02", desktop: 97, mobile: 180 },
@@ -117,16 +112,16 @@ const chartData = [
 ];
 
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
+  views: {
+    label: "Page Views",
   },
   desktop: {
-    label: "Desktop",
-    color: "hsl(var(--chart-1))",
+    label: "On-Time Arrivals",
+    color: "hsl(var(--chart-2))",
   },
   mobile: {
-    label: "Mobile",
-    color: "hsl(var(--chart-2))",
+    label: "Late Arrivals",
+    color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
 
@@ -137,13 +132,9 @@ type Props = {
   teamId: number;
 };
 
-export function ChartAreaInteractive({
-  email,
-  fromDate,
-  toDate,
-  teamId,
-}: Props) {
-  const [timeRange, setTimeRange] = React.useState("90d");
+export function Component({ email, fromDate, toDate, teamId }: Props) {
+  const [activeChart, setActiveChart] =
+    React.useState<keyof typeof chartConfig>("desktop");
 
   const { data, isLoading } = useGetAttendanceChartDataQuery(
     {
@@ -155,48 +146,54 @@ export function ChartAreaInteractive({
     { refetchOnMountOrArgChange: true }
   );
 
+  const total = React.useMemo(
+    () => ({
+      desktop: data?.reduce((acc, curr) => acc + curr.desktop, 0) ?? 0,
+      mobile: data?.reduce((acc, curr) => acc + curr.mobile, 0) ?? 0,
+    }),
+    [data]
+  );
+
   return (
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>On-Time vs Late Arrival Tendency</CardTitle>
+      <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
+          <CardTitle>Line Chart - Interactive</CardTitle>
           <CardDescription>
             Showing total visitors for the last 3 months
           </CardDescription>
         </div>
+        <div className="flex">
+          {(["desktop", "mobile"] as const).map((chart) => (
+            <button
+              key={chart}
+              data-active={activeChart === chart}
+              className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+              onClick={() => setActiveChart(chart)}
+            >
+              <span className="text-xs text-muted-foreground">
+                {chartConfig[chart].label}
+              </span>
+              <span className="text-lg font-bold leading-none sm:text-3xl">
+                {total[chart].toLocaleString()}
+              </span>
+            </button>
+          ))}
+        </div>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+      <CardContent className="px-2 sm:p-6">
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
-          <AreaChart data={data!}>
-            <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-desktop)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-desktop)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-mobile)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-mobile)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
+          <LineChart
+            accessibilityLayer
+            data={data}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -213,35 +210,28 @@ export function ChartAreaInteractive({
               }}
             />
             <ChartTooltip
-              cursor={false}
               content={
                 <ChartTooltipContent
+                  className="w-[150px]"
+                  nameKey="views"
                   labelFormatter={(value) => {
                     return new Date(value).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
+                      year: "numeric",
                     });
                   }}
-                  indicator="dot"
                 />
               }
             />
-            <Area
-              dataKey="desktop"
-              type="natural"
-              fill="url(#fillMobile)"
-              stroke="var(--color-mobile)"
-              stackId="a"
+            <Line
+              dataKey={activeChart}
+              type="monotone"
+              stroke={`var(--color-${activeChart})`}
+              strokeWidth={2}
+              dot={false}
             />
-            <Area
-              dataKey="mobile"
-              type="natural"
-              fill="url(#fillDesktop)"
-              stroke="var(--color-desktop)"
-              stackId="a"
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-          </AreaChart>
+          </LineChart>
         </ChartContainer>
       </CardContent>
     </Card>

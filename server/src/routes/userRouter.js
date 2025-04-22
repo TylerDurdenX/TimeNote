@@ -124,8 +124,11 @@ import { authenticateThirdParty } from "../middleware/generateToken.js";
 import {
   getAdminRole,
   getAttendanceCardsResponse,
+  getAttendanceChartResponse,
+  getAttendanceCustomTableResponse,
   getAttendanceData,
   getAttendanceLCData,
+  getAttendancePCResponse,
   getBreakData,
   getUserAttendanceData,
   getUserAttendanceTableData,
@@ -314,6 +317,12 @@ router.get("/getLeaveData", getLeaves);
 router.get("/getLeaveApprovalData", getLeavesApprovalData);
 router.patch("/updateLeave", updateLeave);
 router.get("/getAttendanceCardsResponse", getAttendanceCardsResponse);
+router.get("/getAttendanceChartResponse", getAttendanceChartResponse);
+router.get("/getAttendancePCResponse", getAttendancePCResponse);
+router.get(
+  "/getAttendanceCustomtableResponse",
+  getAttendanceCustomTableResponse
+);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);

@@ -38,7 +38,7 @@ const AttendanceTable = ({ email, adminFlag }: Props) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const { data, isLoading, error } = useGetUserAttendanceTableDataQuery(
-    { email: email, adminFlag: adminFlag, date: selectedDate.toString() },
+    { email: email, adminFlag: adminFlag, date: selectedDate.toISOString() },
     { refetchOnMountOrArgChange: true }
   );
 

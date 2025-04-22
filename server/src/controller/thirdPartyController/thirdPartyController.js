@@ -37,7 +37,7 @@ export const signInUser = catchAsync(async (req, res, next) => {
       }
 
       const customerData = await prisma.customer.findFirst();
-      console.log(customerData.Allowed_User_Count);
+
       let result;
       if (user.profilePicture) {
         result = {

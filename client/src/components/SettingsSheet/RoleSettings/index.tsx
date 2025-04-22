@@ -91,7 +91,6 @@ export function CreateRole() {
       toast.error(err.data.message);
       console.error("Error creating role:", err.data.Message);
     }
-    console.log("Form Submitted with:", formData);
   };
 
   return (
@@ -144,7 +143,7 @@ export function CreateRole() {
           <DialogFooter>
             <button
               type="submit"
-              className={`flex w-200px mt-4 justify-center bg-blue-600 rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
+              className={`flex w-200px mt-4 justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
             hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
               !isFormValid() || isLoading ? "cursor-not-allowed opacity-50" : ""
             }`}

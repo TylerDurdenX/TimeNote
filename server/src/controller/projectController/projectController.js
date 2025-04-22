@@ -1727,7 +1727,7 @@ export const updateTaskStatus = catchAsync(async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.log("Error during updateTaskStatus" + error);
+    console.log(error);
     return next(new AppError("Some Error Occurred", 500));
   }
   return next(new AppError("Some Error Occurred", 500));
@@ -2570,7 +2570,7 @@ export const getTask = catchAsync(async (req, res, next) => {
       res.json(task);
     });
   } catch (error) {
-    console.log("Error during getTask" + error);
+    console.log(error);
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -3939,7 +3939,7 @@ export const getSubTask = catchAsync(async (req, res, next) => {
       res.json(subTask);
     });
   } catch (error) {
-    console.log("error during getSubTask" + error);
+    console.log(error);
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -4131,7 +4131,7 @@ export const closeCompletedTask = catchAsync(async (req, res, next) => {
       return next(new SuccessResponse("Task Closed Successfully", 200));
     });
   } catch (error) {
-    console.log("Error dusring closeCompletedTask" + error);
+    console.log(error);
     return next(new AppError("Some Error Occurred", 500));
   }
 });
@@ -4222,7 +4222,7 @@ export const getTaskHistory = catchAsync(async (req, res, next) => {
       return res.status(200).json(resultList);
     });
   } catch (error) {
-    console.log("Error during getTaskHistory" + error);
+    console.log(error);
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
   return next(
@@ -4306,7 +4306,7 @@ export const getProjectHoursEstimation = catchAsync(async (req, res, next) => {
       res.json(result);
     });
   } catch (error) {
-    console.log("Error during getProjectHoursEstimation" + error);
+    console.log(error);
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -4332,7 +4332,7 @@ export const getMentionedUsers = catchAsync(async (req, res, next) => {
       res.json(userList);
     });
   } catch (error) {
-    console.log("Error during getMentionedUsers" + error);
+    console.log(error);
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -4366,7 +4366,7 @@ export const getUserData = catchAsync(async (req, res, next) => {
       res.json(user);
     });
   } catch (error) {
-    console.log("Error during getUserData" + error);
+    console.log(error);
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -4410,7 +4410,7 @@ export const getProject = catchAsync(async (req, res, next) => {
       res.json(result);
     });
   } catch (error) {
-    console.log("Error during getProject" + error);
+    console.log(error);
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -4450,7 +4450,7 @@ export const updateProjectStatus = catchAsync(async (req, res, next) => {
       return next(new SuccessResponse("Project Updated Successfully", 200));
     });
   } catch (error) {
-    console.log("Error during updateProjectStatus" + error);
+    console.log(error);
     res.status(500).json({ message: `Error Occurred : ${error.message}` });
   }
 });
@@ -4469,7 +4469,6 @@ export const updateProject = catchAsync(async (req, res, next) => {
   } = req.body;
   try {
     await prisma.$transaction(async (prisma) => {
-      console.log(projectName);
       const user = await prisma.user.findFirst({
         where: {
           email: email,

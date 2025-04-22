@@ -54,9 +54,10 @@ const chartConfig = {
 type Props = {
   onTimeCount: string;
   lateCount: string;
+  onLeave?: string;
 };
 
-export function AttendancePC({ onTimeCount, lateCount }: Props) {
+export function AttendancePC({ onTimeCount, lateCount, onLeave }: Props) {
   const totalCount = Number(onTimeCount) + Number(lateCount);
 
   const desktopData = [
@@ -70,7 +71,7 @@ export function AttendancePC({ onTimeCount, lateCount }: Props) {
       desktop: Number(lateCount),
       fill: "var(--color-february)",
     },
-    { month: "march", desktop: 0, fill: "var(--color-march)" },
+    { month: "march", desktop: Number(onLeave), fill: "var(--color-march)" },
   ];
 
   const id = "pie-interactive";

@@ -8,6 +8,7 @@ import {
   AttendanceCardLCResponse,
   AttendanceCardResponse,
   AttendanceCardsResponse,
+  AttendanceChartResponse,
   AttendanceUserPCResponse,
   AttendanceUserTableResponse,
   BreakRequest,
@@ -18,6 +19,7 @@ import {
   ConfiguredReports,
   CreateSprint,
   CreateUserData,
+  CustomTableResponse,
   DownloadAttachment,
   DownloadProjectAttachment,
   GeoDataResponse,
@@ -29,6 +31,7 @@ import {
   ListResponse,
   LiveStreamResponse,
   MentionedUser,
+  PCResponse,
   PendingTimesheetResponse,
   PmUserResponse,
   ProjectFormData,
@@ -332,6 +335,39 @@ export const api = createApi({
     >({
       query: ({ email, fromDate, toDate, teamId }) => {
         const url = `api/user/getAttendanceCardsResponse?email=${email}&from=${fromDate}&to=${toDate}&teamId=${teamId}`;
+        return url;
+      },
+    }),
+    getAttendanceChartData: build.query<
+      AttendanceChartResponse[],
+      { email: string; fromDate: string; toDate: string; teamId: number }
+    >({
+      query: ({ email, fromDate, toDate, teamId }) => {
+        const url = `api/user/getAttendanceChartResponse?email=${email}&from=${fromDate}&to=${toDate}&teamId=${teamId}`;
+        return url;
+      },
+    }),
+    getAttendancePCData: build.query<
+      PCResponse,
+      { email: string; teamId: number }
+    >({
+      query: ({ email, teamId }) => {
+        const url = `api/user/getAttendancePCResponse?email=${email}&teamId=${teamId}`;
+        return url;
+      },
+    }),
+    getAttendanceCustomTableData: build.query<
+      CustomTableResponse[],
+      {
+        email: string;
+        fromDate: string;
+        toDate: string;
+        teamId: number;
+        lateFlag: boolean;
+      }
+    >({
+      query: ({ email, fromDate, toDate, teamId, lateFlag }) => {
+        const url = `api/user/getAttendanceCustomtableResponse?email=${email}&from=${fromDate}&to=${toDate}&teamId=${teamId}&lateFlag=${lateFlag}`;
         return url;
       },
     }),
@@ -1302,4 +1338,7 @@ export const {
   useCreateBulkUsersMutation,
   useGetAttendanceCardsDataQuery,
   useGetTeamListFilterQuery,
+  useGetAttendanceChartDataQuery,
+  useGetAttendancePCDataQuery,
+  useGetAttendanceCustomTableDataQuery,
 } = api;

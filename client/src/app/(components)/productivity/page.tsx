@@ -11,7 +11,6 @@ import UserList from "../userDetails/usersList";
 type Props = {};
 
 const Productivity = (props: Props) => {
-
   const [isUserSelected, setIsUserSelected] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
 
@@ -21,37 +20,36 @@ const Productivity = (props: Props) => {
   });
 
   const [fromDate, setFromDate] = useState<string>("2000-01-01T00:00:00Z");
-    const [toDate, setToDate] = useState<string>("2000-01-01T00:00:00Z");
-  
-    const logDateRange = () => {
-      if (date?.from && date?.to) {
-        const newFromDate = new Date(date.from);
-        newFromDate.setDate(newFromDate.getDate() + 1);
-  
-        const newToDate = new Date(date.to);
-        newToDate.setDate(newToDate.getDate() + 1);
-  
-        setFromDate(newFromDate.toISOString().split("T")[0]);
-        setToDate(newToDate.toISOString().split("T")[0]);
-      }
-    };
+  const [toDate, setToDate] = useState<string>("2000-01-01T00:00:00Z");
 
-    const clearFilter = () => {
-      setDate(undefined);
-      setFromDate("");
-      setToDate("");
-      console.log("cleared filter from page ");
-    };
+  const logDateRange = () => {
+    if (date?.from && date?.to) {
+      const newFromDate = new Date(date.from);
+      newFromDate.setDate(newFromDate.getDate() + 1);
 
-    const handleSelectUser = (id: number) => {
-      setIsUserSelected(true)
-      setUserId(id)
-    };
+      const newToDate = new Date(date.to);
+      newToDate.setDate(newToDate.getDate() + 1);
+
+      setFromDate(newFromDate.toISOString().split("T")[0]);
+      setToDate(newToDate.toISOString().split("T")[0]);
+    }
+  };
+
+  const clearFilter = () => {
+    setDate(undefined);
+    setFromDate("");
+    setToDate("");
+  };
+
+  const handleSelectUser = (id: number) => {
+    setIsUserSelected(true);
+    setUserId(id);
+  };
 
   return (
     <>
       <div className="w-full sm:flex-row space-y-0 aspect-auto">
-      <div className="flex w-full text-gray-900">
+        <div className="flex w-full text-gray-900">
           <div className="pb-6 pt-6 lg:pb-4 lg:pt-8 w-full">
             <Header
               name="Productivity"
@@ -68,7 +66,7 @@ const Productivity = (props: Props) => {
           {/* Left 40% Area */}
           <div className="flex-[0_0_40%] h-full">
             <div className="h-full ">
-              <UserList onSelectUser={handleSelectUser} />
+              <UserList onSelectUser={handleSelectUser} activeFlag={true} />
             </div>
           </div>
 

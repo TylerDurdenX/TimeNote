@@ -865,8 +865,6 @@ export const createBulkUsers = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       let errorFlag = "";
 
-      console.log(usersList);
-
       const userPromises = usersList.map(async (user) => {
         let joiningDateIsoString = null;
         let dateOfBirthObjISOString = null;

@@ -153,7 +153,6 @@ const FlaggedScreenshots = ({ value }: Props) => {
                               src={card.base64}
                               alt="Base64 Image"
                               className="w-full h-full object-cover"
-                              onClick={() => console.log(card.id)}
                             />
                           </div>
                         </button>

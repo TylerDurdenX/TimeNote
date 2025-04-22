@@ -69,7 +69,6 @@ const LeaveStatus = ({ email }: Props) => {
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
 
   const handleViewDetails = (row: RowData) => {
-    console.log(row.id);
     setSelectedRow(row);
     setRowDataUserName(row.username);
     setIsViewOpen(true);

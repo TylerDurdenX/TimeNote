@@ -125,7 +125,7 @@ const ProjectPage = () => {
           }
         } catch (err: any) {
           toast.error(err.data.message);
-          console.error("Error creating role:", err.data.Message);
+          console.log("Error creating role:", err.data.Message);
         }
       }
     }

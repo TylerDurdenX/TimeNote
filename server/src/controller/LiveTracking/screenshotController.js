@@ -93,13 +93,6 @@ export const getScreenshots = catchAsync(async (req, res, next) => {
         limit,
       };
 
-      // const sizeInBytes = Buffer.byteLength(JSON.stringify(result));
-
-      // // Convert bytes to megabytes (1 MB = 1024 * 1024 bytes)
-      // const sizeInMB = sizeInBytes / (1024 * 1024);
-
-      // console.log(sizeInMB);
-
       res.status(200).json(result);
     } else {
       const user = await prisma.user.findFirst({
@@ -144,13 +137,6 @@ export const getScreenshots = catchAsync(async (req, res, next) => {
         totalItems: screenshotsCount,
         limit,
       };
-
-      const sizeInBytes = Buffer.byteLength(JSON.stringify(result));
-
-      // Convert bytes to megabytes (1 MB = 1024 * 1024 bytes)
-      const sizeInMB = sizeInBytes / (1024 * 1024);
-
-      console.log(sizeInMB);
 
       res.status(200).json(result);
     }
