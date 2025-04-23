@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import TimesheetHeader from "../timesheet/TimesheetHeader";
-import BreakTable from "../attendance/BreakTable";
+import BreakTable from "../attendanceOld/BreakTable";
 
 type Props = {
   email: string;

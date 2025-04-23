@@ -1304,6 +1304,10 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
             (1000 * 60)
           ).toFixed(2);
 
+          const avgBreakTime = (
+            breakTime / attendanceRecordsinRange.length
+          ).toFixed(2);
+
           const result = {
             onTimeArrival: record,
             onTimePercentage: "0",
@@ -1311,7 +1315,7 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
             lateArrivalPercentage: "0",
             avgActiveTime: formatMinutesToHHMMSS(avgDiffInMinutess),
             avgActiveTimePercentage: "0",
-            breakTime: formatMinutesToHHMMSS(breakTime),
+            breakTime: formatMinutesToHHMMSS(avgBreakTime),
             breakTimePercentage: "0",
           };
 
@@ -1938,10 +1942,98 @@ function getTop4MostFrequentNumbers(arr) {
     .map(([num, count]) => ({ number: Number(num), count })); // Return an object with number and count
 }
 
-// Example usage:
-const numbers = [1, 2, 3, 2, 4, 3, 2, 5, 1, 3, 3, 6, 1, 1];
-const result = getTop4MostFrequentNumbers(numbers);
-console.log(result);
+function msToTime(ms) {
+  let totalSeconds = Math.floor(ms / 1000);
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+    2,
+    "0"
+  );
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function getAvgWorkingTime(userID, attendanceRecordsinRange) {
+  let timeInMilliseconds = 0;
+  let attendanceCount = 0;
+  attendanceRecordsinRange.map((attendance) => {
+    if (attendance.userId === userID) {
+      if (attendance.punchInTime !== null && attendance.punchOutTime !== null) {
+        timeInMilliseconds =
+          timeInMilliseconds +
+          (attendance.punchOutTime?.getTime() -
+            attendance.punchInTime?.getTime());
+        attendanceCount = attendanceCount + 1;
+      }
+    }
+  });
+
+  return msToTime(timeInMilliseconds);
+}
+
+function sumTimes(timeList) {
+  let totalSeconds = 0;
+
+  timeList.forEach((timeStr) => {
+    const [hours, minutes, seconds] = timeStr.split(":").map(Number);
+    totalSeconds += hours * 3600 + minutes * 60 + seconds;
+  });
+
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+    2,
+    "0"
+  );
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function timeDiff(start, end) {
+  const toSeconds = (timeStr) => {
+    const [h, m, s] = timeStr.split(":").map(Number);
+    return h * 3600 + m * 60 + s;
+  };
+
+  const startSec = toSeconds(start);
+  const endSec = toSeconds(end);
+
+  // If end > start, return 00:00:00
+  if (endSec > startSec) return "00:00:00";
+
+  let diff = startSec - endSec;
+
+  const hours = String(Math.floor(diff / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
+  const seconds = String(diff % 60).padStart(2, "0");
+
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function getAvgActiveTime(userID, attendanceRecordsinRange) {
+  let timeInMilliseconds = 0;
+  let attendanceCount = 0;
+  let addedBreakTimeList = [];
+  attendanceRecordsinRange.map((attendance) => {
+    if (attendance.userId === userID) {
+      const breakTimeList = attendance.breaks.map((b) => b.breakTimeInMinutes);
+      if (attendance.punchInTime !== null && attendance.punchOutTime !== null) {
+        timeInMilliseconds =
+          timeInMilliseconds +
+          (attendance.punchOutTime?.getTime() -
+            attendance.punchInTime?.getTime());
+        attendanceCount = attendanceCount + 1;
+      }
+      const breakTime = addTimes(breakTimeList);
+      addedBreakTimeList.push(breakTime);
+    }
+  });
+
+  const finalBreakTime = sumTimes(addedBreakTimeList);
+
+  return timeDiff(msToTime(timeInMilliseconds), finalBreakTime);
+}
 
 export const getAttendanceCustomTableResponse = catchAsync(
   async (req, res, next) => {
@@ -1960,7 +2052,11 @@ export const getAttendanceCustomTableResponse = catchAsync(
 
         if (user.roles.some((role) => role.code === "ADMIN")) {
           if (isEmpty(from) || isEmpty(to)) {
-            const attendanceRecordsinRange = await prisma.attendance.findMany();
+            const attendanceRecordsinRange = await prisma.attendance.findMany({
+              include: {
+                breaks: true,
+              },
+            });
             let onTimeArrivalCount = 0;
             let lateArrivalCount = 0;
             let resultList = [];
@@ -1980,69 +2076,115 @@ export const getAttendanceCustomTableResponse = catchAsync(
               usersList = team.members;
             }
 
-            const dateList = [
-              ...new Set(
-                attendanceRecordsinRange.map(
-                  (item) => new Date(item.date).toISOString().split("T")[0]
-                )
-              ),
-            ];
+            let lateUserIds = [];
+            let onTimeUserIds = [];
 
-            dateList.map((date) => {
-              const dateConst = date;
-              attendanceRecordsinRange.map((attendance) => {
-                if (date === attendance.date.toISOString().split("T")[0]) {
-                  usersList.map((user) => {
-                    if (user.userId === attendance.userId) {
-                      if (
-                        user.workingHours !== null &&
-                        user.workingHours !== undefined &&
-                        !isEmpty(user.workingHours)
-                      ) {
-                        const prismaDateTime = attendance.punchInTime;
-                        const timeRange = user.workingHours;
+            attendanceRecordsinRange.map((attendance) => {
+              usersList.map((user) => {
+                if (user.userId === attendance.userId) {
+                  if (
+                    user.workingHours !== null &&
+                    user.workingHours !== undefined &&
+                    !isEmpty(user.workingHours)
+                  ) {
+                    const prismaDateTime = attendance.punchInTime;
+                    const timeRange = user.workingHours;
 
-                        const status = isDateTimeInRange(
-                          timeRange,
-                          prismaDateTime
-                        );
+                    const status = isDateTimeInRange(timeRange, prismaDateTime);
 
-                        if (status === "Before Start Time") {
-                          onTimeArrivalCount = onTimeArrivalCount + 1;
-                        }
-                        if (status === "After Start Time") {
-                          lateArrivalCount = lateArrivalCount + 1;
-                        }
-                      } else {
-                        const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
-                        const timeRange = "9:00-18:00";
-                        const status = isDateTimeInRange(
-                          timeRange,
-                          prismaDateTime
-                        );
-
-                        if (status === "Before Start Time") {
-                          onTimeArrivalCount = onTimeArrivalCount + 1;
-                        }
-                        if (status === "After Start Time") {
-                          lateArrivalCount = lateArrivalCount + 1;
-                        }
-                      }
+                    if (status === "Before Start Time") {
+                      onTimeArrivalCount = onTimeArrivalCount + 1;
+                      onTimeUserIds.push(user.userId);
                     }
-                  });
+                    if (status === "After Start Time") {
+                      lateArrivalCount = lateArrivalCount + 1;
+                      lateUserIds.push(user.userId);
+                    }
+                  } else {
+                    const prismaDateTime = attendance.punchInTime; // Replace with your actual Prisma DateTime
+                    const timeRange = "9:00-18:00";
+                    const status = isDateTimeInRange(timeRange, prismaDateTime);
+
+                    if (status === "Before Start Time") {
+                      onTimeArrivalCount = onTimeArrivalCount + 1;
+                      onTimeUserIds.push(user.userId);
+                    }
+                    if (status === "After Start Time") {
+                      lateArrivalCount = lateArrivalCount + 1;
+                      lateUserIds.push(user.userId);
+                    }
+                  }
                 }
               });
-              const obj = {
-                date: dateConst,
-                desktop: onTimeArrivalCount,
-                mobile: lateArrivalCount,
-              };
-
-              resultList.push(obj);
-              onTimeArrivalCount = 0;
-              lateArrivalCount = 0;
             });
-            return res.status(200).json(resultList);
+
+            if (lateFlag === "true") {
+              const top4LateUsers = getTop4MostFrequentNumbers(lateUserIds);
+
+              const IdList = top4LateUsers.map((item) => item.number);
+
+              const users = await prisma.user.findMany({
+                where: {
+                  userId: {
+                    in: IdList,
+                  },
+                },
+              });
+
+              users.map((user) => {
+                const obj = {
+                  id: user.userId,
+                  username: user.username,
+                  userStatus: user.userStatus,
+                  lateCount: top4LateUsers.find(
+                    (item) => item.number === user.userId
+                  ).count,
+                  avgWorkingTime: getAvgWorkingTime(
+                    user.userId,
+                    attendanceRecordsinRange
+                  ),
+                  avgActiveTime: getAvgActiveTime(
+                    user.userId,
+                    attendanceRecordsinRange
+                  ),
+                };
+                resultList.push(obj);
+              });
+              return res.status(200).json(resultList);
+            } else {
+              const top4OnTimeUsers = getTop4MostFrequentNumbers(onTimeUserIds);
+
+              const IdList = top4OnTimeUsers.map((item) => item.number);
+
+              const users = await prisma.user.findMany({
+                where: {
+                  userId: {
+                    in: IdList,
+                  },
+                },
+              });
+
+              users.map((user) => {
+                const obj = {
+                  id: user.userId,
+                  username: user.username,
+                  userStatus: user.userStatus,
+                  onTimeCount: top4OnTimeUsers.find(
+                    (item) => item.number === user.userId
+                  ).count,
+                  avgWorkingTime: getAvgWorkingTime(
+                    user.userId,
+                    attendanceRecordsinRange
+                  ),
+                  avgActiveTime: getAvgActiveTime(
+                    user.userId,
+                    attendanceRecordsinRange
+                  ),
+                };
+                resultList.push(obj);
+              });
+              return res.status(200).json(resultList);
+            }
           }
 
           const formattedDate1 = moment
@@ -2060,6 +2202,9 @@ export const getAttendanceCustomTableResponse = catchAsync(
                 gte: formattedDate1,
                 lte: formattedDate2,
               },
+            },
+            include: {
+              breaks: true,
             },
           });
 
@@ -2128,7 +2273,7 @@ export const getAttendanceCustomTableResponse = catchAsync(
           if (lateFlag === "true") {
             const top4LateUsers = getTop4MostFrequentNumbers(lateUserIds);
 
-            const IdList = result.map((item) => item.number);
+            const IdList = top4LateUsers.map((item) => item.number);
 
             const users = await prisma.user.findMany({
               where: {
@@ -2138,30 +2283,60 @@ export const getAttendanceCustomTableResponse = catchAsync(
               },
             });
 
-            let reultList = [];
             users.map((user) => {
               const obj = {
+                id: user.userId,
                 username: user.username,
                 userStatus: user.userStatus,
                 lateCount: top4LateUsers.find(
                   (item) => item.number === user.userId
+                ).count,
+                avgWorkingTime: getAvgWorkingTime(
+                  user.userId,
+                  attendanceRecordsinRange
                 ),
-                avgWorkingTime: "",
+                avgActiveTime: getAvgActiveTime(
+                  user.userId,
+                  attendanceRecordsinRange
+                ),
               };
+              resultList.push(obj);
             });
+            return res.status(200).json(resultList);
+          } else {
+            const top4OnTimeUsers = getTop4MostFrequentNumbers(onTimeUserIds);
+
+            const IdList = top4OnTimeUsers.map((item) => item.number);
+
+            const users = await prisma.user.findMany({
+              where: {
+                userId: {
+                  in: IdList,
+                },
+              },
+            });
+
+            users.map((user) => {
+              const obj = {
+                id: user.userId,
+                username: user.username,
+                userStatus: user.userStatus,
+                onTimeCount: top4OnTimeUsers.find(
+                  (item) => item.number === user.userId
+                ).count,
+                avgWorkingTime: getAvgWorkingTime(
+                  user.userId,
+                  attendanceRecordsinRange
+                ),
+                avgActiveTime: getAvgActiveTime(
+                  user.userId,
+                  attendanceRecordsinRange
+                ),
+              };
+              resultList.push(obj);
+            });
+            return res.status(200).json(resultList);
           }
-
-          const obj = {
-            date: dateConst,
-            desktop: onTimeArrivalCount,
-            mobile: lateArrivalCount,
-          };
-
-          resultList.push(obj);
-          onTimeArrivalCount = 0;
-          lateArrivalCount = 0;
-
-          return res.status(200).json(resultList);
         }
       });
     } catch (error) {

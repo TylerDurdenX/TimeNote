@@ -1,218 +1,156 @@
 "use client";
 
-import React, { useState } from "react";
-import Header from "@/components/Header";
-import { Card } from "./Card";
+import { SectionCards } from "@/components/section-cards";
+
+import { useEffect, useState } from "react";
 import { AttendancePC } from "../Dashboard/AttendancePC";
+import { TabsDemo } from "./TabData";
+import AttendanceTable from "../attendanceOld/AttendanceTable";
 import { useSearchParams } from "next/navigation";
-import { DualChart } from "./DualChart";
-import CircularLoading from "@/components/Sidebar/loading";
-import { AttendancePCUser } from "./AttendancePCUser";
-import AttendanceTable from "./AttendanceTable";
-import { useGetAdminRoleQuery } from "@/store/api";
+import { DateRange } from "react-day-picker";
+import AttendanceHeader from "./attendanceHeader";
+import { Component } from "./lineChart";
+import { BarChartComponent } from "./barChart";
+import { ChartAreaInteractive } from "@/components/chart-area-interactive";
+import { useGetAttendancePCDataQuery } from "@/store/api";
 
-const App: React.FC = () => {
-  const email = sessionStorage.getItem("email");
-
+export default function Page() {
+  const [teamId, setTeamId] = useState(0);
+  const now = new Date();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(now.getDate() - 7);
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: sevenDaysAgo,
+    to: now,
+  });
+  const [fromDate, setFromDate] = useState<string>(sevenDaysAgo.toISOString());
+  const [toDate, setToDate] = useState<string>(now.toISOString());
   const [onTimeCount, setonTimeCount] = useState("");
   const [lateCount, setLateCount] = useState("");
   const [onTimeList, setOnTimeList] = useState<any[]>();
   const [lateArrivalList, setLateArrivalList] = useState<any[]>();
 
-  const [isCard1Loaded, setIsCard1Loaded] = useState(false);
-  const [isCard2Loaded, setIsCard2Loaded] = useState(false);
+  const logDateRange = () => {
+    if (date?.from && date?.to) {
+      const newFromDate = new Date(date.from);
+      newFromDate.setDate(newFromDate.getDate() + 1);
 
-  const userRolesList = sessionStorage.getItem("userRoles");
+      const newToDate = new Date(date.to);
+      newToDate.setDate(newToDate.getDate() + 1);
 
-  let Admin: boolean = false;
+      setFromDate(newFromDate.toISOString().split("T")[0]);
+      setToDate(newToDate.toISOString().split("T")[0]);
+    }
+  };
 
-  if (
-    userRolesList !== undefined &&
-    userRolesList !== null &&
-    userRolesList !== ""
-  ) {
-    // Define the function to check if 'ADMIN' is in the list
-    const containsValue = (csvString: string, value: string): boolean => {
-      // Split the string by commas to get an array of values
-      const valuesArray = csvString.split(",");
-      // Check if the value exists in the array
-      return valuesArray.includes(value);
-    };
+  useEffect(() => {
+    if (date?.from && date?.to) {
+      const newFromDate = new Date(date.from);
+      newFromDate.setDate(newFromDate.getDate());
 
-    // Call containsValue function to set Admin
-    Admin = containsValue(userRolesList, "ADMIN");
-  } else {
-    console.log("userRolesList is undefined or empty");
-  }
+      const newToDate = new Date(date.to);
+      newToDate.setDate(newToDate.getDate());
+
+      setFromDate(newFromDate.toISOString().split("T")[0]);
+      setToDate(newToDate.toISOString().split("T")[0]);
+    }
+  }, [date]);
+
+  const clearFilter = () => {
+    setDate(undefined);
+    setFromDate("");
+    setToDate("");
+    setTeamId(0);
+  };
 
   const userEmail = useSearchParams().get("email");
 
-  const { data, isLoading } = useGetAdminRoleQuery(
-    { email: userEmail! },
-    { refetchOnMountOrArgChange: true }
-  );
+  const { data, isLoading } = useGetAttendancePCDataQuery({
+    email: userEmail!,
+    teamId: teamId,
+  });
 
   return (
-    <>
-      {isLoading ? (
-        <CircularLoading />
-      ) : (
-        <>
-          <>
-            {data?.admin ? (
-              <div className="w-full min-h-screen ">
-                {/* Header Section */}
-                <div className="w-full mb-5">
-                  <div className="flex w-full text-gray-900">
-                    <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
-                      <Header
-                        name="Attendance"
-                        hasFilters={false}
-                        hasTeamFilter={false}
-                        buttonName="Add User"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 px-4 ">
-                  <div className="w-1/2 p-4 overflow-hidden">
-                    <Card
-                      title="On Time Arrivals"
-                      chartId="onTimeChart"
-                      email={email!}
-                      onTimeCount={onTimeCount}
-                      setOnTimeCount={setonTimeCount}
-                      lateCount={lateCount}
-                      setLateCount={setLateCount}
-                      setOnTimeList={setOnTimeList}
-                      setLateArrivalList={setLateArrivalList}
-                      setIsCard1Loaded={setIsCard1Loaded}
-                      setIsCard2Loaded={setIsCard2Loaded}
-                    />
-                  </div>
-                  <div className="w-1/2 p-4 overflow-hidden justify-center">
-                    <Card
-                      title="Late Arrivals"
-                      chartId="lateArrivalsChart"
-                      email={email!}
-                      onTimeCount={onTimeCount}
-                      setOnTimeCount={setonTimeCount}
-                      lateCount={lateCount}
-                      setLateCount={setLateCount}
-                      setOnTimeList={setOnTimeList}
-                      setLateArrivalList={setLateArrivalList}
-                      setIsCard1Loaded={setIsCard1Loaded}
-                      setIsCard2Loaded={setIsCard2Loaded}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-rows-1 grid-cols-[35%_65%] ">
-                  <div className="p-4">
-                    <div>
-                      {isCard1Loaded && isCard2Loaded ? (
-                        <AttendancePC
-                          onTimeCount={onTimeCount}
-                          lateCount={lateCount}
-                        />
-                      ) : (
-                        <CircularLoading />
-                      )}
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div>
-                      {isCard1Loaded &&
-                      isCard2Loaded &&
-                      onTimeList?.length !== 0 &&
-                      lateArrivalList?.length !== 0 ? (
-                        <DualChart
-                          onTimeList={onTimeList!}
-                          lateArrivalList={lateArrivalList!}
-                        />
-                      ) : (
-                        <CircularLoading />
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 ">
-                  <div className="h-full w-full overflow-hidden">
-                    <AttendanceTable email={email!} adminFlag={true} />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="w-full min-h-screen bg-gray-50">
-                  {/* Header Section */}
-                  <div className="w-full mb-5">
-                    <div className="flex w-full text-gray-900">
-                      <div className="pb-4 pt-1 lg:pb-4 lg:pt-8 w-full">
-                        <Header
-                          name="Attendance"
-                          hasFilters={false}
-                          hasTeamFilter={false}
-                          buttonName="Add User"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* <div className="flex gap-2 px-4 ">
-        <div className="w-1/2 p-4 overflow-hidden">
-          <Card
-            title="On Time Arrivals"
-            chartId="onTimeChart"
-            email={email!}
-            onTimeCount={onTimeCount}
-            setOnTimeCount={setonTimeCount}
-            lateCount={lateCount}
-            setLateCount={setLateCount}
-            setOnTimeList={setOnTimeList}
-            setLateArrivalList={setLateArrivalList}
-            setIsCard1Loaded={setIsCard1Loaded}
-            setIsCard2Loaded={setIsCard2Loaded}
-          />
-            </div>  
-        <div className="w-1/2 p-4 overflow-hidden justify-center">
-          <Card
-            title="Late Arrivals"
-            chartId="lateArrivalsChart"
-            email={email!}
-            onTimeCount={onTimeCount}
-            setOnTimeCount={setonTimeCount}
-            lateCount={lateCount}
-            setLateCount={setLateCount}
-            setOnTimeList={setOnTimeList}
-            setLateArrivalList={setLateArrivalList}
-            setIsCard1Loaded={setIsCard1Loaded}
-            setIsCard2Loaded={setIsCard2Loaded}
-          />
+    <div className="flex flex-1 flex-col">
+      <div className="w-full">
+        <div className="flex w-full text-gray-900">
+          <div className=" pt-1 lg:pt-8 w-full">
+            <AttendanceHeader
+              name="Attendance"
+              hasFilters={true}
+              hasTeamFilter={true}
+              buttonName="Add User"
+              date={date}
+              setDate={setDate}
+              onRangeSelect={logDateRange}
+              clearFilter={clearFilter}
+              email={userEmail!}
+              value={teamId}
+              setValue={setTeamId}
+            />
+          </div>
         </div>
-      </div> */}
-                  <div className="grid grid-rows-1 grid-cols-[35%_65%] ">
-                    <div className="p-4">
-                      <div>
-                        <AttendancePCUser />
-                        {/* {(isCard1Loaded && isCard2Loaded) ? <AttendancePC onTimeCount={onTimeCount} lateCount={lateCount}/> : <CircularLoading/>} */}
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="h-full overflow-hidden">
-                        <AttendanceTable email={email!} adminFlag={false} />
-                        {/* {(isCard1Loaded && isCard2Loaded && (onTimeList?.length !== 0) && (lateArrivalList?.length !== 0)) ? <DualChart onTimeList={onTimeList!} lateArrivalList={lateArrivalList!}/> : <CircularLoading/>} */}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </>
-        </>
-      )}
-    </>
+      </div>
+      <div className="@container/main flex flex-1 flex-col gap-2">
+        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          <SectionCards
+            email={userEmail!}
+            fromDate={fromDate}
+            toDate={toDate}
+            teamId={teamId}
+          />
+          <div className="px-4 lg:px-6">
+            {/* <ChartAreaInteractive
+              email={userEmail!}
+              fromDate={fromDate}
+              toDate={toDate}
+              teamId={teamId}
+            /> */}
+            {/* <Component
+              email={userEmail!}
+              fromDate={fromDate}
+              toDate={toDate}
+              teamId={teamId}
+            /> */}
+            <BarChartComponent
+              email={userEmail!}
+              fromDate={fromDate}
+              toDate={toDate}
+              teamId={teamId}
+            />
+          </div>
+          <div className="grid grid-rows-1 grid-cols-[35%_65%] ">
+            <div className="p-4">
+              <div>
+                {
+                  <AttendancePC
+                    onTimeCount={data?.onTime!}
+                    lateCount={data?.lateCount!}
+                    onLeave={data?.onLeave}
+                  />
+                }
+              </div>
+            </div>
+            <div className="p-4">
+              <div>
+                {
+                  <TabsDemo
+                    userEmail={userEmail!}
+                    fromDate={fromDate}
+                    toDate={toDate}
+                    teamId={teamId}
+                  />
+                }
+              </div>
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="overflow-hidden">
+              <AttendanceTable email={userEmail!} adminFlag={true} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default App;
+}

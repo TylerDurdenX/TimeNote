@@ -42,16 +42,16 @@ const HighlightedUsersTable = ({
 }: Props) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  // const { data, isLoading, error } = useGetAttendanceCustomTableDataQuery(
-  //   {
-  //     email: email,
-  //     fromDate: fromDate,
-  //     toDate: toDate,
-  //     teamId: teamId,
-  //     lateFlag: lateFlag,
-  //   },
-  //   { refetchOnMountOrArgChange: true }
-  // );
+  const { data, isLoading, error } = useGetAttendanceCustomTableDataQuery(
+    {
+      email: email,
+      fromDate: fromDate,
+      toDate: toDate,
+      teamId: teamId,
+      lateFlag: lateFlag,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
   const { theme } = useTheme();
 
@@ -83,32 +83,32 @@ const HighlightedUsersTable = ({
   const columns: GridColDef[] = [
     ...(adminFlag
       ? [
-          {
-            field: "image",
-            headerName: "",
-            flex: 0.5,
-            renderCell: (params: any) => {
-              const rowData = params.row;
+          // {
+          //   field: "image",
+          //   headerName: "",
+          //   flex: 0.5,
+          //   renderCell: (params: any) => {
+          //     const rowData = params.row;
 
-              return (
-                <Avatar className="h-[40px] mt-1 w-[40px] rounded-full justify-center items-center">
-                  <AvatarImage
-                    src={rowData.image}
-                    alt={rowData.username}
-                    loading="lazy"
-                  />
-                  <AvatarFallback className="absolute inset-0 flex justify-center items-center text-[150%]">
-                    {getInitials(rowData.username!)}
-                  </AvatarFallback>
-                </Avatar>
-              );
-            },
-          },
+          //     return (
+          //       <Avatar className="h-[40px] mt-1 w-[40px] rounded-full justify-center items-center">
+          //         <AvatarImage
+          //           src={rowData.image}
+          //           alt={rowData.username}
+          //           loading="lazy"
+          //         />
+          //         <AvatarFallback className="absolute inset-0 flex justify-center items-center text-[150%]">
+          //           {getInitials(rowData.username!)}
+          //         </AvatarFallback>
+          //       </Avatar>
+          //     );
+          //   },
+          // },
           { field: "username", headerName: "User Name", flex: 1 },
         ]
       : []),
     {
-      field: "status",
+      field: "userStatus",
       headerName: "User Status",
       flex: 1,
       renderCell: (params) => {
@@ -186,7 +186,7 @@ const HighlightedUsersTable = ({
   return (
     <div className="h-full w-full px-4 pb-8 xl:px-6">
       <DataGrid
-        rows={[]}
+        rows={data || []}
         columns={columns}
         className={dataGridClassNames}
         pagination
