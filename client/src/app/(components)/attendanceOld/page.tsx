@@ -158,44 +158,10 @@ const App: React.FC = () => {
                       </div>
                     </div>
                   </div>
-
-                  {/* <div className="flex gap-2 px-4 ">
-        <div className="w-1/2 p-4 overflow-hidden">
-          <Card
-            title="On Time Arrivals"
-            chartId="onTimeChart"
-            email={email!}
-            onTimeCount={onTimeCount}
-            setOnTimeCount={setonTimeCount}
-            lateCount={lateCount}
-            setLateCount={setLateCount}
-            setOnTimeList={setOnTimeList}
-            setLateArrivalList={setLateArrivalList}
-            setIsCard1Loaded={setIsCard1Loaded}
-            setIsCard2Loaded={setIsCard2Loaded}
-          />
-            </div>  
-        <div className="w-1/2 p-4 overflow-hidden justify-center">
-          <Card
-            title="Late Arrivals"
-            chartId="lateArrivalsChart"
-            email={email!}
-            onTimeCount={onTimeCount}
-            setOnTimeCount={setonTimeCount}
-            lateCount={lateCount}
-            setLateCount={setLateCount}
-            setOnTimeList={setOnTimeList}
-            setLateArrivalList={setLateArrivalList}
-            setIsCard1Loaded={setIsCard1Loaded}
-            setIsCard2Loaded={setIsCard2Loaded}
-          />
-        </div>
-      </div> */}
                   <div className="grid grid-rows-1 grid-cols-[35%_65%] ">
                     <div className="p-4">
                       <div>
                         <AttendancePCUser />
-                        {/* {(isCard1Loaded && isCard2Loaded) ? <AttendancePC onTimeCount={onTimeCount} lateCount={lateCount}/> : <CircularLoading/>} */}
                       </div>
                     </div>
                     <div className="p-4">

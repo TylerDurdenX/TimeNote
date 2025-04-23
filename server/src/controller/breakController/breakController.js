@@ -565,7 +565,7 @@ export const idleTimeoutUser = catchAsync(async (req, res, next) => {
         },
       });
 
-      const todayDate = moment().tz("Asia/Kolkata").startOf("day");
+      const todayDate = moment().tz("Asia/Kolkata");
       const indianTimeISOString = todayDate.toISOString();
 
       const attendance = await prisma.attendance.findFirst({

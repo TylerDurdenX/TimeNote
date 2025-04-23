@@ -56,14 +56,14 @@ const ReportsDialog = ({ name, email }: Props) => {
       <CardHeader>
         <CardTitle>Generate {name}</CardTitle>
         <CardDescription>
-          Please provide the below data and click on Generate Report Button to
+          Please provide the below data and click on generate report button to
           download the report.
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-2">
         <div className="grid grid-cols-10 items-center gap-4 mr-1">
-          <Label className="text-center">Project</Label>
+          <Label className="text-center">User</Label>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
