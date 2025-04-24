@@ -1393,10 +1393,15 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
 
           usersList = team.members;
         }
+        let breakUsers = 0;
+        let previousBreakUsers = 0;
 
         attendanceRecordsinRange.map((attendance) => {
           usersList.map((user) => {
             if (user.userId === attendance.userId) {
+              if (!isEmpty(attendance.breaks)) {
+                breakUsers = breakUsers + 1;
+              }
               if (
                 user.workingHours !== null &&
                 user.workingHours !== undefined &&
@@ -1490,6 +1495,9 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
         attendanceRecordsPrev.map((attendance) => {
           usersList.map((user) => {
             if (user.userId === attendance.userId) {
+              if (!isEmpty(attendance.breaks)) {
+                previousBreakUsers = previousBreakUsers + 1;
+              }
               if (
                 user.workingHours !== null &&
                 user.workingHours !== undefined &&
@@ -1593,27 +1601,53 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
           (1000 * 60)
         ).toFixed(2);
 
-        const result = {
-          onTimeArrival: record,
-          onTimePercentage: getPercentageChange(previousRecord, record),
-          lateArrival: lateArrival,
-          lateArrivalPercentage: getPercentageChange(
-            previousLateArrivals,
-            lateArrival
-          ),
-          avgActiveTime: formatMinutesToHHMMSS(avgDiffInMinutess),
-          avgActiveTimePercentage: getPercentageChange(
-            avgPrevDiffInMinutes,
-            avgDiffInMinutess
-          ),
-          breakTime: formatMinutesToHHMMSS(breakTime),
-          breakTimePercentage: getPercentageChange(
-            previousBreakTime,
-            breakTime
-          ),
-        };
+        if (breakUsers !== 0 && previousBreakUsers !== 0) {
+          const result = {
+            onTimeArrival: record,
+            onTimePercentage: getPercentageChange(previousRecord, record),
+            lateArrival: lateArrival,
+            lateArrivalPercentage: getPercentageChange(
+              previousLateArrivals,
+              lateArrival
+            ),
+            avgActiveTime: formatMinutesToHHMMSS(avgDiffInMinutess),
+            avgActiveTimePercentage: getPercentageChange(
+              avgPrevDiffInMinutes,
+              avgDiffInMinutess
+            ),
+            breakTime: formatMinutesToHHMMSS(
+              Math.floor(breakTime / usersList.length)
+            ),
+            breakTimePercentage: getPercentageChange(
+              Math.floor(previousBreakTime / usersList.length),
+              Math.floor(breakTime / usersList.length)
+            ),
+          };
 
-        return res.status(200).json(result);
+          return res.status(200).json(result);
+        } else {
+          const result = {
+            onTimeArrival: record,
+            onTimePercentage: getPercentageChange(previousRecord, record),
+            lateArrival: lateArrival,
+            lateArrivalPercentage: getPercentageChange(
+              previousLateArrivals,
+              lateArrival
+            ),
+            avgActiveTime: formatMinutesToHHMMSS(avgDiffInMinutess),
+            avgActiveTimePercentage: getPercentageChange(
+              avgPrevDiffInMinutes,
+              avgDiffInMinutess
+            ),
+            breakTime: formatMinutesToHHMMSS(Math.floor(breakTime)),
+            breakTimePercentage: getPercentageChange(
+              Math.floor(previousBreakTime),
+              Math.floor(breakTime)
+            ),
+          };
+
+          return res.status(200).json(result);
+        }
       }
     });
   } catch (error) {
@@ -1720,6 +1754,10 @@ export const getAttendanceChartResponse = catchAsync(async (req, res, next) => {
             onTimeArrivalCount = 0;
             lateArrivalCount = 0;
           });
+          resultList.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+
           return res.status(200).json(resultList);
         }
 
@@ -1954,7 +1992,7 @@ function msToTime(ms) {
   return `${hours}:${minutes}:${seconds}`;
 }
 
-function getAvgWorkingTime(userID, attendanceRecordsinRange) {
+function getAvgWorkingTime(userID, attendanceRecordsinRange, count) {
   let timeInMilliseconds = 0;
   let attendanceCount = 0;
   attendanceRecordsinRange.map((attendance) => {
@@ -1969,10 +2007,12 @@ function getAvgWorkingTime(userID, attendanceRecordsinRange) {
     }
   });
 
-  return msToTime(timeInMilliseconds);
+  const avgTimePerDayMillis = Math.floor(timeInMilliseconds / count);
+
+  return msToTime(avgTimePerDayMillis);
 }
 
-function sumTimes(timeList) {
+function sumTimes(timeList, count) {
   let totalSeconds = 0;
 
   timeList.forEach((timeStr) => {
@@ -1980,12 +2020,14 @@ function sumTimes(timeList) {
     totalSeconds += hours * 3600 + minutes * 60 + seconds;
   });
 
-  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+  const totalAvgSeconds = Math.floor(totalSeconds / count);
+
+  const hours = String(Math.floor(totalAvgSeconds / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((totalAvgSeconds % 3600) / 60)).padStart(
     2,
     "0"
   );
-  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  const seconds = String(totalAvgSeconds % 60).padStart(2, "0");
 
   return `${hours}:${minutes}:${seconds}`;
 }
@@ -2011,7 +2053,7 @@ function timeDiff(start, end) {
   return `${hours}:${minutes}:${seconds}`;
 }
 
-function getAvgActiveTime(userID, attendanceRecordsinRange) {
+function getAvgActiveTime(userID, attendanceRecordsinRange, count) {
   let timeInMilliseconds = 0;
   let attendanceCount = 0;
   let addedBreakTimeList = [];
@@ -2030,9 +2072,11 @@ function getAvgActiveTime(userID, attendanceRecordsinRange) {
     }
   });
 
-  const finalBreakTime = sumTimes(addedBreakTimeList);
+  const finalBreakTime = sumTimes(addedBreakTimeList, count);
 
-  return timeDiff(msToTime(timeInMilliseconds), finalBreakTime);
+  const avgTimeInMillis = Math.floor(timeInMilliseconds / count);
+
+  return timeDiff(msToTime(avgTimeInMillis), finalBreakTime);
 }
 
 export const getAttendanceCustomTableResponse = catchAsync(
@@ -2132,20 +2176,23 @@ export const getAttendanceCustomTableResponse = catchAsync(
               });
 
               users.map((user) => {
+                const count = top4LateUsers.find(
+                  (item) => item.number === user.userId
+                ).count;
                 const obj = {
                   id: user.userId,
                   username: user.username,
                   userStatus: user.userStatus,
-                  lateCount: top4LateUsers.find(
-                    (item) => item.number === user.userId
-                  ).count,
+                  lateCount: count,
                   avgWorkingTime: getAvgWorkingTime(
                     user.userId,
-                    attendanceRecordsinRange
+                    attendanceRecordsinRange,
+                    count
                   ),
                   avgActiveTime: getAvgActiveTime(
                     user.userId,
-                    attendanceRecordsinRange
+                    attendanceRecordsinRange,
+                    count
                   ),
                 };
                 resultList.push(obj);
@@ -2165,20 +2212,23 @@ export const getAttendanceCustomTableResponse = catchAsync(
               });
 
               users.map((user) => {
+                const count = top4OnTimeUsers.find(
+                  (item) => item.number === user.userId
+                ).count;
                 const obj = {
                   id: user.userId,
                   username: user.username,
                   userStatus: user.userStatus,
-                  onTimeCount: top4OnTimeUsers.find(
-                    (item) => item.number === user.userId
-                  ).count,
+                  onTimeCount: count,
                   avgWorkingTime: getAvgWorkingTime(
                     user.userId,
-                    attendanceRecordsinRange
+                    attendanceRecordsinRange,
+                    count
                   ),
                   avgActiveTime: getAvgActiveTime(
                     user.userId,
-                    attendanceRecordsinRange
+                    attendanceRecordsinRange,
+                    count
                   ),
                 };
                 resultList.push(obj);
@@ -2284,20 +2334,23 @@ export const getAttendanceCustomTableResponse = catchAsync(
             });
 
             users.map((user) => {
+              const count = top4LateUsers.find(
+                (item) => item.number === user.userId
+              ).count;
               const obj = {
                 id: user.userId,
                 username: user.username,
                 userStatus: user.userStatus,
-                lateCount: top4LateUsers.find(
-                  (item) => item.number === user.userId
-                ).count,
+                lateCount: count,
                 avgWorkingTime: getAvgWorkingTime(
                   user.userId,
-                  attendanceRecordsinRange
+                  attendanceRecordsinRange,
+                  count
                 ),
                 avgActiveTime: getAvgActiveTime(
                   user.userId,
-                  attendanceRecordsinRange
+                  attendanceRecordsinRange,
+                  count
                 ),
               };
               resultList.push(obj);
@@ -2317,20 +2370,23 @@ export const getAttendanceCustomTableResponse = catchAsync(
             });
 
             users.map((user) => {
+              const count = top4OnTimeUsers.find(
+                (item) => item.number === user.userId
+              ).count;
               const obj = {
                 id: user.userId,
                 username: user.username,
                 userStatus: user.userStatus,
-                onTimeCount: top4OnTimeUsers.find(
-                  (item) => item.number === user.userId
-                ).count,
+                onTimeCount: count,
                 avgWorkingTime: getAvgWorkingTime(
                   user.userId,
-                  attendanceRecordsinRange
+                  attendanceRecordsinRange,
+                  count
                 ),
                 avgActiveTime: getAvgActiveTime(
                   user.userId,
-                  attendanceRecordsinRange
+                  attendanceRecordsinRange,
+                  count
                 ),
               };
               resultList.push(obj);
