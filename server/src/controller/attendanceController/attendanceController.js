@@ -14,7 +14,10 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: {
           profilePicture: true,
