@@ -9,6 +9,7 @@ import {
   AttendanceCardResponse,
   AttendanceCardsResponse,
   AttendanceChartResponse,
+  AttendanceReportTableResponse,
   AttendanceUserPCResponse,
   AttendanceUserTableResponse,
   BreakRequest,
@@ -874,6 +875,28 @@ export const api = createApi({
         return url;
       },
     }),
+    getUserAttendanceReportData: build.query<
+      AttendanceReportTableResponse[],
+      { email: string; month: string; year: string }
+    >({
+      query: ({ email, month, year }) => {
+        const url = `api/user/getUserAttendanceReportData?email=${email}&month=${month}&year=${year}`;
+        return url;
+      },
+    }),
+    getUserAttendanceTeamReportData: build.query<
+      AttendanceReportTableResponse[],
+      {
+        teamName: string;
+        month: string;
+        year: string;
+      }
+    >({
+      query: ({ teamName, month, year }) => {
+        const url = `api/user/getUserAttendanceTeamReportData?teamName=${teamName}&month=${month}&year=${year}`;
+        return url;
+      },
+    }),
     getAttendanceLineChartData: build.query<
       AttendanceCardLCResponse[],
       { email: string; title: string }
@@ -1341,4 +1364,6 @@ export const {
   useGetAttendanceChartDataQuery,
   useGetAttendancePCDataQuery,
   useGetAttendanceCustomTableDataQuery,
+  useGetUserAttendanceReportDataQuery,
+  useGetUserAttendanceTeamReportDataQuery,
 } = api;

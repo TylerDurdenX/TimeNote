@@ -1,4 +1,9 @@
-import { configureStore, combineReducers, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  configureStore,
+  combineReducers,
+  createSlice,
+  PayloadAction,
+} from "@reduxjs/toolkit";
 import authSlice from "./authSlice";
 import { api } from "./api"; // Assuming api contains your RTK Query setup
 import {
@@ -19,9 +24,29 @@ const persistConfig = {
   storage,
 };
 
+export interface UserRoles {
+  userRoles: string;
+}
+
+const initialState: UserRoles = {
+  userRoles: "",
+};
+
+export const userRolesSlice = createSlice({
+  name: "userRoles",
+  initialState,
+  reducers: {
+    setUserRoles: (state, action: PayloadAction<string>) => {
+      state.userRoles = action.payload;
+    },
+  },
+});
+export const { setUserRoles } = userRolesSlice.actions;
+
 // Combine reducers including RTK Query and auth slice
 const rootReducer = combineReducers({
   auth: authSlice,
+  userRoles: userRolesSlice.reducer,
   [api.reducerPath]: api.reducer, // API reducer from RTK Query
 });
 
@@ -34,38 +59,10 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [
-          FLUSH,
-          REHYDRATE,
-          PAUSE,
-          PERSIST,
-          PURGE,
-          REGISTER,
-        ],
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }).concat(api.middleware), // Add the api middleware from RTK Query
 });
-
-// export interface initialStateTypes {
-//   isDarkMode: boolean
-// }
-
-// const initialState: initialStateTypes = {
-//   isDarkMode: false
-//   }
-  
-//   export const globalSlice = createSlice({
-//       name: "global",
-//       initialState,
-//       reducers:{
-          
-//           setIsDarkMode: (state, action:PayloadAction<boolean>) => {
-//               state.isDarkMode = action.payload
-//           }
-//       }
-//   })
-//   export const {setIsDarkMode,} = globalSlice.actions
-
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

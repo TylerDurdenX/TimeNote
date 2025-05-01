@@ -9,9 +9,12 @@ export const addscreenshots = catchAsync(async (req, res, next) => {
   const { email, screenshots } = req.body;
 
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
-        email: email,
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
       },
     });
 

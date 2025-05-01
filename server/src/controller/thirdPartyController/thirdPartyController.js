@@ -128,7 +128,10 @@ export const signupTP = catchAsync(async (req, res, next) => {
         where: {
           OR: [
             {
-              email: email,
+              email: {
+                equals: email,
+                mode: "insensitive",
+              },
             },
             { username: username },
           ],

@@ -22,6 +22,17 @@ export const createProject = catchAsync(async (req, res, next) => {
           username: projectManager,
         },
       });
+
+      const createdProject = await prisma.project.findFirst({
+        where: {
+          code: projectCode,
+        },
+      });
+
+      if (!isEmpty(createdProject)) {
+        return next(new AppError("Project code already exists", 500));
+      }
+
       const newProject = await prisma.project.create({
         data: {
           name: title,
@@ -40,7 +51,7 @@ export const createProject = catchAsync(async (req, res, next) => {
       });
     });
   } catch (error) {
-    console.error("Error during create Project" + error);
+    console.log(error);
     return next(new AppError("There was an error creating Project", 400));
   }
 });

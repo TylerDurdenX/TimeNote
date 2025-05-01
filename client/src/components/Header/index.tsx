@@ -251,21 +251,6 @@ const Header = ({
 
       {hasFilters && (
         <div className="flex items-center space-x-4 mr-5 overflow-x-hidden">
-          {hasTeamFilter && (
-            <Select>
-              <SelectTrigger className="w-[180px] text-gray-800">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>All Projects</SelectLabel>
-                  <SelectItem value="apple">TCS</SelectItem>
-                  <SelectItem value="banana">Infosys</SelectItem>
-                  <SelectItem value="blueberry">KPMG</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          )}
           <DatePickerWithRange
             date={date}
             setDate={setDate!}

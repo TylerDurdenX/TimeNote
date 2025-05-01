@@ -291,6 +291,9 @@ const LeaveCalendar = ({ email }: Props) => {
                 {event.description.split(" ").slice(0, 100).join(" ") +
                   (event.description.split(" ").length > 100 ? "..." : "")}
               </p>
+              <p className="text-sm text-muted-foreground">
+                User :{event.username}
+              </p>
             </div>
             <div className="grid gap-2">
               <div className="grid grid-cols-5 items-center gap-4">

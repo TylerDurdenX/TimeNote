@@ -1,5 +1,4 @@
 import catchAsync from "../../utils/catchAsync.js";
-import SuccessResponse from "../../utils/SuccessResponse.js";
 import AppError from "../../utils/appError.js";
 import { isEmpty } from "../../utils/genericMethods.js";
 import { prisma } from "../../server.js";
@@ -73,6 +72,7 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
             error: "",
             message: "Record Updated successfully",
             stack: "",
+            designation: user.designation,
             idleTimeout: idleTimeOut,
           };
 
@@ -1040,7 +1040,10 @@ export const getBreakData = catchAsync(async (req, res, next) => {
     await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
         where: {
-          email: email,
+          email: {
+            equals: email,
+            mode: "insensitive",
+          },
         },
         include: {
           teams: true,
@@ -1193,6 +1196,7 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
           let lateArrival = 0;
           let diffInMilliseconds = 0;
           let breakTime = 0;
+          let breakCount = 0;
           let usersList;
           if (teamId === "0") {
             usersList = await prisma.user.findMany();
@@ -1239,6 +1243,7 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                         attendance.punchInTime?.getTime());
                   }
 
+                  breakCount = breakCount + attendance?.breaks?.length;
                   const totalBreakTimeInMinutes = attendance.breaks.reduce(
                     (sum, b) => {
                       const [minStr, secStr] = (
@@ -1279,6 +1284,7 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                         attendance.punchInTime?.getTime());
                   }
 
+                  breakCount = breakCount + attendance?.breaks?.length;
                   const totalBreakTimeInMinutes = attendance.breaks.reduce(
                     (sum, b) => {
                       const [minStr, secStr] = (
@@ -1308,7 +1314,8 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
           ).toFixed(2);
 
           const avgBreakTime = (
-            breakTime / attendanceRecordsinRange.length
+            (breakTime / attendanceRecordsinRange.length).toFixed(2) /
+            breakCount
           ).toFixed(2);
 
           const result = {
@@ -1380,7 +1387,9 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
         let diffInMilliseconds = 0;
         let previousDiffinMilliseconds = 0;
         let breakTime = 0;
+        let breakCount = 0;
         let previousBreakTime = 0;
+        let previousBreakCount = 0;
         let usersList;
         if (teamId === "0") {
           usersList = await prisma.user.findMany();
@@ -1432,6 +1441,7 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                       attendance.punchInTime?.getTime());
                 }
 
+                breakCount = breakCount + attendance?.breaks?.length;
                 const totalBreakTimeInMinutes = attendance.breaks.reduce(
                   (sum, b) => {
                     const [minStr, secStr] = (
@@ -1472,6 +1482,7 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                       attendance.punchInTime?.getTime());
                 }
 
+                breakCount = breakCount + attendance?.breaks?.length;
                 const totalBreakTimeInMinutes = attendance.breaks.reduce(
                   (sum, b) => {
                     const [minStr, secStr] = (
@@ -1517,6 +1528,8 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                   previousLateArrivals = previousLateArrivals + 1;
                 }
 
+                previousBreakCount =
+                  previousBreakCount + attendance?.breaks?.length;
                 const totalBreakTimeInMinutes = attendance.breaks.reduce(
                   (sum, b) => {
                     const [minStr, secStr] = (
@@ -1559,6 +1572,8 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
                   previousLateArrivals = previousLateArrivals + 1;
                 }
 
+                previousBreakCount =
+                  previousBreakCount + attendance?.breaks?.length;
                 const totalBreakTimeInMinutes = attendance.breaks.reduce(
                   (sum, b) => {
                     const [minStr, secStr] = (
@@ -1619,11 +1634,13 @@ export const getAttendanceCardsResponse = catchAsync(async (req, res, next) => {
               avgDiffInMinutess
             ),
             breakTime: formatMinutesToHHMMSS(
-              Math.floor(breakTime / usersList.length)
+              Math.floor(breakTime / usersList.length / breakCount)
             ),
             breakTimePercentage: getPercentageChange(
-              Math.floor(previousBreakTime / usersList.length),
-              Math.floor(breakTime / usersList.length)
+              Math.floor(
+                previousBreakTime / usersList.length / previousBreakCount
+              ),
+              Math.floor(breakTime / usersList.length / breakCount)
             ),
           };
 
@@ -2402,6 +2419,288 @@ export const getAttendanceCustomTableResponse = catchAsync(
       console.log(error);
       return next(
         new AppError("Error during calculating attendance data", 500)
+      );
+    }
+  }
+);
+
+export const getUserAttendanceReportData = catchAsync(
+  async (req, res, next) => {
+    const { email, month, year } = req.query;
+    try {
+      await prisma.$transaction(async (prisma) => {
+        const user = await prisma.user.findFirst({
+          where: {
+            email: email,
+          },
+        });
+
+        const monthName = month; // Example: passed from somewhere
+        const reqYear = year; // You can make this dynamic as needed
+
+        // Convert month name to 0-based index
+        const monthIndex = new Date(`${monthName} 1, ${reqYear}`).getMonth();
+
+        // Create moment object for the 1st of that month
+        const startOfMonth = moment
+          .tz({ reqYear, month: monthIndex, day: 1 }, "Asia/Kolkata")
+          .startOf("day");
+        const isoStartDate = startOfMonth.toISOString();
+
+        // Get the end of that month
+        const endOfMonth = startOfMonth.clone().endOf("month").startOf("day");
+        const isoEndDate = endOfMonth.toISOString();
+
+        const attendanceRecords = await prisma.attendance.findMany({
+          where: {
+            date: {
+              gte: isoStartDate,
+              lte: isoEndDate,
+            },
+            userId: user.userId,
+          },
+          include: {
+            breaks: true,
+          },
+        });
+
+        const finalResult = await Promise.all(
+          attendanceRecords.map(async (attendance, index) => {
+            const breakTimeList = attendance.breaks.map(
+              (b) => b.breakTimeInMinutes
+            );
+
+            const inTime = attendance.punchInTime
+              ? formatTime(attendance.punchInTime)
+              : "NA";
+
+            const outTime = attendance.punchOutTime
+              ? formatTime(attendance.punchOutTime)
+              : "NA";
+
+            let duration = getTimeDifference(inTime, outTime);
+            if (duration.includes("N")) {
+              duration = "00:00:00";
+            }
+
+            const breakTime = addTimes(breakTimeList);
+
+            return {
+              id: index + 1,
+              userId: attendance.userId,
+              date: formatDate(attendance.date),
+              punchInTime: inTime,
+              punchOutTime: outTime,
+              username: attendance.username,
+              duration: duration,
+              totalIdleTime: breakTime,
+              activeTime: timeDifference(duration, breakTime),
+              place: attendance.city,
+            };
+          })
+        );
+
+        return res.status(200).json(finalResult);
+      });
+    } catch (error) {
+      console.error(error);
+      return next(
+        new AppError("Error during getting user attendance PC data", 500)
+      );
+    }
+  }
+);
+
+export const getUserAttendanceTeamReportData = catchAsync(
+  async (req, res, next) => {
+    const { teamName, month, year } = req.query;
+    try {
+      await prisma.$transaction(async (prisma) => {
+        if (!isEmpty(teamName) && teamName !== "undefined") {
+          const team = await prisma.team.findFirst({
+            where: {
+              name: teamName,
+            },
+            include: {
+              members: {
+                select: {
+                  userId: true,
+                  email: true,
+                  username: true,
+                },
+              },
+            },
+          });
+
+          let userIdList = [];
+
+          team.members.map((user) => {
+            userIdList.push(user.userId);
+          });
+
+          const monthName = month; // Example: passed from somewhere
+          const reqYear = year; // You can make this dynamic as needed
+
+          // Convert month name to 0-based index
+          const monthIndex = new Date(`${monthName} 1, ${reqYear}`).getMonth();
+
+          // Create moment object for the 1st of that month
+          const startOfMonth = moment
+            .tz({ reqYear, month: monthIndex, day: 1 }, "Asia/Kolkata")
+            .startOf("day");
+          const isoStartDate = startOfMonth.toISOString();
+
+          // Get the end of that month
+          const endOfMonth = startOfMonth.clone().endOf("month").startOf("day");
+          const isoEndDate = endOfMonth.toISOString();
+
+          const finalResult = await Promise.all(
+            team.members.map(async (member, idx) => {
+              const attendanceRecords = await prisma.attendance.findMany({
+                where: {
+                  date: {
+                    gte: isoStartDate,
+                    lte: isoEndDate,
+                  },
+                  userId: member.userId,
+                },
+                include: {
+                  breaks: true,
+                },
+              });
+
+              let attendanceData = [];
+
+              attendanceRecords.forEach((attendance) => {
+                const breakTimeList = attendance.breaks.map(
+                  (b) => b.breakTimeInMinutes
+                );
+
+                const inTime = attendance.punchInTime
+                  ? formatTime(attendance.punchInTime)
+                  : "NA";
+
+                const outTime = attendance.punchOutTime
+                  ? formatTime(attendance.punchOutTime)
+                  : "NA";
+
+                let duration = getTimeDifference(inTime, outTime);
+                if (duration.includes("N")) {
+                  duration = "00:00:00";
+                }
+
+                const breakTime = addTimes(breakTimeList);
+
+                const dateTime = new Date(attendance.date);
+                const day = dateTime.getDate();
+                const obj = {
+                  [`date_${day}_A`]: duration,
+                  [`date_${day}_B`]: timeDifference(duration, breakTime),
+                  [`date_${day}_C`]: breakTime,
+                };
+                attendanceData.push(obj);
+              });
+              const flattenedData = attendanceData.reduce((acc, curr) => {
+                return { ...acc, ...curr };
+              }, {});
+
+              return {
+                id: idx + 1,
+                username: member.username,
+                email: member.email,
+                presentDays: attendanceData.length,
+                ...flattenedData,
+              };
+            })
+          );
+
+          return res.status(200).json(finalResult);
+        } else {
+          const usersList = await prisma.user.findMany();
+
+          const monthName = month; // Example: passed from somewhere
+          const reqYear = year; // You can make this dynamic as needed
+
+          // Convert month name to 0-based index
+          const monthIndex = new Date(`${monthName} 1, ${reqYear}`).getMonth();
+
+          // Create moment object for the 1st of that month
+          const startOfMonth = moment
+            .tz({ reqYear, month: monthIndex, day: 1 }, "Asia/Kolkata")
+            .startOf("day");
+          const isoStartDate = startOfMonth.toISOString();
+
+          // Get the end of that month
+          const endOfMonth = startOfMonth.clone().endOf("month").startOf("day");
+          const isoEndDate = endOfMonth.toISOString();
+
+          const finalResult = await Promise.all(
+            usersList.map(async (member, idx) => {
+              const attendanceRecords = await prisma.attendance.findMany({
+                where: {
+                  date: {
+                    gte: isoStartDate,
+                    lte: isoEndDate,
+                  },
+                  userId: member.userId,
+                },
+                include: {
+                  breaks: true,
+                },
+              });
+
+              let attendanceData = [];
+
+              attendanceRecords.forEach((attendance) => {
+                const breakTimeList = attendance.breaks.map(
+                  (b) => b.breakTimeInMinutes
+                );
+
+                const inTime = attendance.punchInTime
+                  ? formatTime(attendance.punchInTime)
+                  : "NA";
+
+                const outTime = attendance.punchOutTime
+                  ? formatTime(attendance.punchOutTime)
+                  : "NA";
+
+                let duration = getTimeDifference(inTime, outTime);
+                if (duration.includes("N")) {
+                  duration = "00:00:00";
+                }
+
+                const breakTime = addTimes(breakTimeList);
+
+                const dateTime = new Date(attendance.date);
+                const day = dateTime.getDate();
+                const obj = {
+                  [`date_${day}_A`]: duration,
+                  [`date_${day}_B`]: timeDifference(duration, breakTime),
+                  [`date_${day}_C`]: breakTime,
+                };
+                attendanceData.push(obj);
+              });
+              const flattenedData = attendanceData.reduce((acc, curr) => {
+                return { ...acc, ...curr };
+              }, {});
+
+              return {
+                id: idx + 1,
+                username: member.username,
+                email: member.email,
+                presentDays: attendanceData.length,
+                ...flattenedData,
+              };
+            })
+          );
+
+          return res.status(200).json(finalResult);
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      return next(
+        new AppError("Error during getting user attendance PC data", 500)
       );
     }
   }

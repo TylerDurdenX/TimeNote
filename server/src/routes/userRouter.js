@@ -131,7 +131,9 @@ import {
   getAttendancePCResponse,
   getBreakData,
   getUserAttendanceData,
+  getUserAttendanceReportData,
   getUserAttendanceTableData,
+  getUserAttendanceTeamReportData,
   updateAttendance,
 } from "../controller/attendanceController/attendanceController.js";
 import {
@@ -323,6 +325,8 @@ router.get(
   "/getAttendanceCustomtableResponse",
   getAttendanceCustomTableResponse
 );
+router.get("/getUserAttendanceReportData", getUserAttendanceReportData);
+router.get("/getUserAttendanceTeamReportData", getUserAttendanceTeamReportData);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);

@@ -441,6 +441,21 @@ export interface AttendanceUserTableResponse {
   activeTime: string;
 }
 
+export interface AttendanceReportTableResponse {
+  id: number;
+  date: string;
+  email: string;
+  presentDays: number;
+  userId: number;
+  punchInTime: string;
+  punchOutTime: string;
+  username: string;
+  duration: string;
+  totalIdleTime: string;
+  activeTime: string;
+  place: string;
+}
+
 export interface AttendanceCardLCResponse {
   date: string;
   count: number;

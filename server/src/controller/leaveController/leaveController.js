@@ -122,15 +122,43 @@ export const getLeaves = catchAsync(async (req, res, next) => {
         where: {
           email: email,
         },
-      });
-
-      const leaves = await prisma.leaves.findMany({
-        where: {
-          userId: user.userId,
+        include: {
+          roles: true,
         },
       });
 
-      return res.status(200).json(leaves);
+      const today = new Date();
+
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(today.getMonth() - 6);
+
+      const sixMonthsLater = new Date();
+      sixMonthsLater.setMonth(today.getMonth() + 6);
+
+      if (user.roles.some((role) => role.code === "ADMIN")) {
+        const leaves = await prisma.leaves.findMany({
+          where: {
+            date: {
+              gte: sixMonthsAgo,
+              lte: sixMonthsLater,
+            },
+          },
+        });
+
+        return res.status(200).json(leaves);
+      } else {
+        const leaves = await prisma.leaves.findMany({
+          where: {
+            userId: user.userId,
+            date: {
+              gte: sixMonthsAgo,
+              lte: sixMonthsLater,
+            },
+          },
+        });
+
+        return res.status(200).json(leaves);
+      }
     });
   } catch (error) {
     console.log(error);

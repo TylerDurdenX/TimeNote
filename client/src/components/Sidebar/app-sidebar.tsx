@@ -158,11 +158,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: `/alerts?email=${userEmail}`,
         icon: Bell,
       },
-      // {
-      //   name: "Reports",
-      //   url: `/reports?email=${userEmail}`,
-      //   icon: FileChartColumnIncreasing,
-      // },
+      {
+        name: "Reports",
+        url: `/reports?email=${userEmail}`,
+        icon: FileChartColumnIncreasing,
+      },
       {
         name: "Timesheet",
         url: `/timesheet?email=${userEmail}`,

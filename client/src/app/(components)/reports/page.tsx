@@ -25,9 +25,11 @@ const page = () => {
               <TabsTrigger value="cdr">Configured Reports</TabsTrigger>
             </TabsList>
             <TabsContent value="dr" className="w-full">
-              <Card>
-                <ReportsTable />
-              </Card>
+              <div className="w-full, mt-5">
+                <Card>
+                  <ReportsTable />
+                </Card>
+              </div>
             </TabsContent>
             <TabsContent value="cr">
               <Card>

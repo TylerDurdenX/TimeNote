@@ -9,6 +9,7 @@ import { Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Toaster, toast } from "react-hot-toast";
 import { setAuthUser } from "@/store/authSlice";
+import { setUserRoles } from "@/store/store";
 
 const App: React.FC = () => {
   const dispatch = useDispatch();
@@ -50,6 +51,7 @@ const App: React.FC = () => {
           .map((role: Role) => role.code)
           .join(", ");
         sessionStorage.setItem("userRoles", commaSeparatedNames);
+        dispatch(setUserRoles(commaSeparatedNames));
       }
       toast.success("Login Successful");
       dispatch(setAuthUser(user));
