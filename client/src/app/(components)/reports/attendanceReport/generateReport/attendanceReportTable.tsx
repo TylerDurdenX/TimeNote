@@ -16,25 +16,21 @@ type Props = {
   downloadUserReport: number;
 };
 
-interface RowData {
-  id: number;
-  date: string;
-  consumedHours: string;
-  userId: number;
-  username: string;
-  projectId?: number;
-}
-
 const AttendanceReportTable = ({ email, month, downloadUserReport }: Props) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
 
-  const { data, isLoading, error } = useGetUserAttendanceReportDataQuery(
-    { email: email, month, year: String(currentYear) },
-    { refetchOnMountOrArgChange: true }
-  );
+  const { data, isLoading, error, refetch } =
+    useGetUserAttendanceReportDataQuery(
+      { email: email, month, year: String(currentYear) },
+      { refetchOnMountOrArgChange: true }
+    );
+
+  useEffect(() => {
+    refetch;
+  }, [email]);
 
   const { theme } = useTheme();
 

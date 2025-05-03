@@ -104,8 +104,6 @@ export const signOutApplication = catchAsync(async (req, res, next) => {
         };
         res.status(200).json(result);
       }
-
-      //return next(new SuccessResponse(result, 200))
     });
   } catch (error) {
     console.log(error);

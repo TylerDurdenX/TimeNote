@@ -91,6 +91,7 @@ const Project = () => {
           assignedTo={assignedTo}
           priority={priority}
           isTaskOrSubTask={isTaskOrSubTask}
+          openViewOnly={false}
         />
       )}
       {activeTab === "Calendar" && (

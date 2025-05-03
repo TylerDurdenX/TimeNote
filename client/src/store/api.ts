@@ -39,6 +39,8 @@ import {
   ProjectHours,
   ProjectListForTeamResponse,
   ProjectListResponse,
+  ProjectNamesResponse,
+  ProjectReportListResponse,
   ProjectResponse,
   ProjectUsers,
   ReopenTaskData,
@@ -59,6 +61,7 @@ import {
   TeamRequest,
   Teams,
   timesheetEntry,
+  TimesheetReportTableResponse,
   TimesheetResponse,
   UpdateBreakObj,
   UpdateProjectData,
@@ -308,6 +311,12 @@ export const api = createApi({
         return url;
       },
     }),
+    getPMListFilter: build.query<UserFilterResponse[], { email: string }>({
+      query: () => {
+        const url = `api/user/getPMListFilter`;
+        return url;
+      },
+    }),
     getTeamListFilter: build.query<TeamFilterResponse[], { email: string }>({
       query: ({ email }) => {
         const url = `api/user/getTeamsListFilter?email=${email}`;
@@ -381,6 +390,21 @@ export const api = createApi({
         return url;
       },
       providesTags: ["ProjectsList"],
+    }),
+    getProjectReport: build.query<
+      ProjectReportListResponse[],
+      { idList: number[]; projectManager: string }
+    >({
+      query: ({ idList, projectManager }) => {
+        const url = `api/user/getProjectReport?idList=${idList}&projectManager=${projectManager}`;
+        return url;
+      },
+    }),
+    getProjectNames: build.query<ProjectNamesResponse[], {}>({
+      query: () => {
+        const url = `api/user/getProjectNames`;
+        return url;
+      },
     }),
     getProjectForTeams: build.query<
       ProjectListForTeamResponse[],
@@ -897,6 +921,20 @@ export const api = createApi({
         return url;
       },
     }),
+    getUserTimesheetTeamReportData: build.query<
+      TimesheetReportTableResponse[],
+      {
+        teamName: string;
+        month: string;
+        email: string;
+        year: string;
+      }
+    >({
+      query: ({ teamName, month, email, year }) => {
+        const url = `api/user/getUserTimesheetTeamReportData?teamName=${teamName}&month=${month}&email=${email}&year=${year}`;
+        return url;
+      },
+    }),
     getAttendanceLineChartData: build.query<
       AttendanceCardLCResponse[],
       { email: string; title: string }
@@ -1366,4 +1404,8 @@ export const {
   useGetAttendanceCustomTableDataQuery,
   useGetUserAttendanceReportDataQuery,
   useGetUserAttendanceTeamReportDataQuery,
+  useGetUserTimesheetTeamReportDataQuery,
+  useGetProjectNamesQuery,
+  useGetPMListFilterQuery,
+  useGetProjectReportQuery,
 } = api;

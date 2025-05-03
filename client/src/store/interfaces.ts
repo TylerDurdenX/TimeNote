@@ -213,6 +213,25 @@ export interface ProjectListResponse {
   completionStatus: number;
 }
 
+export interface ProjectReportListResponse {
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+  startDate: string;
+  dueDate: string;
+  clientName: string;
+  projectManager: string;
+  estimatedHours: string;
+  consumedHours: string;
+  hoursOverrun: string;
+}
+
+export interface ProjectNamesResponse {
+  id: number;
+  name: string;
+}
+
 export interface ProjectListForTeamResponse {
   id: number;
   title: string;
@@ -454,6 +473,13 @@ export interface AttendanceReportTableResponse {
   totalIdleTime: string;
   activeTime: string;
   place: string;
+}
+
+export interface TimesheetReportTableResponse {
+  id: number;
+  date: string;
+  email: string;
+  username: string;
 }
 
 export interface AttendanceCardLCResponse {

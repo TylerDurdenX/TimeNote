@@ -38,6 +38,8 @@ import {
 } from "@/components/ui/sidebar";
 import { useGetUserQuery } from "@/store/api";
 import { useSearchParams } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const userEmail = useSearchParams().get("email");
@@ -237,8 +239,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const [isHovered, setIsHovered] = useState(false);
 
-  const userRolesList = sessionStorage.getItem("userRoles");
-
+  const userRoles = useSelector((state: RootState) => state.userRoles);
+  const userRolesList = userRoles.userRoles;
   let adminPageFlag: boolean = false;
 
   if (
@@ -260,6 +262,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     console.log("userRolesList is undefined or empty");
   }
 
+  let updatedList = mockData.items2;
+
+  console.log(adminPageFlag);
+
+  if (adminPageFlag === false) {
+    updatedList = mockData.items2.filter((item) => item.name !== "Reports");
+  }
+
   const { data, isLoading, error } = useGetUserQuery({ email: userEmail! });
   return (
     <Sidebar collapsible="icon" {...props} variant="floating">
@@ -268,7 +278,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="bg-[#001742]">
         {/* <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/> */}
-        {adminPageFlag ? (
+        {adminPageFlag === true ? (
           <>
             <NavMain
               items={items}
@@ -294,7 +304,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           key={item2Open ? "open" : "closed"}
         />
         <NavProjects
-          projects={mockData.items2}
+          projects={updatedList}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />

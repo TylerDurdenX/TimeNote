@@ -17,22 +17,22 @@ function ReportsConfigurationTable({}: Props) {
       description: "Attendance Report of users",
       name: "Attendance Report",
     },
-    {
-      id: 2,
-      title: "Activity Report",
-      description: "Activity Report of users",
-      name: "Activity Report",
-    },
+    // {
+    //   id: 2,
+    //   title: "Activity Report",
+    //   description: "Activity Report of users",
+    //   name: "Activity Report",
+    // },
     {
       id: 3,
-      title: "Productivity Report",
-      description: "Productivity Report of users",
-      name: "Productivity Report",
+      title: "Timesheet Report",
+      description: "Timesheet Report of users",
+      name: "Timesheet Report",
     },
     {
       id: 4,
       title: "Project Report",
-      description: "Project and Tasks Report",
+      description: "Project Report",
       name: "Project Report",
     },
   ];

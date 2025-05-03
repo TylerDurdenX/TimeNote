@@ -30,13 +30,11 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
 
       if (!isEmpty(punchInTime)) {
         let idleTimeOut = 0;
-        if (user.idleTimeOut !== null) {
+        if (user.idleTimeOut !== null && user.idleTimeOut !== "NA") {
           const numbers = user.idleTimeOut.match(/\d+/g);
           if (numbers !== null) {
             idleTimeOut = numbers[0];
           }
-        } else {
-          return next(new AppError("configuration not done"));
         }
 
         const createdAttendance = await prisma.attendance.findFirst({
@@ -78,21 +76,30 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
 
           return res.status(200).json(result);
         } else {
-          if (!isEmpty())
-            await prisma.attendance.update({
-              where: {
-                id: createdAttendance.id,
-              },
-              data: {
-                punchOutTime: null,
-              },
-            });
+          await prisma.attendance.update({
+            where: {
+              id: createdAttendance.id,
+            },
+            data: {
+              punchOutTime: null,
+            },
+          });
+
+          await prisma.user.update({
+            where: {
+              userId: user.userId,
+            },
+            data: {
+              userStatus: "active",
+            },
+          });
 
           const result = {
             status: "Success",
             error: "",
             message: "Record Updated successfully",
             stack: "",
+            designation: user.designation,
             idleTimeout: idleTimeOut,
           };
           return res.status(200).json(result);
@@ -2429,78 +2436,81 @@ export const getUserAttendanceReportData = catchAsync(
     const { email, month, year } = req.query;
     try {
       await prisma.$transaction(async (prisma) => {
-        const user = await prisma.user.findFirst({
-          where: {
-            email: email,
-          },
-        });
-
-        const monthName = month; // Example: passed from somewhere
-        const reqYear = year; // You can make this dynamic as needed
-
-        // Convert month name to 0-based index
-        const monthIndex = new Date(`${monthName} 1, ${reqYear}`).getMonth();
-
-        // Create moment object for the 1st of that month
-        const startOfMonth = moment
-          .tz({ reqYear, month: monthIndex, day: 1 }, "Asia/Kolkata")
-          .startOf("day");
-        const isoStartDate = startOfMonth.toISOString();
-
-        // Get the end of that month
-        const endOfMonth = startOfMonth.clone().endOf("month").startOf("day");
-        const isoEndDate = endOfMonth.toISOString();
-
-        const attendanceRecords = await prisma.attendance.findMany({
-          where: {
-            date: {
-              gte: isoStartDate,
-              lte: isoEndDate,
+        if (!isEmpty(email)) {
+          const user = await prisma.user.findFirst({
+            where: {
+              email: email,
             },
-            userId: user.userId,
-          },
-          include: {
-            breaks: true,
-          },
-        });
+          });
 
-        const finalResult = await Promise.all(
-          attendanceRecords.map(async (attendance, index) => {
-            const breakTimeList = attendance.breaks.map(
-              (b) => b.breakTimeInMinutes
-            );
+          const monthName = month; // Example: passed from somewhere
+          const reqYear = year; // You can make this dynamic as needed
 
-            const inTime = attendance.punchInTime
-              ? formatTime(attendance.punchInTime)
-              : "NA";
+          // Convert month name to 0-based index
+          const monthIndex = new Date(`${monthName} 1, ${reqYear}`).getMonth();
 
-            const outTime = attendance.punchOutTime
-              ? formatTime(attendance.punchOutTime)
-              : "NA";
+          // Create moment object for the 1st of that month
+          const startOfMonth = moment
+            .tz({ reqYear, month: monthIndex, day: 1 }, "Asia/Kolkata")
+            .startOf("day");
+          const isoStartDate = startOfMonth.toISOString();
 
-            let duration = getTimeDifference(inTime, outTime);
-            if (duration.includes("N")) {
-              duration = "00:00:00";
-            }
+          // Get the end of that month
+          const endOfMonth = startOfMonth.clone().endOf("month").startOf("day");
+          const isoEndDate = endOfMonth.toISOString();
 
-            const breakTime = addTimes(breakTimeList);
+          const attendanceRecords = await prisma.attendance.findMany({
+            where: {
+              date: {
+                gte: isoStartDate,
+                lte: isoEndDate,
+              },
+              userId: user.userId,
+            },
+            include: {
+              breaks: true,
+            },
+          });
 
-            return {
-              id: index + 1,
-              userId: attendance.userId,
-              date: formatDate(attendance.date),
-              punchInTime: inTime,
-              punchOutTime: outTime,
-              username: attendance.username,
-              duration: duration,
-              totalIdleTime: breakTime,
-              activeTime: timeDifference(duration, breakTime),
-              place: attendance.city,
-            };
-          })
-        );
+          const finalResult = await Promise.all(
+            attendanceRecords.map(async (attendance, index) => {
+              const breakTimeList = attendance.breaks.map(
+                (b) => b.breakTimeInMinutes
+              );
 
-        return res.status(200).json(finalResult);
+              const inTime = attendance.punchInTime
+                ? formatTime(attendance.punchInTime)
+                : "NA";
+
+              const outTime = attendance.punchOutTime
+                ? formatTime(attendance.punchOutTime)
+                : "NA";
+
+              let duration = getTimeDifference(inTime, outTime);
+              if (duration.includes("N")) {
+                duration = "00:00:00";
+              }
+
+              const breakTime = addTimes(breakTimeList);
+
+              return {
+                id: index + 1,
+                userId: attendance.userId,
+                date: formatDate(attendance.date),
+                punchInTime: inTime,
+                punchOutTime: outTime,
+                username: attendance.username,
+                duration: duration,
+                totalIdleTime: breakTime,
+                activeTime: timeDifference(duration, breakTime),
+                place: attendance.city,
+              };
+            })
+          );
+
+          return res.status(200).json(finalResult);
+        } else {
+        }
       });
     } catch (error) {
       console.error(error);

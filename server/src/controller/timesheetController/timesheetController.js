@@ -658,3 +658,334 @@ export const updateTimesheetRecords = catchAsync(async (req, res, next) => {
     return next(new AppError("Error during updateTimesheetRecords", 200));
   }
 });
+
+export const getUserTimesheetTeamReportData = catchAsync(
+  async (req, res, next) => {
+    const { teamName, month, email, year } = req.query;
+    try {
+      await prisma.$transaction(async (prisma) => {
+        if (!isEmpty(teamName) && teamName !== "undefined") {
+          let finalResultList = [];
+          let id = 1;
+          const monthName = month; // Example: passed from somewhere
+          const reqYear = year; // You can make this dynamic as needed
+
+          // Convert month name to 0-based index
+          const monthIndex = new Date(`${monthName} 1, ${reqYear}`).getMonth();
+
+          // Create moment object for the 1st of that month
+          const startOfMonth = moment
+            .tz({ reqYear, month: monthIndex, day: 1 }, "Asia/Kolkata")
+            .startOf("day");
+          const isoStartDate = startOfMonth.toISOString();
+
+          // Get the end of that month
+          const endOfMonth = startOfMonth.clone().endOf("month").startOf("day");
+          const isoEndDate = endOfMonth.toISOString();
+
+          const team = await prisma.team.findFirst({
+            where: {
+              name: teamName,
+            },
+            include: {
+              members: {
+                select: {
+                  userId: true,
+                },
+              },
+            },
+          });
+
+          let usersIdList = [];
+
+          team.members.map((member) => {
+            usersIdList.push(member.userId);
+          });
+
+          const usersList = await prisma.user.findMany({
+            where: {
+              userId: {
+                in: usersIdList,
+              },
+            },
+            include: {
+              timesheet: {
+                where: {
+                  date: {
+                    gte: isoStartDate,
+                    lte: isoEndDate,
+                  },
+                },
+              },
+            },
+          });
+
+          function timeToMinutes(timeStr) {
+            if (!timeStr || typeof timeStr !== "string") return 0;
+            const parts = timeStr.split(":");
+            if (parts.length !== 2) return 0;
+            const [hours, minutes] = parts.map(Number);
+            return isNaN(hours) || isNaN(minutes) ? 0 : hours * 60 + minutes;
+          }
+
+          // Helper: convert total minutes → "hh:mm"
+          function minutesToTime(totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${String(hours).padStart(2, "0")}:${String(
+              minutes
+            ).padStart(2, "0")}`;
+          }
+
+          usersList.map((user) => {
+            // Group and total separately
+            const grouped = {};
+
+            user.timesheet.forEach((item) => {
+              const dateKey = new Date(item.date).toISOString().split("T")[0];
+              const startMinutes = timeToMinutes(item.consumedHours);
+              const endMinutes = timeToMinutes(item.approvedHours);
+
+              if (!grouped[dateKey]) {
+                grouped[dateKey] = { totalStart: 0, totalEnd: 0 };
+              }
+
+              grouped[dateKey].totalStart += startMinutes;
+              grouped[dateKey].totalEnd += endMinutes;
+            });
+
+            // Format result
+            const result = Object.entries(grouped).map(
+              ([date, { totalStart, totalEnd }]) => ({
+                date,
+                consumedHours: minutesToTime(totalStart),
+                approvedHours: minutesToTime(totalEnd),
+              })
+            );
+
+            const transformed = {};
+
+            result.forEach((item) => {
+              const day = String(new Date(item.date).getDate()); // Always 2-digit day
+              transformed["id"] = id;
+              transformed["username"] = user.username;
+              transformed["email"] = user.email;
+              transformed[`date_${day}_A`] = item.consumedHours || "";
+              transformed[`date_${day}_B`] = item.approvedHours || "";
+            });
+
+            if (!isEmpty(transformed)) {
+              finalResultList.push(transformed);
+            } else {
+              const obj = {
+                id: id,
+                username: user.username,
+                email: user.email,
+              };
+              finalResultList.push(obj);
+            }
+            id = id + 1;
+          });
+          return res.status(200).json(finalResultList);
+        } else if (!isEmpty(email) && email !== undefined) {
+          let finalResultList = [];
+          let id = 1;
+          const monthName = month; // Example: passed from somewhere
+          const reqYear = year; // You can make this dynamic as needed
+
+          // Convert month name to 0-based index
+          const monthIndex = new Date(`${monthName} 1, ${reqYear}`).getMonth();
+
+          // Create moment object for the 1st of that month
+          const startOfMonth = moment
+            .tz({ reqYear, month: monthIndex, day: 1 }, "Asia/Kolkata")
+            .startOf("day");
+          const isoStartDate = startOfMonth.toISOString();
+
+          // Get the end of that month
+          const endOfMonth = startOfMonth.clone().endOf("month").startOf("day");
+          const isoEndDate = endOfMonth.toISOString();
+
+          const user = await prisma.user.findFirst({
+            where: {
+              email: email,
+            },
+            include: {
+              timesheet: {
+                where: {
+                  date: {
+                    gte: isoStartDate,
+                    lte: isoEndDate,
+                  },
+                },
+              },
+            },
+          });
+
+          function timeToMinutes(timeStr) {
+            if (!timeStr || typeof timeStr !== "string") return 0;
+            const parts = timeStr.split(":");
+            if (parts.length !== 2) return 0;
+            const [hours, minutes] = parts.map(Number);
+            return isNaN(hours) || isNaN(minutes) ? 0 : hours * 60 + minutes;
+          }
+
+          // Helper: convert total minutes → "hh:mm"
+          function minutesToTime(totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${String(hours).padStart(2, "0")}:${String(
+              minutes
+            ).padStart(2, "0")}`;
+          }
+
+          // Group and total separately
+          const grouped = {};
+
+          user.timesheet.forEach((item) => {
+            const dateKey = new Date(item.date).toISOString().split("T")[0];
+            const startMinutes = timeToMinutes(item.consumedHours);
+            const endMinutes = timeToMinutes(item.approvedHours);
+
+            if (!grouped[dateKey]) {
+              grouped[dateKey] = { totalStart: 0, totalEnd: 0 };
+            }
+
+            grouped[dateKey].totalStart += startMinutes;
+            grouped[dateKey].totalEnd += endMinutes;
+          });
+
+          // Format result
+          const result = Object.entries(grouped).map(
+            ([date, { totalStart, totalEnd }]) => ({
+              date,
+              consumedHours: minutesToTime(totalStart),
+              approvedHours: minutesToTime(totalEnd),
+            })
+          );
+
+          const transformed = {};
+
+          result.forEach((item) => {
+            const day = String(new Date(item.date).getDate()); // Always 2-digit day
+            transformed["id"] = id;
+            transformed["username"] = user.username;
+            transformed["email"] = user.email;
+            transformed[`date_${day}_A`] = item.consumedHours || "";
+            transformed[`date_${day}_B`] = item.approvedHours || "";
+          });
+
+          if (!isEmpty(transformed)) {
+            finalResultList.push(transformed);
+          }
+
+          return res.status(200).json(finalResultList);
+        } else {
+          let finalResultList = [];
+          let id = 1;
+          const monthName = month; // Example: passed from somewhere
+          const reqYear = year; // You can make this dynamic as needed
+
+          // Convert month name to 0-based index
+          const monthIndex = new Date(`${monthName} 1, ${reqYear}`).getMonth();
+
+          // Create moment object for the 1st of that month
+          const startOfMonth = moment
+            .tz({ reqYear, month: monthIndex, day: 1 }, "Asia/Kolkata")
+            .startOf("day");
+          const isoStartDate = startOfMonth.toISOString();
+
+          // Get the end of that month
+          const endOfMonth = startOfMonth.clone().endOf("month").startOf("day");
+          const isoEndDate = endOfMonth.toISOString();
+
+          const usersList = await prisma.user.findMany({
+            include: {
+              timesheet: {
+                where: {
+                  date: {
+                    gte: isoStartDate,
+                    lte: isoEndDate,
+                  },
+                },
+              },
+            },
+          });
+
+          function timeToMinutes(timeStr) {
+            if (!timeStr || typeof timeStr !== "string") return 0;
+            const parts = timeStr.split(":");
+            if (parts.length !== 2) return 0;
+            const [hours, minutes] = parts.map(Number);
+            return isNaN(hours) || isNaN(minutes) ? 0 : hours * 60 + minutes;
+          }
+
+          // Helper: convert total minutes → "hh:mm"
+          function minutesToTime(totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${String(hours).padStart(2, "0")}:${String(
+              minutes
+            ).padStart(2, "0")}`;
+          }
+
+          usersList.map((user) => {
+            // Group and total separately
+            const grouped = {};
+
+            user.timesheet.forEach((item) => {
+              const dateKey = new Date(item.date).toISOString().split("T")[0];
+              const startMinutes = timeToMinutes(item.consumedHours);
+              const endMinutes = timeToMinutes(item.approvedHours);
+
+              if (!grouped[dateKey]) {
+                grouped[dateKey] = { totalStart: 0, totalEnd: 0 };
+              }
+
+              grouped[dateKey].totalStart += startMinutes;
+              grouped[dateKey].totalEnd += endMinutes;
+            });
+
+            // Format result
+            const result = Object.entries(grouped).map(
+              ([date, { totalStart, totalEnd }]) => ({
+                date,
+                consumedHours: minutesToTime(totalStart),
+                approvedHours: minutesToTime(totalEnd),
+              })
+            );
+
+            const transformed = {};
+
+            result.forEach((item) => {
+              const day = String(new Date(item.date).getDate()); // Always 2-digit day
+              transformed["id"] = id;
+              transformed["username"] = user.username;
+              transformed["email"] = user.email;
+              transformed[`date_${day}_A`] = item.consumedHours || "";
+              transformed[`date_${day}_B`] = item.approvedHours || "";
+            });
+
+            if (!isEmpty(transformed)) {
+              finalResultList.push(transformed);
+            } else {
+              const obj = {
+                id: id,
+                username: user.username,
+                email: user.email,
+              };
+              finalResultList.push(obj);
+            }
+            id = id + 1;
+          });
+          return res.status(200).json(finalResultList);
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      return next(
+        new AppError("Error during getting user attendance PC data", 500)
+      );
+    }
+  }
+);

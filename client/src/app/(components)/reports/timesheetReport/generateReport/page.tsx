@@ -2,7 +2,6 @@
 
 import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
-import AttendanceReportTable from "./attendanceReportTable";
 import {
   Check,
   ChevronLeft,
@@ -23,7 +22,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import AttendanceReportTeamTable from "./TeamAttendanceReport";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,10 +29,9 @@ import {
   useGetUserListFilterQuery,
 } from "@/store/api";
 import { cn } from "@/lib/utils";
+import TimesheetReportTable from "./TimesheetReport";
 
-type Props = {};
-
-const page = (props: Props) => {
+const page = () => {
   const userEmail = useSearchParams().get("email");
 
   const { data: teamList } = useGetTeamListFilterQuery(
@@ -75,6 +72,13 @@ const page = (props: Props) => {
     "December",
   ];
 
+  const clearFilter = () => {
+    setSelectedMonth(monthName);
+    setSelectedUserEmail("");
+    setReportType("2");
+    setDropdownTeamName("");
+  };
+
   const handleExportToExcel = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -85,13 +89,6 @@ const page = (props: Props) => {
       const userReportClick = downloadUserReportClicked + 1;
       setDownloadUserReportClicked(userReportClick);
     }
-  };
-
-  const clearFilter = () => {
-    setSelectedMonth(monthName);
-    setSelectedUserEmail("");
-    setReportType("2");
-    setDropdownTeamName("");
   };
 
   return (
@@ -107,7 +104,7 @@ const page = (props: Props) => {
                 <button onClick={() => window.history.back()}>
                   <ChevronLeft className="mr-5" />
                 </button>
-                Attendance Report
+                Timesheet Report
               </h1>{" "}
             </div>
           </div>
@@ -189,7 +186,7 @@ const page = (props: Props) => {
                           onSelect={() => {
                             setSelectedUserEmail(user.email);
                             setDropdownTeamName("");
-                            setReportType("1");
+                            setReportType("2");
                             setDownloadTeamReportClicked(0);
                             setOpen(false);
                           }}
@@ -276,20 +273,15 @@ const page = (props: Props) => {
           <div className="h-full overflow-hidden">
             {reportType === "2" ? (
               <>
-                <AttendanceReportTeamTable
+                <TimesheetReportTable
                   teamName={dropdownTeamName!}
+                  userEmail={selectedUserEmail}
                   month={selectedMonth}
                   downloadTeamReport={downloadTeamReportClicked}
                 />
               </>
             ) : (
-              <>
-                <AttendanceReportTable
-                  email={selectedUserEmail!}
-                  month={selectedMonth}
-                  downloadUserReport={downloadUserReportClicked}
-                />
-              </>
+              ""
             )}
           </div>
         </div>

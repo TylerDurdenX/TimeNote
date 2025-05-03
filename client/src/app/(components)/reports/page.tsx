@@ -19,7 +19,7 @@ const page = () => {
         </div>
         <div className="flex gap-4 px-4 w-full h-full  box-border overflow-x-hidden">
           <Tabs defaultValue="dr" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 w-[600px]">
+            <TabsList className="grid grid-cols-3 w-[600px]">
               <TabsTrigger value="dr">Download Reports</TabsTrigger>
               <TabsTrigger value="cr">Configure Reports</TabsTrigger>
               <TabsTrigger value="cdr">Configured Reports</TabsTrigger>

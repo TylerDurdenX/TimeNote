@@ -15,6 +15,7 @@ import CircularLoading from "@/components/Sidebar/loading";
 import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
 import SubTaskPage from "./(SubTask)/SubTaskPage";
+import Link from "next/link";
 
 type Props = {
   projectId: string;
@@ -22,6 +23,7 @@ type Props = {
   assignedTo: string;
   priority: string;
   isTaskOrSubTask: string;
+  openViewOnly: boolean;
 };
 
 const TableView = ({
@@ -30,6 +32,7 @@ const TableView = ({
   assignedTo,
   priority,
   isTaskOrSubTask,
+  openViewOnly,
 }: Props) => {
   const userEmail = useSearchParams().get("email");
   localStorage.removeItem("persist:root");
@@ -187,33 +190,51 @@ const TableView = ({
       renderCell: (params) => {
         return (
           <div className="flex justify-center items-center h-full">
-            <Dialog>
-              <div className="my-3 flex justify-between">
-                <DialogTrigger asChild>
+            {openViewOnly === true ? (
+              <>
+                <Link href={`/task/${params.row.code}?email=${userEmail}`}>
                   <Button
                     variant="contained"
                     className="text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 px-6 py-2 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105"
+                    onClick={() => {
+                      sessionStorage.setItem("taskId", params.row.id);
+                    }}
                   >
                     View
                   </Button>
-                </DialogTrigger>
-              </div>
-              <DialogContent className="max-w-[85vw] mt-5 mb-5 overflow-y-auto">
-                {isTaskOrSubTask === "Task" ? (
-                  <TaskPage
-                    taskId={params.row.id}
-                    email={userEmail!}
-                    projectId={params.row.projectId}
-                  />
-                ) : (
-                  <SubTaskPage
-                    subTaskId={params.row.id}
-                    email={userEmail!}
-                    projectId={params.row.projectId}
-                  />
-                )}
-              </DialogContent>
-            </Dialog>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Dialog>
+                  <div className="my-3 flex justify-between">
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="contained"
+                        className="text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 px-6 py-2 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105"
+                      >
+                        View
+                      </Button>
+                    </DialogTrigger>
+                  </div>
+                  <DialogContent className="max-w-[85vw] mt-5 mb-5 overflow-y-auto">
+                    {isTaskOrSubTask === "Task" ? (
+                      <TaskPage
+                        taskId={params.row.id}
+                        email={userEmail!}
+                        projectId={params.row.projectId}
+                      />
+                    ) : (
+                      <SubTaskPage
+                        subTaskId={params.row.id}
+                        email={userEmail!}
+                        projectId={params.row.projectId}
+                      />
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </>
+            )}
           </div>
         );
       },
@@ -281,7 +302,7 @@ const TableView = ({
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-    XLSX.writeFile(workbook, "data-grid-export.xlsx");
+    XLSX.writeFile(workbook, "tasks-export.xlsx");
   };
   const { theme } = useTheme();
 

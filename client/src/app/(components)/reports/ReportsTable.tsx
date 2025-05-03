@@ -6,6 +6,7 @@ import { Button } from "@mui/material";
 import ReportsDialog from "./ReportsDialog";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Router from "next/router";
 
 type Props = {};
 
@@ -34,12 +35,14 @@ function ReportsTable({}: Props) {
     {
       id: 4,
       title: "Project Report",
-      description: "Project and Tasks Report",
+      description: "Project Report",
       name: "Project Report",
     },
   ];
 
-  let href = `/reports/attendanceReport/generateReport?email=${userEmail}`;
+  let attendancePage = `/reports/attendanceReport/generateReport?email=${userEmail}`;
+  let timesheetPage = `/reports/timesheetReport/generateReport?email=${userEmail}`;
+  let projectPage = `/reports/projectReport/generateReport?email=${userEmail}`;
 
   const columns: GridColDef[] = [
     {
@@ -57,13 +60,24 @@ function ReportsTable({}: Props) {
       headerName: "",
       flex: 1,
       renderCell: (params) => {
+        const title = params.row.title;
         return (
           <div className="flex justify-center items-center h-full">
             <Dialog>
               <div className="my-3 flex justify-between">
                 {/* <DialogTrigger asChild> */}
 
-                <Link href={href}>
+                <Link
+                  href={
+                    title === "Attendance Report"
+                      ? attendancePage
+                      : title === "Timesheet Report"
+                      ? timesheetPage
+                      : title === "Project Report"
+                      ? projectPage
+                      : ""
+                  }
+                >
                   <Button
                     variant="contained"
                     className="text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 px-6 py-2 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105"

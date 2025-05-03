@@ -60,7 +60,10 @@ import {
   getMentionedUsers,
   getProject,
   getProjectHoursEstimation,
+  getProjectManagerNames,
   getProjectManagers,
+  getProjectNames,
+  getProjectReport,
   getProjects,
   getProjectSprint,
   getProjectTasks,
@@ -115,6 +118,7 @@ import {
   getPendingTimesheetData,
   getTimesheetData,
   getUsersTimesheetData,
+  getUserTimesheetTeamReportData,
   updateTimesheet,
   updateTimesheetRecords,
   viewTimesheetData,
@@ -327,6 +331,10 @@ router.get(
 );
 router.get("/getUserAttendanceReportData", getUserAttendanceReportData);
 router.get("/getUserAttendanceTeamReportData", getUserAttendanceTeamReportData);
+router.get("/getUserTimesheetTeamReportData", getUserTimesheetTeamReportData);
+router.get("/getProjectNames", isAuthenticated, getProjectNames);
+router.get("/getPMListFilter", isAuthenticated, getProjectManagerNames);
+router.get("/getProjectReport", getProjectReport);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);
