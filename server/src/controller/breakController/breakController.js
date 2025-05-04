@@ -478,7 +478,10 @@ export const idleTimeoutUser = catchAsync(async (req, res, next) => {
       // const isoDate = todayDate.toISOString();
 
       const currentTime = moment().tz("Asia/Kolkata");
-      const currentDateTime = currentTime.toISOString();
+      const currentDateTime = new Date(currentTime);
+
+      const todayDate = moment().tz("Asia/Kolkata").startOf("day");
+      const indianTimeISOString = todayDate.toISOString();
 
       const user = await prisma.user.findFirst({
         where: {
@@ -575,9 +578,6 @@ export const idleTimeoutUser = catchAsync(async (req, res, next) => {
         },
       });
 
-      const todayDate = moment().tz("Asia/Kolkata").startOf("day");
-      const indianTimeISOString = todayDate.toISOString();
-
       const attendance = await prisma.attendance.findFirst({
         where: {
           userId: user.userId,
@@ -637,7 +637,8 @@ export const resumeIdleTimeout = catchAsync(async (req, res, next) => {
         },
       });
 
-      const currentDateTime = new Date();
+      const currentTime = moment().tz("Asia/Kolkata");
+      const currentDateTime = new Date(currentTime);
       const todayDate = moment().tz("Asia/Kolkata").startOf("day");
       const indianTimeISOString = todayDate.toISOString();
 
@@ -668,8 +669,10 @@ export const resumeIdleTimeout = catchAsync(async (req, res, next) => {
       // Convert milliseconds to seconds
       const differenceInSeconds = differenceInMilliseconds / 1000;
 
-      const breakTimeInMinutes = String(Math.floor(differenceInSeconds / 60));
-      const remainingSeconds = breakTimeInMinutes % 60;
+      const breakTimeInMinutes = String(
+        Math.floor(differenceInSeconds / 60)
+      ).padStart(2, "0");
+      const remainingSeconds = String(breakTimeInMinutes % 60).padStart(2, "0");
       const breakTaken = await prisma.breaks.update({
         where: {
           id: Number(breakId),
