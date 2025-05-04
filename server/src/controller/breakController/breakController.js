@@ -477,7 +477,8 @@ export const idleTimeoutUser = catchAsync(async (req, res, next) => {
       // const todayDate = moment(date).tz("Asia/Kolkata").startOf("day");
       // const isoDate = todayDate.toISOString();
 
-      const currentDateTime = new Date();
+      const currentTime = moment().tz("Asia/Kolkata");
+      const currentDateTime = currentTime.toISOString();
 
       const user = await prisma.user.findFirst({
         where: {
