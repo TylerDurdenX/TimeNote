@@ -356,12 +356,19 @@ export const updateBreakTime = catchAsync(async (req, res, next) => {
           });
         })
       );
-      const userLogout = await prisma.user.update({
+
+      const dbUser = await prisma.user.findFirst({
         where: {
           email: {
             equals: email,
             mode: "insensitive",
           },
+        },
+      });
+
+      const userLogout = await prisma.user.update({
+        where: {
+          userId: dbUser.userId,
         },
         data: {
           isLoggedIn: false,
