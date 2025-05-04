@@ -486,6 +486,8 @@ export const idleTimeoutUser = catchAsync(async (req, res, next) => {
 
       const currentTime = moment().tz("Asia/Kolkata");
       const currentDateTime = new Date();
+      const istOffsetInMs = 330 * 60 * 1000; // 330 minutes → milliseconds
+      const istDate = new Date(currentDateTime.getTime() + istOffsetInMs);
 
       const todayDate = moment().tz("Asia/Kolkata").startOf("day");
       const indianTimeISOString = todayDate.toISOString();
@@ -605,7 +607,7 @@ export const idleTimeoutUser = catchAsync(async (req, res, next) => {
       const breakTaken = await prisma.breaks.create({
         data: {
           userId: user.userId,
-          startTime: new Date(),
+          startTime: istDate,
           date: indianTimeISOString,
           attendanceId: attendance.id,
           breakTypeCode: "CUSTOM_BREAK",
@@ -644,8 +646,9 @@ export const resumeIdleTimeout = catchAsync(async (req, res, next) => {
         },
       });
 
-      const currentTime = moment().tz("Asia/Kolkata");
-      const currentDateTime = new Date(currentTime);
+      const currentDateTime = new Date();
+      const istOffsetInMs = 330 * 60 * 1000; // 330 minutes → milliseconds
+      const istDate = new Date(currentDateTime.getTime() + istOffsetInMs);
       const todayDate = moment().tz("Asia/Kolkata").startOf("day");
       const indianTimeISOString = todayDate.toISOString();
 
@@ -668,7 +671,7 @@ export const resumeIdleTimeout = catchAsync(async (req, res, next) => {
       });
 
       const startDate = new Date(breakTime.startTime);
-      const endDate = new Date(currentDateTime);
+      const endDate = new Date(istDate);
 
       // Calculate the difference in milliseconds
       const differenceInMilliseconds = endDate - startDate;
@@ -685,7 +688,7 @@ export const resumeIdleTimeout = catchAsync(async (req, res, next) => {
           id: Number(breakId),
         },
         data: {
-          endTime: currentDateTime,
+          endTime: istDate,
           breakTimeInMinutes: `${breakTimeInMinutes}:${remainingSeconds}`,
         },
       });
