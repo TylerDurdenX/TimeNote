@@ -456,11 +456,15 @@ model AutoReports {
   ReportName   String  
   ReportTime String 
   ReportDuration String
-  ProjectTeam String
+  team String?
+  userEmail   String?
+  allUsersFlag    Boolean?
   userId    Int
+  reportTriggeredFlag   Boolean?
 
   user            User    @relation(fields: [userId], references: [userId])
-  @@unique([userId, ReportName,ProjectTeam])
+  @@unique([userId, ReportName, ReportDuration])
+
 }
 
 model Customer {

@@ -1,6 +1,6 @@
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import React, { useState } from "react";
-import { dataGridClassNames } from "@/lib/utils";
+import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -166,6 +166,7 @@ const ConfiguredReportsTable = () => {
         rows={data || []}
         columns={columns}
         className={dataGridClassNames}
+        sx={dataGridSxStyles(false)}
       />
     </div>
   );

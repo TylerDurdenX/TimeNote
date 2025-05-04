@@ -242,6 +242,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const userRoles = useSelector((state: RootState) => state.userRoles);
   const userRolesList = userRoles.userRoles;
   let adminPageFlag: boolean = false;
+  let adminPageFlagSession: boolean = false;
 
   if (
     userRolesList !== undefined &&
@@ -262,11 +263,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     console.log("userRolesList is undefined or empty");
   }
 
+  const userRolesSession = sessionStorage.getItem("userRoles");
+
+  if (
+    userRolesSession !== undefined &&
+    userRolesSession !== null &&
+    userRolesSession !== ""
+  ) {
+    // Define the function to check if 'ADMIN' is in the list
+    const containsValue = (csvString: string, value: string): boolean => {
+      // Split the string by commas to get an array of values
+      const valuesArray = csvString.split(",");
+      // Check if the value exists in the array
+      return valuesArray.includes(value);
+    };
+
+    // Call containsValue function to set Admin
+    adminPageFlagSession = containsValue(userRolesList, "ADMIN");
+  } else {
+    console.log("userRolesList is undefined or empty");
+  }
+
   let updatedList = mockData.items2;
 
-  console.log(adminPageFlag);
-
-  if (adminPageFlag === false) {
+  if (adminPageFlag === false && adminPageFlagSession === false) {
     updatedList = mockData.items2.filter((item) => item.name !== "Reports");
   }
 
@@ -278,7 +298,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="bg-[#001742]">
         {/* <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/> */}
-        {adminPageFlag === true ? (
+        {adminPageFlag === true || adminPageFlagSession === true ? (
           <>
             <NavMain
               items={items}

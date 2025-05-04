@@ -757,7 +757,7 @@ const secondsToTime = (seconds) => {
   )}:${String(remainingSeconds).padStart(2, "0")}`;
 };
 
-const getTimeDifference = (startTime, endTime) => {
+export const getTimeDifference = (startTime, endTime) => {
   const startTimeInSeconds = timeToSeconds(startTime);
   const endTimeInSeconds = timeToSeconds(endTime);
 
@@ -773,7 +773,7 @@ const getTimeDifference = (startTime, endTime) => {
   return secondsToTime(durationInSeconds);
 };
 
-function timeDifference(time1, time2) {
+export function timeDifference(time1, time2) {
   // Helper function to parse time string into seconds
   if (time1 === "00:00:00") {
     return "00:00:00";
@@ -829,7 +829,7 @@ function convertToHHMMSS(seconds) {
 }
 
 // Function to sum times in mm:ss format
-function addTimes(timeList) {
+export function addTimes(timeList) {
   let totalSeconds = 0;
 
   // Convert each time to seconds and accumulate the total

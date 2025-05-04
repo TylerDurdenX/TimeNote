@@ -1,6 +1,6 @@
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import React, { useState } from "react";
-import { dataGridClassNames } from "@/lib/utils";
+import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@mui/material";
 import ReportsConfigurationDialog from "./ReportsConfigurationDialog";
@@ -66,7 +66,7 @@ function ReportsConfigurationTable({}: Props) {
                   </Button>
                 </DialogTrigger>
               </div>
-              <DialogContent className="max-w-[65vw] mt-5 mb-5 overflow-y-auto">
+              <DialogContent className="max-w-[85vw] mt-5 mb-5 overflow-y-auto">
                 <ReportsConfigurationDialog
                   name={params.value}
                   isOpen={isOpen}
@@ -86,6 +86,7 @@ function ReportsConfigurationTable({}: Props) {
         rows={reports || []}
         columns={columns}
         className={dataGridClassNames}
+        sx={dataGridSxStyles(false)}
       />
     </div>
   );

@@ -266,8 +266,10 @@ export interface ConfiguredReports {
 
 export interface ReportConfig {
   email: string;
-  projectTeam: string;
+  teamName: string;
+  userEmail: string;
   reportDuration: string;
+  allUsersFlag: boolean;
   time: string;
   period: string;
   reportName: string;
@@ -358,6 +360,8 @@ export interface Task {
   inProgressTime: string;
   inProgressTimeinMinutes: string;
   subTasks: SubTask[];
+  consumedHours: string;
+  hoursOverrun: string;
 
   author?: User;
   assignee?: User;

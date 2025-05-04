@@ -3,12 +3,12 @@
 import Header from "@/components/Header";
 import { useGetProjectTasksQuery } from "@/store/api";
 import React from "react";
+import * as XLSX from "xlsx-js-style";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { dataGridClassNames, dataGridSxStyles } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import TaskPage from "./TaskPage";
 import { useSearchParams } from "next/navigation";
-import * as XLSX from "xlsx";
 import { Button } from "@mui/material";
 import { FileDown } from "lucide-react";
 import CircularLoading from "@/components/Sidebar/loading";
@@ -259,6 +259,21 @@ const TableView = ({
     { refetchOnMountOrArgChange: true }
   );
 
+  const formatDateToDDMMYYYY = (isoDate: string): string => {
+    const date = new Date(isoDate);
+
+    if (isNaN(date.getTime())) {
+      console.warn("Invalid date:", isoDate);
+      return "";
+    }
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
   const removeColumns = (data: any[], columnsToExclude: string[]) => {
     return data.map((item) => {
       let newItem = { ...item };
@@ -284,25 +299,70 @@ const TableView = ({
 
     const flattenedTasks = filteredData.map((task) => {
       return {
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        status: task.status,
-        priority: task.priority,
-        tags: task.tags,
-        startDate: task.startDate,
-        dueDate: task.dueDate,
-        points: task.points,
-        assigneeName: task.assignee.username,
-        assigneeEmail: task.assignee.email,
+        Title: task.title,
+        Description: task.description,
+        "Task Status": task.status,
+        "Task Priority": task.priority,
+        Tags: task.tags,
+        "Start Date (DD/MM/YYYY)": formatDateToDDMMYYYY(task.startDate),
+        "Due Date (DD/MM/YYYY)": formatDateToDDMMYYYY(task.dueDate),
+        "Estimated Hours": task.points,
+        "Consumed Hours (HH:MM:SS)": task.consumedHours,
+        "Hours Overrun (HH:MM:SS)": task.hoursOverrun,
+        "Assignee Name": task.assignee.username,
+        "Assignee Email": task.assignee.email,
       };
     });
+
     const worksheet = XLSX.utils.json_to_sheet(flattenedTasks || []);
 
+    // Apply styles to header row
+    const headers = Object.keys(flattenedTasks?.[0] || {});
+    headers.forEach((header, index) => {
+      const cellRef = XLSX.utils.encode_cell({ r: 0, c: index });
+      const cell = worksheet[cellRef];
+      if (cell) {
+        cell.s = {
+          fill: { fgColor: { rgb: "D9D9D9" } }, // Light gray background
+          font: { bold: true },
+          border: {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } },
+          },
+        };
+      }
+    });
+
+    // Apply borders to all data cells
+    const range = XLSX.utils.decode_range(worksheet["!ref"]!);
+    for (let R = 1; R <= range.e.r; ++R) {
+      for (let C = 0; C <= range.e.c; ++C) {
+        const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = worksheet[cellAddress];
+        if (cell) {
+          cell.s = {
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          };
+        }
+      }
+    }
+
+    // Create workbook and append sheet
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-    XLSX.writeFile(workbook, "tasks-export.xlsx");
+    // Set workbook styles
+    worksheet["!cols"] = headers.map(() => ({ wch: 20 })); // Set column width
+
+    // Write the file
+    XLSX.writeFile(workbook, "project-data-export.xlsx");
   };
   const { theme } = useTheme();
 

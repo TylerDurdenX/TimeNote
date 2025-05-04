@@ -2,10 +2,19 @@ import AppError from "../../utils/appError.js";
 import catchAsync from "../../utils/catchAsync.js";
 import { prisma } from "../../server.js";
 import SuccessResponse from "../../utils/SuccessResponse.js";
+import { isEmpty } from "../../utils/genericMethods.js";
 
 export const createAutoReportConfig = catchAsync(async (req, res, next) => {
-  const { email, projectTeam, reportDuration, time, period, reportName } =
-    req.body;
+  const {
+    email,
+    teamName,
+    userEmail,
+    allUsersFlag,
+    reportDuration,
+    time,
+    period,
+    reportName,
+  } = req.body;
   try {
     const result = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findFirst({
@@ -14,27 +23,31 @@ export const createAutoReportConfig = catchAsync(async (req, res, next) => {
         },
       });
 
-      const newConfig = await prisma.autoReports.upsert({
+      const oldConfig = await prisma.autoReports.findFirst({
         where: {
-          userId_ReportName_ProjectTeam: {
-            userId: user.userId,
-            ReportName: reportName,
-            ProjectTeam: projectTeam,
-          },
-        },
-        update: {
-          ProjectTeam: projectTeam,
-          ReportDuration: reportDuration,
-          ReportTime: time + period,
-        },
-        create: {
-          ReportName: reportName,
-          ReportTime: time + period,
-          ReportDuration: reportDuration,
-          ProjectTeam: projectTeam,
           userId: user.userId,
+          ReportName: reportName,
+          ReportDuration: reportDuration,
         },
       });
+
+      if (isEmpty(oldConfig)) {
+        const newConfiguration = await prisma.autoReports.create({
+          data: {
+            userId: user.userId,
+            userEmail: userEmail,
+            ReportDuration: reportDuration,
+            ReportName: reportName,
+            team: teamName,
+            ReportTime: time + period,
+            allUsersFlag: allUsersFlag,
+          },
+        });
+      } else {
+        return next(
+          new AppError("Configuration for this report already present", 500)
+        );
+      }
 
       res.status(200).json({
         status: "success",

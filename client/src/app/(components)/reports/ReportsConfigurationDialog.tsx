@@ -20,8 +20,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { AmPmCarousel, TimeCarousel } from "./TimeCarousal";
-import { useCreateAutoReportMutation } from "@/store/api";
+import {
+  useCreateAutoReportMutation,
+  useGetTeamListFilterQuery,
+  useGetUserListFilterQuery,
+} from "@/store/api";
 import { useSearchParams } from "next/navigation";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 
 type Props = {
   name: string;
@@ -34,19 +41,42 @@ const ReportsConfigurationDialog = ({ name, isOpen, setIsOpen }: Props) => {
   const [reportDuration, setReportDuration] = useState("");
   const [time, setTime] = useState("");
   const [period, setPeriod] = useState("");
+  const [selectedUserEmail, setSelectedUserEmail] = useState("");
+  const [value, setValue] = useState("");
+  const [openTeam, setTeamOpen] = useState(false);
+  const [dropdownTeamName, setDropdownTeamName] = useState("");
+  const [isAllUsersChecked, setIsAllUsersChecked] = useState(false);
+
+  const [open, setOpen] = useState(false);
   const isValueSelected = () => {
-    return projectTeam && reportDuration && time && period;
+    return (
+      (selectedUserEmail && reportDuration && time && period) ||
+      (dropdownTeamName && reportDuration && time && period) ||
+      (isAllUsersChecked && reportDuration && time && period)
+    );
   };
 
   const userEmail = useSearchParams().get("email");
+
+  const handleToggle = (checked: boolean) => {
+    setIsAllUsersChecked(checked);
+    setSelectedUserEmail("");
+    setDropdownTeamName("");
+  };
+
+  const handleTeamClick = () => {
+    setSelectedUserEmail("");
+  };
 
   const [createAutoReportConfig, { isLoading }] = useCreateAutoReportMutation();
 
   const saveConfig = async () => {
     const reportConfig = {
       email: userEmail!,
-      projectTeam: projectTeam!,
+      teamName: projectTeam!,
+      userEmail: selectedUserEmail,
       reportDuration: reportDuration!,
+      allUsersFlag: isAllUsersChecked,
       time: time!,
       period: period!,
       reportName: name.replace(/\s+/g, "")!,
@@ -62,15 +92,27 @@ const ReportsConfigurationDialog = ({ name, isOpen, setIsOpen }: Props) => {
       ) {
         // @ts-ignore
         toast.error(response.error?.data.message);
+        setIsOpen(false);
       } else {
         // @ts-ignore
         toast.success(response.data?.message);
+        setIsOpen(false);
       }
     } catch (err: any) {
       toast.error(err.data.message);
       console.error("Error creating role:", err.data.Message);
     }
   };
+
+  const { data: teamList } = useGetTeamListFilterQuery(
+    {
+      email: userEmail!,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
+  const { data, error, isSuccess } = useGetUserListFilterQuery({
+    email: userEmail!,
+  });
 
   const handleSave = () => {
     saveConfig();
@@ -87,40 +129,76 @@ const ReportsConfigurationDialog = ({ name, isOpen, setIsOpen }: Props) => {
       </CardHeader>
 
       <CardContent className="space-y-2">
-        <div className="grid grid-cols-8 items-center gap-4 mr-1">
-          <Label className="text-center">Team or Project</Label>
+        <div className="grid grid-cols-12 items-center gap-4 mr-1">
+          <Label className="text-center">Team</Label>
           <Select
-            value={projectTeam}
-            onValueChange={(value) => setProjectTeam(value)}
+            value={dropdownTeamName}
+            onValueChange={(value) => {
+              setDropdownTeamName(value);
+              setSelectedUserEmail("");
+            }}
           >
-            <SelectTrigger className="col-span-3 p-2 border rounded-md">
-              <SelectValue placeholder="Team/Project" />
+            <SelectTrigger className="col-span-2 p-2 border rounded-md">
+              <SelectValue placeholder="Select" />
             </SelectTrigger>
+
             <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Priority</SelectLabel>
-                <SelectItem value="Urgent">Urgent</SelectItem>
-                <SelectItem value="High">High</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Low">Low</SelectItem>
-                <SelectItem value="Backlog">Backlog</SelectItem>
-              </SelectGroup>
+              {teamList?.map((team) => (
+                <SelectItem key={team.id} value={team.name}>
+                  {team.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Label className="text-center">Report Duration</Label>
+          <Label className="text-center ml-2">User</Label>
+          <Select
+            value={selectedUserEmail}
+            onValueChange={(value) => {
+              setSelectedUserEmail(value);
+              setDropdownTeamName("");
+            }}
+          >
+            <SelectTrigger className="col-span-2 p-2 border rounded-md">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              {data?.map((user) => (
+                <SelectItem key={user.userId} value={user.email}>
+                  {user.username}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Label className="ml-5 col-span-2 p-2">Report Duration</Label>
           <Select
             value={reportDuration}
             onValueChange={(value) => setReportDuration(value)}
           >
-            <SelectTrigger className="col-span-3 p-2 border rounded-md">
+            <SelectTrigger className="col-span-2 p-2 border rounded-md">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Daily">Daily Report</SelectItem>
-              <SelectItem value="LastWeek">Last One week</SelectItem>
-              <SelectItem value="LastMonth">Last One Month</SelectItem>
+              <SelectItem value="LastMonth">Monthly Report</SelectItem>
             </SelectContent>
           </Select>
+          <div className=" ml-5">
+            <div className="">
+              <Label htmlFor="airplane-mode" className="">
+                All Users
+              </Label>
+            </div>
+          </div>
+          <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
+            <div className="">
+              <Switch
+                className="ml-5"
+                id="airplane-mode"
+                checked={isAllUsersChecked}
+                onCheckedChange={handleToggle}
+              />
+            </div>
+          </div>
           <Label className="text-center">Set Time</Label>
           <TimeCarousel
             time={time}
