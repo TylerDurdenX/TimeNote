@@ -478,7 +478,7 @@ export const idleTimeoutUser = catchAsync(async (req, res, next) => {
       // const isoDate = todayDate.toISOString();
 
       const currentTime = moment().tz("Asia/Kolkata");
-      const currentDateTime = new Date(currentTime);
+      const currentDateTime = new Date();
 
       const todayDate = moment().tz("Asia/Kolkata").startOf("day");
       const indianTimeISOString = todayDate.toISOString();
@@ -598,7 +598,7 @@ export const idleTimeoutUser = catchAsync(async (req, res, next) => {
       const breakTaken = await prisma.breaks.create({
         data: {
           userId: user.userId,
-          startTime: currentDateTime,
+          startTime: new Date(),
           date: indianTimeISOString,
           attendanceId: attendance.id,
           breakTypeCode: "CUSTOM_BREAK",
