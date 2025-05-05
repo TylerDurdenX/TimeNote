@@ -4875,7 +4875,7 @@ function addTimes(time1, time2) {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }
 
-function subtractHoursFromTime(timeStr, hoursToSubtract) {
+export function subtractHoursFromTime(timeStr, hoursToSubtract) {
   const [hh, mm, ss] = timeStr.split(":").map(Number);
   let totalSeconds = hh * 3600 + mm * 60 + ss;
 

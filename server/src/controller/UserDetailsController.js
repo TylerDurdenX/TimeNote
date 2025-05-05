@@ -4,6 +4,7 @@ import { prisma } from "../server.js";
 import { isEmpty, extractTitles } from "../utils/genericMethods.js";
 import SuccessResponse from "../utils/SuccessResponse.js";
 import { getFinancialYearRange } from "./leaveController/leaveController.js";
+import { compressBase64 } from "./attendanceController/attendanceController.js";
 
 //get list of users form the table
 export const getUsersList = catchAsync(async (req, res, next) => {
@@ -31,24 +32,39 @@ export const getUsersList = catchAsync(async (req, res, next) => {
       }
 
       if (user.roles.some((role) => role.code === "ADMIN")) {
-        return res.status(200).json(
-          await prisma.user.findMany({
-            where: whereCondition,
-            select: {
-              userId: true,
-              username: true,
-              designation: true,
-              userStatus: true,
-              profilePicture: {
-                select: {
-                  base64: true,
-                },
+        let resultList = [];
+        const usersList = await prisma.user.findMany({
+          where: whereCondition,
+          select: {
+            userId: true,
+            username: true,
+            designation: true,
+            userStatus: true,
+            profilePicture: {
+              select: {
+                base64: true,
               },
             },
-            skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
-            take: pageSize,
+          },
+          skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
+          take: pageSize,
+        });
+
+        await Promise.all(
+          usersList.map(async (userObj) => {
+            if (!isEmpty(userObj.profilePicture)) {
+              const compressedBase64 = await compressBase64(
+                userObj.profilePicture.base64,
+                25
+              );
+
+              userObj.profilePicture.base64 = compressedBase64;
+            }
+            resultList.push(userObj);
           })
         );
+
+        return res.status(200).json(resultList);
       } else if (user.roles.some((role) => role.code === "PROJECT_MANAGER")) {
         const projects = await prisma.project.findMany({
           where: {
@@ -130,36 +146,28 @@ export const getUsersList = catchAsync(async (req, res, next) => {
             (userlist) => userlist.userId !== user.userId
           );
 
-          return res.status(200).json(updatedUsersList);
+          let resultList = [];
+          await Promise.all(
+            updatedUsersList.map(async (userObj) => {
+              if (!isEmpty(userObj.profilePicture)) {
+                const compressedBase64 = await compressBase64(
+                  userObj.profilePicture.base64,
+                  25
+                );
+
+                userObj.profilePicture.base64 = compressedBase64;
+              }
+              resultList.push(userObj);
+            })
+          );
+
+          return res.status(200).json(resultList);
         } else {
           delete whereCondition.projects;
           whereCondition.reportsToId = user.userId;
 
-          return res.status(200).json(
-            await prisma.user.findMany({
-              where: whereCondition,
-              select: {
-                userId: true,
-                username: true,
-                designation: true,
-                userStatus: true,
-                profilePicture: {
-                  select: {
-                    base64: true,
-                  },
-                },
-              },
-              skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
-              take: pageSize,
-            })
-          );
-        }
-      } else {
-        return res.status(200).json(
-          await prisma.user.findMany({
-            where: {
-              reportsToId: user.userId,
-            },
+          const usersList = await prisma.user.findMany({
+            where: whereCondition,
             select: {
               userId: true,
               username: true,
@@ -173,12 +181,63 @@ export const getUsersList = catchAsync(async (req, res, next) => {
             },
             skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
             take: pageSize,
+          });
+          let resultList = [];
+          await Promise.all(
+            usersList.map(async (userObj) => {
+              if (!isEmpty(userObj.profilePicture)) {
+                const compressedBase64 = await compressBase64(
+                  userObj.profilePicture.base64,
+                  25
+                );
+
+                userObj.profilePicture.base64 = compressedBase64;
+              }
+              resultList.push(userObj);
+            })
+          );
+
+          return res.status(200).json(resultList);
+        }
+      } else {
+        const usersList = await prisma.user.findMany({
+          where: {
+            reportsToId: user.userId,
+          },
+          select: {
+            userId: true,
+            username: true,
+            designation: true,
+            userStatus: true,
+            profilePicture: {
+              select: {
+                base64: true,
+              },
+            },
+          },
+          skip: (pageNumber - 1) * pageSize, // Skip the first (page - 1) * limit users
+          take: pageSize,
+        });
+        let resultList = [];
+        await Promise.all(
+          usersList.map(async (userObj) => {
+            if (!isEmpty(userObj.profilePicture)) {
+              const compressedBase64 = await compressBase64(
+                userObj.profilePicture.base64,
+                25
+              );
+
+              userObj.profilePicture.base64 = compressedBase64;
+            }
+            resultList.push(userObj);
           })
         );
+
+        return res.status(200).json(resultList);
       }
     });
   } catch (error) {
-    console.error("Error during getUsersList" + error);
+    console.log(error);
     return next(new AppError("There was an error getting Users List", 400));
   }
 });

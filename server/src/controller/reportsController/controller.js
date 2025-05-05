@@ -41,6 +41,7 @@ export const createAutoReportConfig = catchAsync(async (req, res, next) => {
             team: teamName,
             ReportTime: time + period,
             allUsersFlag: allUsersFlag,
+            reportTriggeredFlag: false,
           },
         });
       } else {

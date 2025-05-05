@@ -112,11 +112,11 @@ const ConfiguredReportsTable = () => {
         return formattedDuration;
       },
     },
-    {
-      field: "ProjectTeam",
-      headerName: "Project/Team Name",
-      flex: 1,
-    },
+    // {
+    //   field: "ProjectTeam",
+    //   headerName: "Project/Team Name",
+    //   flex: 1,
+    // },
     {
       field: "id",
       headerName: "",

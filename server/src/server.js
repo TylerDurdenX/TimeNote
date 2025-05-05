@@ -11,12 +11,12 @@ app.listen(port, () => {
   console.log("Server started");
 });
 
-// new CronJob(
-//   "*/10 * * * * *",
-//   () => {
-//     sendAutoReport();
-//   },
-//   null,
-//   true,
-//   "UTC"
-// );
+new CronJob(
+  "0 */10 * * * *", // Every 10 minutes at 0 seconds
+  () => {
+    sendAutoReport();
+  },
+  null,
+  true,
+  "UTC"
+);

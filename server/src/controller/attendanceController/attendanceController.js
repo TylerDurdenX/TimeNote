@@ -834,14 +834,16 @@ export function addTimes(timeList) {
 
   // Convert each time to seconds and accumulate the total
   timeList.forEach((time) => {
-    totalSeconds += convertToSeconds(time);
+    if (time !== null) {
+      totalSeconds += convertToSeconds(time);
+    }
   });
 
   // Convert total seconds back to hh:mm:ss
   return convertToHHMMSS(totalSeconds);
 }
 
-export async function compressBase64(base64Str, quality = 40) {
+export async function compressBase64(base64Str, quality = 25) {
   // Extract MIME and base64 content
   if (isEmpty(base64Str)) {
     return "";

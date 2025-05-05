@@ -14,7 +14,7 @@ function ReportsConfigurationTable({}: Props) {
     {
       id: 1,
       title: "Attendance Report",
-      description: "Attendance Report of users",
+      description: "Monthly Attendance Report of users",
       name: "Attendance Report",
     },
     // {
