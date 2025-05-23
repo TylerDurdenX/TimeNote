@@ -171,7 +171,7 @@ import {
 const router = express.Router();
 
 router.post("/customerDataUpdate", authenticateThirdParty, updateCustomerData);
-router.post("/signUp", isAuthenticated, signup);
+router.post("/signUp", signup);
 router.post("resend-otp", resendOtp);
 router.post("/login", login);
 router.post("/logout", logout);

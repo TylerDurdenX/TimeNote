@@ -7,6 +7,7 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
   try {
     // Get token from cookies
     const cookieString = req.headers.cookie;
+    console.log(cookieString);
     const cookies = cookieString
       .split(";")
       .map((cookie) => cookie.trim())
