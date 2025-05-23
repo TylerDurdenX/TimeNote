@@ -1,5 +1,6 @@
 "use client";
 
+import { AirplayIcon } from "lucide-react";
 import * as React from "react";
 
 export function TeamSwitcher({
@@ -13,13 +14,17 @@ export function TeamSwitcher({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <img src="/lynklogo.png" alt="Logo" className="w-8 h-8" />
+      <div className="mt-2 ml-2">
+        <AirplayIcon className="w-8 h-8 text-white" />
+      </div>
+
       <div>
-        <img
+        {/* <img
           src="/CustomerLogo.jpg"
           alt="lynk.png"
           className="w-full mt-1 h-10"
-        />
+        /> */}
+        <h1 className="text-white mt-2 ml-2">TimeNote</h1>
       </div>
     </div>
   );

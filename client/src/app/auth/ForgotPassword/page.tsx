@@ -36,9 +36,9 @@ const ForgotPassword = () => {
   return (
     <div className="w-[calc(100vw)] h-[calc(100vh)] flex  bg-no-repeat bg-top-right justify-center items-center bg-white p-[10px_7px] box-border relative">
       <Toaster position="top-right" />
-      <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[700px] h-[445px] bg-no-repeat bg-white text-white flex "></div>
+      {/* <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[700px] h-[445px] bg-no-repeat bg-white text-white flex "></div>
       <div className="absolute bottom-0 right-0 m-16 bg-[url('/circle.svg')] w-[300px] h-[280px] bg-white text-white flex justify-center items-center"></div>
-      <div className="absolute top-0 left-0 m-12 bg-[url('/logo.svg')] w-[300px] h-[700px] bg-no-repeat bg-white text-white flex "></div>
+      <div className="absolute top-0 left-0 m-12 bg-[url('/logo.svg')] w-[300px] h-[700px] bg-no-repeat bg-white text-white flex "></div> */}
 
       {/* <div className="flex w-full h-full max-w-[550px] max-h-[700px] bg-white shadow-[0px_10px_30px_rgba(0,0,0,0.1)] overflow-hidden justify-center items-center rounded-[20px] box-border bg-indigo-100"> */}
       <div className="w-[500px] flex justify-center absolute items-center p-5 bg-white box-border bg-indigo-100">

@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
+  ActiveTimeAlertConfig,
   AddComment,
   AddSubTaskComment,
   AdminRoleResponse,
@@ -17,6 +18,7 @@ import {
   Breaks,
   BreaksForTeams,
   BulkUser,
+  ConfiguredAlertsResponse,
   ConfiguredReports,
   CreateSprint,
   CreateUserData,
@@ -42,6 +44,7 @@ import {
   ProjectNamesResponse,
   ProjectReportListResponse,
   ProjectResponse,
+  ProjectTimelineAlertConfig,
   ProjectUsers,
   ReopenTaskData,
   ReportConfig,
@@ -60,9 +63,11 @@ import {
   TeamLeadResponse,
   TeamRequest,
   Teams,
+  TimesheetAlertConfig,
   timesheetEntry,
   TimesheetReportTableResponse,
   TimesheetResponse,
+  UpdateAlertConfigObj,
   UpdateBreakObj,
   UpdateProjectData,
   UpdateSprintObject,
@@ -187,6 +192,7 @@ export const api = createApi({
     "UsersDetails",
     "LeaveData",
     "LeaveApprovalData",
+    "ConfiguredAlerts",
   ],
   endpoints: (build) => ({
     getUsersCount: build.query<UserCountResponse, void>({
@@ -390,6 +396,16 @@ export const api = createApi({
         return url;
       },
       providesTags: ["ProjectsList"],
+    }),
+    getConfiguredAlerts: build.query<
+      ConfiguredAlertsResponse[],
+      { email: string }
+    >({
+      query: ({ email }) => {
+        const url = `api/user/getConfiguredAlerts?email=${email}`;
+        return url;
+      },
+      providesTags: ["ConfiguredAlerts"],
     }),
     getProjectReport: build.query<
       ProjectReportListResponse[],
@@ -829,6 +845,30 @@ export const api = createApi({
       }),
       invalidatesTags: ["AutoReports"],
     }),
+    createActiveTimeAlert: build.mutation<ApiResponse, ActiveTimeAlertConfig>({
+      query: (alertConfigBody) => ({
+        url: "api/user/createActiveTimeAlert",
+        method: "POST",
+        body: alertConfigBody,
+      }),
+    }),
+    createTimesheetAlert: build.mutation<ApiResponse, TimesheetAlertConfig>({
+      query: (alertConfigBody) => ({
+        url: "api/user/createTimesheetAlert",
+        method: "POST",
+        body: alertConfigBody,
+      }),
+    }),
+    createProjectTimelineAlert: build.mutation<
+      ApiResponse,
+      ProjectTimelineAlertConfig
+    >({
+      query: (alertConfigBody) => ({
+        url: "api/user/createProjectTimelineAlert",
+        method: "POST",
+        body: alertConfigBody,
+      }),
+    }),
     getConfiguredReports: build.query<ConfiguredReports[], { email: string }>({
       query: ({ email }) => {
         const url = `api/user/getConfiguredReports?email=${email}`;
@@ -1016,6 +1056,13 @@ export const api = createApi({
       }),
       invalidatesTags: ["Breaks"],
     }),
+    deleteAlertConfig: build.mutation<ApiResponse, { alertId: number }>({
+      query: ({ alertId }) => ({
+        url: `api/user/deleteAlertConfig?alertId=${alertId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ConfiguredAlerts"],
+    }),
     createSubTask: build.mutation<ApiResponse, SubTaskFormData>({
       query: (task) => ({
         url: "api/user/createSubTask",
@@ -1084,6 +1131,16 @@ export const api = createApi({
       }),
       invalidatesTags: ["Breaks"],
     }),
+    updateAlertConfigDetails: build.mutation<ApiResponse, UpdateAlertConfigObj>(
+      {
+        query: (updateAlertConfigObject) => ({
+          url: "api/user/updateAlertConfigObj",
+          method: "POST",
+          body: updateAlertConfigObject,
+        }),
+        invalidatesTags: ["ConfiguredAlerts"],
+      }
+    ),
     getMentionedUsers: build.query<MentionedUser[], { name: string }>({
       query: ({ name }) => {
         const url = `api/user/getMentionedUsers?name=${name}`;
@@ -1408,4 +1465,10 @@ export const {
   useGetProjectNamesQuery,
   useGetPMListFilterQuery,
   useGetProjectReportQuery,
+  useCreateActiveTimeAlertMutation,
+  useGetConfiguredAlertsQuery,
+  useDeleteAlertConfigMutation,
+  useUpdateAlertConfigDetailsMutation,
+  useCreateTimesheetAlertMutation,
+  useCreateProjectTimelineAlertMutation,
 } = api;

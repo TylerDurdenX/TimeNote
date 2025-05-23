@@ -110,8 +110,14 @@ import {
   getAutoReportConfig,
 } from "../controller/reportsController/controller.js";
 import {
+  createActiveTimeAlert,
+  createProjectTimelineAlert,
+  createTimesheetAlert,
   deleteAlert,
+  deleteAlertConfiguration,
   getAlerts,
+  getConfiguredAlerts,
+  updateAlertConfiguration,
 } from "../controller/alertController/alertController.js";
 import {
   createTimesheetEntry,
@@ -335,6 +341,12 @@ router.get("/getUserTimesheetTeamReportData", getUserTimesheetTeamReportData);
 router.get("/getProjectNames", isAuthenticated, getProjectNames);
 router.get("/getPMListFilter", isAuthenticated, getProjectManagerNames);
 router.get("/getProjectReport", getProjectReport);
+router.post("/createActiveTimeAlert", createActiveTimeAlert);
+router.get("/getConfiguredAlerts", getConfiguredAlerts);
+router.delete("/deleteAlertConfig", deleteAlertConfiguration);
+router.post("/updateAlertConfigObj", updateAlertConfiguration);
+router.post("/createTimesheetAlert", createTimesheetAlert);
+router.post("/createProjectTimelineAlert", createProjectTimelineAlert);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);

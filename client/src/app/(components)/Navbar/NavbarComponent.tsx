@@ -49,12 +49,11 @@ const NavbarComponent = () => {
   return (
     <div className="relative flex items-center w-[250px]">
       {/* Search icon */}
-      <Search
+      {/* <Search
         className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-white cursor-pointer"
         aria-label="Search"
       />
-      {/* Search input */}
-      <input
+\      <input
         className="w-full rounded-xl border border-gray-300 bg-gray-100 p-2 pt-2 mt-1 pl-10 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-white"
         type="search"
         placeholder="Search..."
@@ -63,7 +62,6 @@ const NavbarComponent = () => {
         onChange={handleSearchChange}
       />
 
-      {/* Filtered search results dropdown */}
       {searchQuery && (
         <ul className="absolute left-0 w-full bg-white border rounded-xl mt-1 max-h-60 overflow-y-auto shadow-lg z-20 top-full">
           {filteredData.length > 0 ? (
@@ -85,7 +83,7 @@ const NavbarComponent = () => {
             <li className="p-2 text-gray-500">No results found</li>
           )}
         </ul>
-      )}
+      )} */}
     </div>
   );
 };

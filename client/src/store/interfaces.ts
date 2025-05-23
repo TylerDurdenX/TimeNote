@@ -213,6 +213,14 @@ export interface ProjectListResponse {
   completionStatus: number;
 }
 
+export interface ConfiguredAlertsResponse {
+  id: number;
+  name: string;
+  description: string;
+  time: string;
+  percentageCompletion: string;
+}
+
 export interface ProjectReportListResponse {
   id: number;
   name: string;
@@ -273,6 +281,21 @@ export interface ReportConfig {
   time: string;
   period: string;
   reportName: string;
+}
+
+export interface ActiveTimeAlertConfig {
+  email: string;
+  activeTime: string;
+}
+
+export interface TimesheetAlertConfig {
+  email: string;
+  timesheetHours: string;
+}
+
+export interface ProjectTimelineAlertConfig {
+  email: string;
+  completionPercentage: string;
 }
 
 export enum Status {
@@ -753,6 +776,15 @@ export interface UpdateBreakObj {
   breakName: string;
   breakDescription: string;
   breakTimeInMinutes: string;
+}
+
+export interface UpdateAlertConfigObj {
+  id: number;
+  alertType: string;
+  email: string;
+  activeHours: string;
+  timesheetHours: string;
+  completionPercentage: string;
 }
 
 export interface UpdateTaskData {

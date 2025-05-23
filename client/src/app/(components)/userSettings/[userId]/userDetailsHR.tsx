@@ -483,7 +483,7 @@ const UserSettingsHR = ({ id }: Props) => {
               </div>
             </div>
           </div>
-          <div className="flex  w-full">
+          {/* <div className="flex  w-full">
             <div className="w-1/6 flex justify-center items-center p-4">
               <Label className="text-center">Teams</Label>
             </div>
@@ -507,7 +507,7 @@ const UserSettingsHR = ({ id }: Props) => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="flex  w-full">
             <div className="w-1/6 flex justify-center items-center p-4">
               <Label className="text-center">Roles</Label>
@@ -554,7 +554,7 @@ const UserSettingsHR = ({ id }: Props) => {
               </div>
             </div>
           </div>
-          <div className="flex  w-full col-span-6">
+          {/* <div className="flex  w-full col-span-6">
             <div className="w-1/6 flex justify-center items-center p-4">
               <Label className="text-center">Idle Timeout</Label>
             </div>
@@ -647,7 +647,7 @@ const UserSettingsHR = ({ id }: Props) => {
                 />
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-center items-center h-full">
             <AlertDialog open={open} onOpenChange={setOpen}>

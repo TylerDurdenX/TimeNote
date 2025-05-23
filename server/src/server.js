@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import app from "./app.js";
 import { CronJob } from "cron";
-import { sendAutoReport } from "./scheduler/scheduler.js";
+import { sendAlerts, sendAutoReport } from "./scheduler/scheduler.js";
 
 export const prisma = new PrismaClient();
 
@@ -11,12 +11,14 @@ app.listen(port, () => {
   console.log("Server started");
 });
 
-new CronJob(
-  "0 */10 * * * *", // Every 10 minutes at 0 seconds
-  () => {
-    sendAutoReport();
-  },
-  null,
-  true,
-  "UTC"
-);
+// new CronJob(
+//   // "0 */10 * * * *", // Every 10 minutes at 0 seconds
+//   "*/5 * * * * *",
+//   () => {
+//     sendAutoReport();
+//     sendAlerts();
+//   },
+//   null,
+//   true,
+//   "UTC"
+// );

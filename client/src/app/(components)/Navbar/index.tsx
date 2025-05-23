@@ -60,18 +60,18 @@ const Navbar = () => {
   return (
     <div className="flex justify-between bg-white px-4 h-full dark:bg-black">
       <div className="flex items-center space-x-4 ml-auto">
-        <div className="h-min w-min rounded p-2 mt-1.2">
-          <Link href={`/alerts?email=${userEmail}`}>
-            <Badge
-              color="error"
-              badgeContent={Number(alertCountData?.count)}
-              max={9}
-            >
-              <Bell />
-            </Badge>
-          </Link>
-        </div>
-        <div className="h-min w-min rounded p-2">
+        {/* <div className="h-min w-min rounded p-2 mt-1.2">
+            <Link href={`/alerts?email=${userEmail}`}>
+              <Badge
+                color="error"
+                badgeContent={Number(alertCountData?.count)}
+                max={9}
+              >
+                <Bell />
+              </Badge>
+            </Link>
+          </div> */}
+        {/* <div className="h-min w-min rounded p-2">
           <Button
             className="bg-indigo-600 text-white border-0 p-2.5 rounded-xl w-[120px] text-base cursor-pointer hover:bg-indigo-500"
             onClick={() => {
@@ -82,7 +82,7 @@ const Navbar = () => {
             <ArrowDownToLine />
             Lynk 247
           </Button>
-        </div>
+        </div> */}
 
         <div className="h-min w-min rounded p-2 mt-1.2">
           <User className="h-6 w-6 cursor-pointer dark:text-white" />

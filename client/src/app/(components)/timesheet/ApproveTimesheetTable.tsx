@@ -68,12 +68,6 @@ const ApproveTimesheetTable = ({ email, selectedDate }: Props) => {
 
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
 
-  const handleViewDetails = (row: RowData) => {
-    setSelectedRow(row);
-    setRowDataUserName(row.username);
-    setIsViewOpen(true);
-  };
-
   const formatTime = (input: string): string => {
     if (/^\d+$/.test(input)) {
       return `${input}:00`;

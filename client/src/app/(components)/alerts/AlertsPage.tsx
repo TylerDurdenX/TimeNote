@@ -15,6 +15,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   useDeleteTriggeredAlertsMutation,
   useGetAlertsQuery,
 } from "@/store/api";
@@ -23,6 +32,7 @@ import { useSearchParams } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { Typography } from "@mui/material";
 import Link from "next/link";
+import { Card } from "@/components/ui/card";
 
 const AlertsPage = () => {
   const userEmail = useSearchParams().get("email");
@@ -89,38 +99,90 @@ const AlertsPage = () => {
     {
       field: "description",
       headerName: "Description",
-      flex: 2,
+      flex: 4,
       renderCell: (params) => {
         const value = params.value || "";
-        const parts = value.split(":");
+        if (value.includes(":")) {
+          const parts = value.split(":");
 
-        // Ensure there's text after ':'
-        if (parts.length > 1) {
-          const beforeText = parts[0] + ":";
-          const linkText = parts.slice(1).join(":").trim(); // Handles multiple colons
-          const match = linkText.match(/0000(\d+)/);
-          const extracted = match ? match[1] : "";
-          const href = `/task/${extracted}?email=${email}`; // Define your route
+          // Ensure there's text after ':'
+          if (parts.length > 1) {
+            const beforeText = parts[0] + ":";
+            const linkText = parts.slice(1).join(":").trim(); // Handles multiple colons
+            const match = linkText.match(/0000(\d+)/);
+            const extracted = match ? match[1] : "";
+            const href = `/task/${extracted}?email=${email}`; // Define your route
 
+            return (
+              <Typography variant="body2" component="span">
+                {beforeText}{" "}
+                <Link href={href} passHref>
+                  <Typography
+                    variant="body2"
+                    onClick={() => {
+                      sessionStorage.setItem("taskId", String(extracted));
+                    }}
+                    component="span"
+                    sx={{
+                      color: "blue",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    {linkText}
+                  </Typography>
+                </Link>
+              </Typography>
+            );
+          }
+        } else if (value.includes("#")) {
+          const namePart = value.split("#");
+
+          const beforeText = namePart[0] + ":";
+          const afterText = namePart.slice(1);
+          const numberedList = String(afterText)
+            .split(",")
+            .map(
+              (name: string, index: number) => `${index + 1}. ${name.trim()}`
+            );
           return (
             <Typography variant="body2" component="span">
               {beforeText}{" "}
-              <Link href={href} passHref>
-                <Typography
-                  variant="body2"
-                  onClick={() => {
-                    sessionStorage.setItem("taskId", String(extracted));
-                  }}
-                  component="span"
-                  sx={{
-                    color: "blue",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                >
-                  {linkText}
-                </Typography>
-              </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Typography
+                    variant="body2"
+                    component="span"
+                    sx={{
+                      color: "blue",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    Users List
+                  </Typography>
+                </DialogTrigger>
+
+                <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[38vw] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="font-semibold text-lg">
+                      Users List
+                    </DialogTitle>
+                  </DialogHeader>
+                  <Card className="p-5 bg-white shadow-md rounded-lg mt-4 min-h-[150px] flex text-gray-600">
+                    <Typography variant="body2" component="div">
+                      {numberedList.map((item, index) => (
+                        // Render each numbered name on a new line
+                        <div key={index}>{item}</div>
+                      ))}
+                    </Typography>{" "}
+                  </Card>
+                  <DialogFooter className="w-full justify-between items-center">
+                    <div className="absolute flex gap-4 left-10"></div>
+                    <div className="flex items-center space-x-2"></div>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </Typography>
           );
         }
@@ -167,7 +229,7 @@ const AlertsPage = () => {
     {
       field: "triggeredDate",
       headerName: "Triggered Date",
-      flex: 1,
+      flex: 0.7,
       renderCell: (params) => {
         return formatDate(params.value);
       },
@@ -175,7 +237,7 @@ const AlertsPage = () => {
     {
       field: "id",
       headerName: "",
-      flex: 1,
+      flex: 0.7,
       renderCell: (params) => {
         return (
           <div className="flex justify-center items-center h-full">

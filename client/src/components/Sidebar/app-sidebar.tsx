@@ -23,6 +23,8 @@ import {
   FileChartColumnIncreasing,
   CalendarCheck,
   MonitorX,
+  ChartCandlestick,
+  ChartNoAxesCombined,
 } from "lucide-react";
 
 import { NavMain } from "@/components/Sidebar/nav-main";
@@ -75,29 +77,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
 
     liveTracking: [
-      {
-        title: "Live Tracking",
-        url: "#",
-        icon: Radio,
-        isActive: false,
-        items: [
-          {
-            title: "Screenshots",
-            url: `/screenshots?email=${userEmail}`,
-            icon: ScreenShare,
-          },
-          // {
-          //   title: "Live Streaming",
-          //   url: `/liveStream?email=${userEmail}`,
-          //   icon: Cast,
-          // },
-          {
-            title: "Geo Tracking",
-            url: `/geoTrack?email=${userEmail}`,
-            icon: MapPin,
-          },
-        ],
-      },
+      // {
+      //   title: "Live Tracking",
+      //   url: "#",
+      //   icon: Radio,
+      //   isActive: false,
+      //   items: [
+      //     {
+      //       title: "Screenshots",
+      //       url: `/screenshots?email=${userEmail}`,
+      //       icon: ScreenShare,
+      //     },
+      //     // {
+      //     //   title: "Live Streaming",
+      //     //   url: `/liveStream?email=${userEmail}`,
+      //     //   icon: Cast,
+      //     // },
+      //     {
+      //       title: "Geo Tracking",
+      //       url: `/geoTrack?email=${userEmail}`,
+      //       icon: MapPin,
+      //     },
+      //   ],
+      // },
     ],
 
     projects: [
@@ -127,16 +129,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
 
     items1: [
-      {
-        name: "Attendance",
-        url: `/attendance?email=${userEmail}`,
-        icon: UsersRound,
-      },
-      {
-        name: "Leave Management",
-        url: `/leaveManagement?email=${userEmail}`,
-        icon: CalendarCheck,
-      },
+      // {
+      //   name: "Attendance",
+      //   url: `/attendance?email=${userEmail}`,
+      //   icon: UsersRound,
+      // },
+      // {
+      //   name: "Leave Management",
+      //   url: `/leaveManagement?email=${userEmail}`,
+      //   icon: CalendarCheck,
+      // },
       // {
       //   name: "Productivity",
       //   url: `/productivity?email=${userEmail}`,
@@ -155,31 +157,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: `/userDetails?email=${userEmail}`,
         icon: User,
       },
-      {
-        name: "Alerts",
-        url: `/alerts?email=${userEmail}`,
-        icon: Bell,
-      },
-      {
-        name: "Reports",
-        url: `/reports?email=${userEmail}`,
-        icon: FileChartColumnIncreasing,
-      },
+      // {
+      //   name: "Alerts",
+      //   url: `/alerts?email=${userEmail}`,
+      //   icon: Bell,
+      // },
+      // {
+      //   name: "Reports",
+      //   url: `/reports?email=${userEmail}`,
+      //   icon: FileChartColumnIncreasing,
+      // },
       {
         name: "Timesheet",
         url: `/timesheet?email=${userEmail}`,
         icon: FileClock,
       },
-      {
-        name: "Teams",
-        url: `/teams?email=${userEmail}`,
-        icon: Users,
-      },
-      {
-        name: "Breaks",
-        url: `/breaks?email=${userEmail}`,
-        icon: Coffee,
-      },
+      // {
+      //   name: "Teams",
+      //   url: `/teams?email=${userEmail}`,
+      //   icon: Users,
+      // },
+      // {
+      //   name: "Breaks",
+      //   url: `/breaks?email=${userEmail}`,
+      //   icon: Coffee,
+      // },
     ],
   };
 
@@ -290,6 +292,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     updatedList = mockData.items2.filter((item) => item.name !== "Reports");
   }
 
+  React.useEffect(() => {
+    const userRolesSession = sessionStorage.getItem("userRoles");
+    if (
+      userRolesSession !== undefined &&
+      userRolesSession !== null &&
+      userRolesSession !== ""
+    ) {
+      // Define the function to check if 'ADMIN' is in the list
+      const containsValue = (csvString: string, value: string): boolean => {
+        // Split the string by commas to get an array of values
+        const valuesArray = csvString.split(",");
+        // Check if the value exists in the array
+        return valuesArray.includes(value);
+      };
+
+      // Call containsValue function to set Admin
+      adminPageFlagSession = containsValue(userRolesList, "ADMIN");
+    } else {
+      console.log("userRolesList is undefined or empty");
+    }
+  });
+
   const { data, isLoading, error } = useGetUserQuery({ email: userEmail! });
   return (
     <Sidebar collapsible="icon" {...props} variant="floating">
@@ -298,7 +322,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="bg-[#001742]">
         {/* <NavProjects projects={mockData.Dashboard} activeTab={activeTab} setActiveTab={setActiveTab}/> */}
-        {adminPageFlag === true || adminPageFlagSession === true ? (
+        {/* {adminPageFlag === true || adminPageFlagSession === true ? (
           <>
             <NavMain
               items={items}
@@ -309,7 +333,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </>
         ) : (
           ""
-        )}
+        )} */}
 
         <NavProjects
           projects={mockData.items1}

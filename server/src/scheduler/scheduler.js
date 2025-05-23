@@ -1454,3 +1454,287 @@ export async function sendAutoReport() {
     }
   });
 }
+
+export async function sendAlerts() {
+  const alerts = await prisma.alertsConfigurations.findMany();
+  console.log("scheduler");
+
+  alerts.map(async (alert) => {
+    if (alert.type === "ActiveTimeAlert" || alert.type === "TimesheetAlert") {
+      const nowInIndia = moment.tz("Asia/Kolkata");
+      const elevenThirty = moment
+        .tz("Asia/Kolkata")
+        .set({ hour: 23, minute: 30, second: 0, millisecond: 0 });
+
+      if (nowInIndia.isSameOrAfter(elevenThirty)) {
+        if (alert.alertTriggeredFlag === false) {
+          if (alert.type === "ActiveTimeAlert") {
+            const user = await prisma.user.findFirst({
+              where: {
+                userId: alert.userId,
+              },
+              include: {
+                roles: true,
+              },
+            });
+            const todayDate = moment().tz("Asia/Kolkata").startOf("day");
+            const indianTimeISOString = todayDate.toISOString();
+            if (user.roles.some((role) => role.code === "ADMIN")) {
+              let usersList = [];
+              const attendanceRecords = await prisma.attendance.findMany({
+                where: {
+                  date: indianTimeISOString,
+                },
+              });
+              attendanceRecords.map((attendance) => {
+                if (
+                  parseInt(attendance.activeTime.split(":")[0], 10) < alert.time
+                ) {
+                  usersList.push(attendance.username);
+                }
+              });
+
+              if (!isEmpty(usersList)) {
+                const newAlert = await prisma.alert.create({
+                  data: {
+                    title: "Active Time Shortfall",
+                    description: `The mentioned users have less than ${alert.time} hours of active time #${usersList}`,
+                    triggeredDate: indianTimeISOString,
+                    userId: alert.userId,
+                  },
+                });
+              }
+
+              const updatedAlert = await prisma.alertsConfigurations.update({
+                where: {
+                  id: alert.id,
+                },
+                data: {
+                  alertTriggeredFlag: true,
+                },
+              });
+            } else if (user.roles.some((role) => role.code === "TEAM_LEAD")) {
+              let usersList = [];
+
+              const team = await prisma.team.findFirst({
+                where: {
+                  teamLeaderEmail: user.email,
+                },
+                include: {
+                  members: {
+                    select: {
+                      userId: true,
+                    },
+                  },
+                },
+              });
+
+              const attendanceRecords = await prisma.attendance.findMany({
+                where: {
+                  date: indianTimeISOString,
+                  userId: {
+                    in: team.members,
+                  },
+                },
+              });
+
+              attendanceRecords.map((attendance) => {
+                if (
+                  parseInt(attendance.activeTime.split(":")[0], 10) < alert.time
+                ) {
+                  usersList.push(attendance.username);
+                }
+              });
+
+              if (!isEmpty(usersList)) {
+                const newAlert = await prisma.alert.create({
+                  data: {
+                    title: "Active Time Shortfall",
+                    description: `The mentioned users have less than ${alert.time} hours of active time #${usersList}`,
+                    triggeredDate: indianTimeISOString,
+                    userId: alert.userId,
+                  },
+                });
+              }
+
+              const updatedAlert = await prisma.alertsConfigurations.update({
+                where: {
+                  id: alert.id,
+                },
+                data: {
+                  alertTriggeredFlag: true,
+                },
+              });
+            }
+          } else if (alert.type === "TimesheetAlert") {
+            const user = await prisma.user.findFirst({
+              where: {
+                userId: alert.userId,
+              },
+              include: {
+                roles: true,
+              },
+            });
+            const todayDate = moment().tz("Asia/Kolkata").startOf("day");
+            const indianTimeISOString = todayDate.toISOString();
+            if (user.roles.some((role) => role.code === "ADMIN")) {
+              let usersList = [];
+
+              const userIdList = await prisma.user.findMany({
+                select: {
+                  userId: true,
+                  username: true,
+                },
+              });
+
+              const result = await Promise.all(
+                userIdList.map(async (user) => {
+                  const timesheetRecords = await prisma.timesheet.findMany({
+                    where: {
+                      date: indianTimeISOString,
+                      userId: user.userId,
+                    },
+                  });
+
+                  let totalMinutes = 0;
+
+                  if (!isEmpty(timesheetRecords)) {
+                    timesheetRecords.map((timesheet) => {
+                      if (!isEmpty(timesheet.approvedHours)) {
+                        const [hours, minutes] = timesheet.approvedHours
+                          .split(":")
+                          .map(Number);
+                        totalMinutes += hours * 60 + minutes;
+                      }
+                    });
+                  } else {
+                    if (!usersList.includes(user.username)) {
+                      usersList.push(user.username);
+                    }
+                  }
+
+                  const totalHours = Math.floor(totalMinutes / 60);
+                  const remainingMinutes = totalMinutes % 60;
+
+                  if (!isEmpty(timesheetRecords)) {
+                    if (totalHours < alert.time) {
+                      if (!usersList.push(timesheetRecords[0].username)) {
+                        usersList.push(timesheetRecords[0].username);
+                      }
+                    }
+                  }
+                })
+              );
+
+              if (!isEmpty(usersList)) {
+                const date = new Date(todayDate);
+
+                const day = String(date.getDate()).padStart(2, "0");
+                const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+                const year = date.getFullYear();
+                const formatted = `${day}/${month}/${year}`;
+
+                const newAlert = await prisma.alert.create({
+                  data: {
+                    title: "Timesheet Hours Shortfall",
+                    description: `The mentioned users have less than ${alert.time} hours of logged time in Timesheet for date ${formatted}#${usersList}`,
+                    triggeredDate: indianTimeISOString,
+                    userId: alert.userId,
+                  },
+                });
+              }
+
+              const updatedAlert = await prisma.alertsConfigurations.update({
+                where: {
+                  id: alert.id,
+                },
+                data: {
+                  alertTriggeredFlag: true,
+                },
+              });
+            } else if (user.roles.some((role) => role.code === "TEAM_LEAD")) {
+              let usersList = [];
+
+              const team = await prisma.team.findFirst({
+                where: {
+                  teamLeaderEmail: user.email,
+                },
+                include: {
+                  members: {
+                    select: {
+                      userId: true,
+                    },
+                  },
+                },
+              });
+
+              team.members.map(async (user) => {
+                const timesheetRecords = await prisma.timesheet.findMany({
+                  where: {
+                    date: indianTimeISOString,
+                    userId: user.userId,
+                  },
+                });
+
+                let totalMinutes = 0;
+
+                if (!isEmpty(timesheetRecords)) {
+                  timesheetRecords.map((timesheet) => {
+                    if (!isEmpty(timesheet.approvedHours)) {
+                      const [hours, minutes] = timesheet.approvedHours
+                        .split(":")
+                        .map(Number);
+                      totalMinutes += hours * 60 + minutes;
+                    }
+                  });
+                } else {
+                  usersList.push(user.username);
+                }
+
+                const totalHours = Math.floor(totalMinutes / 60);
+                const remainingMinutes = totalMinutes % 60;
+
+                if (totalHours < alert.time) {
+                  usersList.push(timesheetRecords[0].username);
+                }
+              });
+
+              if (!isEmpty(usersList)) {
+                const newAlert = await prisma.alert.create({
+                  data: {
+                    title: "Timesheet Hours Shortfall",
+                    description: `The mentioned users have less than ${alert.time} hours of logged time in Timesheet for date ${todayDate}#${usersList}`,
+                    triggeredDate: indianTimeISOString,
+                    userId: alert.userId,
+                  },
+                });
+              }
+
+              const updatedAlert = await prisma.alertsConfigurations.update({
+                where: {
+                  id: alert.id,
+                },
+                data: {
+                  alertTriggeredFlag: true,
+                },
+              });
+            }
+            // Trigger Alert
+          }
+        }
+      } else {
+        if (alert.alertTriggeredFlag === true) {
+          const updatedAlert = await prisma.alertsConfigurations.update({
+            where: {
+              id: alert.id,
+            },
+            data: {
+              alertTriggeredFlag: false,
+            },
+          });
+        }
+      }
+    } else if (alert.type === "ProjectTimelineAlert") {
+    }
+  });
+}

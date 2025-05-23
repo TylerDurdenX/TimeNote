@@ -105,6 +105,33 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
           return res.status(200).json(result);
         }
       } else {
+        const dbAttendance = await prisma.attendance.findFirst({
+          where: {
+            userId: user.userId,
+            date: indianTimeISOString,
+          },
+          include: {
+            breaks: true,
+          },
+        });
+
+        const breakTimeList = dbAttendance.breaks.map(
+          (b) => b.breakTimeInMinutes
+        );
+
+        const inTime = dbAttendance.punchInTime
+          ? formatTime(dbAttendance.punchInTime)
+          : "NA";
+
+        const outTime = formatTime(new Date(punchOutTime));
+
+        let duration = getTimeDifference(inTime, outTime);
+        if (duration.includes("N")) {
+          duration = "00:00:00";
+        }
+
+        const breakTime = addTimes(breakTimeList);
+
         const attendance = await prisma.attendance.update({
           where: {
             userId_date: {
@@ -114,6 +141,9 @@ export const updateAttendance = catchAsync(async (req, res, next) => {
           },
           data: {
             punchOutTime: punchOutTime,
+            workingTime: duration,
+            activeTime: timeDifference(duration, breakTime),
+            idleBreakTime: breakTime,
           },
         });
 

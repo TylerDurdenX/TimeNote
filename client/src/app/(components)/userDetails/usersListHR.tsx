@@ -219,7 +219,7 @@ const UserListHR = ({ onSelectUser, activeFlag }: Props) => {
                         </Box>
                       </ListItem>
                     </Link>
-                    {employee.userStatus === "active" ? (
+                    {/* {employee.userStatus === "active" ? (
                       <>
                         <div className="absolute top-1/2 right-2 -translate-y-1/2 mr-5 group flex items-center cursor-pointer">
                           <span className="mr-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -255,7 +255,7 @@ const UserListHR = ({ onSelectUser, activeFlag }: Props) => {
                       </>
                     ) : (
                       ""
-                    )}
+                    )} */}
                   </div>
 
                   <Divider />

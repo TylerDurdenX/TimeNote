@@ -122,9 +122,24 @@ model Attendance {
     geoLocation     String?
     city          String?
     status      String?
+    workingTime   String?
+    activeTime    String?
+    idleBreakTime   String?
 
     @@unique([userId, date])
     breaks      Breaks[]
+}
+
+model AlertsConfigurations {
+    id       Int     @id @default(autoincrement()) 
+    name          String
+    description   String?
+    type           String?
+    time            String?
+    percentageCompletion    String?
+    userRoles       String?
+    userId        Int
+    alertTriggeredFlag   Boolean?
 }
 
 model BreakType {

@@ -5,11 +5,19 @@ import { VisibilityOff, Visibility } from "@mui/icons-material";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import axios from "axios";
-import { Loader } from "lucide-react";
+import { Airplay, GalleryVerticalEnd, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Toaster, toast } from "react-hot-toast";
 import { setAuthUser } from "@/store/authSlice";
 import { setUserRoles } from "@/store/store";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const App: React.FC = () => {
   const dispatch = useDispatch();
@@ -57,7 +65,7 @@ const App: React.FC = () => {
       dispatch(setAuthUser(user));
       sessionStorage.setItem("email", user.email);
       //router.push(`/Dashboard?email=${encodeURIComponent(formData.email)}`);
-      router.push(`/attendance?email=${encodeURIComponent(user.email)}`);
+      router.push(`/projectsDashboard?email=${encodeURIComponent(user.email)}`);
     } catch (error: any) {
       toast.error(error.response.data.message);
       console.log(error);
@@ -67,24 +75,10 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen overflow-hidden sm:overflow-auto items-center flex justify-center">
+    <div className="w-full min-h-screen overflow-hidden sm:overflow-auto ">
       <Toaster position="top-right" />
-      <div className="absolute top-0 right-0  bg-[url('/wave.svg')] w-[70vh] h-[45vh] bg-no-repeat bg-white flex " />
-      <div className="absolute bottom-0 right-0  bg-[url('/circle.svg')] w-[38vh] h-[34vh] bg-white flex bg-no-repeat justify-center items-center overflow-hidden" />
-      <div className="absolute top-0 left-0  w-[350px] h-[350px] bg-no-repeat bg-white text-white flex">
-        <img
-          src="/lynklog.png"
-          alt="Description of Image"
-          className="w-180 h-180"
-        ></img>
-      </div>
-      <div className="absolute bottom-0 left-0 mb-2 ml-4 bg-no-repeat bg-white text-white flex ">
-        <h2 className="text-indigo-900">
-          Lynk247 a product of Optimize Innovations
-        </h2>
-      </div>
 
-      <div className="w-[500px]  flex justify-center absolute top-0 mt-[190px] items-center p-5 bg-white box-border oerflow-hidden">
+      {/* <div className="w-[500px]  flex justify-center absolute top-0 mt-[190px] items-center p-5 bg-white box-border oerflow-hidden">
         <div className="w-full max-w-[350px] text-center">
           <h1 className="mt-[20px] font-bold text-5xl text-indigo-700 font-nunito">
             Login
@@ -149,6 +143,86 @@ const App: React.FC = () => {
               </Button>
             )}
           </form>
+        </div>
+      </div> */}
+      <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+        <div className="flex w-full max-w-sm flex-col gap-6">
+          <a
+            href="#"
+            className="flex items-center gap-2 self-center font-medium"
+          >
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Airplay className="size-4" />
+            </div>
+            TimeNote
+          </a>
+          {/* <LoginForm /> */}
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-xl">Welcome back</CardTitle>
+              <CardDescription>Login with your Credientials</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit}>
+                <div className="grid gap-6">
+                  <div className="grid gap-6">
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                        className="w-full p-[10px] text-[16px] border border-[#ccc] rounded-[5px] box-border"
+                        value={formData.email}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <div className="flex items-center">
+                        <Label htmlFor="password">Password</Label>
+                        <a
+                          href="/auth/ForgotPassword"
+                          className="ml-auto text-sm underline-offset-4 hover:underline"
+                        >
+                          Forgot your password?
+                        </a>
+                      </div>
+                      <div className="flex relative items-center">
+                        <input
+                          type={passwordVisible ? "text" : "password"}
+                          id="password"
+                          name="password"
+                          placeholder="Enter your password"
+                          required
+                          className="w-full p-[10px] text-[16px] border border-[#ccc] rounded-[5px] box-border"
+                          value={formData.password}
+                          onChange={handleChange}
+                        />
+                        <span
+                          className="absolute right-[10px] cursor-pointer text-[18px] text-[#999] flex items-center justify-center w-[25px] h-[25px] group hover:text-[#333]"
+                          id="toggle-password"
+                          onClick={() => setPasswordVisible(!passwordVisible)}
+                        >
+                          {passwordVisible ? <Visibility /> : <VisibilityOff />}
+                        </span>
+                      </div>{" "}
+                    </div>
+                    {!loading && (
+                      <Button type="submit" className="w-full">
+                        Login
+                      </Button>
+                    )}
+                    {loading && (
+                      <Button className="w-full">
+                        <Loader className="animate-spin" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
