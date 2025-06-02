@@ -17,7 +17,7 @@ const page = () => {
         </div>
       </div>
       <div className="flex gap-4 px-4 mr-4 h-full overflow-hidden">
-        <ProjectsTable email={userEmail!} />
+        <ProjectsTable email={userEmail!} closedProjectFlag={false} />
       </div>
     </div>
   );

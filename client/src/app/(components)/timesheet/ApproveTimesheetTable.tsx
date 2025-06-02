@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Clock9 } from "lucide-react";
+import { Clock9, CheckCircle2, XCircle, Eye, User } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
   AlertDialog,
@@ -25,7 +25,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Cancel, CheckCircle } from "@mui/icons-material";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   useGetPendingTimesheetDataQuery,
   useUpdateTimesheetEntryMutation,
@@ -61,10 +63,10 @@ const ApproveTimesheetTable = ({ email, selectedDate }: Props) => {
     { refetchOnMountOrArgChange: true }
   );
 
-  function validateTimeFormat(time: string) {
+  const validateTimeFormat = (time: string): boolean => {
     const regex = /^([01]?[0-9]|2[0-3]):([0-5]?[0-9])$/;
     return regex.test(time);
-  }
+  };
 
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
 
@@ -80,7 +82,7 @@ const ApproveTimesheetTable = ({ email, selectedDate }: Props) => {
     return input;
   };
 
-  async function handleApprove(id: number, hours: string) {
+  const handleApprove = async (id: number, hours: string) => {
     const approvedHours = formatTime(hours);
 
     if (!validateTimeFormat(approvedHours)) {
@@ -111,19 +113,17 @@ const ApproveTimesheetTable = ({ email, selectedDate }: Props) => {
         console.error("Error Approving Timesheet record:", err.data.Message);
       }
     }
-  }
+  };
 
-  async function handleReject(id: number) {
+  const handleReject = async (id: number) => {
     setSelectedId(id);
-  }
+  };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
-
     return `${day}/${month}/${year}`;
   };
 
@@ -158,27 +158,73 @@ const ApproveTimesheetTable = ({ email, selectedDate }: Props) => {
     }
   };
 
+  const renderApprovalStatus = (value: string) => {
+    if (value === "NA") {
+      return (
+        <Badge
+          variant="default"
+          className="bg-green-100 text-green-800 hover:bg-green-100"
+        >
+          <CheckCircle2 className="w-3 h-3 mr-1" />
+          Approved
+        </Badge>
+      );
+    } else if (value === "NO") {
+      return (
+        <Badge
+          variant="secondary"
+          className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+        >
+          <Clock9 className="w-3 h-3 mr-1" />
+          Pending for approval
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge
+          variant="default"
+          className="bg-green-100 text-green-800 hover:bg-green-100"
+        >
+          <CheckCircle2 className="w-3 h-3 mr-1" />
+          Approved
+        </Badge>
+      );
+    }
+  };
+
+  const getUserInitials = (username: string): string => {
+    return username
+      .split(" ")
+      .map((name) => name.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   const columns: GridColDef[] = [
     {
       field: "task",
-      headerName: "Comments",
+      headerName: "Task Description",
       flex: 1.5,
       renderCell: (params) => (
         <Dialog>
           <DialogTrigger asChild>
-            <button className="text-blue-600 underline font-medium text-lg hover:text-blue-700 transition-colors">
+            <button className="text-blue-600 underline font-medium hover:text-blue-800 transition-colors duration-200 text-left line-clamp-2">
               {params.value}
             </button>
           </DialogTrigger>
-
-          <DialogContent className="max-w-[50vw] max-h-[85vh] overflow-y-auto p-4 bg-gray-50 rounded-lg shadow-lg">
-            <DialogHeader>
-              <DialogDescription className="text-2xl font-semibold text-gray-800">
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader className="space-y-3">
+              <DialogDescription className="text-xl font-semibold text-gray-900">
                 Task Description
               </DialogDescription>
             </DialogHeader>
-            <Card className="p-5 bg-white shadow-md rounded-lg mt-4 min-h-[150px] flex text-gray-600">
-              <div className="">{params.value}</div>
+            <Card className="mt-4">
+              <CardContent className="p-6">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {params.value}
+                </p>
+              </CardContent>
             </Card>
           </DialogContent>
         </Dialog>
@@ -186,249 +232,279 @@ const ApproveTimesheetTable = ({ email, selectedDate }: Props) => {
     },
     {
       field: "taskName",
-      headerName: "TaskName",
-      flex: 0.6,
+      headerName: "Task Name",
+      flex: 1,
+      minWidth: 120,
     },
     {
       field: "projectName",
-      headerName: "Project Name",
-      flex: 0.6,
+      headerName: "Project",
+      flex: 1,
+      minWidth: 120,
     },
     {
       field: "username",
       headerName: "User",
-      flex: 1,
+      flex: 1.2,
+      minWidth: 140,
+      renderCell: (params) => (
+        <div className="flex items-center space-x-3">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-medium">
+              {getUserInitials(params.value)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="font-medium text-gray-700">{params.value}</span>
+        </div>
+      ),
     },
     {
       field: "completionPercentage",
-      headerName: "Completion Percentage",
+      headerName: "Progress",
       flex: 1,
+      minWidth: 120,
+      renderCell: (params) => (
+        <div className="flex items-center space-x-2 mt-3">
+          <div className="w-12 bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{
+                width: `${Math.min(100, Math.max(0, params.value || 0))}%`,
+              }}
+            ></div>
+          </div>
+          <span className="text-sm font-medium text-gray-600">
+            {params.value || 0}%
+          </span>
+        </div>
+      ),
     },
     {
       field: "date",
       headerName: "Date",
-      flex: 0.7,
-      renderCell: (params) => {
-        return formatDate(params.value);
-      },
+      flex: 1,
+      minWidth: 100,
+      renderCell: (params) => (
+        <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+          {formatDate(params.value)}
+        </span>
+      ),
     },
     {
       field: "consumedHours",
-      headerName: "Consumed Hours",
-      flex: 1,
+      headerName: "Consumed",
+      flex: 0.8,
+      minWidth: 100,
+      renderCell: (params) => (
+        <span className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded">
+          {params.value}
+        </span>
+      ),
     },
     {
       field: "approvedHours",
       headerName: "Approved Hours",
-      flex: 1,
+      flex: 1.2,
+      minWidth: 110,
       editable: true,
-      renderCell: (params) => {
-        return (
+      renderCell: (params) => (
+        <div className="w-full">
           <Input
-            value={params.value} // Display the current cell value
-            className=" mb-3 bg-white"
-            placeholder="0:00"
+            value={params.value}
+            className="bg-white border-gray-300 rounded-md text-sm h-8 font-mono"
+            placeholder="HH:MM"
             onChange={(event) => {
-              // Update the value directly on the cell change
               const newValue = event.target.value;
               params.api.setEditCellValue({ ...params, value: newValue });
             }}
           />
-        );
-      },
+        </div>
+      ),
     },
     {
       field: "ApprovedFlag",
-      headerName: "Approval Status",
-      flex: 1.4,
-      renderCell: (params) => {
-        if (params.value === "NA") {
-          return (
-            <>
-              <CheckCircle style={{ color: "green" }} /> Approved
-            </>
-          );
-        } else if (params.value === "NO") {
-          return (
-            <>
-              <div className="flex items-center">
-                <Clock9 style={{ color: "red" }} />{" "}
-                <span className="ml-2">Pending for approval</span>
-              </div>
-            </>
-          );
-        } else {
-          return (
-            <>
-              <CheckCircle style={{ color: "green" }} /> Approved
-            </>
-          );
-        }
-      },
+      headerName: "Status",
+      flex: 1.2,
+      minWidth: 140,
+      renderCell: (params) => renderApprovalStatus(params.value),
     },
     {
       field: "actions",
       headerName: "Actions",
       flex: 2,
-      renderCell: (params) => {
-        return (
-          <div
-            style={{
-              display: "flex",
-              gap: "15px",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            className="mt-2"
+      minWidth: 180,
+      sortable: false,
+      renderCell: (params) => (
+        <div className="flex items-center space-x-2 py-1">
+          {/* Approve Button */}
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() =>
+              handleApprove(params.row.id, params.row.approvedHours)
+            }
+            startIcon={<CheckCircle2 className="w-4 h-4" />}
+            className="bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-sm transition-all duration-200"
           >
-            {/* Approve Button */}
-            <Button
-              variant="contained"
-              color="success"
-              size="small"
-              onClick={() =>
-                handleApprove(params.row.id, params.row.approvedHours)
-              }
-              startIcon={<CheckCircle />}
-              sx={{
-                backgroundColor: "#4caf50", // Green color
-                "&:hover": { backgroundColor: "#45a049" },
-                borderRadius: "8px",
-              }}
-            >
-              Approve
-            </Button>
+            Approve
+          </Button>
 
-            {/* Reject Button */}
-            <AlertDialog open={open} onOpenChange={setOpen}>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="contained"
-                  color="error"
-                  size="small"
-                  onClick={() => handleReject(params.row.id)}
-                  startIcon={<Cancel />}
-                  sx={{
-                    backgroundColor: "#f44336", // Red color
-                    "&:hover": { backgroundColor: "#e53935" },
-                    borderRadius: "8px",
-                  }}
+          {/* Reject Button */}
+          <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => handleReject(params.row.id)}
+                startIcon={<XCircle className="w-4 h-4" />}
+                className="bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-sm transition-all duration-200"
+              >
+                Reject
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="sm:max-w-md">
+              <AlertDialogHeader className="space-y-3">
+                <AlertDialogTitle className="text-lg font-semibold text-gray-900">
+                  Confirm Rejection
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-gray-600">
+                  Are you sure you want to reject this timesheet record? This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex space-x-2">
+                <AlertDialogCancel
+                  onClick={() => setOpen(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteConfirmation}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
                   Reject
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-gray-700">
-                    Do you want to reject this timesheet record?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel
-                    onClick={() => {
-                      setOpen(false);
-                    }}
-                  >
-                    No
-                  </AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteConfirmation}>
-                    Yes
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        );
-      },
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      ),
     },
     {
       field: "action2",
       headerName: "View Task",
-      flex: 1,
+      flex: 0.8,
+      sortable: false,
       renderCell: (params) => {
         if (params.row.taskId !== null) {
           return (
-            <div
-              style={{
-                display: "flex",
-                gap: "15px",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              className=" w-full"
-            >
+            <div className="w-full flex justify-center">
               <Link href={`/task/${params.row.taskId}?email=${email}`}>
                 <Button
                   variant="contained"
-                  className="mb-5"
-                  color="primary"
                   size="small"
+                  startIcon={<Eye className="w-4 h-4" />}
                   onClick={() =>
                     sessionStorage.setItem("taskId", String(params.row.taskId))
-                  } // Passing the current row's data
-                  sx={{
-                    backgroundColor: "#3f51b5", // Blue color
-                    "&:hover": { backgroundColor: "#2c387e" },
-                    borderRadius: "8px",
-                  }}
+                  }
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-all duration-200"
                 >
-                  View Task
+                  Task
                 </Button>
               </Link>
             </div>
           );
         } else if (params.row.subTaskId !== null) {
           return (
-            <div
-              style={{
-                display: "flex",
-                gap: "15px",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              className=" w-full"
-            >
+            <div className="w-full flex justify-center">
               <Link href={`/subTask/${params.row.subTaskCode}?email=${email}`}>
                 <Button
                   variant="contained"
-                  className="mb-5"
-                  color="primary"
                   size="small"
+                  startIcon={<Eye className="w-4 h-4" />}
                   onClick={() =>
                     sessionStorage.setItem(
                       "taskId",
                       String(params.row.subTaskId)
                     )
-                  } // Passing the current row's data
-                  sx={{
-                    backgroundColor: "#3f51b5", // Blue color
-                    "&:hover": { backgroundColor: "#2c387e" },
-                    borderRadius: "8px",
-                  }}
+                  }
+                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-sm transition-all duration-200"
                 >
-                  View Sub Task
+                  Sub Task
                 </Button>
               </Link>
             </div>
           );
         } else {
-          return "";
+          return null;
         }
       },
     },
   ];
 
-  return (
-    <>
-      <div className="h-full w-full px-4 pb-8 xl:px-6">
-        <DataGrid
-          rows={pendingTimesheetEntry || []}
-          columns={columns}
-          className={dataGridClassNames}
-        />
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"></div>
+        <span className="ml-3 text-gray-600">
+          Loading pending timesheets...
+        </span>
       </div>
-    </>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6 m-4">
+        <div className="flex items-center space-x-3 text-red-600">
+          <XCircle className="w-6 h-6" />
+          <div>
+            <h3 className="font-semibold">Error Loading Data</h3>
+            <p className="text-sm text-gray-600">
+              Failed to load pending timesheet entries.
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Header Card */}
+      <Card className="shadow-sm border-0 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
+            <Clock9 className="w-5 h-5 mr-2 text-blue-600" />
+            Pending Timesheet Approvals
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Review and approve timesheet entries for{" "}
+            {formatDate(selectedDate.toString())}
+          </p>
+        </CardHeader>
+      </Card>
+
+      {/* Data Grid */}
+      <Card className="shadow-sm border-0 bg-white">
+        <CardContent className="p-0">
+          <div className="h-full w-full">
+            <DataGrid
+              rows={pendingTimesheetEntry || []}
+              columns={columns}
+              className={`${dataGridClassNames} border-0`}
+              autoHeight
+              disableRowSelectionOnClick
+              pageSizeOptions={[10, 25, 50]}
+              initialState={{
+                pagination: { paginationModel: { pageSize: 10 } },
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

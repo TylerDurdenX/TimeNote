@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useGetProjectTasksCalendarQuery } from "@/store/api";
-import { Maximize2 } from "lucide-react";
+import { Maximize2, Clock, User, Flag, CheckSquare } from "lucide-react";
 import { Assignee } from "@/store/interfaces";
 import Link from "next/link";
 
@@ -35,6 +35,7 @@ type Result = {
   code: string;
   assignee: Assignee;
 };
+
 // Set up localizer
 const localizer = momentLocalizer(moment);
 
@@ -47,11 +48,10 @@ const MyCalendar = ({
   email,
 }: Props) => {
   const [currentView, setCurrentView] = useState<View>("month");
-
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const handleNavigate = (date: Date) => {
-    setCurrentDate(date); // Update current date when navigating
+    setCurrentDate(date);
   };
 
   const handleViewChange = (view: View) => {
@@ -94,179 +94,193 @@ const MyCalendar = ({
   });
 
   const handleEventClick = (event: any) => {
-    // Log the event that was clicked
     sessionStorage.setItem("taskId", event.id);
   };
 
+  const getStatusColors = (status: string) => {
+    const colorMap = {
+      "To Do": {
+        bg: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        border: "#667eea",
+        shadow: "rgba(102, 126, 234, 0.3)",
+      },
+      "Work In Progress": {
+        bg: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+        border: "#f093fb",
+        shadow: "rgba(240, 147, 251, 0.3)",
+      },
+      "Under Review": {
+        bg: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+        border: "#4facfe",
+        shadow: "rgba(79, 172, 254, 0.3)",
+      },
+      Completed: {
+        bg: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+        border: "#43e97b",
+        shadow: "rgba(67, 233, 123, 0.3)",
+      },
+    };
+
+    return (
+      colorMap[status as keyof typeof colorMap] || {
+        bg: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+        border: "#a8edea",
+        shadow: "rgba(168, 237, 234, 0.3)",
+      }
+    );
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    const priorityMap = {
+      High: { icon: "🔴", color: "#ef4444" },
+      Medium: { icon: "🟡", color: "#f59e0b" },
+      Low: { icon: "🟢", color: "#10b981" },
+    };
+    return (
+      priorityMap[priority as keyof typeof priorityMap] || {
+        icon: "⚪",
+        color: "#6b7280",
+      }
+    );
+  };
+
   const eventPropGetter = (event: any) => {
+    const colors = getStatusColors(event.status);
     return {
       style: {
-        backgroundColor: "#3f51b5", // Green background color
-        borderRadius: "5px",
-        padding: "5px 10px",
+        background: colors.bg,
+        border: `2px solid ${colors.border}`,
+        borderRadius: "12px",
+        padding: "8px 12px",
         color: "white",
-        fontWeight: "bold",
-        fontSize: "14px",
-        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Subtle shadow
-        transition: "background-color 0.3s ease", // Smooth transition on hover
+        fontWeight: "600",
+        fontSize: "13px",
+        boxShadow: `0 8px 25px ${colors.shadow}, 0 4px 10px rgba(0, 0, 0, 0.1)`,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        backdropFilter: "blur(10px)",
+        position: "relative",
+        overflow: "hidden",
       },
     };
   };
 
-  const getStatusColors = (status: string) => {
-    let bgColor, textColor;
-
-    switch (status) {
-      case "To Do":
-        bgColor = "#2563EB"; // Blue
-        textColor = "#ffffff"; // White
-        break;
-      case "Work In Progress":
-        bgColor = "#059669"; // Green
-        textColor = "#ffffff"; // White
-        break;
-      case "Under Review":
-        bgColor = "#D97706"; // Orange
-        textColor = "#ffffff"; // White
-        break;
-      case "Completed":
-        bgColor = "#000000"; // Black
-        textColor = "#ffffff"; // White
-        break;
-      default:
-        bgColor = "#E5E7EB"; // Gray
-        textColor = "#000000"; // Black
-    }
-
-    return { bgColor, textColor };
-  };
-
   const CustomEvent = ({ event }: any) => {
     const [isHovered, setIsHovered] = useState(false);
+    const colors = getStatusColors(event.status);
+    const priorityInfo = getPriorityIcon(event.priority);
 
-    const [statusWidth, setStatusWidth] = useState(0);
-
-    // Specify the type of the ref as HTMLSpanElement
-    const statusRef = useRef<HTMLSpanElement>(null);
-
-    useEffect(() => {
-      // Ensure the ref is not null and then access its offsetWidth
-      if (statusRef.current) {
-        setStatusWidth(statusRef.current.offsetWidth);
-      }
-    }, [event.status]);
-
-    const handleMouseEnter = () => {
-      setIsHovered(true); // Set the hover state to true when mouse enters
-    };
-
-    const handleMouseLeave = () => {
-      setIsHovered(false); // Set the hover state to false when mouse leaves
-    };
-
-    const { bgColor, textColor } = getStatusColors(event.status);
-
-    let href = "";
-    if (email !== event.assignee.email) {
-      href = `/task/${sessionStorage.getItem("taskId")}?email=${email}`;
-    } else {
-      href = `/projectsDashboard/${event.projectId}/${event.code}?email=${email}`;
-    }
+    const href =
+      email !== event.assignee.email
+        ? `/task/${sessionStorage.getItem("taskId")}?email=${email}`
+        : `/projectsDashboard/${event.projectId}/${event.code}?email=${email}`;
 
     return (
       <Popover>
         <PopoverTrigger asChild>
           <div
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             style={{
-              backgroundColor: isHovered ? "#9fa8da" : "#3f51b5", // Darker green on hover
-              borderRadius: "5px",
-              //padding: '5px 10px',
+              background: isHovered
+                ? `${colors.bg}, rgba(255, 255, 255, 0.1)`
+                : colors.bg,
+              borderRadius: "12px",
               color: "white",
-              //fontWeight: 'bold',
-              fontSize: "14px",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-              transition: "background-color 0.3s ease",
+              fontSize: "13px",
+              fontWeight: "600",
+              boxShadow: isHovered
+                ? `0 12px 35px ${colors.shadow}, 0 6px 15px rgba(0, 0, 0, 0.15)`
+                : `0 8px 25px ${colors.shadow}, 0 4px 10px rgba(0, 0, 0, 0.1)`,
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              transform: isHovered
+                ? "translateY(-2px) scale(1.02)"
+                : "translateY(0) scale(1)",
+              backdropFilter: "blur(10px)",
+              border: `2px solid ${colors.border}`,
             }}
-            className="pl-2"
+            className="px-3 py-2 cursor-pointer relative overflow-hidden"
           >
-            {event.title}
+            <div className="flex items-center gap-2">
+              <span className="text-xs">{priorityInfo.icon}</span>
+              <span className="truncate flex-1">{event.title}</span>
+            </div>
+            {/* Animated background gradient */}
+            <div
+              className="absolute inset-0 opacity-0 hover:opacity-20 transition-opacity duration-300"
+              style={{
+                background:
+                  "linear-gradient(45deg, rgba(255,255,255,0.3) 0%, transparent 50%, rgba(255,255,255,0.3) 100%)",
+                animation: isHovered
+                  ? "shimmer 2s ease-in-out infinite"
+                  : "none",
+              }}
+            />
           </div>
         </PopoverTrigger>
-        <PopoverContent className="w-80">
-          <div className="grid gap-4">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <div className="justify-between items-center max-w-[15rem] overflow-hidden">
-                  <h4 className="font-medium whitespace-nowrap overflow-ellipsis overflow-hidden">
-                    {event.title}
-                  </h4>
-                </div>
-
-                <Link href={href}>
-                  <Maximize2 className="ml-3 cursor-pointer mt-0" />
-                </Link>
-              </div>
-
-              <p className="text-sm text-muted-foreground">
-                {event.description.split(" ").slice(0, 100).join(" ") +
-                  (event.description.split(" ").length > 100 ? "..." : "")}
-              </p>
-            </div>
-            <div className="grid gap-2">
-              <div className="grid grid-cols-5 items-center gap-4">
-                <Label htmlFor="Status" className="col-span-2">
-                  Status
-                </Label>
-                <div className="w-full">
+        <PopoverContent className="w-96 p-0 border-0 shadow-2xl bg-white/95 backdrop-blur-xl rounded-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-6">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1 mr-4">
+                <h4 className="font-bold text-lg text-gray-800 leading-tight mb-2">
+                  {event.title}
+                </h4>
+                <div className="flex items-center gap-2 mb-3">
                   <span
-                    id="Status"
-                    className="inline-flex items-center rounded-full text-xs font-semibold leading-5 col-span-3"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-white shadow-lg"
                     style={{
-                      backgroundColor: bgColor,
-                      color: textColor,
-                      paddingLeft: "8px", // Optional: Adjust padding for space between text and border
-                      paddingRight: "8px", // Optional: Adjust padding for space between text and border
-                      whiteSpace: "nowrap", // Prevent wrapping of text
+                      background: colors.bg,
+                      boxShadow: `0 4px 15px ${colors.shadow}`,
                     }}
                   >
                     {event.status}
                   </span>
+                  <span
+                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                    style={{
+                      backgroundColor: `${priorityInfo.color}20`,
+                      color: priorityInfo.color,
+                      border: `1px solid ${priorityInfo.color}40`,
+                    }}
+                  >
+                    {priorityInfo.icon} {event.priority}
+                  </span>
                 </div>
               </div>
-              <div className="grid grid-cols-5 items-center gap-4">
-                <Label htmlFor="maxWidth" className="col-span-2">
-                  Assignee
-                </Label>
-                <Label
-                  htmlFor="maxWidth"
-                  className="col-span-3 h-5 items-center justify-center mt-2"
-                >
+              <Link href={href}>
+                <div className="p-2 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 cursor-pointer group">
+                  <Maximize2 className="w-4 h-4 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
+                </div>
+              </Link>
+            </div>
+
+            <div className="bg-white/80 rounded-xl p-4 mb-4 backdrop-blur-sm border border-gray-100">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {event.description.split(" ").slice(0, 30).join(" ") +
+                  (event.description.split(" ").length > 30 ? "..." : "")}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/80 rounded-lg p-3 border border-gray-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Assignee
+                  </Label>
+                </div>
+                <p className="font-semibold text-gray-800">
                   {event.assignee.username}
-                </Label>
+                </p>
               </div>
-              <div className="grid grid-cols-5 items-center gap-4">
-                <Label htmlFor="height" className="col-span-2">
-                  Estimated Hours
-                </Label>
-                <Label
-                  htmlFor="maxWidth"
-                  className="col-span-3 h-4 items-center justify-center mt-1"
-                >
-                  {event.points}
-                </Label>
-              </div>
-              <div className="grid grid-cols-5 items-center gap-2">
-                <Label htmlFor="maxHeight" className="col-span-2">
-                  Priority
-                </Label>
-                <Label
-                  htmlFor="maxWidth"
-                  className="col-span-3 h-4 items-center justify-center mt-1"
-                >
-                  {event.priority}
-                </Label>
+
+              <div className="bg-white/80 rounded-lg p-3 border border-gray-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock className="w-4 h-4 text-gray-500" />
+                  <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Est. Hours
+                  </Label>
+                </div>
+                <p className="font-semibold text-gray-800">{event.points}h</p>
               </div>
             </div>
           </div>
@@ -276,28 +290,179 @@ const MyCalendar = ({
   };
 
   return (
-    <div
-      style={{ height: "80vh", width: "100%" }}
-      className="mt-5 ml-5 pr-6 w-screen"
-    >
-      <Calendar
-        localizer={localizer}
-        events={resultList}
-        startAccessor="startDate"
-        endAccessor="dueDate"
-        style={{ height: "100%" }}
-        views={["month", "week", "day"]}
-        onView={handleViewChange}
-        view={currentView}
-        onNavigate={handleNavigate}
-        date={currentDate}
-        onSelectEvent={handleEventClick}
-        onShowMore={handleEventClick}
-        eventPropGetter={eventPropGetter}
-        components={{
-          event: CustomEvent, // Custom event rendering with hover effects
-        }}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 p-6 h-full">
+      <div className="max-w-full mx-auto">
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+          {/* <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 p-6">
+            <h1 className="text-2xl font-bold text-white mb-2">
+              Project Calendar
+            </h1>
+            <p className="text-blue-100">
+              Manage your tasks and deadlines efficiently
+            </p>
+          </div> */}
+
+          <div className="p-6">
+            <div style={{ height: "75vh" }} className="calendar-container">
+              <Calendar
+                localizer={localizer}
+                events={resultList}
+                startAccessor="startDate"
+                endAccessor="dueDate"
+                style={{
+                  height: "100%",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+                views={["month", "week", "day"]}
+                onView={handleViewChange}
+                view={currentView}
+                onNavigate={handleNavigate}
+                date={currentDate}
+                onSelectEvent={handleEventClick}
+                onShowMore={handleEventClick}
+                // eventPropGetter={eventPropGetter}
+                components={{
+                  event: CustomEvent,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx global>{`
+        .rbc-calendar {
+          border: none !important;
+          border-radius: 16px !important;
+          overflow: hidden !important;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+            0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        .rbc-header {
+          background: linear-gradient(
+            135deg,
+            #667eea 0%,
+            #764ba2 100%
+          ) !important;
+          color: white !important;
+          font-weight: 600 !important;
+          padding: 16px 8px !important;
+          border: none !important;
+          font-size: 14px !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.5px !important;
+        }
+
+        .rbc-month-view,
+        .rbc-time-view {
+          border: none !important;
+        }
+
+        .rbc-date-cell {
+          padding: 12px 8px !important;
+          border-right: 1px solid #e5e7eb !important;
+          border-bottom: 1px solid #e5e7eb !important;
+          background: rgba(255, 255, 255, 0.8) !important;
+          transition: background-color 0.2s ease !important;
+        }
+
+        .rbc-date-cell:hover {
+          background: rgba(99, 102, 241, 0.05) !important;
+        }
+
+        .rbc-today {
+          background: linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.1) 0%,
+            rgba(139, 92, 246, 0.1) 100%
+          ) !important;
+          border: 2px solid rgba(99, 102, 241, 0.3) !important;
+        }
+
+        .rbc-off-range-bg {
+          background: rgba(0, 0, 0, 0.02) !important;
+        }
+
+        .rbc-toolbar {
+          margin-bottom: 24px !important;
+          padding: 20px !important;
+          background: linear-gradient(
+            135deg,
+            #f8fafc 0%,
+            #e2e8f0 100%
+          ) !important;
+          border-radius: 12px !important;
+          border: 1px solid #e2e8f0 !important;
+        }
+
+        .rbc-toolbar button {
+          background: white !important;
+          border: 1px solid #d1d5db !important;
+          color: #374151 !important;
+          padding: 8px 16px !important;
+          border-radius: 8px !important;
+          font-weight: 500 !important;
+          transition: all 0.2s ease !important;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .rbc-toolbar button:hover {
+          background: #f3f4f6 !important;
+          border-color: #9ca3af !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .rbc-toolbar button.rbc-active {
+          background: linear-gradient(
+            135deg,
+            #667eea 0%,
+            #764ba2 100%
+          ) !important;
+          color: white !important;
+          border-color: #667eea !important;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+        }
+
+        .rbc-month-row {
+          border: none !important;
+        }
+
+        .rbc-day-bg {
+          border-right: 1px solid #e5e7eb !important;
+        }
+
+        .rbc-event {
+          border: none !important;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        .calendar-container .rbc-calendar {
+          font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+            Roboto, sans-serif !important;
+        }
+
+        .rbc-date-cell > a {
+          color: #374151 !important;
+          font-weight: 600 !important;
+          font-size: 14px !important;
+        }
+
+        .rbc-date-cell.rbc-today > a {
+          color: #667eea !important;
+          font-weight: 700 !important;
+        }
+      `}</style>
     </div>
   );
 };

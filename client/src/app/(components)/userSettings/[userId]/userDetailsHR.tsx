@@ -22,12 +22,22 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import CircularLoading from "@/components/Sidebar/loading";
-import { Switch } from "@/components/ui/switch";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
 import AutocompleteTag from "../../userDetails/udComponents/Autocomplete";
 import DropdownTag from "../../userDetails/udComponents/DropdownTag";
+import {
+  User,
+  Mail,
+  Phone,
+  Briefcase,
+  Users,
+  Shield,
+  UserCheck,
+  Save,
+  ArrowLeft,
+  Edit3,
+  Settings,
+} from "lucide-react";
 
 interface DropdownData {
   objectList: { title: string; misc: string }[];
@@ -70,17 +80,7 @@ const UserSettingsHR = ({ id }: Props) => {
   const [autoCompleteProjects, setAutoCompleteProjects] = React.useState<any[]>(
     []
   );
-  const [autoCompleteTeams, setAutoCompleteTeams] = React.useState<any[]>([]);
   const [autoCompleteRoles, setAutoCompleteRoles] = React.useState<any[]>([]);
-
-  const idleTimeoutDropdownValues = [
-    "NA",
-    "5 min",
-    "10 min",
-    "15 min",
-    "20 min",
-    "30 min",
-  ];
 
   const [selectedTimeout, setSelectedTimeout] = useState(
     dataUser?.idleTimeOut || "NA"
@@ -88,35 +88,21 @@ const UserSettingsHR = ({ id }: Props) => {
   const [workingHours, setWorkingHours] = useState(
     dataUser?.workingHours || ""
   );
-
-  const handleTimeoutChange = (value: string) => {
-    setSelectedTimeout(value);
-  };
-
   const [isSignoutEnabled, setIsSignoutEnabled] = useState(
     dataUser?.allowSignout || false
-  ); // Set initial state
+  );
   const [isProfilePicModificationEnabled, setIsProfilePicModificationEnabled] =
     useState(dataUser?.pictureModification || false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isOpenUserData, setIsOpenUserData] = useState(false);
   const [userName, setUserName] = useState(dataUser?.username);
   const [userEmail, setUserEmail] = useState(dataUser?.email);
   const [designation, setDesignation] = useState(dataUser?.designation);
   const [phone, setPhone] = useState(dataUser?.phoneNumber);
 
-  const handlePPModificationChange = (checked: boolean) => {
-    setIsProfilePicModificationEnabled(checked); // Update the state with the new value of the switch
-  };
-
-  const handleToggle = (checked: boolean) => {
-    setIsSignoutEnabled(checked); // Update the state to match the switch's checked value
-  };
-
   const [dropdownData, setDropdownData] = useState<DropdownData>({
     objectList: [],
     isSuccessDropdown: false,
   });
+
   useEffect(() => {
     setInternalState(id);
   }, [id]);
@@ -137,7 +123,6 @@ const UserSettingsHR = ({ id }: Props) => {
   );
 
   useEffect(() => {
-    // Force refetch every time the component is mounted
     refetch();
     localStorage.removeItem("persist:root");
   }, [id]);
@@ -150,20 +135,6 @@ const UserSettingsHR = ({ id }: Props) => {
   } = useGetObjectListQuery(
     {
       entityName: "Project",
-    },
-    {
-      refetchOnMountOrArgChange: true,
-    }
-  );
-
-  const {
-    data: ObjectTeamData,
-    isLoading: teamLoading,
-    error: teamError,
-    isSuccess: isTeamAutocompleteSuccess,
-  } = useGetObjectListQuery(
-    {
-      entityName: "Team",
     },
     {
       refetchOnMountOrArgChange: true,
@@ -239,40 +210,12 @@ const UserSettingsHR = ({ id }: Props) => {
             return false;
           });
         })
-        .filter((item) => item !== undefined); // filter out undefined values
+        .filter((item) => item !== undefined);
 
       if (matchedItems) {
-        setSelectedProjects(matchedItems); // Set the matched values to the local state
+        setSelectedProjects(matchedItems);
       } else {
-        setSelectedProjects([]); // Reset if no items
-      }
-    }
-  }, [dataUser]);
-
-  useEffect(() => {
-    if (isTeamAutocompleteSuccess) {
-      let objectList =
-        ObjectTeamData?.map((obj) => ({
-          title: obj.title,
-          misc: obj.misc,
-        })) || [];
-
-      setAutoCompleteTeams(objectList);
-      const matchedItems = dataUser
-        ?.teams!.map((item) => {
-          return objectList.find((obj) => {
-            if (obj?.title && item?.name) {
-              return obj.title.toLowerCase() === item.name.toLowerCase();
-            }
-            return false;
-          });
-        })
-        .filter((item) => item !== undefined); // filter out undefined values
-
-      if (matchedItems) {
-        setSelectedTeams(matchedItems); // Set the matched values to the local state
-      } else {
-        setSelectedTeams([]); // Reset if no items
+        setSelectedProjects([]);
       }
     }
   }, [dataUser]);
@@ -295,51 +238,37 @@ const UserSettingsHR = ({ id }: Props) => {
             return false;
           });
         })
-        .filter((item) => item !== undefined); // filter out undefined values
+        .filter((item) => item !== undefined);
 
       if (matchedItems) {
-        setSelectedRoles(matchedItems); // Set the matched values to the local state
+        setSelectedRoles(matchedItems);
       } else {
-        setSelectedRoles([]); // Reset if no items
+        setSelectedRoles([]);
       }
     }
   }, [dataUser]);
 
   useEffect(() => {
-    if (
-      !isLoadingUser &&
-      !dropdownLoading &&
-      !teamLoading &&
-      !roleLoading &&
-      !projectLoading
-    ) {
-      // Ensure both queries have finished loading
+    if (!isLoadingUser && !dropdownLoading && !roleLoading && !projectLoading) {
       if (
         userLoadingSuccess &&
         isSuccessDropdown &&
-        isTeamAutocompleteSuccess &&
         isRoleAutocompleteSuccess &&
         isProjectAutocompleteSuccess
       ) {
-        setQueriesLoaded(true); // Set the flag indicating both queries are loaded
+        setQueriesLoaded(true);
       }
     }
   }, [
     isLoadingUser,
     dropdownLoading,
-    teamLoading,
     roleLoading,
     projectLoading,
     userLoadingSuccess,
     isSuccessDropdown,
-    isTeamAutocompleteSuccess,
     isRoleAutocompleteSuccess,
     isProjectAutocompleteSuccess,
   ]);
-
-  const isFormValid = () => {
-    return userName && designation && phone && userEmail;
-  };
 
   const [updateUserData, { isLoading }] = useUpdateUserSettingsDataMutation();
   const [updateUserBasicData, { isLoading: isLoadingUpdate }] =
@@ -382,307 +311,311 @@ const UserSettingsHR = ({ id }: Props) => {
     setOpen(false);
   };
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isLoading) return;
-    try {
-      const response = await updateUserBasicData({
-        userId: dataUser?.userId!,
-        email: userEmail!,
-        username: userName!,
-        designation: designation!,
-        phone: phone!,
-      });
-
-      if (
-        // @ts-ignore
-        response.error?.data.status === "Error" ||
-        // @ts-ignore
-        response.error?.data.status === "Fail"
-      ) {
-        // @ts-ignore
-        toast.error(response.error?.data.message);
-      } else {
-        toast.success(response.data?.message!);
-      }
-      setIsOpenUserData(false);
-    } catch (error) {
-      toast.error("Some Error occurred");
-      console.log(error);
-    }
-    setIsOpenUserData(false);
-  };
+  if (!queriesLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+            <Settings className="w-8 h-8 text-blue-600 animate-spin" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">
+              Loading User Settings
+            </h3>
+            <p className="text-slate-500 text-center">
+              Please wait while we fetch the user details...
+            </p>
+          </div>
+          <CircularLoading />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      {!queriesLoaded ? (
-        <CircularLoading />
-      ) : (
-        <form>
-          <div className="flex h-full w-full mt-7 mb-7">
-            <div className="w-1/4 flex justify-center items-center p-4">
-              <Avatar className="h-40 w-40 rounded-full justify-center items-center">
-                <AvatarImage
-                  src={dataUser?.profilePicture?.base64}
-                  alt={dataUser?.username}
-                />
-                <AvatarFallback className="rounded-lg text-6xl">
-                  {getInitials(dataUser?.username || "XX")}
-                </AvatarFallback>
-              </Avatar>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+      <div className="max-w-full mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800">
+                User Settings
+              </h1>
+              <p className="text-slate-500">
+                Manage user permissions and assignments
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <form className="space-y-8">
+          {/* Profile Card */}
+          <div className="bg-white rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-32 relative">
+              <div className="absolute inset-0 bg-black/10"></div>
             </div>
 
-            {/* Fields Section */}
-            <div className="w-3/4 flex flex-col justify-center gap-4 p-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <p className="font-semibold">Username</p>
-                  <p>{dataUser?.username}</p>
+            <div className="px-8 pb-8 -mt-16 relative">
+              <div className="flex flex-col lg:flex-row items-center lg:items-end gap-6">
+                {/* Avatar Section */}
+                <div className="relative">
+                  <Avatar className="h-32 w-32 ring-4 ring-white shadow-xl bg-gradient-to-br from-blue-500 to-purple-600">
+                    <AvatarImage
+                      src={dataUser?.profilePicture?.base64}
+                      alt={dataUser?.username}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-4xl font-bold text-white">
+                      {getInitials(dataUser?.username || "XX")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
                 </div>
 
-                <div className="flex flex-col">
-                  <p className="font-semibold">Email</p>
-                  <p>{dataUser?.email}</p>
-                </div>
+                {/* User Info */}
+                <div className="flex-1 text-center lg:text-left mt-4 lg:mt-0">
+                  <h2 className="text-2xl font-bold mb-2 text-white">
+                    {dataUser?.username}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Mail className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Email
+                        </p>
+                        <p className="text-sm font-semibold text-slate-800 truncate">
+                          {dataUser?.email}
+                        </p>
+                      </div>
+                    </div>
 
-                <div className="flex flex-col">
-                  <p className="font-semibold">Phone</p>
-                  <p>{dataUser?.phoneNumber}</p>
-                </div>
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Phone className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Phone
+                        </p>
+                        <p className="text-sm font-semibold text-slate-800 truncate">
+                          {dataUser?.phoneNumber || "Not provided"}
+                        </p>
+                      </div>
+                    </div>
 
-                <div className="flex flex-col">
-                  <p className="font-semibold">Designation</p>
-                  <p>{dataUser?.designation}</p>
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <Briefcase className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Designation
+                        </p>
+                        <p className="text-sm font-semibold text-slate-800 truncate">
+                          {dataUser?.designation || "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                      <div className="p-2 bg-orange-100 rounded-lg">
+                        <User className="w-4 h-4 text-orange-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Status
+                        </p>
+                        <p className="text-sm font-semibold text-green-600">
+                          Active
+                        </p>
+                      </div>
+                    </div> */}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex  w-full">
-            <div className="w-1/6 flex justify-center items-center p-4">
-              <Label className="text-center">Projects</Label>
-            </div>
+          {/* Settings Sections */}
+          <div className="grid gap-8">
+            {/* Projects Section */}
+            <div className="bg-white rounded-2xl shadow-lg border border-white/20 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <Briefcase className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-800">
+                    Project Assignments
+                  </h3>
+                  <p className="text-slate-500">
+                    Manage user's project access and responsibilities
+                  </p>
+                </div>
+              </div>
 
-            <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
-              <div className="">
+              <div className="bg-slate-50 rounded-xl p-6">
                 <AutocompleteTag
                   label=""
-                  placeholder="Projects"
+                  placeholder="Select projects to assign..."
                   entityName="Project"
                   selectedList={selectedProjects}
-                  key={internalState}
+                  key={`projects-${internalState}`}
                   objectList={autoCompleteProjects}
                   setSelectedProjects={setSelectedProjects}
                   setSelectedReportingUsers={setSelectedReportingUsers}
                   setSelectedRoles={setSelectedRoles}
                   setSelectedTeams={setSelectedTeams}
                 />
-                <div className="col-span-8 flex justify-center">
-                  {error && <div className="text-red-500 text-sm">{error}</div>}
-                </div>
+                {error && (
+                  <div className="mt-3 text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                    {error}
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-          {/* <div className="flex  w-full">
-            <div className="w-1/6 flex justify-center items-center p-4">
-              <Label className="text-center">Teams</Label>
-            </div>
 
-            <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
-              <div className="">
-                <AutocompleteTag
-                  label=""
-                  placeholder="Teams"
-                  entityName="Team"
-                  selectedList={selectedTeams}
-                  key={internalState}
-                  objectList={autoCompleteTeams}
-                  setSelectedProjects={setSelectedProjects}
-                  setSelectedReportingUsers={setSelectedReportingUsers}
-                  setSelectedRoles={setSelectedRoles}
-                  setSelectedTeams={setSelectedTeams}
-                />
-                <div className="col-span-8 flex justify-center">
-                  {error && <div className="text-red-500 text-sm">{error}</div>}
+            {/* Roles Section */}
+            <div className="bg-white rounded-2xl shadow-lg border border-white/20 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-purple-100 rounded-xl">
+                  <Shield className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-800">
+                    Role Assignments
+                  </h3>
+                  <p className="text-slate-500">
+                    Define user permissions and access levels
+                  </p>
                 </div>
               </div>
-            </div>
-          </div> */}
-          <div className="flex  w-full">
-            <div className="w-1/6 flex justify-center items-center p-4">
-              <Label className="text-center">Roles</Label>
-            </div>
 
-            <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
-              <div className="">
+              <div className="bg-slate-50 rounded-xl p-6">
                 <AutocompleteTag
                   label=""
-                  placeholder="Roles"
+                  placeholder="Select roles to assign..."
                   entityName="Role"
                   selectedList={selectedRoles}
-                  key={internalState}
+                  key={`roles-${internalState}`}
                   objectList={autoCompleteRoles}
                   setSelectedProjects={setSelectedProjects}
                   setSelectedReportingUsers={setSelectedReportingUsers}
                   setSelectedRoles={setSelectedRoles}
                   setSelectedTeams={setSelectedTeams}
                 />
-                <div className="col-span-8 flex justify-center">
-                  {error && <div className="text-red-500 text-sm">{error}</div>}
-                </div>
+                {error && (
+                  <div className="mt-3 text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                    {error}
+                  </div>
+                )}
               </div>
             </div>
-          </div>
 
-          <div className="flex  w-full">
-            <div className="w-1/6 flex justify-center items-center p-4">
-              <Label className="text-center">Reports To</Label>
-            </div>
+            {/* Reporting Structure */}
+            <div className="bg-white rounded-2xl shadow-lg border border-white/20 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-green-100 rounded-xl">
+                  <UserCheck className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-800">
+                    Reporting Structure
+                  </h3>
+                  <p className="text-slate-500">
+                    Set up organizational hierarchy and reporting lines
+                  </p>
+                </div>
+              </div>
 
-            <div className="w-5/6 flex flex-col justify-center gap-4 p-4">
-              <div className="">
+              <div className="bg-slate-50 rounded-xl p-6">
+                <div className="mb-4">
+                  <Label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Reports To
+                  </Label>
+                </div>
                 <DropdownTag
                   objectList={dropdownData.objectList}
-                  // key={internalState}
                   setSelectedReportsTo={setSelectedReportsTo}
                   selectedUser={dropdownSelectedUser}
                   setDropdownSelectedUser={setDropdownSelectedUser}
                 />
-                <div className="col-span-8 flex justify-center">
-                  {error && <div className="text-red-500 text-sm">{error}</div>}
-                </div>
+                {error && (
+                  <div className="mt-3 text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                    {error}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-          {/* <div className="flex  w-full col-span-6">
-            <div className="w-1/6 flex justify-center items-center p-4">
-              <Label className="text-center">Idle Timeout</Label>
-            </div>
 
-            <div className="w-3/6 flex flex-col justify-center gap-4 p-4">
-              <div className="">
-                <div>
-                  <FormControl variant="standard" className="w-[100%]">
-                    <InputLabel id="demo-simple-select-standard-label">
-                      Idle Timeout
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-standard-label"
-                      id="demo-simple-select-standard"
-                      value={selectedTimeout} // Controlled select, value bound to user state
-                      onChange={(e) => {
-                        handleTimeoutChange(e.target.value);
-                      }} // Handle change event to update state
-                      label="Idle Timeout"
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      {idleTimeoutDropdownValues.map((item) => (
-                        <MenuItem key={item} value={item}>
-                          {item}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </div>
-                <div className="flex justify-center">
-                  {error && <div className="text-red-500 text-sm">{error}</div>}
-                </div>
-              </div>
-            </div>
-            <div className="w-1/6 flex flex-col justify-center items-center gap-4 p-4">
-              <div className="">
-                <Label htmlFor="airplane-mode" className="mt-5">
-                  Allow Signout
-                </Label>
-              </div>
-            </div>
-            <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
-              <div className="">
-                <Switch
-                  className="ml-5"
-                  id="airplane-mode"
-                  checked={isSignoutEnabled}
-                  onCheckedChange={handleToggle}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex  w-full col-span-6">
-            <div className="w-1/6 flex justify-center items-center p-4">
-              <Label className="text-center">Working Hours</Label>
-            </div>
-
-            <div className="w-3/6 flex flex-col justify-center gap-4 p-4">
-              <div className="">
-                <div>
-                  <FormControl variant="standard" className="w-[100%]">
-                    <Input
-                      value={workingHours}
-                      onChange={(e) => setWorkingHours(e.target.value)}
-                      placeholder="9:30-18:30"
-                    />
-                  </FormControl>
-                </div>
-                <div className="flex justify-center">
-                  {error && <div className="text-red-500 text-sm">{error}</div>}
-                </div>
-              </div>
-            </div>
-            <div className="w-1/6 flex flex-col justify-center items-center gap-4 p-4">
-              <div className="">
-                <Label htmlFor="airplane-mode" className="mt-5">
-                  Allow Profile Picture Modification
-                </Label>
-              </div>
-            </div>
-            <div className="w-1/6 flex flex-col justify-center gap-4 p-4">
-              <div className="">
-                <Switch
-                  className="ml-5"
-                  id="airplane-mode"
-                  checked={isProfilePicModificationEnabled}
-                  onCheckedChange={handlePPModificationChange}
-                />
-              </div>
-            </div>
-          </div> */}
-
-          <div className="flex justify-center items-center h-full">
+          {/* Action Buttons */}
+          <div className="flex justify-center pt-8">
             <AlertDialog open={open} onOpenChange={setOpen}>
               <AlertDialogTrigger asChild>
                 <button
-                  className={`flex w-[139px] mt-4 text-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
-          hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
-            isLoading ? "cursor-not-allowed opacity-50" : ""
-          }`}
+                  type="button"
+                  className={`group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-3 ${
+                    isLoading
+                      ? "cursor-not-allowed opacity-70"
+                      : "hover:from-blue-700 hover:to-indigo-700"
+                  }`}
                   disabled={isLoading}
                 >
-                  {isLoading ? "Saving..." : "Save Changes"}
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                      <span>Saving Changes...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5" />
+                      <span>Save Changes</span>
+                    </>
+                  )}
                 </button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+
+              <AlertDialogContent className="sm:max-w-md">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action will change the user settings! Kindly confirm if
-                    you want to proceed with the changes.
+                  <AlertDialogTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-amber-100 rounded-lg">
+                      <Edit3 className="w-5 h-5 text-amber-600" />
+                    </div>
+                    Confirm Changes
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-slate-600 leading-relaxed pt-2">
+                    You're about to update this user's settings, including their
+                    project assignments, roles, and reporting structure. This
+                    action will immediately affect their system access and
+                    permissions.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setOpen(false)}>
+                <AlertDialogFooter className="gap-3">
+                  <AlertDialogCancel
+                    onClick={() => setOpen(false)}
+                    className="px-6 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 transition-colors"
+                  >
                     Cancel
                   </AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSubmit}>
-                    Proceed
+                  <AlertDialogAction
+                    onClick={handleSubmit}
+                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                  >
+                    Save Changes
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
         </form>
-      )}
+      </div>
     </div>
   );
 };

@@ -87,6 +87,10 @@ import {
 } from "./interfaces";
 import { AxiosProgressEvent } from "axios";
 import { toast } from "react-hot-toast";
+import {
+  User as ProjectWorkloadUsers,
+  UserTask,
+} from "@/app/(components)/activity/WorkloadCalendar";
 import { UserGeoData } from "@/app/(components)/geoTrack/HeatMap";
 
 export interface Project {
@@ -572,6 +576,21 @@ export const api = createApi({
     getProjectUsers: build.query<ProjectUsers[], { projectId: string }>({
       query: ({ projectId }) => {
         const url = `api/user/getProjectUsers?id=${projectId}`;
+        return url;
+      },
+    }),
+    getProjectWorkloadUsers: build.query<
+      ProjectWorkloadUsers[],
+      { projectId: string }
+    >({
+      query: ({ projectId }) => {
+        const url = `api/user/getProjectWorkloadUsers?id=${projectId}`;
+        return url;
+      },
+    }),
+    getProjectWorkloadTasks: build.query<UserTask[], { projectId: string }>({
+      query: ({ projectId }) => {
+        const url = `api/user/getProjectWorkloadTasks?id=${projectId}`;
         return url;
       },
     }),
@@ -1192,8 +1211,8 @@ export const api = createApi({
       DownloadAttachment,
       { taskId: number; isSubTask: boolean }
     >({
-      query: ({ taskId }) => ({
-        url: `api/user/downloadAttachment?taskId=${taskId}`,
+      query: ({ taskId, isSubTask }) => ({
+        url: `api/user/downloadAttachment?taskId=${taskId}&isSubTask=${isSubTask}`,
         method: "GET",
       }),
     }),
@@ -1471,4 +1490,6 @@ export const {
   useUpdateAlertConfigDetailsMutation,
   useCreateTimesheetAlertMutation,
   useCreateProjectTimelineAlertMutation,
+  useGetProjectWorkloadUsersQuery,
+  useGetProjectWorkloadTasksQuery,
 } = api;

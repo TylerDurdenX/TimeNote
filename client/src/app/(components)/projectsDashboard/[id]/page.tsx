@@ -8,6 +8,7 @@ import TableView from "./Table";
 import CircularLoading from "@/components/Sidebar/loading";
 import MyCalendar from "./CalendarView";
 import UserWorkload from "./UserWorkload";
+import WorkloadCalendar from "../../activity/WorkloadCalendar";
 
 const Project = () => {
   const [activeTab, setActiveTab] = useState(
@@ -104,15 +105,8 @@ const Project = () => {
           isTaskOrSubTask={isTaskOrSubTask}
         />
       )}
-      {activeTab === "User Workload" && (
-        <UserWorkload
-          projectId={idFromUrl!}
-          sprint={sprint}
-          email={email!}
-          assignedTo={assignedTo}
-          priority={priority}
-          isTaskOrSubTask={isTaskOrSubTask}
-        />
+      {activeTab === "Workload" && (
+        <WorkloadCalendar projectId={idFromUrl!} email={email!} />
       )}
     </div>
   );

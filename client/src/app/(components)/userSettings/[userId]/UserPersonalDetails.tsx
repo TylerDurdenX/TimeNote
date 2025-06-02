@@ -1,19 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { getInitials } from "@/components/Sidebar/nav-user";
 import {
-  useCreateUserMutation,
   useGetUserPersonalDetailsQuery,
   useUpdateUserDataMutation,
 } from "@/store/api";
@@ -24,11 +12,9 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { add } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -37,38 +23,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import toast from "react-hot-toast";
-import { Pen, PlusSquare, User2 } from "lucide-react";
-
-interface EmployeeData {
-  fullName: string;
-  email: string;
-  phone: string;
-  address: string;
-  position: string;
-  department: string;
-  employeeId: string;
-  dob: string;
-  startDate: string;
-  salary: string;
-  city: string;
-  state: string;
-  zip: string;
-  emergencyContact: string;
-  notes: string;
-}
+import {
+  Pen,
+  User2,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Building,
+  Shield,
+  Heart,
+  UserCheck,
+  Briefcase,
+  Monitor,
+  Clock,
+  Camera,
+} from "lucide-react";
 
 type Props = {
   id: number;
 };
 
 const UserPersonalDetails = ({ id }: Props) => {
-  const {
-    data: dataUser,
-    isLoading: isLoadingUser,
-    error: errorQuery,
-    isSuccess: userLoadingSuccess,
-  } = useGetUserPersonalDetailsQuery(
+  const { data: dataUser } = useGetUserPersonalDetailsQuery(
     {
       id: Number(id),
     },
@@ -76,8 +57,6 @@ const UserPersonalDetails = ({ id }: Props) => {
       refetchOnMountOrArgChange: true,
     }
   );
-
-  const [profilePic, setProfilePic] = useState<File | null>(null);
 
   const [address, setAddress] = useState("");
   const [joiningDate, setJoiningDate] = useState("");
@@ -107,10 +86,20 @@ const UserPersonalDetails = ({ id }: Props) => {
     }
     const date = new Date(dateString);
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // 0-indexed months
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
+  }
+
+  function formatDisplayDate(dateString: string): string {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   }
 
   useEffect(() => {
@@ -147,7 +136,7 @@ const UserPersonalDetails = ({ id }: Props) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleAvatarClick = () => {
-    fileInputRef.current?.click(); // Trigger file input click when the avatar is clicked
+    fileInputRef.current?.click();
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,12 +144,10 @@ const UserPersonalDetails = ({ id }: Props) => {
     if (file) {
       const reader = new FileReader();
 
-      // Event handler to run once the file is read
       reader.onloadend = () => {
         if (typeof reader.result === "string") {
           try {
-            // Set the base64 result as the image
-            setBase64Image(reader.result); // Update the state with the base64 string
+            setBase64Image(reader.result);
           } catch (err) {
             toast.error("Some error occurred");
             console.error(err);
@@ -168,8 +155,7 @@ const UserPersonalDetails = ({ id }: Props) => {
         }
       };
 
-      // Read the file as a data URL (base64 encoded)
-      reader.readAsDataURL(file); // This triggers the reader.onloadend once file is read
+      reader.readAsDataURL(file);
     }
   };
 
@@ -199,7 +185,6 @@ const UserPersonalDetails = ({ id }: Props) => {
       workLocation: workLocation,
       employmentType: employmentType,
       issuedDevices: issuedDevices,
-
       userId: Number(id),
     };
     try {
@@ -223,373 +208,460 @@ const UserPersonalDetails = ({ id }: Props) => {
     }
   };
 
-  return (
-    <div className="overflow-y-auto mr-5">
-      <div className="flex h-full w-full mt-7 mb-7">
-        <div className="w-1/4 flex justify-center items-center p-4">
-          <Avatar className="h-40 w-40 rounded-full justify-center items-center">
-            <AvatarImage
-              src={dataUser?.profilePicture?.base64}
-              alt={dataUser?.username}
-            />
-            <AvatarFallback className="rounded-lg text-6xl">
-              {getInitials(dataUser?.username || "XX")}
-            </AvatarFallback>
-          </Avatar>
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "active":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "inactive":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const InfoCard = ({ icon: Icon, label, value, className = "" }: any) => (
+    <div
+      className={`bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow ${className}`}
+    >
+      <div className="flex items-start space-x-3">
+        <div className="p-2 bg-blue-50 rounded-lg">
+          <Icon className="h-5 w-5 text-blue-600" />
         </div>
-
-        {/* Fields Section */}
-        <div className="w-3/4 flex flex-col justify-center gap-4 p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <p className="font-semibold">Username</p>
-              <p>{dataUser?.username}</p>
-            </div>
-
-            <div className="flex flex-col">
-              <p className="font-semibold">Email</p>
-              <p>{dataUser?.email}</p>
-            </div>
-
-            <div className="flex flex-col">
-              <p className="font-semibold">Phone</p>
-              <p>{dataUser?.phoneNumber}</p>
-            </div>
-
-            <div className="flex flex-col">
-              <p className="font-semibold">Designation</p>
-              <p>{dataUser?.designation}</p>
-            </div>
-          </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-500 mb-1">{label}</p>
+          {value ? (
+            <p className="text-gray-900 font-medium break-words">{value}</p>
+          ) : (
+            <span className="text-gray-400 italic text-sm">
+              No data provided
+            </span>
+          )}
         </div>
       </div>
-      <div className="relative w-full h-full">
-        <div className=" top-0 left-0 w-[calc(100%)] h-full">
-          <form>
-            <div className="grid gap-4 py-1">
-              <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                <Label className="text-center">Employee Id</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {employeeId || (
-                    <span className="text-gray-400 italic">No data</span>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+      <div className="max-w-full mx-auto space-y-6">
+        {/* Header Profile Card */}
+        <Card className="bg-white shadow-sm border-0 ring-1 ring-gray-200">
+          <CardContent className="p-8">
+            <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
+              {/* Avatar Section */}
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <Avatar className="h-32 w-32 ring-4 ring-white shadow-lg">
+                    <AvatarImage
+                      src={dataUser?.profilePicture?.base64}
+                      alt={dataUser?.username}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-3xl font-semibold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                      {getInitials(dataUser?.username || "XX")}
+                    </AvatarFallback>
+                  </Avatar>
+                  {employeeStatus && (
+                    <Badge
+                      className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 ${getStatusColor(
+                        employeeStatus
+                      )} border`}
+                    >
+                      {employeeStatus}
+                    </Badge>
                   )}
-                </p>
-                <Label className="text-center">Personal Email</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {personalEmail || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Blood Group</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {bloodGroup || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Employee Grade</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {employeeGrade || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Address</Label>
-                <div className="col-span-3 shadow border bg-gray-100 rounded-md px-4 py-2 min-h-[4rem] whitespace-pre-wrap text-gray-800">
-                  {address || (
-                    <span className="text-gray-400 italic">
-                      No address provided
-                    </span>
+                </div>
+              </div>
+
+              {/* Main Info Section */}
+              <div className="flex-1 text-center lg:text-left space-y-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    {dataUser?.username || "Unknown User"}
+                  </h1>
+                  <p className="text-lg text-blue-600 font-medium mb-1">
+                    {dataUser?.designation || "No designation"}
+                  </p>
+                  {employeeId && (
+                    <p className="text-gray-600">Employee ID: {employeeId}</p>
                   )}
                 </div>
 
-                <Label className="text-center">Gender</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {gender || (
-                    <span className="text-gray-400 italic">No data</span>
+                <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                  <div className="flex items-center space-x-2 text-gray-600">
+                    <Mail className="h-4 w-4" />
+                    <span className="text-sm">{dataUser?.email}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-gray-600">
+                    <Phone className="h-4 w-4" />
+                    <span className="text-sm">{dataUser?.phoneNumber}</span>
+                  </div>
+                  {department && (
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <Building className="h-4 w-4" />
+                      <span className="text-sm">{department}</span>
+                    </div>
                   )}
-                </p>
-                <Label className="text-center">Department</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {department || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-
-                <Label className="text-center">Joining Date</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {joiningDate || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Date Of birth</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {dateOfBirth || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Emergency Contact</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {emergencyContact || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Total Leaves</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {totalLeaves || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Claimed Leaves</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {claimedLeaves || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Employee Status</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {employeeStatus || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Work Location</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {workLocation || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Employement Type</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {employmentType || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
-                <Label className="text-center">Issued Devices</Label>
-                <p className="col-span-3 text-gray-800 bg-gray-100 px-4 py-2 rounded-md shadow-inner min-h-[2.5rem]">
-                  {issuedDevices || (
-                    <span className="text-gray-400 italic">No data</span>
-                  )}
-                </p>
+                </div>
               </div>
-            </div>
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogTrigger asChild>
-                <button className="flex items-center justify-center mx-auto mt-7 rounded-md bg-blue-800 px-4 py-2 text-white hover:bg-blue-500">
-                  <Pen className="h-5 w-5 mr-2" />
-                  Edit Details
-                </button>
-              </DialogTrigger>
-              <DialogContent className="max-w-[60vw] overflow-y-auto max-h-[80vh]">
-                <DialogHeader>
-                  <DialogTitle className="mb-2">Edit User Details</DialogTitle>
-                </DialogHeader>
 
-                <div className="relative w-full h-full">
-                  <div className=" top-0 left-0 w-[calc(100%)] h-full">
-                    <form onSubmit={handleSubmit}>
-                      <div className="grid gap-4 py-3">
-                        <div className="flex flex-col justify-center items-center">
-                          {/* Button wrapped around Avatar */}
-                          <button
-                            type="button" // Prevent form submission
-                            className="cursor-pointer"
-                            onClick={handleAvatarClick}
-                          >
-                            <Avatar className="h-32 w-32 rounded-full flex justify-center items-center">
-                              {/* If base64Image exists, use it as the src, else show the fallback */}
-                              <AvatarImage
-                                src={base64Image || ""}
-                                alt={"profilePic"}
-                              />
-                              {username !== "" ? (
-                                <AvatarFallback className="rounded-lg text-4xl">
-                                  {getInitials(username || "XX")}
-                                </AvatarFallback>
-                              ) : (
-                                <AvatarFallback className="rounded-lg text-4xl">
-                                  <User2 className="h-20 w-20" />
-                                </AvatarFallback>
-                              )}
-                            </Avatar>
-                          </button>
+              {/* Edit Button */}
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                    <Pen className="h-4 w-4 mr-2" />
+                    Edit Profile
+                  </button>
+                </DialogTrigger>
 
-                          {/* Add the text under the avatar */}
-                          <p className="mt-2 text-sm text-center">
-                            Click above picture for uploading profile picture
-                          </p>
+                <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                  <DialogHeader className="pb-6">
+                    <DialogTitle className="text-2xl font-bold text-gray-900">
+                      Edit User Details
+                    </DialogTitle>
+                  </DialogHeader>
 
-                          {/* Hidden file input */}
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            onChange={handleFileChange} // This handles the file selection
-                            style={{ display: "none" }} // Hide the file input
-                          />
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    {/* Profile Picture Section */}
+                    <div className="flex flex-col items-center space-y-4 p-6 bg-gray-50 rounded-xl">
+                      <button
+                        type="button"
+                        className="relative group cursor-pointer"
+                        onClick={handleAvatarClick}
+                      >
+                        <Avatar className="h-24 w-24 ring-4 ring-white shadow-lg group-hover:ring-blue-200 transition-all">
+                          <AvatarImage src={base64Image || ""} alt="Profile" />
+                          <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                            {username ? (
+                              getInitials(username)
+                            ) : (
+                              <User2 className="h-12 w-12" />
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Camera className="h-6 w-6 text-white" />
                         </div>
+                      </button>
+                      <p className="text-sm text-gray-600 text-center">
+                        Click to upload profile picture
+                      </p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        accept="image/*"
+                      />
+                    </div>
 
-                        <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                          <Label className="text-center col-span-2">
-                            User Name
-                            <span className="text-red-500 ml-1">*</span>
+                    {/* Basic Information */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                        Basic Information
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Username <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="col-span-6"
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                           />
-                          <Label className="text-center col-span-2">
-                            Email<span className="text-red-500 ml-1">*</span>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Email <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="col-span-6"
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                           />
-
-                          <Label className="text-center col-span-2">
-                            Designation
-                            <span className="text-red-500 ml-1">*</span>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Designation <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             value={designation}
                             onChange={(e) => setDesignation(e.target.value)}
-                            className="col-span-6"
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                           />
-                          <Label className="text-center col-span-2">
-                            Phone Number
-                            <span className="text-red-500 ml-1">*</span>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Phone Number <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             value={phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value)}
-                            className="col-span-6"
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                           />
                         </div>
                       </div>
-                      <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                        <Label className="text-center">Employee Id</Label>
-                        <Input
-                          value={employeeId}
-                          onChange={(e) => setEmployeeId(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Personal Email</Label>
-                        <Input
-                          value={personalEmail}
-                          onChange={(e) => setPersonalEmail(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Blood Group</Label>
-                        <Input
-                          value={bloodGroup}
-                          onChange={(e) => setBloodGroup(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Employee Grade</Label>
-                        <Input
-                          value={employeeGrade}
-                          onChange={(e) => setEmployeeGrade(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Address</Label>
+                    </div>
+
+                    {/* Employee Details */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                        Employee Details
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Employee ID
+                          </Label>
+                          <Input
+                            value={employeeId}
+                            onChange={(e) => setEmployeeId(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Department
+                          </Label>
+                          <Input
+                            value={department}
+                            onChange={(e) => setDepartment(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Employee Grade
+                          </Label>
+                          <Input
+                            value={employeeGrade}
+                            onChange={(e) => setEmployeeGrade(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Employment Type
+                          </Label>
+                          <Input
+                            value={employmentType}
+                            onChange={(e) => setEmploymentType(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Employee Status
+                          </Label>
+                          <Input
+                            value={employeeStatus}
+                            onChange={(e) => setEmployeeStatus(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Work Location
+                          </Label>
+                          <Input
+                            value={workLocation}
+                            onChange={(e) => setWorkLocation(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Joining Date
+                          </Label>
+                          <Input
+                            type="date"
+                            value={joiningDate}
+                            onChange={(e) => setJoiningDate(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Total Leaves
+                          </Label>
+                          <Input
+                            value={totalLeaves}
+                            onChange={(e) => setTotalLeaves(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Issued Devices
+                          </Label>
+                          <Input
+                            value={issuedDevices}
+                            onChange={(e) => setIssuedDevices(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Personal Information */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                        Personal Information
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Personal Email
+                          </Label>
+                          <Input
+                            value={personalEmail}
+                            onChange={(e) => setPersonalEmail(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Date of Birth
+                          </Label>
+                          <Input
+                            type="date"
+                            value={dateOfBirth}
+                            onChange={(e) => setDateOfBirth(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Gender
+                          </Label>
+                          <Select value={gender} onValueChange={setGender}>
+                            <SelectTrigger className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                              <SelectValue placeholder="Select gender" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectItem value="male">Male</SelectItem>
+                                <SelectItem value="female">Female</SelectItem>
+                                <SelectItem value="others">Others</SelectItem>
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Blood Group
+                          </Label>
+                          <Input
+                            value={bloodGroup}
+                            onChange={(e) => setBloodGroup(e.target.value)}
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Emergency Contact
+                          </Label>
+                          <Input
+                            value={emergencyContact}
+                            onChange={(e) =>
+                              setEmergencyContact(e.target.value)
+                            }
+                            className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-gray-700">
+                          Address
+                        </Label>
                         <textarea
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
-                          className="col-span-3 shadow border"
-                        />
-
-                        <Label className="text-center">Gender</Label>
-                        <Select
-                          value={gender}
-                          onValueChange={(value) => setGender(value)}
-                        >
-                          <SelectTrigger className="col-span-3 p-2 border rounded-md">
-                            <SelectValue placeholder="Select gender" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectItem value="male">Male</SelectItem>
-                              <SelectItem value="female">Female</SelectItem>
-                              <SelectItem value="others">Others</SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Label className="text-center">Department</Label>
-                        <Input
-                          value={department}
-                          onChange={(e) => setDepartment(e.target.value)}
-                          className="col-span-3"
-                        />
-
-                        <Label className="text-center">Joining Date</Label>
-                        <Input
-                          type="date"
-                          value={joiningDate}
-                          onChange={(e) => setJoiningDate(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Date Of birth</Label>
-                        <Input
-                          type="date"
-                          value={dateOfBirth}
-                          onChange={(e) => setDateOfBirth(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Emergency Contact</Label>
-                        <Input
-                          value={emergencyContact}
-                          onChange={(e) => setEmergencyContact(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Total Leaves</Label>
-                        <Input
-                          value={totalLeaves}
-                          onChange={(e) => setTotalLeaves(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Employee Status</Label>
-                        <Input
-                          value={employeeStatus}
-                          onChange={(e) => setEmployeeStatus(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Work Location</Label>
-                        <Input
-                          value={workLocation}
-                          onChange={(e) => setWorkLocation(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Employement Type</Label>
-                        <Input
-                          value={employmentType}
-                          onChange={(e) => setEmploymentType(e.target.value)}
-                          className="col-span-3"
-                        />
-                        <Label className="text-center">Issued Devices</Label>
-                        <Input
-                          value={issuedDevices}
-                          onChange={(e) => setIssuedDevices(e.target.value)}
-                          className="col-span-3"
+                          rows={3}
+                          className="w-full rounded-lg shadow-md border border-gray-300 focus:border-blue-500 focus:ring-blue-500 p-3"
+                          placeholder="Enter full address..."
                         />
                       </div>
-                      <DialogFooter>
-                        <button
-                          type="submit"
-                          className={`flex w-200px mt-5 justify-center rounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
-                                            hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
-                                              !isFormValid() || isLoading
-                                                ? "cursor-not-allowed opacity-50"
-                                                : ""
-                                            }`}
-                          disabled={!isFormValid() || isLoading}
-                        >
-                          {isLoading ? "Saving..." : "Save Details"}
-                        </button>
-                      </DialogFooter>
-                    </form>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </form>
+                    </div>
+
+                    <DialogFooter className="pt-6 border-t">
+                      <button
+                        type="submit"
+                        disabled={!isFormValid() || isLoading}
+                        className={`px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-xl transition-all duration-200 ${
+                          !isFormValid() || isLoading
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        }`}
+                      >
+                        {isLoading ? "Saving..." : "Save Changes"}
+                      </button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Details Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Employee Information */}
+          <InfoCard icon={UserCheck} label="Employee ID" value={employeeId} />
+          <InfoCard icon={Building} label="Department" value={department} />
+          <InfoCard
+            icon={Briefcase}
+            label="Employee Grade"
+            value={employeeGrade}
+          />
+          <InfoCard
+            icon={Calendar}
+            label="Joining Date"
+            value={joiningDate ? formatDisplayDate(joiningDate) : ""}
+          />
+          <InfoCard icon={MapPin} label="Work Location" value={workLocation} />
+          <InfoCard
+            icon={Shield}
+            label="Employment Type"
+            value={employmentType}
+          />
+
+          {/* Personal Information */}
+          <InfoCard icon={Mail} label="Personal Email" value={personalEmail} />
+          <InfoCard
+            icon={Calendar}
+            label="Date of Birth"
+            value={dateOfBirth ? formatDisplayDate(dateOfBirth) : ""}
+          />
+          <InfoCard icon={User2} label="Gender" value={gender} />
+          <InfoCard icon={Heart} label="Blood Group" value={bloodGroup} />
+          <InfoCard
+            icon={Phone}
+            label="Emergency Contact"
+            value={emergencyContact}
+          />
+          <InfoCard
+            icon={Monitor}
+            label="Issued Devices"
+            value={issuedDevices}
+          />
+
+          {/* Leave Information */}
+          <InfoCard icon={Clock} label="Total Leaves" value={totalLeaves} />
+          <InfoCard icon={Clock} label="Claimed Leaves" value={claimedLeaves} />
+
+          {/* Address - Full Width */}
+          <div className="md:col-span-2 lg:col-span-3">
+            <InfoCard
+              icon={MapPin}
+              label="Address"
+              value={address}
+              className="h-auto"
+            />
+          </div>
         </div>
       </div>
     </div>

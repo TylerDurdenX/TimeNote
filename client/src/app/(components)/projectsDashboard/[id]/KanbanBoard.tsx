@@ -28,6 +28,8 @@ import {
   History,
   MessageSquareMore,
   PlusSquare,
+  Clock,
+  Calendar,
 } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -151,16 +153,6 @@ const BoardView = ({
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
   const [updateSubTaskStatus] = useUpdateSubTaskStatusMutation();
 
-  // Object.defineProperty(window, 'localStorage', {
-  //   value: {
-  //     getItem: () => null, // Prevent reading
-  //     setItem: () => {},   // Prevent setting values
-  //     removeItem: () => {},// Prevent removing items
-  //     clear: () => {}      // Prevent clearing
-  //   },
-  //   writable: false
-  // });
-
   const moveTask = async (taskId: number, toStatus: string, item: any) => {
     try {
       if (sessionStorage.getItem("isTask") === "1") {
@@ -215,15 +207,25 @@ const BoardView = ({
 
   if (isLoading)
     return (
-      <div>
+      <div className="flex items-center justify-center min-h-[400px]">
         <CircularLoading />
       </div>
     );
-  if (error) return <div>An error occurred while fetching tasks</div>;
+  if (error)
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-8">
+        <div className="text-center">
+          <div className="text-lg font-semibold mb-2">Error Loading Tasks</div>
+          <div className="text-sm opacity-80">
+            An error occurred while fetching tasks. Please try again.
+          </div>
+        </div>
+      </div>
+    );
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 xl:grid-cols-4 bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-gray-900 dark:to-gray-800 min-h-screen">
         {taskStatus.map((status) => (
           <TaskColumn
             key={status}
@@ -239,15 +241,15 @@ const BoardView = ({
       </div>
       {tasksList?.hasmore ? (
         <>
-          <div className="flex items-center w-full my-4">
-            <hr className="flex-grow border-gray-300" />
-            <span
+          <div className="flex items-center w-full my-8 px-6">
+            <hr className="flex-grow border-gray-300 dark:border-gray-600" />
+            <button
               onClick={handleClick}
-              className="mx-4 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-300"
+              className="mx-6 px-6 py-2 text-gray-600 dark:text-gray-300 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 bg-white dark:bg-gray-800 rounded-full shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-700 font-medium"
             >
-              Load More
-            </span>
-            <hr className="flex-grow border-gray-300" />
+              Load More Tasks
+            </button>
+            <hr className="flex-grow border-gray-300 dark:border-gray-600" />
           </div>
         </>
       ) : (
@@ -290,11 +292,27 @@ const TaskColumn = ({
     ? tasks.filter((task) => task.status === status).length
     : 0;
 
-  const statusColor: any = {
-    "To Do": "#2563EB",
-    "Work In Progress": "#059669",
-    "Under Review": "#D97706",
-    Completed: "#000000",
+  const statusConfig: any = {
+    "To Do": {
+      color: "#3B82F6",
+      bgColor: "from-blue-500 to-blue-600",
+      lightBg: "bg-blue-50 dark:bg-blue-900/20",
+    },
+    "Work In Progress": {
+      color: "#10B981",
+      bgColor: "from-emerald-500 to-emerald-600",
+      lightBg: "bg-emerald-50 dark:bg-emerald-900/20",
+    },
+    "Under Review": {
+      color: "#F59E0B",
+      bgColor: "from-amber-500 to-amber-600",
+      lightBg: "bg-amber-50 dark:bg-amber-900/20",
+    },
+    Completed: {
+      color: "#6B7280",
+      bgColor: "from-gray-500 to-gray-600",
+      lightBg: "bg-gray-50 dark:bg-gray-900/20",
+    },
   };
 
   const [taskName, setTaskName] = useState("");
@@ -376,11 +394,9 @@ const TaskColumn = ({
     const value = e.target.value;
     const regex = /^[a-zA-Z0-9_\s]*$/;
 
-    // Check if the value matches the regex
     if (regex.test(value)) {
-      setTaskName(value); // Update the state only if valid
+      setTaskName(value);
     } else {
-      // Show a toast message when an invalid character is entered
       toast.error(
         "Invalid character! Only letters, numbers, and underscores are allowed."
       );
@@ -401,303 +417,309 @@ const TaskColumn = ({
       ref={(instance) => {
         drop(instance);
       }}
-      className={`sl-py-2 rounded-sm py-1 xl:px-1 ${
-        isOver ? "bg-blue-100 dark:bg-neutral-950" : ""
-      }`}
+      className={`h-fit transition-all duration-300 ${
+        isOver
+          ? `${statusConfig[status].lightBg} scale-[1.02] shadow-lg`
+          : "bg-white/80 dark:bg-gray-800/80"
+      } backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm`}
     >
-      <div className="mb-3 flex w-full">
-        <div
-          className={`w-2 !bg-[${statusColor[status]}] rounded-s-lg`}
-          style={{ backgroundColor: statusColor[status] }}
-        />
-        <div className="flex w-full items-center justify-between rounded-e-lg bg-white px-5 py-4 dark:bg-dark-secondary">
-          <h3 className="flex items-center text-lg font-semibold dark:text-white">
-            {status}{" "}
-            <span
-              className="ml-2 inline-block rounded-full bg-gray-200 p-1 text-center text-sm leading-none dark:bg-dark-tertiary"
-              style={{ width: "1.3rem", height: "1.3rem " }}
-            >
+      {/* Column Header */}
+      <div className="p-6 pb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-3 h-3 rounded-full bg-gradient-to-r ${statusConfig[status].bgColor} shadow-sm`}
+            />
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+              {status}
+            </h3>
+            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300">
               {tasksCount}
-            </span>
-          </h3>
-          <div className="flex items-center gap-1  overflow-auto">
-            {status === "To Do" ? (
-              <>
-                <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                  {isTaskOrSubTask === "Task" ? (
-                    <>
-                      <DialogTrigger asChild>
-                        <button className="flex items-center rounded-md bg-blue-600 px-2 py-1.5 text-white hover:bg-blue-500">
-                          <PlusSquare className="h-4 w-4 mr-1.5" />
-                          Create Task
-                        </button>
-                      </DialogTrigger>
-                    </>
-                  ) : (
-                    ""
-                  )}
-                  <DialogContent className="sm:max-w-[50vw] lg:max-w-[60vw] max-h-[38vw]">
-                    <DialogHeader>
-                      <DialogTitle className="font-semibold text-lg">
-                        Create Task
-                      </DialogTitle>
-                    </DialogHeader>
-                    <Tabs
-                      defaultValue="alerts"
-                      className="w-full  overflow-auto"
-                    >
-                      <TabsList className="grid  grid-cols-2 w-[400px] h-[46px]  overflow-auto">
-                        <TabsTrigger
-                          value="Manual"
-                          className="font-semibold text-lg"
-                        >
-                          Create Manually
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="Upload"
-                          className="font-semibold text-lg "
-                        >
-                          Upload Excel
-                        </TabsTrigger>
-                      </TabsList>
-                      <div className="mt-2 mb-2 border-t-2 border-gray-300 dark:border-gray-600"></div>
-
-                      <TabsContent
-                        value="Manual"
-                        className="w-full  overflow-auto"
-                      >
-                        <div
-                          className="relative w-full h-full overflow-auto"
-                          style={{
-                            paddingTop: "42.575%",
-                          }}
-                        >
-                          <div className="absolute top-0 left-0 w-[calc(100%)] h-[calc(100%)]">
-                            <form onSubmit={handleSubmit}>
-                              <div className="grid gap-4 py-1">
-                                <div className="grid grid-cols-8 items-center gap-4 mr-1">
-                                  <Label className="text-center">
-                                    Task Name
-                                    <span className="text-red-500 ml-1">*</span>
-                                  </Label>
-                                  <Input
-                                    value={taskName}
-                                    onChange={handleChange}
-                                    className="col-span-7"
-                                    required
-                                  />
-                                  <Label className="text-center">
-                                    Description
-                                    <span className="text-red-500 ml-1">*</span>
-                                  </Label>
-                                  <textarea
-                                    value={taskDescription}
-                                    onChange={(e) =>
-                                      setTaskDescription(e.target.value)
-                                    }
-                                    className="col-span-7 shadow border"
-                                  />
-
-                                  <Label className="text-center">
-                                    Priority
-                                    <span className="text-red-500 ml-1">*</span>
-                                  </Label>
-                                  <Select
-                                    value={taskPriority}
-                                    onValueChange={(value) =>
-                                      setTaskPriority(value)
-                                    }
-                                  >
-                                    <SelectTrigger className="col-span-3 p-2 border rounded-md">
-                                      <SelectValue placeholder="Select a priority" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectGroup>
-                                        <SelectLabel>Priority</SelectLabel>
-                                        <SelectItem value="Urgent">
-                                          Urgent
-                                        </SelectItem>
-                                        <SelectItem value="High">
-                                          High
-                                        </SelectItem>
-                                        <SelectItem value="Medium">
-                                          Medium
-                                        </SelectItem>
-                                        <SelectItem value="Low">Low</SelectItem>
-                                        <SelectItem value="Backlog">
-                                          Backlog
-                                        </SelectItem>
-                                      </SelectGroup>
-                                    </SelectContent>
-                                  </Select>
-                                  <Label className="text-center">
-                                    Estimated Hours
-                                    <span className="text-red-500 ml-1">*</span>
-                                  </Label>
-                                  <Input
-                                    placeholder="Please enter a number"
-                                    value={taskPoints}
-                                    onChange={(e) =>
-                                      setTaskPoints(e.target.value)
-                                    }
-                                    className="col-span-3"
-                                  />
-
-                                  <Label className="text-center">
-                                    Start Date
-                                    <span className="text-red-500 ml-1">*</span>
-                                  </Label>
-                                  <Input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={(e) =>
-                                      setStartDate(e.target.value)
-                                    }
-                                    className="col-span-3"
-                                  />
-                                  <Label className="text-center">
-                                    Due Date
-                                    <span className="text-red-500 ml-1">*</span>
-                                  </Label>
-                                  <Input
-                                    type="date"
-                                    value={dueDate}
-                                    onChange={(e) => setDueDate(e.target.value)}
-                                    className="col-span-3"
-                                  />
-
-                                  <Label className="text-center">Tags</Label>
-                                  <Input
-                                    placeholder="Please enter comma separated values"
-                                    value={taskTags}
-                                    onChange={(e) =>
-                                      setTaskTags(e.target.value)
-                                    }
-                                    className="col-span-3"
-                                  />
-                                  <Label className="text-center">
-                                    Assignee
-                                    <span className="text-red-500 ml-1">*</span>
-                                  </Label>
-                                  <Select
-                                    value={assignedUserId}
-                                    onValueChange={(value) =>
-                                      setAssignedUserId(value)
-                                    }
-                                  >
-                                    <SelectTrigger className="col-span-3 p-2 border rounded-md">
-                                      <SelectValue placeholder="Select assignee" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectGroup>
-                                        <SelectLabel>
-                                          Assignee
-                                          <span className="text-red-500 ml-1">
-                                            *
-                                          </span>
-                                        </SelectLabel>
-                                        {data?.map((user) => (
-                                          <SelectItem
-                                            key={user.username}
-                                            value={String(user.userId)!}
-                                          >
-                                            {user.username}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectGroup>
-                                    </SelectContent>
-                                  </Select>
-                                  <Label className="text-center">
-                                    Sprint
-                                    <span className="text-red-500 ml-1">*</span>
-                                  </Label>
-                                  <Select
-                                    value={sprintId}
-                                    onValueChange={(value) =>
-                                      setSprintId(value)
-                                    }
-                                  >
-                                    <SelectTrigger className="col-span-3 p-2 border rounded-md">
-                                      <SelectValue placeholder="Select sprint" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectGroup>
-                                        {sprintData?.map((sprint) => (
-                                          <SelectItem
-                                            key={sprint.title}
-                                            value={String(sprint.id)!}
-                                          >
-                                            {sprint.title}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectGroup>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <button
-                                  type="submit"
-                                  className={`flex w-200px mt-4 justify-centerrounded-md border border-transparent bg-blue-primary px-4 py-2 text-base font-medium text-white shadow-sm 
-                                hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus-offset-2 ${
-                                  !isFormValid() || isLoadingCreateTask
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
-                                }`}
-                                  disabled={
-                                    !isFormValid() || isLoadingCreateTask
-                                  }
-                                >
-                                  {isLoadingCreateTask
-                                    ? "Creating..."
-                                    : "Create Task"}
-                                </button>
-                              </DialogFooter>
-                            </form>
-                          </div>
-                        </div>
-                      </TabsContent>
-                      <TabsContent value="Upload" className=" overflow-auto">
-                        <Card>
-                          <CardHeader>
-                            <CardDescription>Bulk Create Tasks</CardDescription>
-                          </CardHeader>
-                          <CardContent className="space-y-2">
-                            <BulkCreate
-                              sprintList={sprintData!}
-                              email={email}
-                              projectId={Number(projectId)}
-                              setIsOpen={setIsOpen}
-                            />
-                          </CardContent>
-                        </Card>
-                      </TabsContent>
-                    </Tabs>
-
-                    <DialogFooter className="w-full justify-between items-center">
-                      <div className="absolute flex gap-4 left-10"></div>
-                      <div className="flex items-center space-x-2"></div>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </>
-            ) : (
-              ""
-            )}
+            </div>
           </div>
+
+          {status === "To Do" && isTaskOrSubTask === "Task" && (
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogTrigger asChild>
+                <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
+                  <PlusSquare className="h-4 w-4" />
+                  <span className="hidden sm:inline">Create Task</span>
+                </button>
+              </DialogTrigger>
+
+              <DialogContent className="sm:max-w-[60vw] lg:max-w-[70vw] max-h-[85vh] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-0 shadow-2xl">
+                <DialogHeader className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                  <DialogTitle className="font-bold text-xl text-gray-800 dark:text-gray-100">
+                    Create New Task
+                  </DialogTitle>
+                </DialogHeader>
+
+                <Tabs defaultValue="Manual" className="w-full overflow-auto">
+                  <TabsList className="grid grid-cols-2 w-full max-w-md h-12 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                    <TabsTrigger
+                      value="Manual"
+                      className="font-semibold text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+                    >
+                      Create Manually
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="Upload"
+                      className="font-semibold text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+                    >
+                      Upload Excel
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <div className="my-4 border-t border-gray-200 dark:border-gray-700"></div>
+
+                  <TabsContent value="Manual" className="w-full overflow-auto">
+                    <div
+                      className="relative w-full h-full overflow-auto"
+                      style={{ paddingTop: "42.575%" }}
+                    >
+                      <div className="absolute top-0 left-0 w-full h-full">
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                          <div className="grid gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                  Task Name{" "}
+                                  <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                  value={taskName}
+                                  onChange={handleChange}
+                                  className="border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                                  required
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                  Priority{" "}
+                                  <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                  value={taskPriority}
+                                  onValueChange={setTaskPriority}
+                                >
+                                  <SelectTrigger className="border-gray-300 dark:border-gray-600 focus:border-blue-500 rounded-lg">
+                                    <SelectValue placeholder="Select priority" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                                    <SelectGroup>
+                                      <SelectLabel>Priority</SelectLabel>
+                                      <SelectItem value="Urgent">
+                                        🔴 Urgent
+                                      </SelectItem>
+                                      <SelectItem value="High">
+                                        🟠 High
+                                      </SelectItem>
+                                      <SelectItem value="Medium">
+                                        🟡 Medium
+                                      </SelectItem>
+                                      <SelectItem value="Low">
+                                        🟢 Low
+                                      </SelectItem>
+                                      <SelectItem value="Backlog">
+                                        ⚪ Backlog
+                                      </SelectItem>
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                Description{" "}
+                                <span className="text-red-500">*</span>
+                              </Label>
+                              <textarea
+                                value={taskDescription}
+                                onChange={(e) =>
+                                  setTaskDescription(e.target.value)
+                                }
+                                className="w-full min-h-[100px] p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                                required
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                  Estimated Hours{" "}
+                                  <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                  placeholder="Enter hours"
+                                  value={taskPoints}
+                                  onChange={(e) =>
+                                    setTaskPoints(e.target.value)
+                                  }
+                                  className="border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                                  required
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                  Tags
+                                </Label>
+                                <Input
+                                  placeholder="Comma separated values"
+                                  value={taskTags}
+                                  onChange={(e) => setTaskTags(e.target.value)}
+                                  className="border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                  Start Date{" "}
+                                  <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                  type="date"
+                                  value={startDate}
+                                  onChange={(e) => setStartDate(e.target.value)}
+                                  className="border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                                  required
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                  Due Date{" "}
+                                  <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                  type="date"
+                                  value={dueDate}
+                                  onChange={(e) => setDueDate(e.target.value)}
+                                  className="border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
+                                  required
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                  Assignee{" "}
+                                  <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                  value={assignedUserId}
+                                  onValueChange={setAssignedUserId}
+                                >
+                                  <SelectTrigger className="border-gray-300 dark:border-gray-600 focus:border-blue-500 rounded-lg">
+                                    <SelectValue placeholder="Select assignee" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                                    <SelectGroup>
+                                      <SelectLabel>Team Members</SelectLabel>
+                                      {data?.map((user) => (
+                                        <SelectItem
+                                          key={user.username}
+                                          value={String(user.userId)}
+                                        >
+                                          {user.username}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                  Sprint <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                  value={sprintId}
+                                  onValueChange={setSprintId}
+                                >
+                                  <SelectTrigger className="border-gray-300 dark:border-gray-600 focus:border-blue-500 rounded-lg">
+                                    <SelectValue placeholder="Select sprint" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                                    <SelectGroup>
+                                      {sprintData?.map((sprint) => (
+                                        <SelectItem
+                                          key={sprint.title}
+                                          value={String(sprint.id)}
+                                        >
+                                          {sprint.title}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </div>
+
+                          <DialogFooter className="pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <button
+                              type="submit"
+                              className={`px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                                !isFormValid() || isLoadingCreateTask
+                                  ? "cursor-not-allowed opacity-50 transform-none"
+                                  : ""
+                              }`}
+                              disabled={!isFormValid() || isLoadingCreateTask}
+                            >
+                              {isLoadingCreateTask
+                                ? "Creating..."
+                                : "Create Task"}
+                            </button>
+                          </DialogFooter>
+                        </form>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="Upload" className="overflow-auto">
+                    <Card className="border-0 shadow-sm bg-gray-50 dark:bg-gray-800/50">
+                      <CardHeader>
+                        <CardDescription className="text-gray-600 dark:text-gray-400">
+                          Bulk Create Tasks from Excel
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <BulkCreate
+                          sprintList={sprintData!}
+                          email={email}
+                          projectId={Number(projectId)}
+                          setIsOpen={setIsOpen}
+                        />
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
-      {tasks
-        .filter((task) => task.status === status)
-        .map((task) => (
-          <Task
-            key={task.id}
-            task={task}
-            email={email}
-            projectId={id}
-            isTaskOrSubTask={isTaskOrSubTask}
-          />
-        ))}
+
+      {/* Tasks Container */}
+      <div className="px-6 pb-6 space-y-4 min-h-[200px]">
+        {tasks
+          .filter((task) => task.status === status)
+          .map((task) => (
+            <Task
+              key={task.id}
+              task={task}
+              email={email}
+              projectId={id}
+              isTaskOrSubTask={isTaskOrSubTask}
+            />
+          ))}
+      </div>
     </div>
   );
 };
@@ -1001,15 +1023,15 @@ const Task = ({ task, email, projectId, isTaskOrSubTask }: TaskProps) => {
               {task.assignee && (
                 <Avatar className="h-8 w-8 rounded-full border-white object-cover dark:border-dark-secondary">
                   {/* {task.assignee?.profilePicture?.base64 ? (
-                    <AvatarImage
-                      src={task.assignee.profilePicture.base64}
-                      alt={task.assignee.username}
-                    />
-                  ) : (
-                    <AvatarFallback className="rounded-lg">
-                      {getInitials(task.assignee.username!)}
-                    </AvatarFallback>
-                  )} */}
+                  <AvatarImage
+                    src={task.assignee.profilePicture.base64}
+                    alt={task.assignee.username}
+                  />
+                ) : (
+                  <AvatarFallback className="rounded-lg">
+                    {getInitials(task.assignee.username!)}
+                  </AvatarFallback>
+                )} */}
                   <AvatarFallback className="rounded-lg">
                     {getInitials(task.assignee.username!)}
                   </AvatarFallback>

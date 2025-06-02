@@ -578,6 +578,14 @@ export interface ProjectUsers {
   username: string;
 }
 
+export interface ProjectWorkloadUsers {
+  id: string;
+  name: string;
+  avatar: string;
+  designation: string;
+  maxHoursPerWeek: number;
+}
+
 export interface TaskFormData {
   title: string;
   description: string;

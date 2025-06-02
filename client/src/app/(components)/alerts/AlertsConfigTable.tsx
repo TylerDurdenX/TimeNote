@@ -38,12 +38,6 @@ function AlertsConfigTable() {
     },
   ];
 
-  let attendancePage = `/reports/attendanceReport/generateReport?email=${userEmail}`;
-  let timesheetPage = `/reports/timesheetReport/generateReport?email=${userEmail}`;
-  let projectPage = `/reports/projectReport/generateReport?email=${userEmail}`;
-
-  const [isOpen, setIsOpen] = React.useState(false);
-
   const columns: GridColDef[] = [
     {
       field: "title",

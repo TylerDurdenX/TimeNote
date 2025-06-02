@@ -3,15 +3,7 @@
 import { AirplayIcon } from "lucide-react";
 import * as React from "react";
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string;
-    logo: React.ElementType;
-    plan: string;
-  }[];
-}) {
+export function TeamSwitcher() {
   return (
     <div className="flex items-center gap-3">
       <div className="mt-2 ml-2">

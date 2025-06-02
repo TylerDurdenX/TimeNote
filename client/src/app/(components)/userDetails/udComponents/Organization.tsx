@@ -3,11 +3,23 @@ import UserCard from "./UserCard"; // Assuming the UserCard component is importe
 import { UserHierarchy as User } from "@/store/interfaces";
 import { useGetUserHierarchyDataQuery } from "@/store/api";
 import CircularLoading from "@/components/Sidebar/loading";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 interface HierarchyPageProps {
   startingUserId: number;
   setStartingUserId: React.Dispatch<React.SetStateAction<number>>;
 }
+
+// Connection Line Component
+const ConnectionLine = ({ vertical = false, className = "" }) => (
+  <div
+    className={`
+    bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 
+    ${vertical ? "w-0.5 h-8 mx-auto" : "h-0.5 w-8"} 
+    ${className}
+  `}
+  />
+);
 
 export default function HierarchyPage({
   startingUserId,
@@ -71,7 +83,7 @@ export default function HierarchyPage({
         (user) => Number(user.reportsToId) === foundUser.userId // Direct comparison between userId and reportsToId
       );
       setDirectReports(reports);
-      if (directReports === null || directReports === undefined) {
+      if (reports.length === 0) {
         setIfBottomUserSelected(true);
       } else {
         setIfBottomUserSelected(false);
@@ -81,18 +93,34 @@ export default function HierarchyPage({
 
   if (isLoading) {
     return (
-      <div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <CircularLoading />
       </div>
     );
   }
 
   if (error) {
-    return <div>Error loading user data</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-red-500 bg-red-50 p-6 rounded-xl border border-red-200 shadow-lg">
+          <h3 className="font-semibold text-red-700 mb-2">
+            Error Loading Data
+          </h3>
+          <p>Error loading user data</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
-    return <div>User not found</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-gray-500 bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-lg">
+          <h3 className="font-semibold text-gray-700 mb-2">User Not Found</h3>
+          <p>User not found</p>
+        </div>
+      </div>
+    );
   }
 
   const handleCardClick = (id: number) => {
@@ -100,117 +128,151 @@ export default function HierarchyPage({
   };
 
   return (
-    <div className="flex flex-col items-center mt-8 w-full relative">
-      {/* Render Manager Hierarchy */}
-      <div className="flex flex-col items-center space-y-4 relative">
-        {managers.map((manager, index) => (
-          <div
-            key={manager.userId}
-            className="relative flex items-center  justify-center"
-          >
-            {index !== managers.length - 1 && (
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-px h-6 bg-gray-500"></div>
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-800 mb-3">
+            Organization Hierarchy
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Navigate through the organizational structure
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center">
+          {/* Render Manager Hierarchy */}
+          {managers.length > 0 && (
+            <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center">
+                {managers.map((manager, index) => (
+                  <div
+                    key={manager.userId}
+                    className="flex flex-col items-center"
+                  >
+                    <button
+                      onClick={() => handleCardClick(manager.userId)}
+                      className="transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 hover:shadow-xl"
+                    >
+                      <UserCard
+                        name={manager.username}
+                        designation={manager.designation}
+                        imageUrl={manager.profilePicture?.base64}
+                        isHighlighted={false}
+                        textAlignment="left"
+                      />
+                    </button>
+
+                    {index !== managers.length - 1 && (
+                      <div className="my-3">
+                        <ConnectionLine vertical />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Connection line to current user */}
+          {!TopMostUserSelected && (
+            <div className="my-3">
+              <ConnectionLine vertical />
+            </div>
+          )}
+
+          {/* Render Current User with Highlight */}
+          <div className="relative">
+            <div className="absolute -inset-6 bg-gradient-to-r from-blue-400 via-purple-500 to-blue-400 rounded-3xl opacity-20 blur-xl animate-pulse"></div>
             <button
-              onClick={() => handleCardClick(manager.userId)}
-              className="transition-all transform hover:scale-105"
+              onClick={() => handleCardClick(user.userId)}
+              className="relative transition-all duration-300 transform hover:scale-110 hover:-translate-y-2"
             >
               <UserCard
-                name={manager.username}
-                designation={manager.designation}
-                imageUrl={manager.profilePicture?.base64}
-                isHighlighted={false}
+                name={user.username}
+                designation={user.designation}
+                imageUrl={user.profilePicture?.base64}
+                isHighlighted={true}
                 textAlignment="left"
               />
             </button>
           </div>
-        ))}
-      </div>
-      {TopMostUserSelected ? (
-        ""
-      ) : (
-        <div className=" top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>
-      )}
 
-      {/* Render Current User with Highlight */}
-      <div>
-        <button
-          onClick={() => handleCardClick(user.userId)}
-          className="transition-all transform hover:scale-105"
-        >
-          <UserCard
-            name={user.username}
-            designation={user.designation}
-            imageUrl={user.profilePicture?.base64}
-            isHighlighted={true}
-            textAlignment="left"
-          />
-        </button>
-      </div>
+          {/* Direct Reports Section */}
+          {directReports.length > 0 && (
+            <div className="flex flex-col items-center space-y-6 w-full">
+              <div className="my-3">
+                <ConnectionLine vertical />
+              </div>
 
-      {directReports.length > 1 ? (
-        <div className="flex flex-col items-center relative rounded-lg">
-          <div className="top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>
-          <div className="flex flex-col items-center mt-0 relative border border-gray-300 rounded-lg p-4">
-            <div className="flex flex-wrap justify-center gap-8 bg-white shadow-md p-6 w-full">
-              {directReports.map((report) => (
-                <div
-                  key={report.userId}
-                  className="relative flex flex-col items-center"
-                >
-                  <button
-                    onClick={() => handleCardClick(report.userId)}
-                    className="transition-all transform hover:scale-105"
-                  >
-                    <UserCard
-                      name={report.username}
-                      designation={report.designation}
-                      imageUrl={report.profilePicture?.base64}
-                      isHighlighted={false}
-                      textAlignment="left"
-                    />
-                  </button>
+              <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+                <ChevronDown size={16} />
+                <span className="font-medium">
+                  Direct Reports ({directReports.length})
+                </span>
+              </div>
+
+              {directReports.length > 1 ? (
+                <div className="flex flex-col items-center w-full">
+                  <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-white/50 shadow-2xl p-8 w-full max-w-6xl">
+                    <div className="flex flex-wrap justify-center gap-8">
+                      {directReports.map((report) => (
+                        <div
+                          key={report.userId}
+                          className="flex flex-col items-center"
+                        >
+                          <button
+                            onClick={() => handleCardClick(report.userId)}
+                            className="transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 hover:shadow-xl"
+                          >
+                            <UserCard
+                              name={report.username}
+                              designation={report.designation}
+                              imageUrl={report.profilePicture?.base64}
+                              isHighlighted={false}
+                              textAlignment="left"
+                            />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              ))}
+              ) : (
+                <div className="flex flex-wrap justify-center gap-8">
+                  {directReports.map((report, index) => (
+                    <div
+                      key={report.userId}
+                      className="flex flex-col items-center"
+                    >
+                      <button
+                        onClick={() => handleCardClick(report.userId)}
+                        className="transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 hover:shadow-xl"
+                      >
+                        <UserCard
+                          name={report.username}
+                          designation={report.designation}
+                          imageUrl={report.profilePicture?.base64}
+                          isHighlighted={false}
+                          textAlignment="left"
+                        />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Navigation Hint */}
+          <div className="mt-12 text-center">
+            <div className="inline-flex items-center space-x-2 text-sm text-gray-500 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-full border border-white/40 shadow-lg">
+              <span>💡</span>
+              <span>Click on any card to navigate through the hierarchy</span>
             </div>
           </div>
         </div>
-      ) : (
-        <div className="flex flex-col items-center mt-0 relative rounded-lg">
-          <div className="flex flex-wrap justify-center gap-8">
-            {directReports.map((report, index) => (
-              <div
-                key={report.userId}
-                className="relative flex flex-col items-center"
-              >
-                {ifBottomUserSelected ? (
-                  ""
-                ) : (
-                  <div className=" top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500"></div>
-                )}
-
-                <button
-                  onClick={() => handleCardClick(report.userId)}
-                  className="transition-all transform hover:scale-105"
-                >
-                  <UserCard
-                    name={report.username}
-                    designation={report.designation}
-                    imageUrl={report.profilePicture?.base64}
-                    isHighlighted={false}
-                    textAlignment="left"
-                  />
-                </button>
-
-                {/* Conditionally render a vertical line between cards, but not after the last one */}
-                {index < directReports.length - 1 && !ifBottomUserSelected && (
-                  <div className="top-full left-1/2 transform -translate-x-1/2 w-px h-4 bg-gray-500 mt-4"></div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

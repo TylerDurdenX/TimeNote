@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import * as XLSX from "xlsx-js-style";
 import {
   Check,
@@ -9,13 +9,14 @@ import {
   ChevronsUpDown,
   FileDown,
   FilterX,
+  User,
+  FolderOpen,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import {
   useGetPMListFilterQuery,
   useGetProjectNamesQuery,
   useGetProjectReportQuery,
-  useGetProjectsQuery,
 } from "@/store/api";
 
 import {
@@ -36,26 +37,33 @@ import { Button } from "@/components/ui/button";
 import ProjectReportTable from "./ProjectReportTable";
 import { cn } from "@/lib/utils";
 
-const page = () => {
+const ProjectReportPage = () => {
   const userEmail = useSearchParams().get("email");
 
+  // API Queries
   const { data: projectsList } = useGetProjectNamesQuery({
     refetchOnMountOrArgChange: true,
   });
-  const { data, isLoading, error, isSuccess } = useGetPMListFilterQuery({
+
+  const {
+    data: pmListData,
+    isLoading,
+    error,
+    isSuccess,
+  } = useGetPMListFilterQuery({
     email: userEmail!,
   });
 
+  // State Management
   const [dropdownTeamName, setDropdownTeamName] = useState("");
   const [value, setValue] = useState("");
   const [selectedUserEmail, setSelectedUserEmail] = useState("");
   const [open, setOpen] = useState(false);
-  const [downloadUserReportClicked, setDownloadUserReportClicked] = useState(0);
   const [downloadTeamReportClicked, setDownloadTeamReportClicked] = useState(0);
   const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
   const [projectIdList, setProjectIdList] = useState<number[]>([]);
-  const [onBlurFlag, setOnBlurFlag] = useState(0);
 
+  // Update project ID list when selected projects change
   useEffect(() => {
     if (Array.isArray(selectedProjects)) {
       const ids = selectedProjects.map((item) => item.id);
@@ -63,39 +71,53 @@ const page = () => {
     }
   }, [selectedProjects]);
 
+  // Project report query
   const { data: projectData, refetch } = useGetProjectReportQuery(
     { idList: projectIdList!, projectManager: selectedUserEmail },
     { refetchOnMountOrArgChange: true }
   );
 
+  // Memoized selected user display name
+  const selectedUserDisplayName = useMemo(() => {
+    if (!selectedUserEmail || !pmListData) return "Find User";
+    const user = pmListData.find(
+      (user) => String(user.userId) === selectedUserEmail
+    );
+    return user?.username || "Find User";
+  }, [selectedUserEmail, pmListData]);
+
+  // Excel export functionality
   const handleExportToExcel = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    const flattenedTasks = projectData?.map((project) => {
-      return {
-        "Project Name": project.name,
-        Description: project.description,
-        "Client Name": project.clientName,
-        Status: project.status,
-        "Start Date (DD/MM/YYYY)": project.startDate,
-        "Due Date (DD/MM/YYYY)": project.dueDate,
-        "Project Manager": project.projectManager,
-        "Estimated Hours (HH:MM:SS)": project.estimatedHours,
-        "Consumed Hours (HH:MM:SS)": project.consumedHours,
-        "Hours Overrun (HH:MM:SS)": project.hoursOverrun,
-      };
-    });
+    if (!projectData || projectData.length === 0) {
+      console.warn("No data to export");
+      return;
+    }
 
-    const worksheet = XLSX.utils.json_to_sheet(flattenedTasks || []);
+    const flattenedTasks = projectData.map((project) => ({
+      "Project Name": project.name,
+      Description: project.description,
+      "Client Name": project.clientName,
+      Status: project.status,
+      "Start Date (DD/MM/YYYY)": project.startDate,
+      "Due Date (DD/MM/YYYY)": project.dueDate,
+      "Project Manager": project.projectManager,
+      "Estimated Hours (HH:MM:SS)": project.estimatedHours,
+      "Consumed Hours (HH:MM:SS)": project.consumedHours,
+      "Hours Overrun (HH:MM:SS)": project.hoursOverrun,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(flattenedTasks);
 
     // Apply styles to header row
-    const headers = Object.keys(flattenedTasks?.[0] || {});
+    const headers = Object.keys(flattenedTasks[0] || {});
     headers.forEach((header, index) => {
       const cellRef = XLSX.utils.encode_cell({ r: 0, c: index });
       const cell = worksheet[cellRef];
       if (cell) {
         cell.s = {
-          fill: { fgColor: { rgb: "D9D9D9" } }, // Light gray background
+          fill: { fgColor: { rgb: "D9D9D9" } },
           font: { bold: true },
           border: {
             top: { style: "thin", color: { rgb: "000000" } },
@@ -126,127 +148,177 @@ const page = () => {
       }
     }
 
-    // Create workbook and append sheet
+    // Create workbook
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Project Report");
 
-    // Set workbook styles
-    worksheet["!cols"] = headers.map(() => ({ wch: 20 })); // Set column width
+    // Set column widths
+    worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
 
-    // Write the file
-    XLSX.writeFile(workbook, "project-data-export.xlsx");
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split("T")[0];
+    const filename = `project-report-${timestamp}.xlsx`;
+
+    XLSX.writeFile(workbook, filename);
   };
 
+  // Clear all filters
   const clearFilter = () => {
     setSelectedUserEmail("");
     setSelectedProjects([]);
+    setProjectIdList([]);
   };
 
+  // Handle user selection
+  const handleUserSelect = (userId: string) => {
+    setSelectedUserEmail(userId);
+    setDropdownTeamName("");
+    setDownloadTeamReportClicked(0);
+    setOpen(false);
+  };
+
+  // Handle back navigation
+  const handleGoBack = () => {
+    window.history.back();
+  };
+
+  const hasActiveFilters = selectedUserEmail || selectedProjects.length > 0;
+  const hasExportableData = projectData && projectData.length > 0;
+
   return (
-    <>
-      <div className="w-full bg-gray-50">
+    <div className="min-h-screen min-w-full bg-gray-50">
+      <div className="container mx-auto px-4 py-6">
         {/* Header Section */}
-        <div className="w-full mb-5">
-          <div className="flex w-full text-gray-900">
-            <div className=" pt-1 lg:pt-8 w-full">
-              <h1
-                className={`text-2xl font-semibold dark:text-white flex items-center`}
-              >
-                <button onClick={() => window.history.back()}>
-                  <ChevronLeft className="mr-5" />
-                </button>
-                Project Report
-              </h1>{" "}
-            </div>
-          </div>
-          <div className="mt-5 ml-5 flex items-center">
-            <Label className="justify-center col-span-1 mr-3">Project</Label>
-            <LimitTags
-              projectFlag={true}
-              userEmail={userEmail!}
-              setSelectedProjects={setSelectedProjects}
-              projectsList={projectsList!}
-              selectedList={selectedProjects}
-            />
-            <Label className="text-center ml-7">Project Manager</Label>
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="w-[200px] justify-between col-span-2 ml-3"
-                >
-                  {selectedUserEmail
-                    ? data?.find(
-                        (user) => String(user.userId) === selectedUserEmail
-                      )?.username
-                    : "Find User"}
-                  <ChevronsUpDown className="opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-0 ">
-                <Command>
-                  <CommandInput placeholder="Search User..." className="h-9" />
-                  <CommandList>
-                    <CommandEmpty>No User found.</CommandEmpty>
-                    <CommandGroup>
-                      {data?.map((user) => (
-                        <CommandItem
-                          key={user.username}
-                          value={String(user.username)}
-                          onSelect={() => {
-                            setSelectedUserEmail(String(user.userId));
-                            setDropdownTeamName("");
-                            setDownloadTeamReportClicked(0);
-                            setOpen(false);
-                          }}
-                        >
-                          {user.username}
-                          <Check
-                            className={cn(
-                              "ml-auto",
-                              value === user.username
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+        <header className="mb-8">
+          <div className="flex items-center mb-6">
             <Button
-              className="bg-gray-200 hover:bg-gray-300 mt-2 ml-4"
-              onClick={clearFilter}
+              variant="ghost"
+              size="sm"
+              onClick={handleGoBack}
+              className="mr-2 p-2 hover:bg-gray-200 rounded-full"
             >
-              <FilterX className="text-gray-800" />
+              <ChevronLeft className="h-5 w-5" />
             </Button>
-            <div className="flex ml-auto items-center px-6">
-              <button
-                className="flex items-center ml-5  text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 whitespace-nowrap"
-                style={{ height: "50px", padding: "0 16px" }}
-                onClick={handleExportToExcel}
-              >
-                <FileDown size={25} />
-                <span className="ml-2">Export to Excel</span>
-              </button>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Project Report
+            </h1>
+          </div>
+
+          {/* Filter Controls */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Project Filter */}
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 whitespace-nowrap">
+                  <FolderOpen className="h-4 w-4" />
+                  Projects
+                </Label>
+                <div className="flex-1 min-w-[200px]">
+                  <LimitTags
+                    projectFlag={true}
+                    userEmail={userEmail!}
+                    setSelectedProjects={setSelectedProjects}
+                    projectsList={projectsList!}
+                    selectedList={selectedProjects}
+                  />
+                </div>
+              </div>
+
+              {/* Project Manager Filter */}
+              <div className="flex items-center gap-3 min-w-0">
+                <Label className="flex items-center gap-2 text-sm font-medium text-gray-700 whitespace-nowrap">
+                  <User className="h-4 w-4" />
+                  Project Manager
+                </Label>
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-[200px] justify-between"
+                    >
+                      <span className="truncate">
+                        {selectedUserDisplayName}
+                      </span>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[200px] p-0">
+                    <Command>
+                      <CommandInput
+                        placeholder="Search users..."
+                        className="h-9"
+                      />
+                      <CommandList>
+                        <CommandEmpty>No user found.</CommandEmpty>
+                        <CommandGroup>
+                          {pmListData?.map((user) => (
+                            <CommandItem
+                              key={user.userId}
+                              value={user.username}
+                              onSelect={() =>
+                                handleUserSelect(String(user.userId))
+                              }
+                            >
+                              {user.username}
+                              <Check
+                                className={cn(
+                                  "ml-auto h-4 w-4",
+                                  selectedUserEmail === String(user.userId)
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 ml-auto">
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearFilter}
+                    className="flex items-center gap-2"
+                  >
+                    <FilterX className="h-4 w-4" />
+                    Clear Filters
+                  </Button>
+                )}
+
+                <Button
+                  onClick={handleExportToExcel}
+                  disabled={!hasExportableData}
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FileDown className="h-4 w-4" />
+                  Export to Excel
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="grid grid-rows-1 w-full">
-          <div className="h-full overflow-hidden">
+        </header>
+
+        {/* Report Table Section */}
+        <main className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <div className="h-full">
             <ProjectReportTable
               email={userEmail!}
               closedProjectFlag={false}
               data={projectData!}
             />
           </div>
-        </div>
+        </main>
       </div>
-    </>
+    </div>
   );
 };
 
-export default page;
+export default ProjectReportPage;

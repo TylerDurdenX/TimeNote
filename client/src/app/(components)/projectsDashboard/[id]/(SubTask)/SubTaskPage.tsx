@@ -260,18 +260,6 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
     initialStatus,
   ]);
 
-  const handleEditClick = () => {
-    setIsEditableStatus(true);
-  };
-
-  const handleEditAssigneeClick = () => {
-    setIsAssigneeEditable(true);
-  };
-
-  const handleEditDescriptionClick = () => {
-    setIsDescriptionEditable(true);
-  };
-
   const handleBlur = () => {
     setIsEditableStatus(false);
     setIsHovered(true);
@@ -294,42 +282,6 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
   };
 
   const taskStatus = ["To Do", "Work In Progress", "Under Review", "Completed"];
-
-  const [updateSubTask, { isLoading: isLoadingUpdateSubTask }] =
-    useUpdateSubTaskMutation();
-
-  const handleSaveChanges = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    const updateTaskData = {
-      subTaskId: subTaskId,
-      subTaskStatus: subTaskStatus,
-      editedConsumedHours: editedConsumedHours,
-      subTaskAssignee: subTaskAssignee,
-      subTaskDescription: subTaskDescription,
-      email: userEmail!,
-      startDate: startDate!,
-      dueDate: dueDate!,
-      taskName: taskName!,
-    };
-    try {
-      const response = await updateSubTask(updateTaskData);
-      if (
-        // @ts-ignore
-        response.error?.data.status === "Error" ||
-        // @ts-ignore
-        response.error?.data.status === "Fail"
-      ) {
-        // @ts-ignore
-        toast.error(response.error?.data.message);
-      } else {
-        toast.success(response.data?.message!);
-      }
-    } catch (err: any) {
-      toast.error(err.data.message);
-      console.error("Error creating role:", err.data.Message);
-    }
-  };
 
   const [isProgressStarted, setIsProgressStarted] = useState(
     task?.inProgressStartTime === null ? false : true
@@ -839,90 +791,229 @@ const SubTaskPage = ({ subTaskId, email, projectId }: Props) => {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Attachments</h2>
-          <div className="border-2 border-dashed border-gray-300 p-4 rounded-lg dark:border-gray-600">
-            <div className="flex items-center justify-between">
-              <div className="flex space-x-4">
-                <div className="flex items-center space-x-2">
-                  {(task?.attachments?.length ?? 0) > 0 ? (
-                    <>
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                        <span className="text-2xl text-gray-500">📎</span>
+        {/* Attachments Section */}
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg">
+              <svg
+                className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              Attachments
+            </h2>
+            {(task?.attachments?.length ?? 0) > 0 && (
+              <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full">
+                {task?.attachments?.length} file
+                {(task?.attachments?.length ?? 0) > 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+
+          {/* Main Container */}
+          <div className="relative overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+            {/* Decorative gradient border */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 p-[1px] rounded-xl">
+              <div className="w-full h-full bg-white dark:bg-gray-800 rounded-[11px]" />
+            </div>
+
+            <div className="relative p-6">
+              {(task?.attachments?.length ?? 0) > 0 ? (
+                /* Existing Attachment */
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600/50">
+                    <div className="flex items-center gap-4">
+                      {/* File Icon */}
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <svg
+                            className="w-6 h-6 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"></div>
                       </div>
-                      <span className="text-gray-800 dark:text-gray-100">
-                        {task?.attachments?.[0]?.fileName}
-                      </span>
+
+                      {/* File Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          {task?.attachments?.[0]?.fileName}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Uploaded • Ready to download
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2">
                       <button
-                        className="text-blue-600 hover:text-blue-800 ml-2"
+                        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-all duration-200 hover:scale-105"
                         onClick={downloadAttachment}
                       >
-                        <Download />
+                        <Download className="w-4 h-4" />
+                        Download
                       </button>
-                    </>
-                  ) : (
-                    "Please upload a document of size less than 1 mb"
-                  )}
-                </div>
 
-                {(task?.attachments?.length ?? 0) > 0 ? (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button className="text-blue-600 hover:text-blue-800 ml-2">
-                        Delete
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription className="text-gray-700">
-                          Do you want to remove the Attachment ?
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel
-                          onClick={() => {
-                            //setOpen(false);
-                          }}
-                        >
-                          No
-                        </AlertDialogCancel>
-                        <AlertDialogAction onClick={deleteAttachment}>
-                          Yes
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                ) : (
-                  ""
-                )}
-              </div>
-            </div>
-            <div className="mt-4">
-              <div>
-                {isLoadingUploadAttachment && (
-                  <Progress value={uploadProgress} max={100} color="blue" />
-                )}
-                {(task?.attachments?.length ?? 0) > 0 ? (
-                  ""
-                ) : (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-all duration-200 hover:scale-105">
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                            Delete
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="sm:max-w-md">
+                          <AlertDialogHeader className="text-center sm:text-left">
+                            <div className="mx-auto sm:mx-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
+                              <svg
+                                className="w-6 h-6 text-red-600 dark:text-red-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                                />
+                              </svg>
+                            </div>
+                            <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                              Delete Attachment
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                              Are you sure you want to remove this attachment?
+                              This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="flex gap-2 pt-4">
+                            <AlertDialogCancel className="flex-1 sm:flex-none">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={deleteAttachment}
+                              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Upload Area */
+                <div className="text-center py-8">
+                  {/* Upload Icon */}
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <svg
+                      className="w-8 h-8 text-gray-400 dark:text-gray-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Upload your files
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                    <span className="text-xs">Maximum file size: 1MB</span>
+                  </p>
+
+                  {/* Upload Button */}
                   <button
-                    className="flex items-center justify-start w-full p-3 text-blue-600 hover:text-blue-800 rounded-md hover:bg-gray-200 focus:outline-none transition duration-200"
+                    className="group inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                     onClick={() =>
                       document.getElementById("fileInputSubTask")?.click()
                     }
                   >
-                    + Add Attachment
+                    <svg
+                      className="w-5 h-5 group-hover:rotate-12 transition-transform duration-200"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                    Add Attachment
                   </button>
-                )}
+                </div>
+              )}
 
-                <input
-                  id="fileInputSubTask"
-                  type="file"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </div>
+              {/* Progress Bar */}
+              {isLoadingUploadAttachment && (
+                <div className="mt-6 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Uploading...
+                    </span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {uploadProgress}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300 ease-out shadow-sm"
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              {/* Hidden file input */}
+              <input
+                id="fileInputSubTask"
+                type="file"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
           </div>
         </div>

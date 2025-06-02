@@ -1,28 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Download,
-  Maximize2,
-  EllipsisVertical,
-  Clock,
-  ChevronLeft,
-  Timer,
-} from "lucide-react";
+import { Download, ChevronLeft, Timer } from "lucide-react";
 import { SubTask, Task as TaskType } from "@/store/interfaces";
 import {
-  useCloseTaskMutation,
-  useCreateSubTaskMutation,
-  useDeleteAttachmentMutation,
   useDownloadAttachmentMutation,
-  useGetProjectUsersQuery,
   useGetTaskQuery,
   useGetTotalTaskTimeQuery,
-  useUpdateTaskAssigneeMutation,
-  useUpdateTaskMutation,
-  useUpdateTaskProgressMutation,
-  useUpdateTaskStatusMutation,
-  useUploadAttachmentMutation,
 } from "@/store/api";
 import { toast } from "react-hot-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -660,7 +644,7 @@ const TaskPageFull = () => {
       </div>
       <div className="space-y-4">
         <Tabs defaultValue="alerts" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 w-[400px] h-[44px]">
+          <TabsList className="grid grid-cols-2 w-[400px] h-[44px]">
             <TabsTrigger value="alerts" className="font-semibold text-lg">
               Task History
             </TabsTrigger>

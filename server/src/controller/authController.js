@@ -298,7 +298,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     await sendEmail({
       email: user.email,
       subject: "Passowrd Reset OTP (Valid for 5 mins)",
-      html: `<h1>Your password rest OTP is : ${otp}</h1>`,
+      html: `<h1>Your password reset OTP is : ${otp}</h1>`,
     });
 
     res.status(200).json({

@@ -33,9 +33,13 @@ const page = () => {
   const id = urlParams.pathname.split("/")[2];
   const emailParam = urlParams.searchParams.get("email");
   const [startingUserId, setStartingUserId] = useState(Number(id));
+  const [userPersonalDetailsId, setUserPersonalDetailsId] = useState(
+    Number(id)
+  );
 
   useEffect(() => {
     setStartingUserId(Number(id));
+    setUserPersonalDetailsId(Number(id));
   }, [id]);
 
   return (
@@ -78,7 +82,7 @@ const page = () => {
                 <UserSettingsHR id={Number(id)} />
               </TabsContent>
               <TabsContent value="userPersonalDetails" className="w-full mr-5">
-                <UserPersonalDetails id={startingUserId} />
+                <UserPersonalDetails id={userPersonalDetailsId} />
               </TabsContent>
               <TabsContent value="organization" className="w-full mr-5">
                 <HierarchyPage

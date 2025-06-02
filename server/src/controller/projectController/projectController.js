@@ -732,6 +732,52 @@ export const getProjectTasks = catchAsync(async (req, res, next) => {
   }
 });
 
+export const getProjectWorkloadTasks = catchAsync(async (req, res, next) => {
+  const { id } = req.query;
+
+  try {
+    await prisma.$transaction(async (prisma) => {
+      const projectTasks = await prisma.project.findFirst({
+        where: {
+          id: Number(id),
+        },
+        include: {
+          tasks: {
+            include: {
+              assignee: true,
+            },
+          },
+        },
+      });
+
+      let finalResultList = [];
+
+      projectTasks.tasks.map((obj) => {
+        const taskObj = {
+          id: String(obj.id),
+          title: obj.title,
+          description: obj.description,
+          priority: obj.priority,
+          estimatedHours: obj.points,
+          status: obj.status,
+          dueDate: obj.dueDate,
+        };
+        const finalObj = {
+          userId: String(obj.assignedUserId),
+          task: taskObj,
+          assignedDate: obj.startDate,
+        };
+
+        finalResultList.push(finalObj);
+      });
+      res.json(finalResultList);
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("There was an error getting Tasks", 400));
+  }
+});
+
 export const getProjectTasksCalendar = catchAsync(async (req, res, next) => {
   const {
     id,
@@ -950,6 +996,56 @@ export const getProjectUsers = catchAsync(async (req, res, next) => {
             ...newObj
           } = user;
           resultList.push(newObj);
+        });
+        res.status(200).json(resultList);
+      }
+      return next(new AppError("No User Found", 400));
+    });
+  } catch (error) {
+    console.error("Error during getProjectUsers" + error);
+    return next(
+      new AppError("There was an error getting Users in Project", 400)
+    );
+  }
+});
+
+export const getProjectWorkloadUsers = catchAsync(async (req, res, next) => {
+  const { id } = req.query;
+  let resultList = [];
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      const project = await prisma.project.findFirst({
+        where: {
+          id: Number(id),
+        },
+        include: {
+          users: true,
+        },
+      });
+      if (project.users) {
+        const usersList = project.users;
+        usersList.map((user) => {
+          const {
+            email,
+            password,
+            designation,
+            phoneNumber,
+            profilePictureId,
+            reportsToId,
+            resetPasswordOTP,
+            otpExpires,
+            createdAt,
+            updatedAt,
+            ...newObj
+          } = user;
+
+          const workloadUser = {
+            id: String(user.userId),
+            name: user.username,
+            role: user.designation,
+            maxHoursPerWeek: 40,
+          };
+          resultList.push(workloadUser);
         });
         res.status(200).json(resultList);
       }
@@ -4648,6 +4744,8 @@ export const getTaskActivity = catchAsync(async (req, res, next) => {
           activity: activity.activity,
         });
       });
+
+      resultList.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       return res.status(200).json(resultList);
     });

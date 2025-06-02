@@ -69,6 +69,8 @@ import {
   getProjectTasks,
   getProjectTasksCalendar,
   getProjectUsers,
+  getProjectWorkloadTasks,
+  getProjectWorkloadUsers,
   getSprint,
   getSubTask,
   getSubTaskActivity,
@@ -217,7 +219,7 @@ router.get("/getProjectUsers", isAuthenticated, getProjectUsers);
 router.post("/createTask", isAuthenticated, createTask);
 router.patch("/updateTaskStatus", isAuthenticated, updateTaskStatus);
 router.patch("/updateTaskAssignee", isAuthenticated, updateTaskAssignee);
-router.get("/getComments", isAuthenticated, getTaskComments);
+router.get("/getComments", getTaskComments);
 router.post("/addComment", isAuthenticated, addComment);
 router.post("/createSprint", createSprint);
 router.get("/getSprint", isAuthenticated, getSprint);
@@ -274,7 +276,7 @@ router.get(
 );
 router.post("/createBulkTasks", isAuthenticated, createBulkTasks);
 router.post("/createBulkUsers", isAuthenticated, createBulkUsers);
-router.get("/getTaskActivity", isAuthenticated, getTaskActivity);
+router.get("/getTaskActivity", getTaskActivity);
 router.get("/getSubTaskActivity", isAuthenticated, getSubTaskActivity);
 router.get("/getTimesheetData", isAuthenticated, getTimesheetData);
 router.get("/viewTimesheetData", isAuthenticated, viewTimesheetData);
@@ -347,6 +349,8 @@ router.delete("/deleteAlertConfig", deleteAlertConfiguration);
 router.post("/updateAlertConfigObj", updateAlertConfiguration);
 router.post("/createTimesheetAlert", createTimesheetAlert);
 router.post("/createProjectTimelineAlert", createProjectTimelineAlert);
+router.get("/getProjectWorkloadUsers", getProjectWorkloadUsers);
+router.get("/getProjectWorkloadTasks", getProjectWorkloadTasks);
 
 // Third party requests
 router.post("/updateAttendance", authenticateThirdParty, updateAttendance);

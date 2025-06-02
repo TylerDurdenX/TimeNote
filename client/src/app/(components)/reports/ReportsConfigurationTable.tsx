@@ -11,12 +11,12 @@ function ReportsConfigurationTable({}: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   const reports = [
-    {
-      id: 1,
-      title: "Attendance Report",
-      description: "Monthly Attendance Report of users",
-      name: "Attendance Report",
-    },
+    // {
+    //   id: 1,
+    //   title: "Attendance Report",
+    //   description: "Monthly Attendance Report of users",
+    //   name: "Attendance Report",
+    // },
     // {
     //   id: 2,
     //   title: "Activity Report",

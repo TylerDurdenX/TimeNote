@@ -15,8 +15,11 @@ import {
   Paper,
   TextField,
   Typography,
+  Chip,
+  Fade,
+  Skeleton,
 } from "@mui/material";
-import { CircleCheck, CircleX, History } from "lucide-react";
+import { CircleCheck, CircleX, History, Search, Users } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -46,33 +49,6 @@ const UserListHR = ({ onSelectUser, activeFlag }: Props) => {
     }
   }, [searchQuery]);
 
-  // const useScrollToBottom = (
-  //   containerRef: React.RefObject<HTMLDivElement | null>,
-  //   callback: () => void,
-  //   isLoading: boolean,
-  //   hasMore: boolean
-  // ) => {
-  //   useEffect(() => {
-  //     const handleScroll = () => {
-  //       if (!containerRef.current || isLoading || !hasMore) return;
-
-  //       const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-  //       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 70;
-
-  //       if (isAtBottom) {
-  //         callback();
-  //       }
-  //     };
-
-  //     const container = containerRef.current;
-  //     container?.addEventListener("scroll", handleScroll);
-
-  //     return () => {
-  //       container?.removeEventListener("scroll", handleScroll);
-  //     };
-  //   }, [containerRef, callback, isLoading, hasMore]);
-  // };
-
   const {
     data: list,
     isLoading,
@@ -90,16 +66,6 @@ const UserListHR = ({ onSelectUser, activeFlag }: Props) => {
     }
   );
 
-  // useScrollToBottom(
-  //   scrollContainerRef,
-  //   () => {
-  //     console.log("Fetching more users...");
-  //     setPage((prev) => prev + 1);
-  //   },
-  //   isLoading,
-  //   hasMore
-  // );
-
   useEffect(() => {
     if (list && Array.isArray(list)) {
       if (list.length > 0) {
@@ -107,21 +73,17 @@ const UserListHR = ({ onSelectUser, activeFlag }: Props) => {
           const existingIds = new Set(prev.map((user) => user.userId));
           const newItems = list.filter((user) => {
             const isNew = !existingIds.has(user.userId);
-
             return isNew;
           });
-
           return [...prev, ...newItems];
         });
-
-        setHasMore(list.length === 15); // or however your API signals the end
+        setHasMore(list.length === 15);
       } else {
-        setHasMore(false); // No more data
+        setHasMore(false);
       }
     } else {
-      setHasMore(false); // Invalid list or error
+      setHasMore(false);
     }
-
     setLoading(false);
   }, [list]);
 
@@ -131,156 +93,251 @@ const UserListHR = ({ onSelectUser, activeFlag }: Props) => {
         ? data.filter((employee) =>
             employee.username.toLowerCase().includes(searchQuery.toLowerCase())
           )
-        : data // Return the original list when searchQuery is less than or equal to 3 characters
+        : data
       : [];
 
-  return (
-    <Paper className="p-2 flex flex-col items-center h-full">
-      {isLoading ? (
-        <>
-          <CircularLoading />
-        </>
-      ) : (
-        <Box className="flex-1 bg-white rounded-2xl flex flex-col w-full">
-          <Typography variant="h6" gutterBottom>
-            Users List
-          </Typography>
-          <div className="relative mb-4 ">
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Search employees (abc...)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <i className="fas fa-search text-gray-500"></i>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                borderRadius: "25px",
-                padding: "10px 15px",
-                backgroundColor: "#ffffff", // White background for search input
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "25px",
-                  "& fieldset": {
-                    borderColor: "#ccc",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#888",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#5c6bc0",
-                  },
-                },
-              }}
-            />
-          </div>
-          <Box
-            ref={scrollContainerRef}
-            sx={{
-              flex: 1,
-              overflowY: "auto",
-              maxHeight: "calc(100vh - 11rem)", // Adjusting for 10 users, each approximately 60px in height
-            }}
-          >
-            <List className="overflow-hidden">
-              {filteredEmployees.map((employee) => (
-                <React.Fragment key={employee.userId}>
-                  <div className="relative">
-                    <Link
-                      href={`/userSettings/${employee.userId}?email=${userEmail}`}
-                    >
-                      <ListItem
-                        className="flex items-center justify-between gap-2 cursor-pointer"
-                        style={{ height: "60px" }}
-                      >
-                        <Box className="flex items-center gap-2">
-                          <Avatar className="h-[50px] w-[50px] rounded-full justify-center items-center">
-                            <AvatarImage
-                              src={
-                                employee.profilePicture
-                                  ? employee.profilePicture.base64
-                                  : ""
-                              }
-                              alt={employee.username}
-                              loading="lazy"
-                            />
-                            <AvatarFallback className="absolute inset-0 flex justify-center items-center text-[150%]">
-                              {getInitials(employee.username!)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <ListItemText
-                            primary={employee.username}
-                            secondary={employee.designation}
-                          />
-                        </Box>
-                      </ListItem>
-                    </Link>
-                    {/* {employee.userStatus === "active" ? (
-                      <>
-                        <div className="absolute top-1/2 right-2 -translate-y-1/2 mr-5 group flex items-center cursor-pointer">
-                          <span className="mr-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            Active
-                          </span>
-                          <CircleCheck style={{ color: "green" }} />
-                        </div>
-                      </>
-                    ) : (
-                      ""
-                    )}
-                    {employee.userStatus === "inactive" ? (
-                      <>
-                        <div className="absolute top-1/2 right-2 -translate-y-1/2 mr-5 group flex items-center cursor-pointer">
-                          <span className="mr-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            On a Break
-                          </span>
-                          <History style={{ color: "orange" }} />
-                        </div>
-                      </>
-                    ) : (
-                      ""
-                    )}
-                    {employee.userStatus === null ||
-                    employee.userStatus === "offline" ? (
-                      <>
-                        <div className="absolute top-1/2 right-2 -translate-y-1/2 mr-5 group flex items-center cursor-pointer">
-                          <span className="mr-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            Offline
-                          </span>
-                          <CircleX style={{ color: "black" }} />
-                        </div>
-                      </>
-                    ) : (
-                      ""
-                    )} */}
-                  </div>
+  const LoadingSkeleton = () => (
+    <Box className="space-y-3">
+      {[...Array(6)].map((_, index) => (
+        <Box key={index} className="flex items-center gap-4 p-4">
+          <Skeleton variant="circular" width={56} height={56} />
+          <Box className="flex-1">
+            <Skeleton variant="text" width="60%" height={24} />
+            <Skeleton variant="text" width="40%" height={20} />
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  );
 
-                  <Divider />
-                </React.Fragment>
-              ))}
-            </List>
-            {filteredEmployees.length === 0 && (
-              <Typography
-                variant="body1"
-                color="textSecondary"
-                className="text-center mt-2 flex items-center justify-center"
+  if (isLoading) {
+    return (
+      <Paper
+        elevation={0}
+        className="p-6 flex flex-col h-full bg-gradient-to-br from-slate-50 to-white border border-slate-200"
+        sx={{ borderRadius: "16px" }}
+      >
+        <Box className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Users className="w-5 h-5 text-blue-600" />
+          </div>
+          <Typography variant="h5" className="font-semibold text-slate-800">
+            Users Directory
+          </Typography>
+        </Box>
+        <LoadingSkeleton />
+      </Paper>
+    );
+  }
+
+  return (
+    <Paper
+      elevation={0}
+      className="p-6 flex flex-col h-full bg-gradient-to-br from-slate-50 to-white border border-slate-200"
+      sx={{ borderRadius: "16px" }}
+    >
+      {/* Header Section */}
+      <Box className="flex items-center justify-between mb-6">
+        <Box className="flex items-center gap-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Users className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <Typography variant="h5" className="font-semibold text-slate-800">
+              Users Directory
+            </Typography>
+            <Typography variant="body2" className="text-slate-500">
+              {filteredEmployees.length}{" "}
+              {filteredEmployees.length === 1 ? "employee" : "employees"} found
+            </Typography>
+          </div>
+        </Box>
+        <Chip
+          label={`${filteredEmployees.length} Total`}
+          size="small"
+          sx={{
+            backgroundColor: "#f1f5f9",
+            color: "#64748b",
+            fontWeight: 500,
+          }}
+        />
+      </Box>
+
+      {/* Search Section */}
+      <Box className="mb-6">
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search employees by name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search className="w-5 h-5 text-slate-400" />
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+              backgroundColor: "#ffffff",
+              border: "1px solid #e2e8f0",
+              fontSize: "14px",
+              transition: "all 0.2s ease-in-out",
+              "& fieldset": {
+                border: "none",
+              },
+              "&:hover": {
+                borderColor: "#cbd5e1",
+                boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+              },
+              "&.Mui-focused": {
+                borderColor: "#3b82f6",
+                boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+              },
+            },
+            "& .MuiInputBase-input": {
+              padding: "14px 16px",
+            },
+          }}
+        />
+      </Box>
+
+      {/* Users List */}
+      <Box
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto"
+        sx={{
+          maxHeight: "calc(100vh - 16rem)",
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "#f1f5f9",
+            borderRadius: "3px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "#cbd5e1",
+            borderRadius: "3px",
+            "&:hover": {
+              background: "#94a3b8",
+            },
+          },
+        }}
+      >
+        <List className="space-y-2" disablePadding>
+          {filteredEmployees.map((employee, index) => (
+            <Fade in={true} timeout={300 + index * 50} key={employee.userId}>
+              <Link
+                href={`/userSettings/${employee.userId}?email=${userEmail}`}
+                className="block"
               >
-                No employees found.
-              </Typography>
+                <ListItem
+                  className="group cursor-pointer transition-all duration-200 hover:bg-white hover:shadow-md rounded-xl border border-transparent hover:border-slate-200"
+                  sx={{
+                    padding: "16px",
+                    marginBottom: "8px",
+                    "&:hover": {
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  <Box className="flex items-center gap-4 w-full">
+                    <div className="relative">
+                      <Avatar className="h-14 w-14 ring-2 ring-slate-100 group-hover:ring-blue-200 transition-all duration-200">
+                        <AvatarImage
+                          src={
+                            employee.profilePicture
+                              ? employee.profilePicture.base64
+                              : ""
+                          }
+                          alt={employee.username}
+                          loading="lazy"
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                          {getInitials(employee.username!)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                    </div>
+
+                    <Box className="flex-1 min-w-0">
+                      <Typography
+                        variant="subtitle1"
+                        className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors duration-200 truncate"
+                      >
+                        {employee.username}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        className="text-slate-500 truncate"
+                      >
+                        {employee.designation || "No designation"}
+                      </Typography>
+                    </Box>
+
+                    <Box className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </Box>
+                  </Box>
+                </ListItem>
+              </Link>
+            </Fade>
+          ))}
+        </List>
+
+        {/* Empty State */}
+        {filteredEmployees.length === 0 && !isLoading && (
+          <Box className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <Search className="w-8 h-8 text-slate-400" />
+            </div>
+            <Typography variant="h6" className="text-slate-600 mb-2">
+              No employees found
+            </Typography>
+            <Typography variant="body2" className="text-slate-400 max-w-sm">
+              {searchQuery
+                ? `No results for "${searchQuery}". Try adjusting your search terms.`
+                : "No employees are currently available in the directory."}
+            </Typography>
+            {searchQuery && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setSearchQuery("")}
+                className="mt-4"
+                sx={{
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  borderColor: "#e2e8f0",
+                  color: "#64748b",
+                  "&:hover": {
+                    borderColor: "#cbd5e1",
+                    backgroundColor: "#f8fafc",
+                  },
+                }}
+              >
+                Clear search
+              </Button>
             )}
           </Box>
-          {isLoading ? (
-            <>
-              <CircularLoading />
-            </>
-          ) : (
-            ""
-          )}
-        </Box>
-      )}
+        )}
+      </Box>
     </Paper>
   );
 };
