@@ -214,7 +214,7 @@ export default function HierarchyPage({
 
               {directReports.length > 1 ? (
                 <div className="flex flex-col items-center w-full">
-                  <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-white/50 shadow-2xl p-8 w-full max-w-6xl">
+                  <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-white/50 shadow-2xl p-8 w-full max-w-full">
                     <div className="flex flex-wrap justify-center gap-8">
                       {directReports.map((report) => (
                         <div

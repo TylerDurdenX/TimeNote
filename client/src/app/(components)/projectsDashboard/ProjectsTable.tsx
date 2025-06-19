@@ -9,7 +9,14 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
 import { useGetProjectsQuery } from "@/store/api";
-import { CalendarDays, User, Eye, Briefcase, Target } from "lucide-react";
+import {
+  CalendarDays,
+  User,
+  Eye,
+  Briefcase,
+  Target,
+  ExternalLink,
+} from "lucide-react";
 
 type Props = {
   email: string;
@@ -101,7 +108,7 @@ const ProjectsTable = ({ email, closedProjectFlag }: Props) => {
                 sessionStorage.setItem("projectId", params.row.id);
               }}
             >
-              <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 truncate">
+              <p className="text-sm font-semibold text-blue-500 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 truncate">
                 {params.value}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

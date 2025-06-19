@@ -145,7 +145,7 @@ const ProjectReportTable: React.FC<ProjectReportTableProps> = ({
           <div className="flex items-center">
             <FileText className="w-4 h-4 mr-2 text-gray-500" />
             <Link
-              href={`project/${params.row.id}?email=${email}`}
+              href={`/project/${params.row.id}?email=${email}`}
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline font-medium transition-colors duration-200 flex items-center group"
               onClick={() => handleProjectClick(params.row.id)}

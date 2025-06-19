@@ -65,52 +65,6 @@ const WorkloadCalendar = ({ projectId, email }: Props) => {
       { refetchOnMountOrArgChange: true }
     );
 
-  const generateMockTasks = (): UserTask[] => {
-    const tasks: UserTask[] = [];
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-
-    projectUsers?.forEach((user) => {
-      for (let day = 0; day < 7; day++) {
-        const taskDate = new Date(startOfWeek);
-        taskDate.setDate(taskDate.getDate() + day);
-
-        // Random number of tasks per day (0-3)
-        const numTasks = 2;
-
-        for (let i = 0; i < numTasks; i++) {
-          const taskHours = Math.floor(Math.random() * 6) + 1;
-          tasks.push({
-            userId: user.id,
-            task: {
-              id: `${user.id}-${day}-${i}`,
-              title: `Task ${i + 1} for ${user.name.split(" ")[0]}`,
-              description: `Description for task ${i + 1}`,
-              priority: ["Low", "Urgent", "Medium", "High", "Backlog"][
-                Math.floor(Math.random() * 3)
-              ] as Task["priority"],
-              estimatedHours: taskHours,
-              status: [
-                "Closed",
-                "Work In Progress",
-                "To Do",
-                "Under Review",
-                "Completed",
-              ][Math.floor(Math.random())] as Task["status"],
-              dueDate: taskDate,
-            },
-            assignedDate: taskDate,
-          });
-        }
-      }
-    });
-
-    console.log(JSON.stringify(tasks));
-    return tasks;
-  };
-
-  const [userTasks] = useState<UserTask[]>(generateMockTasks());
-
   const navigateWeek = (direction: "prev" | "next") => {
     const newWeek = new Date(currentWeek);
     newWeek.setDate(newWeek.getDate() + (direction === "next" ? 7 : -7));
